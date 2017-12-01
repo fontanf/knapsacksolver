@@ -51,34 +51,39 @@ int main(int argc, char *argv[])
 	KnapsackInstance instance(input_data);
 
 	// Initialize memory table
-	Profit** values = new Profit*[instance.itemNumber()+1];
-	for (ItemIdx i=0; i<=instance.itemNumber(); ++i) {
-		values[i] = new Profit[instance.capacity() + 1];
-		for (Weight j=0; j<=instance.capacity(); ++j)
-			values[i][j] = -1;
-	}
+	// values[i][w] == values[w * (n+1) + i]
+	// values[i][w] == values[i * (c+1) + w]
+	ItemIdx n = instance.itemNumber();
+	ItemIdx c = instance.capacity();
+	ValIdx values_size = (n+1)*(c+1);
+	Profit* values = new Profit[values_size];
+	for (ItemIdx i=0; i<values_size; ++i)
+		values[i] = -1;
+
 
 	std::list<Node*> q;
 
-	Node* n = new Node();
-	n->i = instance.itemNumber();
-	n->w = instance.capacity();
-	n->parent = NULL;
-	q.push_front(n);
+	Node* node = new Node();
+	node->i = instance.itemNumber();
+	node->w = instance.capacity();
+	node->parent = NULL;
+	q.push_front(node);
 
 	while (!q.empty()) {
 		Node* node = q.front();
 		q.pop_front();
 		ItemIdx i = node->i;
 		Weight  w = node->w;
+		//ValIdx  x = w*(n+1) + i;
+		ValIdx x = i*(c+1) + w;
 		if (node->state == 0) {
-			if (values[i][w] != -1) {
-				node->p = values[i][w];
+			if (values[x] != -1) {
+				node->p = values[x];
 				continue;
 			}
 
 			if (i == 0) {
-				values[i][w] = 0;
+				values[x] = 0;
 				node->p      = 0;
 				continue;
 			}
@@ -105,29 +110,35 @@ int main(int argc, char *argv[])
 			Profit p0 = node->child_0->p;
 			Profit p1 = (w < instance.weight(i))? 0: node->child_1->p + instance.profit(i);
 
-			values[i][w] = (p1 > p0)? p1: p0;
-			node->p = values[i][w];
+			values[x] = (p1 > p0)? p1: p0;
+			node->p = values[x];
 			delete node->child_0;
 			if (w >= instance.weight(i))
 				delete node->child_1;
 		}
 	}
-	delete n;
+	delete node;
 
-	Profit opt = values[instance.itemNumber()][instance.capacity()];
+	Profit opt = values[values_size-1];
 
 	// Retrieve optimal solution
-	std::vector<bool> solution(instance.itemNumber(), false);
-	ItemIdx i = instance.itemNumber();
-	Weight  w = instance.capacity();
+	std::vector<bool> solution(n, false);
+	ItemIdx i = n;
+	Weight  w = c;
 	Profit  v = 0;
 	while (v < opt) {
-		Profit v0 = values[i-1][w];
-		Profit v1 = (w < instance.weight(i))? 0:
-			values[i-1][w - instance.weight(i)] + instance.profit(i);
+		Weight wi = instance.weight(i);
+		Profit pi = instance.profit(i);
+		//ValIdx x0 = w * (n+1) + (i-1);
+		//ValIdx x1 = (w - wi) * (n+1) + (i-1);
+		ValIdx x0 = (i-1) * (c+1) + w;
+		ValIdx x1 = (i-1) * (c+1) + (w - wi);
+
+		Profit v0 = values[x0];
+		Profit v1 = (w < wi)? 0: values[x1] + pi;
 		if (v1 > v0) {
-			v += instance.profit(i);
-			w -= instance.weight(i);
+			v += pi;
+			w -= wi;
 			solution[i-1] = true;
 		}
 		i--;
@@ -151,10 +162,7 @@ int main(int argc, char *argv[])
 	if (verbose)
 		std::cout << "OPT: " << opt << std::endl;
 
-	// Free memory
-	for (ItemIdx i=0; i<=instance.itemNumber(); ++i)
-		delete[] values[i];
-	delete[] values;
+	delete[] values; // Free memory
 
 	return 0;
 }

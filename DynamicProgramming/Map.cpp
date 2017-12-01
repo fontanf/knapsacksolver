@@ -113,8 +113,7 @@ int main(int argc, char *argv[])
 	if (verbose)
 		std::cout << "OPT: " << opt << std::endl;
 
-	// Free memory
-	delete[] values;
+	delete[] values; // Free memory
 
 	return 0;
 }

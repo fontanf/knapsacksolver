@@ -15,6 +15,7 @@
 typedef  int_fast64_t Profit;
 typedef uint_fast64_t Weight;
 typedef size_t ItemIdx;
+typedef size_t ValIdx;
 
 class KnapsackInstance
 {

@@ -8,14 +8,19 @@
 #include <boost/program_options.hpp>
 
 Profit rec(
-		KnapsackInstance& instance, Profit** values,
+		KnapsackInstance& instance, Profit* values,
 		ItemIdx i, Weight w)
 {
-	if (values[i][w] != -1)
-		return values[i][w];
+	//ItemIdx n = instance.itemNumber();
+	//ValIdx  x = w*(n+1) + i;
+	Weight c = instance.capacity();
+	ValIdx x = i*(c+1) + w;
+
+	if (values[x] != -1)
+		return values[x];
 
 	if (i == 0) {
-		values[i][w] = 0;
+		values[x] = 0;
 		return 0;
 	}
 
@@ -24,10 +29,10 @@ Profit rec(
 			instance, values, i-1, w - instance.weight(i)) + instance.profit(i);
 
 	if (v1 > v0) {
-		values[i][w] = v1;
+		values[x] = v1;
 		return v1;
 	} else {
-		values[i][w] = v0;
+		values[x] = v0;
 		return v0;
 	}
 }
@@ -63,29 +68,36 @@ int main(int argc, char *argv[])
 	KnapsackInstance instance(input_data);
 
 	// Initialize memory table
-	Profit** values = new Profit*[instance.itemNumber()+1];
-	for (ItemIdx i=0; i<=instance.itemNumber(); ++i) {
-		values[i] = new Profit[instance.capacity() + 1];
-		for (Weight j=0; j<=instance.capacity(); ++j)
-			values[i][j] = -1;
-	}
+	// values[i][w] == values[w * (n+1) + i]
+	// values[i][w] == values[i * (c+1) + w]
+	ItemIdx n = instance.itemNumber();
+	ItemIdx c = instance.capacity();
+	ValIdx values_size = (n+1)*(c+1);
+	Profit* values = new Profit[values_size];
+	for (ItemIdx i=0; i<values_size; ++i)
+		values[i] = -1;
 
 	// Compute optimal value
-	Profit opt = rec(
-			instance, values, instance.itemNumber(), instance.capacity());
+	Profit opt = rec(instance, values, n, c);
 
 	// Retrieve optimal solution
-	std::vector<bool> solution(instance.itemNumber(), false);
-	ItemIdx i = instance.itemNumber();
-	Weight  w = instance.capacity();
+	std::vector<bool> solution(n, false);
+	ItemIdx i = n;
+	Weight  w = c;
 	Profit  v = 0;
 	while (v < opt) {
-		Profit v0 = values[i-1][w];
-		Profit v1 = (w < instance.weight(i))? 0:
-			values[i-1][w - instance.weight(i)] + instance.profit(i);
+		Weight wi = instance.weight(i);
+		Profit pi = instance.profit(i);
+		//ValIdx x0 = w * (n+1) + (i-1);
+		//ValIdx x1 = (w - wi) * (n+1) + (i-1);
+		ValIdx x0 = (i-1) * (c+1) + w;
+		ValIdx x1 = (i-1) * (c+1) + (w - wi);
+
+		Profit v0 = values[x0];
+		Profit v1 = (w < wi)? 0: values[x1] + pi;
 		if (v1 > v0) {
-			v += instance.profit(i);
-			w -= instance.weight(i);
+			v += pi;
+			w -= wi;
 			solution[i-1] = true;
 		}
 		i--;
@@ -106,10 +118,7 @@ int main(int argc, char *argv[])
 		cert.close();
 	}
 
-	// Free memory
-	for (ItemIdx i=0; i<=instance.itemNumber(); ++i)
-		delete[] values[i];
-	delete[] values;
+	delete[] values; // Free memory
 
 	if (verbose)
 		std::cout << "OPT: " << opt << std::endl;
