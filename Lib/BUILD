@@ -1,7 +1,7 @@
 cc_library(
         name = "cpp",
-        srcs = ["Parser.cpp", "PartialInstance.cpp"],
-        hdrs = ["Parser.hpp", "PartialInstance.hpp"],
+        srcs = ["Parser.cpp", "PartialInstance.cpp", "Tools.cpp"],
+        hdrs = ["Parser.hpp", "PartialInstance.hpp", "Tools.hpp"],
         visibility = ["//visibility:public"],
 )
 
