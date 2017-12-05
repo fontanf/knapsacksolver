@@ -48,12 +48,12 @@ int main(int argc, char *argv[])
 	}
 	bool verbose = vm.count("verbose");
 
-	KnapsackInstance instance(input_data);
+	Instance instance(input_data);
 
 	// Initialize memory table
 	// values[i][w] == values[w * (n+1) + i]
 	// values[i][w] == values[i * (c+1) + w]
-	ItemIdx n = instance.itemNumber();
+	ItemIdx n = instance.item_number();
 	ItemIdx c = instance.capacity();
 	ValIdx values_size = (n+1)*(c+1);
 	Profit* values = new Profit[values_size];
@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
 	std::list<Node*> q;
 
 	Node* node = new Node();
-	node->i = instance.itemNumber();
+	node->i = instance.item_number();
 	node->w = instance.capacity();
 	node->parent = NULL;
 	q.push_front(node);

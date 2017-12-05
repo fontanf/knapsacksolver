@@ -36,12 +36,12 @@ int main(int argc, char *argv[])
 	}
 	bool verbose = vm.count("verbose");
 
-	KnapsackInstance instance(input_data);
+	Instance instance(input_data);
 
 	// Initialize memory table
 	// values[i][w] == values[w * (n+1) + i]
 	// values[i][w] == values[i * (c+1) + w]
-	ItemIdx n = instance.itemNumber();
+	ItemIdx n = instance.item_number();
 	ItemIdx c = instance.capacity();
 	ValIdx values_size = (n+1)*(c+1);
 	Profit* values = new Profit[values_size];
@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
 		ValIdx x = w;
 		values[x] = 0;
 	}
-	for (ItemIdx i=1; i<=instance.itemNumber(); ++i) {
+	for (ItemIdx i=1; i<=instance.item_number(); ++i) {
 		Weight wi = instance.weight(i);
 		for (Weight w=0; w<=instance.capacity(); ++w) {
 			//ValIdx x  = w*(n+1) + i;

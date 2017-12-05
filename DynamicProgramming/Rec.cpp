@@ -8,10 +8,10 @@
 #include <boost/program_options.hpp>
 
 Profit rec(
-		KnapsackInstance& instance, Profit* values,
+		Instance& instance, Profit* values,
 		ItemIdx i, Weight w)
 {
-	//ItemIdx n = instance.itemNumber();
+	//ItemIdx n = instance.item_number();
 	//ValIdx  x = w*(n+1) + i;
 	Weight c = instance.capacity();
 	ValIdx x = i*(c+1) + w;
@@ -65,12 +65,12 @@ int main(int argc, char *argv[])
 	}
 	bool verbose = vm.count("verbose");
 
-	KnapsackInstance instance(input_data);
+	Instance instance(input_data);
 
 	// Initialize memory table
 	// values[i][w] == values[w * (n+1) + i]
 	// values[i][w] == values[i * (c+1) + w]
-	ItemIdx n = instance.itemNumber();
+	ItemIdx n = instance.item_number();
 	ItemIdx c = instance.capacity();
 	ValIdx values_size = (n+1)*(c+1);
 	Profit* values = new Profit[values_size];

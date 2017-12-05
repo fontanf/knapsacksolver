@@ -17,24 +17,24 @@ typedef uint_fast64_t Weight;
 typedef size_t ItemIdx;
 typedef size_t ValIdx;
 
-class KnapsackInstance
+class Instance
 {
 
 public:
 
-	KnapsackInstance(boost::filesystem::path filename);
-	void KnapsackInstanceStandard(boost::filesystem::path filename);
-	void KnapsackInstancePisinger(boost::filesystem::path filename);
+	Instance(boost::filesystem::path filename);
+	void read_standard(boost::filesystem::path filename);
+	void read_pisinger(boost::filesystem::path filename);
 
-	~KnapsackInstance();
+	~Instance();
 
 	std::string name() const { return name_; }
-	ItemIdx itemNumber() const { return n_; }
+	ItemIdx item_number() const { return n_; }
 	Weight capacity() const { return c_; }
 	Profit optimum() const { return opt_; }
 	Weight weight(ItemIdx i) const { return w_[i-1]; }
 	Profit profit(ItemIdx i) const { return p_[i-1]; }
-	Profit profit(std::vector<ItemIdx> v) const;
+	Profit profit(std::vector<bool> v) const;
 
 	Profit check(boost::filesystem::path cert_file);
 

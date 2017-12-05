@@ -14,7 +14,7 @@ void executeProgram(std::string cmd)
 
 void check(boost::filesystem::path prog, boost::filesystem::path input)
 {
-	KnapsackInstance instance(input);
+	Instance instance(input);
 	Profit opt = instance.optimum();
 
 	std::string output_file = "output_file.ini";

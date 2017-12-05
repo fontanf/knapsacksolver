@@ -7,7 +7,7 @@
 #include <boost/program_options.hpp>
 
 Profit rec(
-		KnapsackInstance& instance, std::map<Weight, Profit>* values,
+		Instance& instance, std::map<Weight, Profit>* values,
 		ItemIdx i, Weight w)
 {
 	if (values[i].find(w) != values[i].end())
@@ -59,21 +59,21 @@ int main(int argc, char *argv[])
 	}
 	bool verbose = vm.count("verbose");
 
-	KnapsackInstance instance(input_data);
+	Instance instance(input_data);
 
 	// Initialize memory map
 	std::map<Weight, Profit>* values
-		= new std::map<Weight, Profit>[instance.itemNumber() + 1];
-	for (ItemIdx i=0; i<=instance.itemNumber(); ++i)
+		= new std::map<Weight, Profit>[instance.item_number() + 1];
+	for (ItemIdx i=0; i<=instance.item_number(); ++i)
 		values[i] = std::map<Weight, Profit>();
 
 	// Compute optimal value
 	Profit opt = rec(
-			instance, values, instance.itemNumber(), instance.capacity());
+			instance, values, instance.item_number(), instance.capacity());
 
 	// Retrieve optimal solution
-	std::vector<bool> solution(instance.itemNumber(), false);
-	ItemIdx i = instance.itemNumber();
+	std::vector<bool> solution(instance.item_number(), false);
+	ItemIdx i = instance.item_number();
 	Weight  w = instance.capacity();
 	Profit  v = 0;
 	while (v < opt) {
@@ -89,9 +89,9 @@ int main(int argc, char *argv[])
 	}
 
 	size_t map_size = 0;
-	for (ItemIdx i=0; i<=instance.itemNumber(); ++i)
+	for (ItemIdx i=0; i<=instance.item_number(); ++i)
 		map_size += values[i].size();
-	size_t map_max_size = (instance.itemNumber() + 1) * (instance.capacity() + 1);
+	size_t map_max_size = (instance.item_number() + 1) * (instance.capacity() + 1);
 
 	// Write output file
 	if (output_file != "") {
