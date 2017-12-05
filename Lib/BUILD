@@ -11,9 +11,11 @@ cc_test(
         deps = [
                 ":cpp", 
                 "@googletest//:gtest_main",
-                "@boost//:filesystem",
-                "@boost//:system",
-                "@boost//:program_options",
+        ],
+        linkopts = [
+                "-lboost_system",
+                "-lboost_filesystem",
+                "-lboost_program_options"
         ],
         data = [
                 "//TestInstances:data",
