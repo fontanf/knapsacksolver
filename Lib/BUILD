@@ -1,20 +1,22 @@
 cc_library(
         name = "cpp",
-        srcs = ["Parser.cpp", "PartialInstance.cpp", "Tools.cpp"],
-        hdrs = ["Parser.hpp", "PartialInstance.hpp", "Tools.hpp"],
+        srcs = ["Instance.cpp", "Solution.cpp", "Tools.cpp"],
+        hdrs = ["Instance.hpp", "Solution.hpp", "Tools.hpp"],
         visibility = ["//visibility:public"],
 )
 
 cc_test(
         name = "cppTest",
-        srcs = ["ParserTest.cpp"],
+        srcs = ["Test.cpp"],
         deps = [
                 ":cpp", 
                 "@googletest//:gtest_main",
-                "@system_libs//:boost",
+                "@boost//:filesystem",
+                "@boost//:system",
+                "@boost//:program_options",
         ],
         data = [
-                "//KnapsackFontan/TestInstances:data",
+                "//TestInstances:data",
         ],
         timeout = "short",
 )

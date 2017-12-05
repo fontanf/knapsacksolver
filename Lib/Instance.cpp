@@ -1,4 +1,6 @@
-#include "Parser.hpp"
+#include "Instance.hpp"
+#include "Solution.hpp"
+#include "Tools.hpp"
 
 #include <sstream>
 
@@ -25,6 +27,9 @@ Instance::Instance(boost::filesystem::path filepath)
 		std::cout << format_ << ": Unknown instance format." << std::endl;
 		assert(false);
 	}
+
+	i_ = std::vector<ItemIdx>(n_);
+	iota(i_.begin(), i_.end(), 1);
 }
 
 void Instance::read_standard(boost::filesystem::path filepath)
@@ -109,32 +114,12 @@ void Instance::read_pisinger(boost::filesystem::path filepath)
 	file.close();
 }
 
-Profit Instance::profit(std::vector<bool> v) const
-{
-	assert(v.size() == n_);
-	Profit res = 0;
-	for (ItemIdx i=1; i<=item_number(); ++i)
-		if (v[i-1])
-			res += profit(i);
-	return res;
-}
-
 Instance::~Instance()
 {
 	delete[] w_;
 	delete[] p_;
-}
-
-std::ostream& operator<<(std::ostream &os, const std::vector<bool>& sol)
-{
-	for (bool b: sol) {
-		if (b) {
-			os << 1 << std::endl;
-		} else {
-			os << 0 << std::endl;
-		}
-	}
-	return os;
+	if (solution_ != NULL)
+		delete solution_;
 }
 
 Profit Instance::check(boost::filesystem::path cert_file)
@@ -155,4 +140,82 @@ Profit Instance::check(boost::filesystem::path cert_file)
 	if (c > capacity())
 		return -1;
 	return p;
+}
+
+Instance::Instance(const Instance& instance):
+	instance_orig_((instance.instance_orig() == NULL)? &instance: instance.instance_orig())
+{
+	if (instance.instance_orig() == NULL) {
+		solution_ = new Solution(instance);
+	} else {
+		solution_ = new Solution(*instance.solution());
+	}
+	assert(instance.instance_orig() == NULL);
+	assert(solution_->profit() == 0);
+	n_ = instance.item_number();
+	c_ = instance.capacity();
+
+	i_ = std::vector<ItemIdx>(n_);
+	iota(i_.begin(), i_.end(), 1);
+	sort(i_.begin(), i_.end(),
+			[&instance](ItemIdx i1, ItemIdx i2) {
+			return instance.profit(i1) * instance.weight(i2)
+			< instance.profit(i2) * instance.weight(i1);});
+
+	w_ = new Weight[n_];
+	p_ = new Profit[n_];
+	for (ItemIdx i=0; i<n_; ++i) {
+		w_[i] = instance.weight(i_[i]);
+		p_[i] = instance.profit(i_[i]);
+	}
+	assert(solution_->profit() == 0);
+}
+
+Instance::Instance(const Instance& instance, Profit lower_bound):
+	instance_orig_((instance.instance_orig() == NULL)? &instance: instance.instance_orig())
+{
+	if (instance.instance_orig() == NULL) {
+		solution_ = new Solution(instance);
+	} else {
+		solution_ = new Solution(*instance.solution());
+	}
+	Weight c = instance.capacity();
+	c_ = instance.capacity();
+	n_ = 0;
+	for (ItemIdx i=1; i<=instance.item_number(); ++i) {
+		Profit pi = instance.profit(i);
+		Weight wi = instance.weight(i);
+		if        (!upper_bound_without(instance, i, c-wi, lower_bound-pi)) {
+		} else if (!upper_bound_without(instance, i, c,    lower_bound)) {
+			solution_->set(instance.index(i), true);
+			c_ -= instance.weight(i);
+		} else {
+			n_++;
+			i_.push_back(instance.index(i));
+		}
+	}
+
+	w_ = new Weight[n_];
+	p_ = new Profit[n_];
+	for (ItemIdx i=0; i<n_; ++i) {
+		w_[i] = instance_orig_->weight(i_[i]);
+		p_[i] = instance_orig_->profit(i_[i]);
+	}
+}
+
+void Instance::info(std::ostream& os)
+{
+	os << "Reduction: "
+		<< n_ << " / " << instance_orig_->item_number() << " (" << (double)n_ / (double)instance_orig_->item_number() << "); "
+		<< c_ << " / " << instance_orig_->capacity()    << " (" << (double)c_ / (double)instance_orig_->capacity()    << "); ";
+	if (solution_ != NULL)
+		os << solution_->profit();
+	os << std::endl;
+}
+
+std::ostream& operator<<(std::ostream& os, const Instance& instance)
+{
+	for (ItemIdx i=1; i<=instance.item_number(); ++i)
+		os << instance.index(i) << " " << instance.profit(i) << " " << instance.weight(i) << std::endl;
+	return os;
 }

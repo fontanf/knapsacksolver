@@ -1,4 +1,4 @@
-#include "../Lib/Parser.hpp"
+#include "../Lib/Instance.hpp"
 
 #include <thread>
 #include <gtest/gtest.h>

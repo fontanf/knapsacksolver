@@ -1,4 +1,5 @@
-#include "../Lib/Parser.hpp"
+#include "../Lib/Instance.hpp"
+#include "../Lib/Solution.hpp"
 
 #include <queue>
 #include <iostream>
@@ -122,7 +123,7 @@ int main(int argc, char *argv[])
 	Profit opt = values[values_size-1];
 
 	// Retrieve optimal solution
-	std::vector<bool> solution(n, false);
+	Solution solution(instance);
 	ItemIdx i = n;
 	Weight  w = c;
 	Profit  v = 0;
@@ -139,7 +140,7 @@ int main(int argc, char *argv[])
 		if (v1 > v0) {
 			v += pi;
 			w -= wi;
-			solution[i-1] = true;
+			solution.set(i, true);
 		}
 		i--;
 	}

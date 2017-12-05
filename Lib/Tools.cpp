@@ -1,6 +1,8 @@
+#include "Instance.hpp"
+#include "Solution.hpp"
 #include "Tools.hpp"
 
-Profit lower_bound_greedy(const PartialInstance& instance)
+Profit lower_bound_greedy(const Instance& instance)
 {
 	Weight remaining_capacity = instance.capacity();
 	Profit p = 0;
@@ -14,7 +16,7 @@ Profit lower_bound_greedy(const PartialInstance& instance)
 	return p;
 }
 
-Solution solution_greedy(const PartialInstance& instance)
+Solution solution_greedy(const Instance& instance)
 {
 	Solution solution(instance);
 	for (ItemIdx i=instance.item_number(); i>0; --i)
@@ -23,7 +25,7 @@ Solution solution_greedy(const PartialInstance& instance)
 	return solution;
 }
 
-Profit opt_bellman_dp(const PartialInstance& instance)
+Profit opt_bellman_dp(const Instance& instance)
 {
 	Weight c = instance.capacity();
 	Profit* values = new Profit[c+1];
@@ -43,7 +45,7 @@ Profit opt_bellman_dp(const PartialInstance& instance)
 
 Profit local_search(Solution& solution)
 {
-	const PartialInstance& instance = solution.instance();
+	const Instance& instance = solution.instance();
 	bool b = true;
 	ItemIdx n = instance.item_number();
 	
@@ -54,6 +56,7 @@ Profit local_search(Solution& solution)
 					solution.remaining_capacity() >= instance.weight(j)) {
 				solution.set(j, true);
 				b = true;
+				break;
 			}
 		}
 		for (ItemIdx i=1; i<=n; ++i) {
@@ -71,15 +74,18 @@ Profit local_search(Solution& solution)
 					solution.set(i, false);
 					solution.set(j, true);
 					b = true;
+					break;
 				}
 			}
+			if (b)
+				break;
 		}
 	}
 	return solution.profit();
 }
 
 bool upper_bound(
-		const PartialInstance& instance,
+		const Instance& instance,
 		ItemIdx j, Weight capacity, Profit lower_bound)
 {
 	ItemIdx i;
@@ -101,7 +107,7 @@ bool upper_bound(
 }
 
 bool upper_bound_without(
-		const PartialInstance& instance,
+		const Instance& instance,
 		ItemIdx j, Weight capacity, Profit lower_bound)
 {
 	ItemIdx i;
@@ -124,20 +130,3 @@ bool upper_bound_without(
 	return (p * wb + pb * r >= wb * lower_bound);
 }
 
-std::vector<char> reduce(const PartialInstance& instance, Profit opt)
-{
-	std::vector<char> res(instance.item_number());
-	Weight c = instance.capacity();
-	for (ItemIdx i=1; i<=instance.item_number(); ++i) {
-		Profit pi = instance.profit(i);
-		Weight wi = instance.weight(i);
-		if (!upper_bound_without(instance, i, c-wi, opt-pi)) {
-			res[i-1] = '0';
-		} else if (!upper_bound_without(instance, i, c, opt)) {
-			res[i-1] = '1';
-		} else {
-			res[i-1] = '?';
-		}
-	}
-	return res;
-}

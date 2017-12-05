@@ -1,4 +1,5 @@
-#include "../Lib/Parser.hpp"
+#include "../Lib/Instance.hpp"
+#include "../Lib/Solution.hpp"
 
 #include <map>
 #include <iostream>
@@ -72,7 +73,7 @@ int main(int argc, char *argv[])
 			instance, values, instance.item_number(), instance.capacity());
 
 	// Retrieve optimal solution
-	std::vector<bool> solution(instance.item_number(), false);
+	Solution solution(instance);
 	ItemIdx i = instance.item_number();
 	Weight  w = instance.capacity();
 	Profit  v = 0;
@@ -83,7 +84,7 @@ int main(int argc, char *argv[])
 		if (v1 > v0) {
 			v += instance.profit(i);
 			w -= instance.weight(i);
-			solution[i-1] = true;
+			solution.set(i, true);
 		}
 		i--;
 	}
