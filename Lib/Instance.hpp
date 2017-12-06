@@ -37,6 +37,8 @@ public:
 	 */
 	Instance(const Instance& instance);
 
+	Instance(const Instance& instance, Weight divisor, bool ceiling);
+
 	/**
 	 * Create an instance such that if instance_2 = Instance(instance_1,
 	 * lower_bound), if item i is not in instance_2, then there exists an

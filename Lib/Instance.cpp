@@ -203,6 +203,37 @@ Instance::Instance(const Instance& instance, Profit lower_bound):
 	}
 }
 
+Instance::Instance(const Instance& instance, Weight divisor, bool ceiling):
+	instance_orig_((instance.instance_orig() == NULL)? &instance: instance.instance_orig())
+{
+	if (instance.instance_orig() == NULL) {
+		solution_ = new Solution(instance);
+	} else {
+		solution_ = new Solution(*instance.solution());
+	}
+	n_ = instance.item_number();
+	if (ceiling) {
+		c_ = (instance.capacity() != 0)?
+			1 + ((instance.capacity() - 1) / divisor): 0;
+	} else {
+		c_ = instance.capacity() / divisor;
+	}
+
+	i_ = std::vector<ItemIdx>(n_);
+	iota(i_.begin(), i_.end(), 1);
+	w_ = new Weight[n_];
+	p_ = new Profit[n_];
+	for (ItemIdx i=1; i<=n_; ++i) {
+		if (ceiling) {
+			w_[i-1] = (instance.weight(i) != 0)?
+				1 + ((instance.weight(i) - 1) / divisor): 0;
+		} else {
+			w_[i-1] = instance.weight(i) / divisor;
+		}
+		p_[i-1] = instance.profit(i);
+	}
+}
+
 void Instance::info(std::ostream& os)
 {
 	os << "Reduction: "
