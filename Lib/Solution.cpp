@@ -52,13 +52,13 @@ Solution Solution::get_orig() const
 	assert(instance_.instance_orig()->item_number() == instance_.solution()->instance().item_number());
 	for (ItemIdx i=1; i<=n_; ++i)
 		if (get(i))
-			solution.set(instance_.index(i), get(i));
+			solution.set(instance_.index(i), true);
 	return solution;
 }
 
 std::ostream& operator<<(std::ostream& os, const Solution& solution)
 {
 	for (ItemIdx i=1; i<=solution.instance().item_number(); ++i)
-		os << " " << (solution.get(i)? 1: 0) << std::endl;
+		os << (solution.get(i)? 1: 0) << std::endl;
 	return os;
 }

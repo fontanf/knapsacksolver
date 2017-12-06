@@ -28,7 +28,20 @@ public:
 	void read_standard(boost::filesystem::path filename);
 	void read_pisinger(boost::filesystem::path filename);
 
+	/**
+	 * Create an instance with the same items as in the one in parameter, but
+	 * for which they are sorted in non-decreasing order of their profit over
+	 * weight ratio.
+	 * Note that if instance_2 = Instance(instance_1), Then instance_2.index(i)
+	 * returns the index of item i in instance_1.
+	 */
 	Instance(const Instance& instance);
+
+	/**
+	 * Create an instance such that if instance_2 = Instance(instance_1,
+	 * lower_bound), if item i is not in instance_2, then there exists an
+	 * optimal solution such that item i is as in instance_2.solution().
+	 */
 	Instance(const Instance& instance, Profit lower_bound);
 
 	~Instance();
