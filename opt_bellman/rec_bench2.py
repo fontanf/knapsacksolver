@@ -10,12 +10,12 @@ if __name__ == '__main__':
             "external",
             "KnapsackPisingerInstances",
             "smallcoeff",
-            "knapPI_3_500_1000",
+            "knapPI_3_1000_10000",
             str(i) + ".txt"))
 
     args = [
             os.path.join("external", "BenchTools", "bench"),
-            "-e", os.path.join("DynamicProgramming", "rec"),
+            "-e", os.path.join("opt_bellman", "rec"),
             "-i"] + data + [
             "-o", "Bench.csv",
     ]

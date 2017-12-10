@@ -1,44 +1,16 @@
-#include "../Lib/Instance.hpp"
-#include "../Lib/Solution.hpp"
+#include "it.hpp"
 
 #include <algorithm>
 #include <iostream>
+
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/program_options.hpp>
 
-int main(int argc, char *argv[])
+Solution sol_bellman_it(const Instance& instance)
 {
-	// Parse program options
-	std::string input_data  = "";
-	std::string output_file = "";
-	std::string cert_file   = "";
-	boost::program_options::options_description desc("Allowed options");
-	desc.add_options()
-		("help,h", "produce help message")
-		("input-data,i",  boost::program_options::value<std::string>(&input_data)->required(), "set input data (required)")
-		("output-file,o", boost::program_options::value<std::string>(&output_file),            "set output file")
-		("cert-file,c",   boost::program_options::value<std::string>(&cert_file),              "set certificate output file")
-		("verbose,v",                                                                          "enable verbosity")
-		;
-	boost::program_options::variables_map vm;
-	boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
-	if (vm.count("help")) {
-		std::cout << desc << std::endl;;
-		return 1;
-	}
-	try {
-		boost::program_options::notify(vm);
-	} catch (boost::program_options::required_option e) {
-		std::cout << desc << std::endl;;
-		return 1;
-	}
-	bool verbose = vm.count("verbose");
-
-	Instance instance(input_data);
-
 	// Initialize memory table
 	// values[i][w] == values[w * (n+1) + i]
 	// values[i][w] == values[i * (c+1) + w]
@@ -92,10 +64,46 @@ int main(int argc, char *argv[])
 		i--;
 	}
 
+	delete[] values; // Free memory
+
+	return solution;
+}
+
+int main(int argc, char *argv[])
+{
+	// Parse program options
+	std::string input_data  = "";
+	std::string output_file = "";
+	std::string cert_file   = "";
+	boost::program_options::options_description desc("Allowed options");
+	desc.add_options()
+		("help,h", "produce help message")
+		("input-data,i",  boost::program_options::value<std::string>(&input_data)->required(), "set input data (required)")
+		("output-file,o", boost::program_options::value<std::string>(&output_file),            "set output file")
+		("cert-file,c",   boost::program_options::value<std::string>(&cert_file),              "set certificate output file")
+		("verbose,v",                                                                          "enable verbosity")
+		;
+	boost::program_options::variables_map vm;
+	boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
+	if (vm.count("help")) {
+		std::cout << desc << std::endl;;
+		return 1;
+	}
+	try {
+		boost::program_options::notify(vm);
+	} catch (boost::program_options::required_option e) {
+		std::cout << desc << std::endl;;
+		return 1;
+	}
+	bool verbose = vm.count("verbose");
+
+	Instance instance(input_data);
+	Solution solution = sol_bellman_it(instance);
+
 	// Write output file
 	if (output_file != "") {
 		boost::property_tree::ptree pt;
-		pt.put("Solution.OPT", opt);
+		pt.put("Solution.OPT", solution.profit());
 		write_ini(output_file, pt);
 	}
 
@@ -108,9 +116,7 @@ int main(int argc, char *argv[])
 	}
 
 	if (verbose)
-		std::cout << "OPT: " << opt << std::endl;
-
-	delete[] values; // Free memory
+		std::cout << "OPT: " << solution.profit() << std::endl;
 
 	return 0;
 }

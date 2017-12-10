@@ -1,4 +1,4 @@
-#include "../Lib/Instance.hpp"
+#include "../lib/instance.hpp"
 
 #include <thread>
 #include <gtest/gtest.h>
@@ -46,15 +46,15 @@ void check(boost::filesystem::path prog, boost::filesystem::path input)
 TEST(DynamicProgramming, SimpleInstances)
 {
 	boost::filesystem::path p = boost::filesystem::current_path();
-	p /= boost::filesystem::path("DynamicProgramming");
+	p /= boost::filesystem::path("opt_bellman");
 
-	boost::filesystem::path rec  = p / "rec";
-	boost::filesystem::path map  = p / "map";
-	boost::filesystem::path it   = p / "it";
-	boost::filesystem::path list = p / "list";
+	boost::filesystem::path rec   = p / "rec";
+	boost::filesystem::path map   = p / "map";
+	boost::filesystem::path it    = p / "it";
+	boost::filesystem::path stack = p / "stack";
 
 	boost::filesystem::path data_dir = boost::filesystem::current_path();
-	data_dir /= boost::filesystem::path("TestInstances");
+	data_dir /= boost::filesystem::path("test_instances");
 
 	boost::filesystem::directory_iterator end_itr;
 	for (boost::filesystem::directory_iterator itr(data_dir); itr != end_itr; ++itr) {
@@ -62,10 +62,10 @@ TEST(DynamicProgramming, SimpleInstances)
 			continue;
 		if (itr->path().filename() == "BUILD")
 			continue;
-		check(rec,  itr->path());
-		check(map,  itr->path());
-		check(it,   itr->path());
-		check(list, itr->path());
+		check(rec,   itr->path());
+		check(map,   itr->path());
+		check(it,    itr->path());
+		check(stack, itr->path());
 	}
 }
 

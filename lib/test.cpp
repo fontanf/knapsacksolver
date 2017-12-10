@@ -4,14 +4,14 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 
-TEST(DynamicProgramming, SimpleInstances)
+TEST(Instance, SortDensity)
 {
 	boost::filesystem::path path = boost::filesystem::current_path();
 	path /= boost::filesystem::path("TestInstances");
 	path /= boost::filesystem::path("5_items.txt");
 
 	Instance instance(path);
-	Instance instance_sorted(instance);
+	Instance instance_sorted = Instance::sort_by_density(instance);
 
 	EXPECT_EQ(instance_sorted.profit(1), 5);
 	EXPECT_EQ(instance_sorted.profit(2), 10);

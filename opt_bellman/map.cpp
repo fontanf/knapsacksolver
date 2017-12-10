@@ -1,5 +1,5 @@
-#include "../Lib/Instance.hpp"
-#include "../Lib/Solution.hpp"
+#include "../lib/instance.hpp"
+#include "../lib/solution.hpp"
 
 #include <map>
 #include <iostream>

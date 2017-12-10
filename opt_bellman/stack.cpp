@@ -1,9 +1,8 @@
-#include "../Lib/Instance.hpp"
-#include "../Lib/Solution.hpp"
+#include "../lib/instance.hpp"
+#include "../lib/solution.hpp"
 
-#include <queue>
+#include <stack>
 #include <iostream>
-#include <list>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -62,17 +61,17 @@ int main(int argc, char *argv[])
 		values[i] = -1;
 
 
-	std::list<Node*> q;
+	std::stack<Node*> stack;
 
 	Node* node = new Node();
 	node->i = instance.item_number();
 	node->w = instance.capacity();
 	node->parent = NULL;
-	q.push_front(node);
+	stack.push(node);
 
-	while (!q.empty()) {
-		Node* node = q.front();
-		q.pop_front();
+	while (!stack.empty()) {
+		Node* node = stack.top();
+		stack.pop();
 		ItemIdx i = node->i;
 		Weight  w = node->w;
 		//ValIdx  x = w*(n+1) + i;
@@ -90,14 +89,14 @@ int main(int argc, char *argv[])
 			}
 
 			node->state = 1;
-			q.push_front(node);
+			stack.push(node);
 
 			Node* n0 = new Node();
 			node->child_0 = n0;
 			n0->i = i-1;
 			n0->w = w;
 			n0->parent = node;
-			q.push_front(n0);
+			stack.push(n0);
 
 			if (w >= instance.weight(i)) {
 				Node* n1 = new Node();
@@ -105,7 +104,7 @@ int main(int argc, char *argv[])
 				n1->i = i-1;
 				n1->w = w - instance.weight(i);
 				n1->parent = node;
-				q.push_front(n1);
+				stack.push(n1);
 			}
 		} else if (node->state == 1) {
 			Profit p0 = node->child_0->p;

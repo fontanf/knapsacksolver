@@ -15,7 +15,7 @@ if __name__ == '__main__':
 
     args = [
             os.path.join("external", "BenchTools", "bench"),
-            "-e", os.path.join("DynamicProgramming", "map"),
+            "-e", os.path.join("opt_bellman", "list"),
             "-i"] + data + [
             "-o", "Bench.csv",
     ]

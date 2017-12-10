@@ -1,13 +1,20 @@
 cc_library(
         name = "cpp",
-        srcs = ["Instance.cpp", "Solution.cpp", "Tools.cpp"],
-        hdrs = ["Instance.hpp", "Solution.hpp", "Tools.hpp"],
+        hdrs = ["instance.hpp", "solution.hpp"],
+        srcs = ["instance.cpp", "solution.cpp"],
+        visibility = ["//visibility:public"],
+        deps = ["//ub_dantzig:libdantzig"],
+)
+
+cc_library(
+        name = "hpp",
+        hdrs = ["instance.hpp", "solution.hpp"],
         visibility = ["//visibility:public"],
 )
 
 cc_test(
-        name = "cppTest",
-        srcs = ["Test.cpp"],
+        name = "cpp_test",
+        srcs = ["test.cpp"],
         deps = [
                 ":cpp", 
                 "@googletest//:gtest_main",

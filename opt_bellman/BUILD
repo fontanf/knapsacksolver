@@ -1,80 +1,95 @@
-cc_binary(
-        name = "rec",
-        srcs = ["Rec.cpp"],
-        linkopts = [
-                "-lboost_system",
-                "-lboost_filesystem",
-                "-lboost_program_options"
-        ],
-        deps = [
-                "//Lib:cpp",
-        ],
+cc_library(
+        name = "libbellman",
+        hdrs = ["bellman.hpp"],
+        srcs = ["bellman.cpp"],
+        visibility = ["//visibility:public"],
+        deps = ["//lib:cpp", ":libit"],
+)
+
+cc_library(
+        name = "libit",
+        srcs = ["it.cpp"],
+        hdrs = ["it.hpp"],
+        visibility = ["//visibility:public"],
+        deps = ["//lib:cpp"],
+)
+
+cc_library(
+        name = "cpp",
+        srcs = ["instance.cpp", "solution.cpp"],
+        hdrs = ["instance.hpp", "solution.hpp"],
+        visibility = ["//visibility:public"],
 )
 
 cc_binary(
-        name = "list",
-        srcs = ["List.cpp"],
+        name = "rec",
+        srcs = ["rec.cpp"],
         linkopts = [
                 "-lboost_system",
                 "-lboost_filesystem",
                 "-lboost_program_options"
         ],
-        deps = [
-                "//Lib:cpp",
+        deps = ["//lib:cpp"],
+)
+
+cc_binary(
+        name = "stack",
+        srcs = ["stack.cpp"],
+        linkopts = [
+                "-lboost_system",
+                "-lboost_filesystem",
+                "-lboost_program_options"
         ],
+        deps = ["//lib:cpp"],
 )
 
 cc_binary(
         name = "map",
-        srcs = ["Map.cpp"],
+        srcs = ["map.cpp"],
         linkopts = [
                 "-lboost_system",
                 "-lboost_filesystem",
                 "-lboost_program_options"
         ],
-        deps = [
-                "//Lib:cpp",
-        ],
+        deps = ["//lib:cpp"],
 )
 
 cc_binary(
         name = "it",
-        srcs = ["It.cpp"],
+        srcs = ["it.cpp"],
         linkopts = [
                 "-lboost_system",
                 "-lboost_filesystem",
                 "-lboost_program_options"
         ],
-        deps = [
-                "//Lib:cpp",
-        ],
+        deps = ["//lib:cpp", ":libit"],
 )
 
 cc_test(
         name = "test",
-        srcs = ["Test.cpp"],
+        srcs = ["test.cpp"],
         linkopts = [
                 "-lboost_system",
                 "-lboost_filesystem",
         ],
         deps = [
-                "//Lib:cpp",
+                "//lib:cpp",
                 "@googletest//:gtest_main",
         ],
         data = [
                 ":rec",
                 ":map",
                 ":it",
-                ":list",
-                "//TestInstances:data",
+                ":stack",
+                "//test_instances:data",
         ],
         timeout = "short",
 )
 
 py_binary(
-        name = "mapBench",
-        srcs = ["MapBench.py"],
-        main = "MapBench.py",
+        name = "map_bench",
+        srcs = ["map_bench.py"],
+        main = "map_bench.py",
         data = [
                 "@BenchTools//:bench",
                 "@KnapsackPisingerInstances//:data",
@@ -83,9 +98,9 @@ py_binary(
 )
 
 py_binary(
-        name = "recBench",
-        srcs = ["RecBench.py"],
-        main = "RecBench.py",
+        name = "rec_bench",
+        srcs = ["rec_bench.py"],
+        main = "rec_bench.py",
         data = [
                 "@BenchTools//:bench",
                 "@KnapsackPisingerInstances//:data",
@@ -94,9 +109,9 @@ py_binary(
 )
 
 py_binary(
-        name = "itBench",
-        srcs = ["ItBench.py"],
-        main = "ItBench.py",
+        name = "it_bench",
+        srcs = ["it_bench.py"],
+        main = "it_bench.py",
         data = [
                 "@BenchTools//:bench",
                 "@KnapsackPisingerInstances//:data",
@@ -105,20 +120,20 @@ py_binary(
 )
 
 py_binary(
-        name = "listBench",
-        srcs = ["ListBench.py"],
-        main = "ListBench.py",
+        name = "stack_bench",
+        srcs = ["stack_bench.py"],
+        main = "stack_bench.py",
         data = [
                 "@BenchTools//:bench",
                 "@KnapsackPisingerInstances//:data",
-                ":list",
+                ":stack",
         ],
 )
 
 py_binary(
-        name = "itBench2",
-        srcs = ["ItBench2.py"],
-        main = "ItBench2.py",
+        name = "it_bench2",
+        srcs = ["it_bench2.py"],
+        main = "it_bench2.py",
         data = [
                 "@BenchTools//:bench",
                 "@KnapsackPisingerInstances//:data",
@@ -127,9 +142,9 @@ py_binary(
 )
 
 py_binary(
-        name = "recBench2",
-        srcs = ["RecBench2.py"],
-        main = "RecBench2.py",
+        name = "rec_bench2",
+        srcs = ["rec_bench2.py"],
+        main = "rec_bench2.py",
         data = [
                 "@BenchTools//:bench",
                 "@KnapsackPisingerInstances//:data",
@@ -138,12 +153,12 @@ py_binary(
 )
 
 py_binary(
-        name = "listBench2",
-        srcs = ["ListBench2.py"],
-        main = "ListBench2.py",
+        name = "stack_bench2",
+        srcs = ["stack_bench2.py"],
+        main = "stack_bench2.py",
         data = [
                 "@BenchTools//:bench",
                 "@KnapsackPisingerInstances//:data",
-                ":list",
+                ":stack",
         ],
 )
