@@ -4,6 +4,6 @@
 #include "../lib/instance.hpp"
 #include "../lib/solution.hpp"
 
-Solution sol_bellman_it(const Instance& instance);
+Solution sopt_bellman_it(const Instance& instance);
 
 #endif /* end of include guard: IT_HPP_NZHKO4R1 */

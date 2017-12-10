@@ -4,8 +4,8 @@
 #include "../lib/instance.hpp"
 #include "../lib/solution.hpp"
 
-Profit   opt_bellman(const Instance& instance);
-Solution sol_bellman(const Instance& instance);
-Solution sol_bellman(const Instance& instance, ItemIdx alpha);
+Profit    opt_bellman(const Instance& instance);
+Solution sopt_bellman(const Instance& instance);
+Solution sopt_bellman(const Instance& instance, ItemIdx alpha);
 
 #endif /* end of include guard: BELLMAN_HPP_0M1MVTFZ */

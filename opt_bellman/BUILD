@@ -56,7 +56,7 @@ cc_binary(
 
 cc_binary(
         name = "it",
-        srcs = ["it.cpp"],
+        srcs = ["it_main.cpp"],
         linkopts = [
                 "-lboost_system",
                 "-lboost_filesystem",

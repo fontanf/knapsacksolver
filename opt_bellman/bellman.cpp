@@ -2,9 +2,9 @@
 
 #include "it.hpp"
 
-Solution sol_bellman(const Instance& instance)
+Solution sopt_bellman(const Instance& instance)
 {
-	return sol_bellman_it(instance);
+	return sopt_bellman_it(instance);
 }
 
 Profit opt_bellman(const Instance& instance)
