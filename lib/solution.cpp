@@ -23,6 +23,7 @@ Solution::Solution(const Solution& solution):
 Solution& Solution::operator=(const Solution& solution)
 {
 	if (this != &solution) {
+		assert(instance() == solution.instance());
 		ItemIdx n = solution.instance()->item_number();
 		if (instance()->item_number() == n) {
 			k_ = 0;

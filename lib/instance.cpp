@@ -399,17 +399,6 @@ Instance Instance::reduce(const Instance& instance, Profit lower_bound)
 			// If item i is not in any optimal solution
 			DBG(std::cout << "0 " << std::flush;)
 			assert(!instance.instance_orig()->optimum(instance.index_orig(i)));
-		//} else if (upper_bound_martello(instance_tmp.set_capacity(c), lower_bound) < lower_bound) {
-			//// If item i is in any optimal solution
-			//DBG(std::cout << "1 " << std::flush;)
-			//instance_new.solution_->set(i, true);
-			//instance_new.c_   -= wi;
-			//instance_new.opt_ -= pi;
-			//assert(instance.instance_orig()->optimum(instance.index_orig(i)));
-		//} else if (pi + upper_bound_martello(instance_tmp.set_capacity(c - wi), lower_bound) < lower_bound) {
-			//// If item i is not in any optimal solution
-			//DBG(std::cout << "0 " << std::flush;)
-			//assert(!instance.instance_orig()->optimum(instance.index_orig(i)));
 		} else {
 			// Item i may be in an optimal solution
 			DBG(std::cout << "? " << std::flush;)
@@ -474,7 +463,7 @@ Instance Instance::divide_ceil(const Instance& instance, Weight divisor)
 
 void Instance::info(std::ostream& os)
 {
-	os << "Reduction: "
+	os
 		<< n_ << " / " << instance_orig()->item_number() << " (" << (double)n_ / (double)instance_orig()->item_number() << "); "
 		<< c_ << " / " << instance_orig()->capacity()    << " (" << (double)c_ / (double)instance_orig()->capacity()    << "); ";
 	if (solution_ != NULL)
