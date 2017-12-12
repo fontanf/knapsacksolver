@@ -4,6 +4,6 @@
 #include "../lib/instance.hpp"
 #include "../lib/solution.hpp"
 
-Profit ub_martello(const Instance& instance, Profit lower_bound);
+Profit ub_surrogate(const Instance& instance, Profit lower_bound);
 
 #endif /* end of include guard: MARTELLO_HPP_YNPESKFM */
