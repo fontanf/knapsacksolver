@@ -5,6 +5,20 @@
 
 #include <sstream>
 
+Instance::Instance(ItemIdx n, Weight c, std::vector<Profit> p, std::vector<Weight> w):
+	name_(""), format_(""),
+	n_(n), c_(c), opt_(0)
+{
+	w_ = new Weight[n];
+	p_ = new Profit[n];
+	i_ = new ItemIdx[n];
+	for (ItemIdx i=1; i<=n_; ++i) {
+		set_weight(i, w[i-1]);
+		set_profit(i, p[i-1]);
+		set_index(i, i);
+	}
+}
+
 Instance::Instance(boost::filesystem::path filepath)
 {
 	if (!boost::filesystem::exists(filepath)) {
@@ -29,8 +43,9 @@ Instance::Instance(boost::filesystem::path filepath)
 		assert(false);
 	}
 
-	i_ = std::vector<ItemIdx>(n_);
-	iota(i_.begin(), i_.end(), 1);
+	i_ = new ItemIdx[n_];
+	for (ItemIdx i=1; i<=n_; ++i)
+		set_index(i, i);
 }
 
 void Instance::read_standard(boost::filesystem::path filepath)
@@ -107,6 +122,7 @@ Instance::~Instance()
 {
 	delete[] w_;
 	delete[] p_;
+	delete[] i_;
 	if (solution_ != NULL)
 		delete solution_;
 	if (x_ != NULL)
@@ -180,10 +196,11 @@ Instance::Instance(const Instance& instance):
 {
 	w_ = new Weight[instance_orig()->item_number()];
 	p_ = new Profit[instance_orig()->item_number()];
+	i_ = new ItemIdx[instance_orig()->item_number()];
 	for (ItemIdx i=1; i<=n_; ++i) {
 		set_weight(i, instance.weight(i));
 		set_profit(i, instance.profit(i));
-		i_.push_back(instance.index(i));
+		set_index(i, instance.index(i));
 	}
 }
 
@@ -195,8 +212,9 @@ Instance Instance::child(const Instance& instance)
 	instance_new.n_   = instance.item_number();
 	instance_new.c_   = instance.capacity();
 	instance_new.opt_ = instance.optimum();
-	instance_new.i_   = std::vector<ItemIdx>(instance_new.n_);
-	iota(instance_new.i_.begin(), instance_new.i_.end(), 1);
+	instance_new.i_   = new ItemIdx[instance_new.n_];
+	for (ItemIdx i=1; i<=instance_new.n_; ++i)
+		instance_new.set_index(i, i);
 	instance_new.set_profits_and_weights_from_parent();
 	return instance_new;
 }
@@ -211,6 +229,64 @@ void Instance::set_profits_and_weights_from_parent()
 	}
 }
 
+#define DBG(x)
+//#define DBG(x) x
+
+inline void swap(ItemIdx* v, ItemIdx i, ItemIdx j)
+{
+	ItemIdx tmp = v[j];
+	v[j] = v[i];
+	v[i] = tmp;
+}
+
+template<typename Func1, typename Func2, typename Q>
+void partial_sort(ItemIdx* v, ItemIdx n, Func1 compare, Q capacity, Func2 weight)
+{
+	ItemIdx f = 0;
+	ItemIdx l = (n > 0)? n - 1: 0;
+	Q w = 0; // Sum of the weights of the items after l
+	DBG(std::cout << "f " << f << " l " << l << std::flush;)
+	while (f < l) {
+		ItemIdx pivot = f + 1 + rand() % (l - f); // Select pivot
+		DBG(std::cout << " pivot " << pivot << std::flush;)
+		swap(v, pivot, l);
+
+		ItemIdx j = f;
+		for (ItemIdx i=f; i<l; ++i) {
+			if (!compare(v[i], v[l]))
+				continue;
+			swap(v, i, j);
+			j++;
+		}
+
+		Q w_curr = w;
+		for (ItemIdx i=f; i<j; ++i)
+			w_curr += weight(v[i]);
+
+		swap(v, j, l);
+		DBG(std::cout << " j " << j << std::flush;)
+		DBG(std::cout << " w_curr " << w_curr << std::flush;)
+
+		if (w_curr + weight(v[j]) <= capacity) {
+			f = j+1;
+			w = w_curr + weight(v[j]);
+			DBG(std::cout << " w " << w << std::flush;)
+		} else if (w_curr > capacity) {
+			l = j-1;
+		} else {
+			break;
+		}
+
+		DBG(std::cout << std::endl;
+		for (ItemIdx i=0; i<v.size(); ++i)
+			std::cout << v[i] << " " << std::flush;)
+		DBG(std::cout << std::endl;)
+		DBG(std::cout << "f " << f << " l " << l << std::flush;)
+	}
+}
+
+#undef DBG
+
 Instance Instance::sort_by_profit(const Instance& instance)
 {
 	Instance instance_new;
@@ -219,11 +295,12 @@ Instance Instance::sort_by_profit(const Instance& instance)
 	instance_new.n_   = instance.item_number();
 	instance_new.c_   = instance.capacity();
 	instance_new.opt_ = instance.optimum();
-	instance_new.i_   = std::vector<ItemIdx>(instance_new.n_);
-	iota(instance_new.i_.begin(), instance_new.i_.end(), 1);
-	std::sort(instance_new.i_.begin(), instance_new.i_.end(),
+	instance_new.i_   = new ItemIdx[instance_new.n_];
+	for (ItemIdx i=1; i<=instance_new.n_; ++i)
+		instance_new.set_index(i, i);
+	std::sort(instance_new.i_, instance_new.i_ + instance_new.n_,
 			[&instance](ItemIdx i1, ItemIdx i2) {
-			return instance.profit(i1) < instance.profit(i2);});
+			return instance.profit(i1) > instance.profit(i2);});
 	instance_new.set_profits_and_weights_from_parent();
 	return instance_new;
 }
@@ -236,51 +313,102 @@ Instance Instance::sort_by_weight(const Instance& instance)
 	instance_new.n_   = instance.item_number();
 	instance_new.c_   = instance.capacity();
 	instance_new.opt_ = instance.optimum();
-	instance_new.i_   = std::vector<ItemIdx>(instance_new.n_);
-	iota(instance_new.i_.begin(), instance_new.i_.end(), 1);
-	std::sort(instance_new.i_.begin(), instance_new.i_.end(),
+	instance_new.i_   = new ItemIdx[instance_new.n_];
+	for (ItemIdx i=1; i<=instance_new.n_; ++i)
+		instance_new.set_index(i, i);
+	std::sort(instance_new.i_, instance_new.i_ + instance_new.n_,
 			[&instance](ItemIdx i1, ItemIdx i2) {
 			return instance.weight(i1) < instance.weight(i2);});
 	instance_new.set_profits_and_weights_from_parent();
 	return instance_new;
 }
 
-Instance Instance::sort_by_density(const Instance& instance)
+Instance Instance::sort_by_efficiency(const Instance& instance)
 {
 	Instance instance_new;
 	instance_new.init(instance);
-	instance_new.name_ += "_density";
+	instance_new.name_ += "_efficiency";
 	instance_new.n_   = instance.item_number();
 	instance_new.c_   = instance.capacity();
 	instance_new.opt_ = instance.optimum();
-	instance_new.i_   = std::vector<ItemIdx>(instance_new.n_);
-	iota(instance_new.i_.begin(), instance_new.i_.end(), 1);
-	std::sort(instance_new.i_.begin(), instance_new.i_.end(),
+	instance_new.i_   = new ItemIdx[instance_new.n_];
+	for (ItemIdx i=1; i<=instance_new.n_; ++i)
+		instance_new.set_index(i, i);
+	std::sort(instance_new.i_, instance_new.i_ + instance_new.n_,
 			[&instance](ItemIdx i1, ItemIdx i2) {
 			return instance.profit(i1) * instance.weight(i2)
-			     < instance.profit(i2) * instance.weight(i1);});
+			     > instance.profit(i2) * instance.weight(i1);});
 	instance_new.set_profits_and_weights_from_parent();
 	return instance_new;
 }
 
-Instance Instance::remove_first_item(const Instance& instance)
+Instance Instance::sort_partially_by_profit(const Instance& instance, Profit lb)
 {
 	Instance instance_new;
 	instance_new.init(instance);
-	assert(instance.item_number() > 0);
-	instance_new.name_  += "_dltfirst";
-	instance_new.n_      = instance.item_number() - 1;
-	instance_new.c_      = instance.capacity();
-	instance_new.opt_    = 0;
-	instance_new.parent_ = &instance;
-	instance_new.i_      = std::vector<ItemIdx>(instance_new.n_);
-	iota(instance_new.i_.begin(), instance_new.i_.end(), 2);
-	instance_new.w_ = new Weight[instance.instance_orig()->item_number()];
-	instance_new.p_ = new Profit[instance.instance_orig()->item_number()];
-	for (ItemIdx i=1; i<=instance_new.item_number(); ++i) {
-		instance_new.set_weight(i, instance.weight(i+1));
-		instance_new.set_profit(i, instance.profit(i+1));
-	}
+	instance_new.name_ += "_partprofit";
+	instance_new.n_   = instance.item_number();
+	instance_new.c_   = instance.capacity();
+	instance_new.opt_ = instance.optimum();
+	instance_new.i_   = new ItemIdx[instance_new.n_];
+	for (ItemIdx i=1; i<=instance_new.n_; ++i)
+		instance_new.set_index(i, i);
+
+	partial_sort(
+			instance_new.i_, instance_new.n_,
+			[&instance](ItemIdx i1, ItemIdx i2) {
+			return instance.weight(i1) > instance.weight(i2);},
+			lb,
+			[&instance](ItemIdx i) { return instance.profit(i); });
+
+	instance_new.set_profits_and_weights_from_parent();
+	return instance_new;
+}
+
+Instance Instance::sort_partially_by_weight(const Instance& instance)
+{
+	Instance instance_new;
+	instance_new.init(instance);
+	instance_new.name_ += "_partweight";
+	instance_new.n_   = instance.item_number();
+	instance_new.c_   = instance.capacity();
+	instance_new.opt_ = instance.optimum();
+	instance_new.i_   = new ItemIdx[instance_new.n_];
+	for (ItemIdx i=1; i<=instance_new.n_; ++i)
+		instance_new.set_index(i, i);
+
+	partial_sort(
+			instance_new.i_, instance_new.n_,
+			[&instance](ItemIdx i1, ItemIdx i2) {
+			return instance.weight(i1) < instance.weight(i2);},
+			instance_new.capacity(),
+			[&instance](ItemIdx i) { return instance.weight(i); });
+
+	instance_new.set_profits_and_weights_from_parent();
+	return instance_new;
+}
+
+Instance Instance::sort_partially_by_efficiency(const Instance& instance)
+{
+	Instance instance_new;
+	instance_new.init(instance);
+	instance_new.name_ += "_partefficiency";
+	instance_new.n_   = instance.item_number();
+	instance_new.c_   = instance.capacity();
+	instance_new.opt_ = instance.optimum();
+	instance_new.i_   = new ItemIdx[instance_new.n_];
+	for (ItemIdx i=1; i<=instance_new.n_; ++i)
+		instance_new.set_index(i, i);
+
+	partial_sort(
+			instance_new.i_, instance_new.n_,
+			[&instance](ItemIdx i1, ItemIdx i2) {
+			return instance.profit(i1) * instance.weight(i2)
+			     > instance.profit(i2) * instance.weight(i1);},
+			instance_new.capacity(),
+			[&instance](ItemIdx i) { return instance.weight(i); });
+
+	instance_new.set_profits_and_weights_from_parent();
 	return instance_new;
 }
 
@@ -294,19 +422,23 @@ void Instance::surrogate_plus(const Instance& instance, Weight multiplier, ItemI
 	opt_ = 0;
 	n_ = instance.item_number();
 	c_ = instance.capacity() + multiplier * bound;
-	std::sort(i_.begin(), i_.end(),
+	partial_sort(
+			i_, n_,
 			[&instance, &multiplier](ItemIdx i1, ItemIdx i2) {
 			Profit pi1 = instance.profit(i1);
 			Profit pi2 = instance.profit(i2);
 			Weight wi1 = instance.weight(i1) + multiplier;
 			Weight wi2 = instance.weight(i2) + multiplier;
-			if (pi1 * wi2 < pi2 * wi1) {
+			if (pi1 * wi2 > pi2 * wi1) {
 				return true;
-			} else if (pi1 * wi2 > pi2 * wi1) {
+			} else if (pi1 * wi2 < pi2 * wi1) {
 				return false;
 			} else {
-				return instance.weight(i1) < instance.weight(i2);
-			}});
+				return instance.weight(i1) > instance.weight(i2);
+			}},
+			capacity(),
+			[&instance, &multiplier](ItemIdx i) { return instance.weight(i) + multiplier; });
+
 	for (ItemIdx i=1; i<=n_; ++i) {
 		set_weight(i, weight_parent(i) + multiplier);
 		set_profit(i, profit_parent(i));
@@ -327,32 +459,37 @@ void Instance::surrogate_minus(const Instance& instance, Weight multiplier, Item
 	c_ = instance.capacity();
 	parent_ = &instance;
 	opt_ = 0;
-	i_.clear();
+	n_ = 0;
 	for (ItemIdx i=1; i<=instance.item_number(); ++i) {
 		if (instance.weight(i) > multiplier) {
-			i_.push_back(i);
+			n_++;
+			set_index(n_, i);
 			solution_->set(i, false);
 		} else {
 			c_ += multiplier - instance.weight(i);
 			solution_->set(i, true);
 		}
-		n_ = i_.size();
 	}
 	c_ = (c_ > multiplier * bound)?
 		c_ - multiplier * bound: 0;
-	std::sort(i_.begin(), i_.end(),
+
+	partial_sort(
+			i_, n_,
 			[&instance, &multiplier](ItemIdx i1, ItemIdx i2) {
 			Profit pi1 = instance.profit(i1);
 			Profit pi2 = instance.profit(i2);
 			Weight wi1 = instance.weight(i1) - multiplier;
 			Weight wi2 = instance.weight(i2) - multiplier;
-			if (pi1 * wi2 < pi2 * wi1) {
+			if (pi1 * wi2 > pi2 * wi1) {
 				return true;
-			} else if (pi1 * wi2 > pi2 * wi1) {
+			} else if (pi1 * wi2 < pi2 * wi1) {
 				return false;
 			} else {
-				return instance.weight(i1) < instance.weight(i2);
-			}});
+				return instance.weight(i1) > instance.weight(i2);
+			}},
+			capacity(),
+			[&instance, &multiplier](ItemIdx i) { return instance.weight(i) - multiplier; });
+
 	for (ItemIdx i=1; i<=n_; ++i) {
 		assert(weight_parent(i) >= multiplier);
 		set_weight(i, weight_parent(i) - multiplier);
@@ -375,46 +512,39 @@ Instance Instance::reduce(const Instance& instance, Profit lower_bound)
 	instance_new.name_ += "_reduced";
 	instance_new.c_   = instance.capacity();
 	instance_new.opt_ = instance.optimum();
+	instance_new.n_   = 0;
+	instance_new.i_   = new ItemIdx[instance.item_number()];
 	Weight c = instance.capacity();
 
-	ItemIdx i=1;
 	Weight wi;
 	Profit pi;
-	Instance instance_tmp = Instance::remove_first_item(instance);
-	for (;;i++) {
+	for (ItemIdx i=1; i<=instance.item_number(); ++i) {
 		DBG(std::cout << "i: " << i << " " << std::flush;)
 
 		wi = instance.weight(i);
 		pi = instance.profit(i);
 		DBG(std::cout << "pi: " << pi << " wi: " << wi << std::flush;)
 
-		if (ub_dantzig(instance_tmp.set_capacity(c)) < lower_bound) {
+		if (ub_dantzig_without(instance, i, c) < lower_bound) {
 			// If item i is in any optimal solution
 			DBG(std::cout << "1 " << std::flush;)
 			instance_new.solution_->set(i, true);
 			instance_new.c_   -= wi;
 			instance_new.opt_ -= pi;
 			assert(instance.instance_orig()->optimum(instance.index_orig(i)));
-		} else if (pi + ub_dantzig(instance_tmp.set_capacity(c-wi)) < lower_bound) {
+		} else if (pi + ub_dantzig_without(instance, i, c-wi) < lower_bound) {
 			// If item i is not in any optimal solution
 			DBG(std::cout << "0 " << std::flush;)
 			assert(!instance.instance_orig()->optimum(instance.index_orig(i)));
 		} else {
 			// Item i may be in an optimal solution
 			DBG(std::cout << "? " << std::flush;)
-			instance_new.i_.push_back(i);
+			instance_new.n_++;
+			instance_new.set_index(instance_new.n_, i);
 		}
-
-		if (i == instance.item_number())
-			break;
-
-		instance_tmp.set_weight(i, wi);
-		instance_tmp.set_profit(i, pi);
-		instance_tmp.set_index(i, i);
 		DBG(std::cout << std::endl;)
 	}
 
-	instance_new.n_ = instance_new.i_.size();
 	instance_new.set_profits_and_weights_from_parent();
 
 	DBG(std::cout << "reduce()... END" << std::endl;)
@@ -430,11 +560,11 @@ Instance Instance::divide_floor(const Instance& instance, Weight divisor)
 	instance_new.n_   = instance.item_number();
 	instance_new.c_   = instance.capacity() / divisor;
 	instance_new.opt_ = instance.optimum();
-	instance_new.i_   = std::vector<ItemIdx>(instance_new.n_);
-	iota(instance_new.i_.begin(), instance_new.i_.end(), 1);
 	instance_new.w_ = new Weight[instance_new.instance_orig()->item_number()];
 	instance_new.p_ = new Profit[instance_new.instance_orig()->item_number()];
+	instance_new.i_ = new ItemIdx[instance_new.instance_orig()->item_number()];
 	for (ItemIdx i=1; i<=instance_new.n_; ++i) {
+		instance_new.set_index(i, i);
 		instance_new.set_weight(i, instance.weight(i) / divisor);
 		instance_new.set_profit(i, instance.profit(i));
 	}
@@ -449,11 +579,11 @@ Instance Instance::divide_ceil(const Instance& instance, Weight divisor)
 	instance_new.c_   = (instance.capacity() != 0)?
 		1 + ((instance.capacity() - 1) / divisor): 0;
 	instance_new.opt_ = instance.optimum();
-	instance_new.i_   = std::vector<ItemIdx>(instance_new.n_);
-	iota(instance_new.i_.begin(), instance_new.i_.end(), 1);
 	instance_new.w_ = new Weight[instance_new.instance_orig()->item_number()];
 	instance_new.p_ = new Profit[instance_new.instance_orig()->item_number()];
+	instance_new.i_ = new ItemIdx[instance_new.instance_orig()->item_number()];
 	for (ItemIdx i=1; i<=instance_new.n_; ++i) {
+		instance_new.set_index(i, i);
 		instance_new.set_weight(i, (instance.weight(i) != 0)?
 				1 + ((instance.weight(i) - 1) / divisor): 0);
 		instance_new.set_profit(i, instance.profit(i));

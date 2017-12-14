@@ -26,16 +26,17 @@ Profit ub_surrogate_cardinality_max(const Instance& instance, ItemIdx k)
 		p = 0;
 		instance_tmp.surrogate_plus(instance, s, k);
 		r = instance_tmp.capacity();
-		for (i=instance_tmp.item_number(); i>0; --i) {
+		for (i=1; i<=instance_tmp.item_number(); ++i) {
 			Weight wi = instance_tmp.weight(i);
 			if (r < wi)
 				break;
 			r -= wi;
 			p += instance_tmp.profit(i);
 		}
-		if (r > 0 && i > 0)
+		if (r > 0 && i != instance_tmp.item_number() + 1)
 			p += (instance_tmp.profit(i) * r) / instance_tmp.weight(i);
-		gamma = instance_tmp.item_number() - i;
+		gamma = i - 1;
+		DBG(std::cout << " " << gamma << std::flush;)
 
 		if (p < ub)
 			ub = p;
@@ -77,11 +78,8 @@ Profit ub_surrogate_cardinality_min(const Instance& instance, ItemIdx k)
 		instance_tmp.surrogate_minus(instance, s, k);
 		p = instance_tmp.solution()->profit();
 		DBG(std::cout << p << " " << std::flush;)
-		//for (ItemIdx j=instance.item_number(); j>0; --j)
-			//if (instance_tmp.solution()->get(j))
-				//p += instance.profit(j);
 		r = instance_tmp.capacity();
-		for (i=instance_tmp.item_number(); i>0; --i) {
+		for (i=1; i<=instance_tmp.item_number(); ++i) {
 			Weight wi = instance_tmp.weight(i);
 			if (r < wi)
 				break;
@@ -89,9 +87,9 @@ Profit ub_surrogate_cardinality_min(const Instance& instance, ItemIdx k)
 			p += instance_tmp.profit(i);
 		}
 		DBG(std::cout << p << " " << std::flush;)
-		if (r > 0 && i > 0)
+		if (r > 0 && i != instance_tmp.item_number() + 1)
 			p += (instance_tmp.profit(i) * r) / instance_tmp.weight(i);
-		gamma = instance_tmp.item_number() - i + instance_tmp.solution()->item_number();
+		gamma = i - 1 + instance_tmp.solution()->item_number();
 		DBG(std::cout << p << " " << gamma << " " << std::flush;)
 
 		if (p < ub)
@@ -121,10 +119,10 @@ Profit ub_surrogate(const Instance& instance, Profit lower_bound)
 	ItemIdx b = 0;
 	Weight r = instance.capacity();
 	Profit p = 0;
-	for (ItemIdx i=instance.item_number(); i>0; --i) {
+	for (ItemIdx i=1; i<=instance.item_number(); ++i) {
 		Weight wi = instance.weight(i);
 		if (r < wi) {
-			b = instance.item_number() - i + 1;
+			b = i;
 			break;
 		}
 		r -= wi;
@@ -161,10 +159,10 @@ Profit ub_surrogate(const Instance& instance, Profit lower_bound)
 
 	Instance instance_profit = Instance::sort_by_profit(instance);
 	ItemIdx kz = 0;
-	for (ItemIdx i=instance_profit.item_number(); i>0; --i) {
+	for (ItemIdx i=1; i<=instance_profit.item_number(); ++i) {
 		Profit pi = instance_profit.profit(i);
 		if (lower_bound < pi) {
-			kz = instance_profit.item_number() - i + 1;
+			kz = i;
 			break;
 		}
 		lower_bound -= pi;

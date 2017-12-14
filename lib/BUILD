@@ -13,7 +13,7 @@ cc_library(
 )
 
 cc_test(
-        name = "cpp_test",
+        name = "test",
         srcs = ["test.cpp"],
         deps = [
                 ":cpp", 
@@ -24,8 +24,16 @@ cc_test(
                 "-lboost_filesystem",
                 "-lboost_program_options"
         ],
-        data = [
-                "//TestInstances:data",
-        ],
         timeout = "short",
+)
+
+cc_binary(
+        name = "sort_bench",
+        srcs = ["sort_bench.cpp"],
+        linkopts = [
+                "-lboost_system",
+                "-lboost_filesystem",
+                "-lboost_program_options"
+        ],
+        deps = ["//lib:cpp"],
 )

@@ -9,7 +9,8 @@
 
 void executeProgram(std::string cmd)
 {
-    system(cmd.c_str());
+	std::cout << cmd << std::endl;
+	system(cmd.c_str());
 }
 
 void check(boost::filesystem::path prog, boost::filesystem::path input)

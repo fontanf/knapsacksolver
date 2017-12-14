@@ -25,11 +25,22 @@ class Instance
 
 public:
 
+	/**
+	 * Constructors
+	 */
+
+	/**
+	 * Manual constructor.
+	 * This constructor should only be used for tests.
+	 */
+	Instance(ItemIdx n, Weight c, std::vector<Profit> p, std::vector<Weight> w);
+
+	/**
+	 * Create instance from file.
+	 */
 	Instance(boost::filesystem::path filename);
 	void read_standard(boost::filesystem::path filename);
 	void read_pisinger(boost::filesystem::path filename);
-
-	Instance() { };
 
 	/**
 	 * Copy constructor
@@ -38,71 +49,152 @@ public:
 	Instance& operator=(const Instance& instance);
 
 	/**
+	 * Create an instance with items ordered according to non-increasing
+	 * profit.
+	 */
+	static Instance sort_by_profit(const Instance& instance);
+
+	/**
+	 * Create an instance with items ordered according to non-decreasing
+	 * weight.
+	 */
+	static Instance sort_by_weight(const Instance& instance);
+
+	/*
+	 * Create an instance with items ordered according to non-increasing
+	 * profit-to-weight ratio.
+	 */
+	static Instance sort_by_efficiency(const Instance& instance);
+
+	/**
+	 * Create an instance with items partially ordered according to
+	 * non-increasing profit / non-decreasing weight / non-increasing
+	 * profit-to-weight ratio, i.e. the break item is the same as if the items
+	 * were fully sorted. This is achieved with a quick-sort like algorithm as
+	 * described in "A Minimal Algorithm for the 0-1 Knapsack Problem"
+	 * (Pisinger, 1997).
+	 */
+	static Instance sort_partially_by_profit(const Instance& instance, Profit lb);
+	static Instance sort_partially_by_weight(const Instance& instance);
+	static Instance sort_partially_by_efficiency(const Instance& instance);
+
+	/**
+	 * Create an instance with capacitiy and weights divided, keeping the
+	 * floor (resp. the ceiling).
+	 */
+	static Instance divide_floor(const Instance& instance, Weight divisor);
+	static Instance divide_ceil(const Instance& instance, Weight divisor);
+
+	/**
+	 * Create an instance applying variable reduction. See "Knapsack Problem",
+	 * Chap 3.2: "Variable Reduction" (Pferschy, 2004) for more details.
+	 */
+	static Instance reduce(const Instance& instance, Profit lower_bound);
+
+	/**
+	 * Create an instance partially ordered according to non-increasing
+	 * profit-to-weight ratio, with weights equal to wi + S (resp.  wi - S) and
+	 * capacity c + Sk (resp. c - Sk). This is used for surrogate relaxation.
+	 * See "Dynamic Programming and Strong Bounds for the 0-1
+	 * Knapsack Problem" (Martello, 1999).
+	 */
+	void surrogate_plus(const Instance& instance, Weight multiplier, ItemIdx bound);
+	void surrogate_minus(const Instance& instance, Weight multiplier, ItemIdx bound);
+
+	static Instance child(const Instance& instance);
+
+	~Instance();
+
+
+	/**
+	 * Getters
+	 */
+
+	inline ItemIdx item_number() const { return n_; }
+	inline Weight  capacity()    const { return c_; }
+
+	/**
+	 * Items properties
+	 */
+	inline Weight weight(ItemIdx i) const { assert(i > 0 && i <= n_); return w_[i-1]; }
+	inline Profit profit(ItemIdx i) const { assert(i > 0 && i <= n_); return p_[i-1]; }
+
+	/**
+	 * Return optimal value if known, 0 otherwise.
+	 */
+	inline Profit optimum()         const { return opt_; }
+
+	/**
+	 * Return true if item i is in the known solution, false otherwise.
+	 */
+	inline bool optimum(ItemIdx i) const { assert(i > 0 && i <= n_ && x_ != NULL); return x_[i-1]; }
+
+	/**
+	 * Index of item i in the parent solution.
+	 */
+	inline ItemIdx index(ItemIdx i) const { assert(i > 0 && i <= n_); return i_[i-1]; }
+
+	/**
+	 * Index of item i in the original instance.
+	 */
+	ItemIdx index_orig(ItemIdx i) const;
+
+	Weight weight_max() const;
+	Profit profit_max() const;
+
+	inline std::string name()   const { return name_; }
+	inline std::string format() const { return format_; }
+
+	/**
+	 * Parent instance.
+	 */
+	const Instance* parent() const { return parent_; }
+
+	/**
+	 * Original instance.
+	 */
+	const Instance* instance_orig() const;
+
+	/**
+	 * After a reduction, return the solution of the reduced variables.
+	 */
+	Solution* solution() const { return solution_; }
+
+	/**
+	 * Return the solution converted in the original instance.
+	 */
+	Solution solution_orig(const Solution& solution) const;
+
+	/**
+	 * After a reduction, return the profit from the original instance.
+	 */
+	Profit profit_orig() const;
+
+	/**
+	 * Compute GCD of capacity and weights.
+	 */
+	Weight gcd() const;
+
+	/**
+	 * Return the profit of the certificate file.
+	 */
+	Profit check(boost::filesystem::path cert_file);
+
+	void info(std::ostream& os);
+
+private:
+
+	Instance() { };
+
+	/**
 	 * Create an instance with name_, format_, parent_ and solution_
 	 * members initialized.
 	 */
 	void init(const Instance& instance);
 
-	static Instance child(const Instance& instance);
-
-	/*
-	 * Create an instance with sorted items.
-	 */
-	static Instance sort_by_profit(const Instance& instance);
-	static Instance sort_by_weight(const Instance& instance);
-	static Instance sort_by_density(const Instance& instance);
-
-	static Instance divide_floor(const Instance& instance, Weight divisor);
-	static Instance divide_ceil(const Instance& instance, Weight divisor);
-
-	static Instance reduce(const Instance& instance, Profit lower_bound);
-
-	void surrogate_plus(const Instance& instance, Weight multiplier, ItemIdx bound);
-	void surrogate_minus(const Instance& instance, Weight multiplier, ItemIdx bound);
-
-	static Instance remove_first_item(const Instance& instance);
-
-	/**
-	 * Setters
-	 */
-	inline void add_name(std::string name) { name_ += name; }
-	inline void set_item_number(ItemIdx n) { n_ = n; }
-	inline void set_optimum(Profit opt) { opt_ = opt; }
-	inline const Instance& set_capacity(Weight c) { c_ = c; return *this; }
 	inline void set_profit(ItemIdx i, Profit p) { assert(i > 0 && i <= n_); p_[i-1] = p; }
 	inline void set_weight(ItemIdx i, Weight w) { assert(i > 0 && i <= n_); w_[i-1] = w; }
 	inline void set_index(ItemIdx i, ItemIdx j) { assert(i > 0 && i <= n_); i_[i-1] = j; }
-
-	~Instance();
-
-	/**
-	 * Getters
-	 */
-	inline std::string name()       const { return name_; }
-	inline std::string format()     const { return format_; }
-	Solution*       solution()      const { return solution_; }
-	const Instance* parent()        const { return parent_; }
-	inline ItemIdx item_number()    const { return n_; }
-	inline Weight capacity()        const { return c_; }
-	inline Profit optimum()         const { return opt_; }
-	inline bool  optimum(ItemIdx i) const { assert(i > 0 && i <= n_ && x_ != NULL); return x_[i-1]; }
-	inline Weight weight(ItemIdx i) const { assert(i > 0 && i <= n_); return w_[i-1]; }
-	inline Profit profit(ItemIdx i) const { assert(i > 0 && i <= n_); return p_[i-1]; }
-	inline ItemIdx index(ItemIdx i) const { assert(i > 0 && i <= n_); return i_[i-1]; }
-
-	Weight weight_max() const;
-	Profit profit_max() const;
-	Weight gcd()        const;
-
-	const Instance* instance_orig()                         const;
-	ItemIdx            index_orig(ItemIdx i)                const;
-	Solution        solution_orig(const Solution& solution) const;
-	Profit            profit_orig()                         const;
-
-	Profit check(boost::filesystem::path cert_file);
-	void info(std::ostream& os);
-
-private:
 
 	void set_profits_and_weights_from_parent();
 	Profit profit_parent(ItemIdx i) const { return parent()->profit(index(i));}
@@ -114,13 +206,12 @@ private:
 	ItemIdx n_;
 	Weight  c_;
 	Profit  opt_ = 0;
-	Weight* w_ = NULL;
-	Profit* p_ = NULL;
-	bool*   x_ = NULL;
-	std::vector<ItemIdx> i_;
+	Weight* w_  = NULL;
+	Profit* p_  = NULL;
+	bool*   x_  = NULL;
+	ItemIdx* i_ = NULL;
 	const Instance* parent_   = NULL;
 	Solution*       solution_ = NULL;
-
 };
 
 std::ostream& operator<<(std::ostream &os, const Instance& instance);
