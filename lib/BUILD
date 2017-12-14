@@ -12,6 +12,21 @@ cc_library(
         visibility = ["//visibility:public"],
 )
 
+cc_library(
+        name = "tester",
+        hdrs = ["tester.hpp"],
+        srcs = ["tester.cpp"],
+        visibility = ["//visibility:public"],
+        linkopts = [
+                "-lboost_system",
+                "-lboost_filesystem",
+        ],
+        deps = [
+                ":cpp", 
+                "@googletest//:gtest_main",
+        ],
+)
+
 cc_test(
         name = "test",
         srcs = ["test.cpp"],

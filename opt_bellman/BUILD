@@ -6,6 +6,28 @@ cc_library(
         deps = ["//lib:cpp", ":libit"],
 )
 
+cc_binary(
+        name = "bellman_1",
+        srcs = ["bellman_1_main.cpp"],
+        linkopts = [
+                "-lboost_system",
+                "-lboost_filesystem",
+                "-lboost_program_options"
+        ],
+        deps = ["//lib:cpp", ":libbellman"],
+)
+
+cc_binary(
+        name = "bellman_2",
+        srcs = ["bellman_2_main.cpp"],
+        linkopts = [
+                "-lboost_system",
+                "-lboost_filesystem",
+                "-lboost_program_options"
+        ],
+        deps = ["//lib:cpp", ":libbellman"],
+)
+
 cc_library(
         name = "libit",
         srcs = ["it.cpp"],
@@ -73,10 +95,12 @@ cc_test(
                 "-lboost_filesystem",
         ],
         deps = [
+                "//lib:tester",
                 "//lib:cpp",
-                "@googletest//:gtest_main",
         ],
         data = [
+                ":bellman_1",
+                ":bellman_2",
                 ":rec",
                 ":map",
                 ":it",
