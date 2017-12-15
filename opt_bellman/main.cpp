@@ -1,4 +1,4 @@
-#include "it.hpp"
+#include "bellman.hpp"
 
 #include <iostream>
 
@@ -14,12 +14,14 @@ int main(int argc, char *argv[])
 	std::string input_data  = "";
 	std::string output_file = "";
 	std::string cert_file   = "";
+	std::string algorithm   = "";
 	boost::program_options::options_description desc("Allowed options");
 	desc.add_options()
 		("help,h", "produce help message")
 		("input-data,i",  boost::program_options::value<std::string>(&input_data)->required(), "set input data (required)")
 		("output-file,o", boost::program_options::value<std::string>(&output_file),            "set output file")
 		("cert-file,c",   boost::program_options::value<std::string>(&cert_file),              "set certificate output file")
+		("algorithm,a",   boost::program_options::value<std::string>(&algorithm),              "set algorithm")
 		("verbose,v",                                                                          "enable verbosity")
 		;
 	boost::program_options::variables_map vm;
@@ -37,14 +39,28 @@ int main(int argc, char *argv[])
 	bool verbose = vm.count("verbose");
 
 	Instance instance(input_data);
-	Solution solution = sopt_bellman_it(instance);
+	Solution solution(instance);
+	boost::property_tree::ptree pt;
+
+	if (algorithm == "") {
+		solution = sopt_bellman_1(instance, &pt, verbose);
+	} else if (algorithm == "1") {
+		solution = sopt_bellman_1(instance, &pt, verbose);
+	} else if (algorithm == "2") {
+		solution = sopt_bellman_2(instance, &pt, verbose);
+	} else if (algorithm == "it") {
+		solution = sopt_bellman_1_it(instance, &pt, verbose);
+	} else if (algorithm == "rec") {
+		solution = sopt_bellman_1_rec(instance, &pt, verbose);
+	} else if (algorithm == "stack") {
+		solution = sopt_bellman_1_stack(instance, &pt, verbose);
+	} else if (algorithm == "map") {
+		solution = sopt_bellman_1_map(instance, &pt, verbose);
+	}
 
 	// Write output file
-	if (output_file != "") {
-		boost::property_tree::ptree pt;
-		pt.put("Solution.OPT", solution.profit());
+	if (output_file != "")
 		write_ini(output_file, pt);
-	}
 
 	// Write certificate file
 	if (cert_file != "") {
@@ -53,9 +69,6 @@ int main(int argc, char *argv[])
 		cert << solution;
 		cert.close();
 	}
-
-	if (verbose)
-		std::cout << "OPT: " << solution.profit() << std::endl;
 
 	return 0;
 }

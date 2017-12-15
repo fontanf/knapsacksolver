@@ -11,14 +11,14 @@ void executeProgram(std::string cmd)
 	system(cmd.c_str());
 }
 
-void check(boost::filesystem::path prog, boost::filesystem::path input)
+void check(std::string prog, boost::filesystem::path input)
 {
 	Instance instance(input);
 	Profit opt = instance.optimum();
 
 	std::string output_file = "output_file.ini";
 	std::string cert_file   = "cert_file.txt";
-	std::string cmd = prog.string()
+	std::string cmd = prog
 			+ " -i" + input.string()
 			+ " -o" + output_file
 			+ " -c" + cert_file;
@@ -42,7 +42,7 @@ void check(boost::filesystem::path prog, boost::filesystem::path input)
 	boost::filesystem::remove(cert_file);
 }
 
-void test(boost::filesystem::path exec)
+void test(std::string exec)
 {
 	boost::filesystem::path data_dir = boost::filesystem::current_path();
 	data_dir /= boost::filesystem::path("test_instances");

@@ -6,5 +6,5 @@
 #include <boost/property_tree/ini_parser.hpp>
 
 
-void test(boost::filesystem::path exec);
+void test(std::string exec);
 
