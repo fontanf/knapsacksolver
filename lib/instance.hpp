@@ -139,8 +139,8 @@ public:
 	 */
 	ItemIdx index_orig(ItemIdx i) const;
 
-	Weight weight_max() const;
-	Profit profit_max() const;
+	ItemIdx weight_max() const;
+	ItemIdx profit_max() const;
 
 	inline std::string name()   const { return name_; }
 	inline std::string format() const { return format_; }

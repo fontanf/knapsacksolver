@@ -627,18 +627,34 @@ Weight Instance::gcd() const
 
 Weight Instance::weight_max() const
 {
-	Weight w_max = 0;
-	for (ItemIdx i=1; i<=item_number(); ++i)
-		if (weight(i) > w_max)
+	ItemIdx    j = 0;
+	Profit p     = 0;
+	Weight w_max = capacity();
+	for (ItemIdx i=1; i<=item_number(); ++i) {
+		if (weight(i) > capacity())
+			continue;
+		if (weight(i) > w_max || (weight(i) == w_max && profit(i) > p)) {
+			j     = i;
 			w_max = weight(i);
-	return w_max;
+			p     = profit(i);
+		}
+	}
+	return j;
 }
 
-Profit Instance::profit_max() const
+ItemIdx Instance::profit_max() const
 {
+	ItemIdx    j = 0;
 	Profit p_max = 0;
-	for (ItemIdx i=1; i<=item_number(); ++i)
-		if (profit(i) > p_max)
+	Weight w     = capacity();
+	for (ItemIdx i=1; i<=item_number(); ++i) {
+		if (weight(i) > capacity())
+			continue;
+		if (profit(i) > p_max || (profit(i) == p_max && weight(i) < w)) {
+			j     = i;
 			p_max = profit(i);
-	return p_max;
+			w     = weight(i);
+		}
+	}
+	return j;
 }
