@@ -39,8 +39,6 @@ public:
 	 * Create instance from file.
 	 */
 	Instance(boost::filesystem::path filename);
-	void read_standard(boost::filesystem::path filename);
-	void read_pisinger(boost::filesystem::path filename);
 
 	/**
 	 * Copy constructor
@@ -185,6 +183,9 @@ public:
 private:
 
 	Instance() { };
+
+	void read_standard(boost::filesystem::path filename);
+	void read_pisinger(boost::filesystem::path filename);
 
 	/**
 	 * Create an instance with name_, format_, parent_ and solution_
