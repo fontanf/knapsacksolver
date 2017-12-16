@@ -29,7 +29,7 @@ cc_test(
                 "//lib:cpp",
         ],
         data = [
-                "main",
+                ":main",
                 "//test_instances:data",
         ],
         timeout = "short",

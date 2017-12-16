@@ -2,6 +2,8 @@
 
 #include <map>
 
+#define INDEX(i,w) (i)*(c+1) + (w)
+
 Profit opt_bellman(const Instance& instance,
 		boost::property_tree::ptree* pt, bool verbose)
 {
@@ -40,31 +42,20 @@ Solution sopt_bellman_1_it(const Instance& instance,
 		boost::property_tree::ptree* pt, bool verbose)
 {
 	// Initialize memory table
-	// values[i][w] == values[w * (n+1) + i]
-	// values[i][w] == values[i * (c+1) + w]
 	ItemIdx n = instance.item_number();
-	ItemIdx c = instance.capacity();
+	Weight  c = instance.capacity();
 	ValIdx values_size = (n+1)*(c+1);
 	Profit* values = new Profit[values_size];
 
 	// Compute optimal value
-	for (Weight w=0; w<=instance.capacity(); ++w) {
-		//ValIdx x = w*(n+1);
-		ValIdx x = w;
-		values[x] = 0;
-	}
+	for (Weight w=0; w<=instance.capacity(); ++w)
+		values[INDEX(0,w)] = 0;
 	for (ItemIdx i=1; i<=instance.item_number(); ++i) {
 		Weight wi = instance.weight(i);
 		for (Weight w=0; w<=instance.capacity(); ++w) {
-			//ValIdx x  = w*(n+1) + i;
-			//ValIdx x0 = w*(n+1) + (i-1);
-			//ValIdx x1 = (w-wi)*(n+1) + (i-1);
-			ValIdx x  = i*(c+1) + w;
-			ValIdx x0 = (i-1)*(c+1) + w;
-			ValIdx x1 = (i-1)*(c+1) + (w-wi);
-			Profit v0 = values[x0];
-			Profit v1 = (w < wi)? 0: values[x1] + instance.profit(i);
-			values[x] = (v1 > v0)? v1: v0;
+			Profit v0 = values[INDEX(i-1,w)];
+			Profit v1 = (w < wi)? 0: values[INDEX(i-1,w-wi)] + instance.profit(i);
+			values[INDEX(i,w)] = (v1 > v0)? v1: v0;
 		}
 	}
 	Profit opt = values[values_size-1];
@@ -77,13 +68,8 @@ Solution sopt_bellman_1_it(const Instance& instance,
 	while (v < opt) {
 		Weight wi = instance.weight(i);
 		Profit pi = instance.profit(i);
-		//ValIdx x0 = w * (n+1) + (i-1);
-		//ValIdx x1 = (w - wi) * (n+1) + (i-1);
-		ValIdx x0 = (i-1) * (c+1) + w;
-		ValIdx x1 = (i-1) * (c+1) + (w - wi);
-
-		Profit v0 = values[x0];
-		Profit v1 = (w < wi)? 0: values[x1] + pi;
+		Profit v0 = values[INDEX(i-1,w)];
+		Profit v1 = (w < wi)? 0: values[INDEX(i-1,w-wi)] + pi;
 		if (v1 > v0) {
 			v += pi;
 			w -= wi;
@@ -110,7 +96,7 @@ struct RecData
 		instance(instance), i(instance.item_number()), w(instance.capacity())
 	{
 		ItemIdx n = instance.item_number();
-		ItemIdx c = instance.capacity();
+		Weight  c = instance.capacity();
 		ValIdx values_size = (n+1)*(c+1);
 		values = new Profit[values_size];
 		for (ItemIdx i=0; i<values_size; ++i)
@@ -126,13 +112,13 @@ struct RecData
 
 Profit sopt_bellman_1_rec_rec(RecData& d)
 {
-	ValIdx x = d.i*(d.instance.capacity()+1) + d.w;
+	Weight c = d.instance.capacity();
 
-	if (d.values[x] != -1)
-		return d.values[x];
+	if (d.values[INDEX(d.i,d.w)] != -1)
+		return d.values[INDEX(d.i,d.w)];
 
 	if (d.i == 0) {
-		d.values[x] = 0;
+		d.values[INDEX(d.i,d.w)] = 0;
 		return 0;
 	}
 
@@ -149,10 +135,10 @@ Profit sopt_bellman_1_rec_rec(RecData& d)
 	d.nodes++;
 
 	if (v1 > v0) {
-		d.values[x] = v1;
+		d.values[INDEX(d.i,d.w)] = v1;
 		return v1;
 	} else {
-		d.values[x] = v0;
+		d.values[INDEX(d.i,d.w)] = v0;
 		return v0;
 	}
 }
@@ -161,7 +147,7 @@ Solution sopt_bellman_1_rec(const Instance& instance,
 		boost::property_tree::ptree* pt, bool verbose)
 {
 	ItemIdx n = instance.item_number();
-	ItemIdx c = instance.capacity();
+	Weight  c = instance.capacity();
 
 	// Compute optimal value
 	RecData data(instance);
@@ -175,13 +161,8 @@ Solution sopt_bellman_1_rec(const Instance& instance,
 	while (v < opt) {
 		Weight wi = instance.weight(i);
 		Profit pi = instance.profit(i);
-		//ValIdx x0 = w * (n+1) + (i-1);
-		//ValIdx x1 = (w - wi) * (n+1) + (i-1);
-		ValIdx x0 = (i-1) * (c+1) + w;
-		ValIdx x1 = (i-1) * (c+1) + (w - wi);
-
-		Profit v0 = data.values[x0];
-		Profit v1 = (w < wi)? 0: data.values[x1] + pi;
+		Profit v0 = data.values[INDEX(i-1,w)];
+		Profit v1 = (w < wi)? 0: data.values[INDEX(i-1,w-wi)] + pi;
 		if (v1 > v0) {
 			v += pi;
 			w -= wi;
@@ -221,10 +202,8 @@ Solution sopt_bellman_1_stack(const Instance& instance,
 		boost::property_tree::ptree* pt, bool verbose)
 {
 	// Initialize memory table
-	// values[i][w] == values[w * (n+1) + i]
-	// values[i][w] == values[i * (c+1) + w]
 	ItemIdx n = instance.item_number();
-	ItemIdx c = instance.capacity();
+	Weight  c = instance.capacity();
 	ValIdx values_size = (n+1)*(c+1);
 	Profit* values = new Profit[values_size];
 	for (ItemIdx i=0; i<values_size; ++i)
@@ -248,16 +227,14 @@ Solution sopt_bellman_1_stack(const Instance& instance,
 		stack.pop();
 		ItemIdx i = node->i;
 		Weight  w = node->w;
-		//ValIdx  x = w*(n+1) + i;
-		ValIdx x = i*(c+1) + w;
 		if (node->state == 0) {
-			if (values[x] != -1) {
-				node->p = values[x];
+			if (values[INDEX(i,w)] != -1) {
+				node->p = values[INDEX(i,w)];
 				continue;
 			}
 
 			if (i == 0) {
-				values[x] = 0;
+				values[INDEX(i,w)] = 0;
 				node->p      = 0;
 				continue;
 			}
@@ -285,8 +262,8 @@ Solution sopt_bellman_1_stack(const Instance& instance,
 			Profit p1 = (w < instance.weight(i))? 0: node->child_1->p + instance.profit(i);
 
 			nodes++;
-			values[x] = (p1 > p0)? p1: p0;
-			node->p = values[x];
+			values[INDEX(i,w)] = (p1 > p0)? p1: p0;
+			node->p = values[INDEX(i,w)];
 			delete node->child_0;
 			if (w >= instance.weight(i))
 				delete node->child_1;
@@ -304,13 +281,8 @@ Solution sopt_bellman_1_stack(const Instance& instance,
 	while (v < opt) {
 		Weight wi = instance.weight(i);
 		Profit pi = instance.profit(i);
-		//ValIdx x0 = w * (n+1) + (i-1);
-		//ValIdx x1 = (w - wi) * (n+1) + (i-1);
-		ValIdx x0 = (i-1) * (c+1) + w;
-		ValIdx x1 = (i-1) * (c+1) + (w - wi);
-
-		Profit v0 = values[x0];
-		Profit v1 = (w < wi)? 0: values[x1] + pi;
+		Profit v0 = values[INDEX(i-1,w)];
+		Profit v1 = (w < wi)? 0: values[INDEX(i-1,w-wi)] + pi;
 		if (v1 > v0) {
 			v += pi;
 			w -= wi;
@@ -431,7 +403,7 @@ Solution sopt_bellman_2(const Instance& instance,
 		boost::property_tree::ptree* pt, bool verbose)
 {
 	ItemIdx n = instance.item_number();
-	ItemIdx c = instance.capacity();
+	Weight  c = instance.capacity();
 
 	Solution solution(instance);
 
