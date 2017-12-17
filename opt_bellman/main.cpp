@@ -46,8 +46,6 @@ int main(int argc, char *argv[])
 		solution = sopt_bellman_1(instance, &pt, verbose);
 	} else if (algorithm == "1") {
 		solution = sopt_bellman_1(instance, &pt, verbose);
-	} else if (algorithm == "2") {
-		solution = sopt_bellman_2(instance, &pt, verbose);
 	} else if (algorithm == "it") {
 		solution = sopt_bellman_1_it(instance, &pt, verbose);
 	} else if (algorithm == "rec") {
@@ -56,6 +54,10 @@ int main(int argc, char *argv[])
 		solution = sopt_bellman_1_stack(instance, &pt, verbose);
 	} else if (algorithm == "map") {
 		solution = sopt_bellman_1_map(instance, &pt, verbose);
+	} else if (algorithm == "2") {
+		solution = sopt_bellman_2(instance, &pt, verbose);
+	} else if (algorithm == "3") {
+		solution = sopt_bellman_3(instance, &pt, verbose);
 	}
 
 	// Write output file

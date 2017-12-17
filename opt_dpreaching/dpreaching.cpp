@@ -2,8 +2,8 @@
 
 #include "../ub_dantzig/dantzig.hpp"
 
-#define DBG(x)
-//#define DBG(x) x
+//#define DBG(x)
+#define DBG(x) x
 
 #define INDEX(i,q) (i)*(ub+1) + (q)
 
@@ -64,9 +64,10 @@ Solution sopt_dpreaching_1(const Instance& instance, Profit ub,
 		values[INDEX(0,q)] = c+1;
 	for (ItemIdx i=1; i<=n; ++i) {
 		Profit pi = instance.profit(i);
+		Profit wi = instance.weight(i);
 		for (Profit q=0; q<=ub; ++q) {
 			Weight v0 = values[INDEX(i-1,q)];
-			Weight v1 = (q < pi)? c+1: values[INDEX(i-1,q-pi)] + instance.weight(i);
+			Weight v1 = (q < pi)? wi: values[INDEX(i-1,q-pi)] + wi;
 			values[INDEX(i,q)] = (v1 < v0)? v1: v0;
 		}
 	}
@@ -81,7 +82,7 @@ Solution sopt_dpreaching_1(const Instance& instance, Profit ub,
 	Profit opt = 0;
 	for (Profit q=0; q<=ub; ++q) {
 		if (values[INDEX(n,q)] > c)
-			continue;
+			break;
 		opt = q;
 	}
 
