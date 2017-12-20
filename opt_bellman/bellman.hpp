@@ -9,14 +9,14 @@
 
 /**
  * Time:  O(nc)
- * Space: O(n+c)
+ * Space: O(n+c), exactly (c+1) * sizeof(Profit) + cst
  */
 Profit opt_bellman(const Instance& instance,
 		boost::property_tree::ptree* pt = NULL, bool verbose = false);
 
 /**
  * Time:  O(nc)
- * Space: O(nc)
+ * Space: O(nc), exactly (c+1) * (n+1) * sizeof(Profit) + sizeof(Solution) + cst
  */
 Solution sopt_bellman_1(const Instance& instance,
 		boost::property_tree::ptree* pt = NULL, bool verbose = false);
@@ -31,16 +31,26 @@ Solution sopt_bellman_1_map(const Instance& instance,
 
 /**
  * Time:  O(n2c)
- * Space: O(n+c)
+ * Space: O(n+c), exactly (c+1) * sizeof(Profit) + sizeof(Solution) + cst
  */
 Solution sopt_bellman_2(const Instance& instance,
 		boost::property_tree::ptree* pt = NULL, bool verbose = false);
 
 /**
  * Time:  O(nc)
- * Space: O(n+c)
+ * Space: O(n+c), exactly 2 * (c+1) * sizeof(Profit) + sizeof(Solution) + cst
  */
-Solution sopt_bellman_3(const Instance& instance,
+Solution sopt_bellman_rec(const Instance& instance,
+		boost::property_tree::ptree* pt = NULL, bool verbose = false);
+
+/**
+ * Time:  O(nc)
+ * Space: O(c), at most (c+1) * (sizeof(Profit) + sizeof(Weight)) + cst
+ */
+Profit opt_bellman_list(const Instance& instance,
+		boost::property_tree::ptree* pt = NULL, bool verbose = false);
+
+Solution sopt_bellman_rec_list(const Instance& instance,
 		boost::property_tree::ptree* pt = NULL, bool verbose = false);
 
 #endif /* end of include guard: BELLMAN_HPP_0M1MVTFZ */

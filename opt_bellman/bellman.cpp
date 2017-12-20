@@ -1,24 +1,33 @@
 #include "bellman.hpp"
 
 #include <map>
+#include <queue>
 
 #define INDEX(i,w) (i)*(c+1) + (w)
 
-Profit opt_bellman(const Instance& instance,
-		boost::property_tree::ptree* pt, bool verbose)
+void opts_bellman(const Instance& instance, Profit* values,
+		ItemIdx n1, ItemIdx n2, Weight c)
 {
-	Weight c = instance.capacity();
-	Profit* values = new Profit[c+1];
 	for (Weight w=c+1; w-->0;)
 		values[w] = 0;
-	for (ItemIdx i=1; i<=instance.item_number(); ++i) {
+	for (ItemIdx i=n1; i<=n2; ++i) {
 		Weight wi = instance.weight(i);
 		Profit pi = instance.profit(i);
 		for (Weight w=c+1; w-->0;)
 			if (w >= wi && values[w-wi] + pi > values[w])
 				values[w] = values[w-wi] + pi;
 	}
+}
+
+Profit opt_bellman(const Instance& instance,
+		boost::property_tree::ptree* pt, bool verbose)
+{
+	Weight  c = instance.capacity();
+	ItemIdx n = instance.item_number();
+	Profit* values = new Profit[c+1];
+	opts_bellman(instance, values, 1, n, c);
 	Profit opt = values[c];
+
 	if (pt != NULL)
 		pt->put("Solution.OPT", opt);
 	if (verbose)
@@ -478,21 +487,7 @@ struct RecData2
 	Profit* values2;
 };
 
-void opts_bellman(const Instance& instance, Profit* values, ItemIdx n1, ItemIdx n2, Weight c)
-{
-	DBG(std::cout << "OPTS n1 " << n1 << " n2 " << n2 << " c " << c << std::endl;)
-	for (Weight w=c+1; w-->0;)
-		values[w] = 0;
-	for (ItemIdx i=n1; i<=n2; ++i) {
-		Weight wi = instance.weight(i);
-		Profit pi = instance.profit(i);
-		for (Weight w=c+1; w-->0;)
-			if (w >= wi && values[w-wi] + pi > values[w])
-				values[w] = values[w-wi] + pi;
-	}
-}
-
-void sopt_bellman_3_rec(RecData2& d)
+void sopt_bellman_rec_rec(RecData2& d)
 {
 	DBG(std::cout << "Rec n1 " << d.n1 << " n2 " << d.n2 << " c " << d.c << std::endl;)
 	DBG(std::cout << d.sol_curr << std::endl;)
@@ -531,7 +526,7 @@ void sopt_bellman_3_rec(RecData2& d)
 		DBG(std::cout << "..." << std::endl;)
 		d.n2 = k;
 		d.c  = c1_opt;
-		sopt_bellman_3_rec(d);
+		sopt_bellman_rec_rec(d);
 	}
 
 	if (k+1 == n2) {
@@ -545,11 +540,11 @@ void sopt_bellman_3_rec(RecData2& d)
 		d.n1 = k+1;
 		d.n2 = n2;
 		d.c  = c2_opt;
-		sopt_bellman_3_rec(d);
+		sopt_bellman_rec_rec(d);
 	}
 }
 
-Solution sopt_bellman_3(const Instance& instance,
+Solution sopt_bellman_rec(const Instance& instance,
 		boost::property_tree::ptree* pt, bool verbose)
 {
 	if (instance.item_number() == 0) {
@@ -569,7 +564,239 @@ Solution sopt_bellman_3(const Instance& instance,
 	}
 
 	RecData2 data(instance);
-	sopt_bellman_3_rec(data);
+	sopt_bellman_rec_rec(data);
+
+	if (pt != NULL)
+		pt->put("Solution.OPT", data.sol_curr.profit());
+
+	if (verbose)
+		std::cout << "OPT: " << data.sol_curr.profit() << std::endl;
+
+	DBG(std::cout << data.sol_curr << std::endl;)
+
+	return data.sol_curr;
+}
+
+#undef DBG
+
+/******************************************************************************/
+
+#define DBG(x)
+//#define DBG(x) x
+
+struct State
+{
+	Weight w;
+	Profit p;
+};
+
+std::vector<State> opts_bellman_list(const Instance& instance,
+		ItemIdx n1, ItemIdx n2, Weight c)
+{
+	// Note that list L'i-1 is not explicitly created and that the
+	// implementation requires Li-1 to be reversed (since pop_back is O(1)
+	// whereas pop_front() is O(n) for std::vector).
+	std::vector<State> l0{{0, 0}};
+	for (ItemIdx i=n1; i<=n2; ++i) {
+		Weight wi = instance.weight(i);
+		Profit pi = instance.profit(i);
+		std::vector<State> l{{0, 0}};
+		std::vector<State>::reverse_iterator it = l0.rbegin();
+		while (!l0.empty()) {
+			if (it != l0.rend() && it->w <= l0.back().w + wi) {
+				if (it->p > l.back().p) {
+					if (it->w == l.back().w) {
+						l.back() = *it;
+					} else {
+						l.push_back(*it);
+					}
+				}
+				++it;
+			} else {
+				if (l0.back().w + wi > c)
+					break;
+				if (l0.back().p + pi > l.back().p) {
+					if (l0.back().w + wi == l.back().w) {
+						l.back() = {l0.back().w + wi, l0.back().p + pi};
+					} else {
+						l.push_back({l0.back().w + wi, l0.back().p + pi});
+					}
+				}
+				l0.pop_back();
+			}
+		}
+		DBG(for (State& s: l)
+			std::cout << "(" << s.w << "," << s.p << ") " << std::flush;
+		std::cout << std::endl;)
+		std::reverse(l.begin(), l.end());
+		l0 = std::move(l);
+	}
+	return l0;
+}
+
+Profit opt_bellman_list(const Instance& instance,
+		boost::property_tree::ptree* pt, bool verbose)
+{
+	Weight  c = instance.capacity();
+	ItemIdx n = instance.item_number();
+
+	if (n == 0) {
+		if (pt != NULL)
+			pt->put("Solution.OPT", 0);
+		if (verbose)
+			std::cout << "OPT: " << 0 << std::endl;
+		return 0;
+	}
+
+	std::vector<State> l0 = opts_bellman_list(instance, 1, n, c);
+	Profit opt = l0.front().p;
+
+	if (pt != NULL) {
+		pt->put("Solution.OPT", opt);
+		pt->put("Solution.States", l0.size());
+		pt->put("Solution.StateRatio", (double)l0.size() / (double)instance.capacity());
+	}
+
+	if (verbose) {
+		std::cout << "OPT "        << opt << std::endl;
+		std::cout << "States "     << l0.size() << std::endl;
+		std::cout << "StateRatio " << (double)l0.size() / (double)instance.capacity() << std::endl;
+	}
+
+	return opt;
+}
+
+#undef DBG
+
+/******************************************************************************/
+
+#define DBG(x)
+//#define DBG(x) x
+
+struct RecListData
+{
+	RecListData(const Instance& instance):
+		instance(instance), n1(1), n2(instance.item_number()),
+		c(instance.capacity()), sol_curr(instance) { }
+	const Instance& instance;
+	ItemIdx n1;
+	ItemIdx n2;
+	Weight  c;
+	Solution sol_curr;
+};
+
+void sopt_bellman_rec_list_rec(RecListData& d)
+{
+	DBG(std::cout << "Rec n1 " << d.n1 << " n2 " << d.n2 << " c " << d.c << std::endl;)
+	DBG(std::cout << d.sol_curr << std::endl;)
+	ItemIdx k = (d.n1 + d.n2) / 2;
+	DBG(std::cout << "k " << k << std::endl;)
+	ItemIdx n2 = d.n2;
+
+	Weight w1_opt = 0;
+	Weight w2_opt = 0;
+	Profit p1_opt = 0;
+	Profit p2_opt = 0;
+
+	{
+		std::vector<State> l1 = opts_bellman_list(d.instance, d.n1, k, d.c);
+		std::vector<State> l2 = opts_bellman_list(d.instance, k+1, d.n2, d.c);
+
+		DBG(std::cout << "Find" << std::endl;)
+			Profit z_max  = 0;
+		Weight i1_opt = 0;
+		Weight i2_opt = 0;
+		if (l1.size() > 0) {
+			ItemIdx i2 = 0;
+			for (Weight i1=l1.size(); i1-->0;) {
+				DBG(std::cout << "i1 " << i1 << " " << std::flush;)
+					DBG(std::cout << "i2 " << std::flush;)
+					while (l1[i1].w + l2[i2].w > d.c) {
+						DBG(std::cout << i2 << " " << std::flush;)
+							i2++;
+					}
+				assert(i2 < l2.size());
+				DBG(std::cout << i2 << " " << std::flush;)
+					Profit z = l1[i1].p + l2[i2].p;
+				if (z > z_max) {
+					z_max = z;
+					i1_opt = i1;
+					i2_opt = i2;
+				}
+			}
+		}
+		if (l2.size() > 0) {
+			ItemIdx i1 = 0;
+			for (Weight i2=l2.size(); i2-->0;) {
+				while (l2[i2].w + l1[i1].w > d.c)
+					i1++;
+				Profit z = l1[i1].p + l2[i2].p;
+				if (z > z_max) {
+					z_max = z;
+					i1_opt = i1;
+					i2_opt = i2;
+				}
+			}
+		}
+
+		w1_opt = l1[i1_opt].w;
+		w2_opt = l2[i2_opt].w;
+		p1_opt = l1[i1_opt].p;
+		p2_opt = l2[i2_opt].p;
+	}
+
+	DBG(std::cout << "c1 " << l1[i1_opt].w << " c2 " << l2[i2_opt].w << std::endl;)
+
+	DBG(std::cout << "Conquer" << std::endl;)
+	if (k == d.n1) {
+		DBG(std::cout << "Leaf" << std::endl;)
+		if (p1_opt == d.instance.profit(d.n1)) {
+			DBG(std::cout << "Set " << d.n1 << std::endl;)
+			d.sol_curr.set(d.n1, true);
+		}
+	} else {
+		DBG(std::cout << "..." << std::endl;)
+		d.n2 = k;
+		d.c  = w1_opt;
+		sopt_bellman_rec_list_rec(d);
+	}
+
+	if (k+1 == n2) {
+		DBG(std::cout << "Leaf" << std::endl;)
+		if (p2_opt == d.instance.profit(n2)) {
+			DBG(std::cout << "Set " << n2 << std::endl;)
+			d.sol_curr.set(n2, true);
+		}
+	} else {
+		DBG(std::cout << "..." << std::endl;)
+		d.n1 = k+1;
+		d.n2 = n2;
+		d.c  = w2_opt;
+		sopt_bellman_rec_list_rec(d);
+	}
+}
+
+Solution sopt_bellman_rec_list(const Instance& instance,
+		boost::property_tree::ptree* pt, bool verbose)
+{
+	if (instance.item_number() == 0) {
+		Solution solution(instance);
+		if (pt != NULL)
+			pt->put("Solution.OPT", 0);
+		return solution;
+	}
+
+	if (instance.item_number() == 1) {
+		Solution solution(instance);
+		if (instance.weight(1) <= instance.capacity())
+			solution.set(1, true);
+		if (pt != NULL)
+			pt->put("Solution.OPT", solution.profit());
+		return solution;
+	}
+
+	RecListData data(instance);
+	sopt_bellman_rec_list_rec(data);
 
 	if (pt != NULL)
 		pt->put("Solution.OPT", data.sol_curr.profit());

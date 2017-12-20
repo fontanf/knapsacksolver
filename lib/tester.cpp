@@ -11,7 +11,7 @@ void executeProgram(std::string cmd)
 	system(cmd.c_str());
 }
 
-void check(std::string prog, boost::filesystem::path input)
+void check_sopt(std::string prog, boost::filesystem::path input)
 {
 	Instance instance(input);
 	Profit opt = instance.optimum();
@@ -42,7 +42,30 @@ void check(std::string prog, boost::filesystem::path input)
 	boost::filesystem::remove(cert_file);
 }
 
-void test(std::string exec)
+void check_opt(std::string prog, boost::filesystem::path input)
+{
+	Instance instance(input);
+	Profit opt = instance.optimum();
+
+	std::string output_file = "output_file.ini";
+	std::string cmd = prog
+			+ " -i" + input.string()
+			+ " -o" + output_file;
+	std::thread worker_rec(executeProgram, cmd);
+	worker_rec.join();
+
+	EXPECT_EQ(boost::filesystem::exists(output_file), true);
+	if (!boost::filesystem::exists(output_file))
+		return;
+
+	boost::property_tree::ptree pt;
+	boost::property_tree::ini_parser::read_ini(output_file, pt);
+	EXPECT_EQ(pt.get<Profit>("Solution.OPT"), opt);
+
+	boost::filesystem::remove(output_file);
+}
+
+void test(std::string exec, std::string test)
 {
 	boost::filesystem::path data_dir = boost::filesystem::current_path();
 	data_dir /= boost::filesystem::path("test_instances");
@@ -53,7 +76,10 @@ void test(std::string exec)
 			continue;
 		if (itr->path().filename() == "BUILD")
 			continue;
-		check(exec, itr->path());
+		if (test == "sopt") {
+			check_sopt(exec, itr->path());
+		} else if (test == "opt") {
+			check_opt(exec, itr->path());
+		}
 	}
-
 }
