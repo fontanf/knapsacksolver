@@ -2,7 +2,17 @@
 
 Implementations of classical algorithms for the Knapsack Problem. Most algorithms are detailed in the "Knapsack Problem" book (Pferschy, 2004).
 
-DP with Bellman recursion *(See "Knapsack Problem", 2.3 Dynamic Programming, 3.3 Storage Reduction in Dynamic Programming, 3.4 Dynamic Programming with Lists, 3.5 Combining Dynamic Programming and Upper Bounds - Pferschy, 2004)*
+## Ext-Greedy
+
+
+## Dantzig Upper Bound
+
+
+## Surrogate relaxation
+
+
+## DP with Bellman recursion *(See "Knapsack Problem", 2.3, 3.3, 3.4, 3.5 - Pferschy, 2004)*
+
 - Only optimal value, Time O(nc), Space O(c) `opt_bellman/main`
 - Version 1, Time O(nc), Space O(nc) `opt_bellman/main -a 1`
   - Iterative implementation (default) `opt_bellman/main -a 1it`
@@ -16,6 +26,6 @@ DP with Bellman recursion *(See "Knapsack Problem", 2.3 Dynamic Programming, 3.3
 - With Upper Bounds, only optimal value `opt_bellman/main -a ub`
 - With Upper Bounds, recursive scheme `opt_bellman/main -a recub`
 
-Branch-and-bound *(See "Knapsack Problem", 2.4 Branch-and-Bound - Pferschy, 2004)*
+## Branch-and-bound *(See "Knapsack Problem", 2.4 Branch-and-Bound - Pferschy, 2004)*
 - Implementation with a recursive function (default) `opt_bab/main -a rec`
 - Implementation with a stack simulating a recusrive function `opt_bab/main -a stack`
