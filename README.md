@@ -2,6 +2,18 @@
 
 Implementations of classical algorithms for the Knapsack Problem. Most algorithms are detailed in the "Knapsack Problem" book (Pferschy, 2004).
 
+This project uses Bazel https://bazel.build/
+
+Compile:
+```
+bazel build --compilation_mode=opt -- lb_greedy:main
+```
+
+Execute:
+```
+bazel-bin/lb_greedy/main -i ...
+```
+
 - Ext-Greedy `lb_greedy/main` *(See "Knapsack Problem", 2.5 Approximation Algorithms - Pferschy, 2004)*
 - Dantzig Upper Bound `ub_dantzig/main` *(See "Knapsack Problem", 5.1.1 Upper Bounds for (KP) - Pferschy, 2004)*
 - Surrogate relaxation `ub_surrogate/main` *(See "Knapsack Problem", 5.1.1 Upper Bounds for (KP) - Pferschy, 2004)*
