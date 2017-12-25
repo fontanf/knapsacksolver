@@ -3,8 +3,9 @@
 Implementations of classical algorithms for the Knapsack Problem. Most algorithms are detailed in the "Knapsack Problem" book (Pferschy, 2004).
 
 - Ext-Greedy `lb_greedy/main` *(See "Knapsack Problem", 2.5 Approximation Algorithms - Pferschy, 2004)*
-- Dantzig Upper Bound
-- Surrogate relaxation
+- Dantzig Upper Bound `ub_dantzig/main` *(See "Knapsack Problem", 5.1.1 Upper Bounds for (KP) - Pferschy, 2004)*
+- Surrogate relaxation `ub_surrogate/main` *(See "Knapsack Problem", 5.1.1 Upper Bounds for (KP) - Pferschy, 2004)*
+- Local search `lb_ls/main`
 
 ## DP with Bellman recursion
 
@@ -25,6 +26,11 @@ Implementations of classical algorithms for the Knapsack Problem. Most algorithm
 - Recursive scheme `opt_bellman/main -a reclist`
 - With Upper Bounds, only optimal value `opt_bellman/main -a ub`
 - With Upper Bounds, recursive scheme `opt_bellman/main -a recub`
+
+## DP by reaching *(See "Knapsack Problem", 2.3 - Pferschy, 2004)*
+
+- Only optimal value `opt_dpreaching/main`
+- With solution `opt_bellman/main -a 1`
 
 ## Branch-and-bound *(See "Knapsack Problem", 2.4 Branch-and-Bound - Pferschy, 2004)*
 
