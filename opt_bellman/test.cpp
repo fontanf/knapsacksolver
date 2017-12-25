@@ -6,6 +6,8 @@ TEST(BellmanRecursion, SimpleInstances)
 	p /= boost::filesystem::path("opt_bellman");
 	p /= boost::filesystem::path("main");
 
+	test(p.string() + " -a recub",   "sopt");
+	test(p.string() + " -a ub",       "opt");
 	test(p.string() + " -a reclist", "sopt");
 	test(p.string() + " -a list",     "opt");
 	test(p.string() + " -a rec",     "sopt");

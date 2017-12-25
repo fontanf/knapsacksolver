@@ -62,6 +62,12 @@ int main(int argc, char *argv[])
 		opt_bellman_list(instance, &pt, verbose);
 	} else if (algorithm == "reclist") {
 		solution = sopt_bellman_rec_list(instance, &pt, verbose);
+	} else if (algorithm == "ub") {
+		Instance instance_sorted = Instance::sort_by_efficiency(instance);
+		opt_bellman_ub(instance_sorted, &pt, verbose);
+	} else if (algorithm == "recub") {
+		Instance instance_sorted = Instance::sort_by_efficiency(instance);
+		solution = sopt_bellman_rec_ub(instance_sorted, &pt, verbose).get_orig();
 	} else {
 		std::cout << "Unknwow algorithm" << std::endl;
 	}

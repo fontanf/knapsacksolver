@@ -3,7 +3,12 @@ cc_library(
         hdrs = ["bellman.hpp"],
         srcs = ["bellman.cpp"],
         visibility = ["//visibility:public"],
-        deps = ["//lib:cpp"],
+        deps = [
+                "//lib:cpp",
+                "//ub_dantzig:libdantzig",
+                "//lb_ls:libls",
+                "//lb_greedy:libgreedy",
+        ],
 )
 
 cc_binary(

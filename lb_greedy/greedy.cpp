@@ -13,15 +13,18 @@ Profit lb_extgreedy(const Instance& instance)
 	}
 
 	ItemIdx j = instance.profit_max();
-	remaining_capacity = instance.capacity() - instance.weight(j);
-	Profit p2 = instance.profit(j);
-	for (ItemIdx i=1; i<=instance.item_number(); ++i) {
-		if (i == j)
-			continue;
-		Weight wi = instance.weight(i);
-		if (remaining_capacity >= wi) {
-			remaining_capacity -= wi;
-			p2 += instance.profit(i);
+	Profit p2 = 0;
+	if (j != 0) {
+		remaining_capacity = instance.capacity() - instance.weight(j);
+		p2 = instance.profit(j);
+		for (ItemIdx i=1; i<=instance.item_number(); ++i) {
+			if (i == j)
+				continue;
+			Weight wi = instance.weight(i);
+			if (remaining_capacity >= wi) {
+				remaining_capacity -= wi;
+				p2 += instance.profit(i);
+			}
 		}
 	}
 
@@ -40,12 +43,14 @@ Solution sol_extgreedy(const Instance& instance,
 
 	Solution solution2(instance);
 	ItemIdx j = instance.profit_max();
-	solution2.set(j, true);
-	for (ItemIdx i=1; i<=instance.item_number(); ++i) {
-		if (i == j)
-			continue;
-		if (solution2.remaining_capacity() >= instance.weight(i))
-			solution2.set(i, true);
+	if (j != 0) {
+		solution2.set(j, true);
+		for (ItemIdx i=1; i<=instance.item_number(); ++i) {
+			if (i == j)
+				continue;
+			if (solution2.remaining_capacity() >= instance.weight(i))
+				solution2.set(i, true);
+		}
 	}
 
 	assert(instance.optimum() == 0 || solution1.profit() <= instance.optimum());

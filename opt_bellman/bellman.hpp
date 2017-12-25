@@ -53,4 +53,10 @@ Profit opt_bellman_list(const Instance& instance,
 Solution sopt_bellman_rec_list(const Instance& instance,
 		boost::property_tree::ptree* pt = NULL, bool verbose = false);
 
+Profit opt_bellman_ub(const Instance& instance,
+		boost::property_tree::ptree* pt = NULL, bool verbose = false);
+
+Solution sopt_bellman_rec_ub(const Instance& instance,
+		boost::property_tree::ptree* pt = NULL, bool verbose = false);
+
 #endif /* end of include guard: BELLMAN_HPP_0M1MVTFZ */
