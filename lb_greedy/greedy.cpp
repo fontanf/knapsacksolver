@@ -1,6 +1,6 @@
 #include "greedy.hpp"
 
-Profit lb_greedy(const Instance& instance)
+Profit lb_extgreedy(const Instance& instance)
 {
 	Weight remaining_capacity = instance.capacity();
 	Profit p1 = 0;
@@ -30,7 +30,8 @@ Profit lb_greedy(const Instance& instance)
 	return (p1 > p2)? p1: p2;
 }
 
-Solution sol_greedy(const Instance& instance)
+Solution sol_extgreedy(const Instance& instance,
+		boost::property_tree::ptree* pt, bool verbose)
 {
 	Solution solution1(instance);
 	for (ItemIdx i=1; i<=instance.item_number(); ++i)
@@ -49,7 +50,17 @@ Solution sol_greedy(const Instance& instance)
 
 	assert(instance.optimum() == 0 || solution1.profit() <= instance.optimum());
 	assert(instance.optimum() == 0 || solution2.profit() <= instance.optimum());
-	return (solution1.profit() > solution2.profit())? solution1: solution2;
+
+	Solution solution = (solution1.profit() > solution2.profit())? solution1: solution2;
+	if (pt != NULL) {
+		pt->put("Solution.Value", solution.profit());
+	}
+	if (verbose)
+		std::cout
+			<< "LB " << solution.profit()
+			<< " GAP " << instance.optimum() - solution.profit()
+			<< std::endl;
+	return solution;
 }
 
 /******************************************************************************/

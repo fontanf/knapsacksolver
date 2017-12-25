@@ -4,6 +4,9 @@
 #include "../lib/instance.hpp"
 #include "../lib/solution.hpp"
 
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/ini_parser.hpp>
+
 /**
  * Extended greedy algorithm.
  * Require sorted or partially sorted input instance.
@@ -11,8 +14,9 @@
  * Space: O(n)
  * Relative performance guarantee 1/2
  */
-Solution sol_greedy(const Instance& instance);
-Profit    lb_greedy(const Instance& instance);
+Solution sol_extgreedy(const Instance& instance,
+		boost::property_tree::ptree* pt = NULL, bool verbose = false);
+Profit lb_extgreedy(const Instance& instance);
 
 /**
  * Greedy algorithm with items n1..n2
