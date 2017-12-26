@@ -1,7 +1,7 @@
 cc_library(
-        name = "libdpreaching",
-        hdrs = ["dpreaching.hpp"],
-        srcs = ["dpreaching.cpp"],
+        name = "libdpprofits",
+        hdrs = ["dpprofits.hpp"],
+        srcs = ["dpprofits.cpp"],
         visibility = ["//visibility:public"],
         deps = ["//lib:cpp"],
 )
@@ -14,7 +14,7 @@ cc_binary(
                 "-lboost_filesystem",
                 "-lboost_program_options"
         ],
-        deps = ["//lib:cpp", ":libdpreaching"],
+        deps = ["//lib:cpp", ":libdpprofits"],
 )
 
 cc_test(

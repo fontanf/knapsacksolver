@@ -7,21 +7,14 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
 
-Profit opt_dpreaching(const Instance& instance, Profit ub = -1,
+Profit opt_dpprofits(const Instance& instance, Profit ub = -1,
 		boost::property_tree::ptree* pt = NULL, bool verbose = false);
 
 /**
  * Time:  O(nU)
  * Space: O(nU)
  */
-Solution sopt_dpreaching_1(const Instance& instance, Profit ub = -1,
-		boost::property_tree::ptree* pt = NULL, bool verbose = false);
-
-/**
- * Time:  O(nU)
- * Space: O(n+U)
- */
-Solution sopt_dpreaching_2(const Instance& instance, Profit ub = -1,
+Solution sopt_dpprofits_1(const Instance& instance, Profit ub = -1,
 		boost::property_tree::ptree* pt = NULL, bool verbose = false);
 
 #endif /* end of include guard: DPREACHING_HPP_PH02LVYK */

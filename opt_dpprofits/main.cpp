@@ -1,4 +1,4 @@
-#include "dpreaching.hpp"
+#include "dpprofits.hpp"
 
 #include <iostream>
 
@@ -43,9 +43,9 @@ int main(int argc, char *argv[])
 	boost::property_tree::ptree pt;
 
 	if (algorithm == "") {
-		solution = sopt_dpreaching_1(instance, -1, &pt, verbose);
+		opt_dpprofits(instance, -1, &pt, verbose);
 	} else if (algorithm == "1") {
-		solution = sopt_dpreaching_1(instance, -1, &pt, verbose);
+		solution = sopt_dpprofits_1(instance, -1, &pt, verbose);
 	}
 
 	// Write output file

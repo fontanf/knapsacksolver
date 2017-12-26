@@ -1,4 +1,4 @@
-#include "dpreaching.hpp"
+#include "dpprofits.hpp"
 
 #include "../ub_dantzig/dantzig.hpp"
 
@@ -7,7 +7,7 @@
 
 #define INDEX(i,q) (i)*(ub+1) + (q)
 
-Profit opt_dpreaching(const Instance& instance, Profit ub,
+Profit opt_dpprofits(const Instance& instance, Profit ub,
 		boost::property_tree::ptree* pt, bool verbose)
 {
 	// Initialize memory table
@@ -22,19 +22,22 @@ Profit opt_dpreaching(const Instance& instance, Profit ub,
 	for (Profit q=1; q<=ub; ++q)
 		values[q] = c+1;
 	for (ItemIdx i=1; i<=n; ++i) {
-		std::cout << i << std::endl;
 		Profit pi = instance.profit(i);
 		Weight wi = instance.weight(i);
 		for (Profit q=ub+1; q-->0;) {
-			if (pi <= q && values[q-pi] + wi < values[q])
-				values[q] = values[q-pi];
+			Weight w = (q < pi)? wi: values[q-pi] + wi;
+			if (w < values[q])
+				values[q] = w;
 		}
+		DBG(for (Profit q=0; q<=ub; ++q)
+			std::cout << values[q] << " ";
+		std::cout << std::endl;)
 	}
 
 	Profit opt = 0;
 	for (Profit q=0; q<=ub; ++q) {
 		if (values[q] > c)
-			continue;
+			break;
 		opt = q;
 	}
 
@@ -47,7 +50,7 @@ Profit opt_dpreaching(const Instance& instance, Profit ub,
 	return opt;
 }
 
-Solution sopt_dpreaching_1(const Instance& instance, Profit ub,
+Solution sopt_dpprofits_1(const Instance& instance, Profit ub,
 		boost::property_tree::ptree* pt, bool verbose)
 {
 	// Initialize memory table
