@@ -553,7 +553,7 @@ Instance Instance::reduce(const Instance& instance, Profit lower_bound)
 
 #undef DBG
 
-Instance Instance::divide_floor(const Instance& instance, Weight divisor)
+Instance Instance::divide_weights_floor(const Instance& instance, Weight divisor)
 {
 	Instance instance_new;
 	instance_new.init(instance);
@@ -571,7 +571,7 @@ Instance Instance::divide_floor(const Instance& instance, Weight divisor)
 	return instance_new;
 }
 
-Instance Instance::divide_ceil(const Instance& instance, Weight divisor)
+Instance Instance::divide_weights_ceil(const Instance& instance, Weight divisor)
 {
 	Instance instance_new;
 	instance_new.init(instance);
@@ -587,6 +587,43 @@ Instance Instance::divide_ceil(const Instance& instance, Weight divisor)
 		instance_new.set_weight(i, (instance.weight(i) != 0)?
 				1 + ((instance.weight(i) - 1) / divisor): 0);
 		instance_new.set_profit(i, instance.profit(i));
+	}
+	return instance_new;
+}
+
+Instance Instance::divide_profits_floor(const Instance& instance, Profit divisor)
+{
+	Instance instance_new;
+	instance_new.init(instance);
+	instance_new.n_   = instance.item_number();
+	instance_new.c_   = instance.capacity();
+	instance_new.opt_ = 0;
+	instance_new.w_ = new Weight[instance_new.instance_orig()->item_number()];
+	instance_new.p_ = new Profit[instance_new.instance_orig()->item_number()];
+	instance_new.i_ = new ItemIdx[instance_new.instance_orig()->item_number()];
+	for (ItemIdx i=1; i<=instance_new.n_; ++i) {
+		instance_new.set_index(i, i);
+		instance_new.set_weight(i, instance.weight(i));
+		instance_new.set_profit(i, instance.profit(i) / divisor);
+	}
+	return instance_new;
+}
+
+Instance Instance::divide_profits_ceil(const Instance& instance, Profit divisor)
+{
+	Instance instance_new;
+	instance_new.init(instance);
+	instance_new.n_   = instance.item_number();
+	instance_new.c_   = instance.capacity();
+	instance_new.opt_ = 0;
+	instance_new.w_ = new Weight[instance_new.instance_orig()->item_number()];
+	instance_new.p_ = new Profit[instance_new.instance_orig()->item_number()];
+	instance_new.i_ = new ItemIdx[instance_new.instance_orig()->item_number()];
+	for (ItemIdx i=1; i<=instance_new.n_; ++i) {
+		instance_new.set_index(i, i);
+		instance_new.set_profit(i, (instance.profit(i) != 0)?
+				1 + ((instance.profit(i) - 1) / divisor): 0);
+		instance_new.set_weight(i, instance.weight(i));
 	}
 	return instance_new;
 }

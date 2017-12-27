@@ -80,8 +80,11 @@ public:
 	 * Create an instance with capacitiy and weights divided, keeping the
 	 * floor (resp. the ceiling).
 	 */
-	static Instance divide_floor(const Instance& instance, Weight divisor);
-	static Instance divide_ceil(const Instance& instance, Weight divisor);
+	static Instance divide_weights_floor(const Instance& instance, Weight divisor);
+	static Instance divide_weights_ceil(const Instance& instance, Weight divisor);
+
+	static Instance divide_profits_floor(const Instance& instance, Profit divisor);
+	static Instance divide_profits_ceil(const Instance& instance, Profit divisor);
 
 	/**
 	 * Create an instance applying variable reduction. See "Knapsack Problem",
