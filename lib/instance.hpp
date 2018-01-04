@@ -13,10 +13,9 @@
 #include <boost/filesystem/fstream.hpp>
 
 typedef  int_fast64_t Profit;
-typedef uint_fast64_t Weight;
-typedef  int_fast64_t ProWei;
-typedef size_t ItemIdx;
-typedef size_t ValIdx;
+typedef  int_fast64_t Weight;
+typedef uint_fast64_t ItemIdx;
+typedef uint_fast64_t ValIdx;
 
 class Solution;
 
@@ -86,6 +85,9 @@ public:
 	static Instance divide_profits_floor(const Instance& instance, Profit divisor);
 	static Instance divide_profits_ceil(const Instance& instance, Profit divisor);
 
+	static Instance from_to(const Instance& instance, ItemIdx i1, ItemIdx i2, Weight c);
+	static Instance fix(const Instance& instance, ItemIdx j, Weight w);
+
 	/**
 	 * Create an instance applying variable reduction. See "Knapsack Problem",
 	 * Chap 3.2: "Variable Reduction" (Pferschy, 2004) for more details.
@@ -140,8 +142,8 @@ public:
 	 */
 	ItemIdx index_orig(ItemIdx i) const;
 
-	ItemIdx weight_max() const;
-	ItemIdx profit_max() const;
+	ItemIdx max_weight_item() const;
+	ItemIdx max_profit_item() const;
 
 	inline std::string name()   const { return name_; }
 	inline std::string format() const { return format_; }

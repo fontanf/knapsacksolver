@@ -470,8 +470,7 @@ void Instance::surrogate_minus(const Instance& instance, Weight multiplier, Item
 			solution_->set(i, true);
 		}
 	}
-	c_ = (c_ > multiplier * bound)?
-		c_ - multiplier * bound: 0;
+	c_ -= c_ - multiplier * bound;
 
 	partial_sort(
 			i_, n_,
@@ -628,6 +627,40 @@ Instance Instance::divide_profits_ceil(const Instance& instance, Profit divisor)
 	return instance_new;
 }
 
+Instance Instance::from_to(const Instance& instance, ItemIdx i1, ItemIdx i2, Weight c)
+{
+	Instance instance_new;
+	instance_new.init(instance);
+	instance_new.n_   = i2 - i1 + 1;
+	instance_new.c_   = c;
+	instance_new.opt_ = 0;
+	instance_new.w_ = new Weight[instance_new.instance_orig()->item_number()];
+	instance_new.p_ = new Profit[instance_new.instance_orig()->item_number()];
+	instance_new.i_ = new ItemIdx[instance_new.instance_orig()->item_number()];
+	for (ItemIdx i=1; i<=instance_new.n_; ++i)
+		instance_new.set_index(i, i+i1-1);
+	instance_new.set_profits_and_weights_from_parent();
+	return instance_new;
+}
+
+Instance Instance::fix(const Instance& instance, ItemIdx j, Weight w)
+{
+	Instance instance_new;
+	instance_new.init(instance);
+	instance_new.n_   = instance.item_number() - 1;
+	instance_new.c_   = instance.capacity() - w;
+	instance_new.opt_ = 0;
+	instance_new.w_ = new Weight[instance_new.instance_orig()->item_number()];
+	instance_new.p_ = new Profit[instance_new.instance_orig()->item_number()];
+	instance_new.i_ = new ItemIdx[instance_new.instance_orig()->item_number()];
+	for (ItemIdx i=1; i<=j-1; ++i)
+		instance_new.set_index(i, i);
+	for (ItemIdx i=j+1; i<=instance_new.n_; ++i)
+		instance_new.set_index(i, i+1);
+	instance_new.set_profits_and_weights_from_parent();
+	return instance_new;
+}
+
 void Instance::info(std::ostream& os)
 {
 	os
@@ -662,11 +695,11 @@ Weight Instance::gcd() const
 	return gcd;
 }
 
-Weight Instance::weight_max() const
+ItemIdx Instance::max_weight_item() const
 {
-	ItemIdx    j = 0;
-	Profit p     = 0;
-	Weight w_max = capacity();
+	ItemIdx j = 0;
+	Profit p  = 0;
+	Weight w_max = 0;
 	for (ItemIdx i=1; i<=item_number(); ++i) {
 		if (weight(i) > capacity())
 			continue;
@@ -679,7 +712,7 @@ Weight Instance::weight_max() const
 	return j;
 }
 
-ItemIdx Instance::profit_max() const
+ItemIdx Instance::max_profit_item() const
 {
 	ItemIdx    j = 0;
 	Profit p_max = 0;
