@@ -6,7 +6,7 @@ TEST(BranchAndBound, SimpleInstances)
 	p /= boost::filesystem::path("opt_bab");
 	p /= boost::filesystem::path("main");
 
-	test(p.string() + " -a rec");
-	test(p.string() + " -a stack");
+	test(p.string() + " -a rec",   "sopt");
+	test(p.string() + " -a stack", "sopt");
 }
 
