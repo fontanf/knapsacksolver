@@ -5,3 +5,19 @@ cc_library(
         visibility = ["//visibility:public"],
         deps = ["//lib:hpp", "//ub_dantzig:libdantzig"],
 )
+
+cc_binary(
+        name = "main",
+        srcs = ["main.cpp"],
+        deps = [
+                ":libsurrogate",
+                "//lib:cpp",
+                "//lb_greedy:libgreedy",
+                "//lb_ls:libls",
+        ],
+        linkopts = [
+                "-lboost_system",
+                "-lboost_filesystem",
+                "-lboost_program_options"
+        ],
+)
