@@ -1,11 +1,11 @@
 #include "bab.hpp"
 
 #include "../ub_dantzig/dantzig.hpp"
+#include "../ub_surrogate/surrogate.hpp"
 
-Profit opt_bab(BabData& data,
-		boost::property_tree::ptree* pt, bool verbose)
+Profit sopt_bab(BabData& data)
 {
-	return opt_bab_rec(data, pt, verbose);
+	return sopt_bab_rec(data);
 }
 
 /******************************************************************************/
@@ -13,83 +13,57 @@ Profit opt_bab(BabData& data,
 #define DBG(x)
 //#define DBG(x) x
 
-void opt_bab_rec_rec(BabData& d)
+void sopt_bab_rec_rec(BabData& d)
 {
-	DBG(if (d.opt_branch && d.i <= d.instance.item_number()) {
-		std::cout << std::endl
-			<< "* " << d.i
-			<< " pi " << d.instance.profit(d.i)
-			<< " wi " << d.instance.weight(d.i)
-			<< " xi " << d.instance.instance_orig()->optimum(d.instance.index_orig(d.i))
-			<< " r " << d.sol_curr.remaining_capacity() << " " << std::flush;
-	} else {
-		std::cout << d.i << " " << std::flush;
-	})
-	DBG(bool opt_branch_mem = d.opt_branch;)
-
 	// If upperbound is reached, stop
 	if (d.ub != 0 && d.sol_best.profit() == d.ub)
 		return;
 
 	d.nodes++;
 
+	// Stop condition
 	if (d.i == d.instance.item_number() + 1) {
 		if (d.sol_curr.profit() > d.lb) {
 			d.sol_best = d.sol_curr;
 			d.lb = d.sol_best.profit();
-			DBG(std::cout << std::endl << "New best solution of value " << d.sol_best.profit_orig() << std::endl;)
+			if (d.verbose)
+				std::cout << "New best solution of value " << d.sol_best.profit_orig() << std::endl;
 		}
 		return;
 	}
 
-	if (d.sol_curr.profit() < d.lb && d.sol_curr.profit() + ub_dantzig_from(d.instance, d.i, d.sol_curr.remaining_capacity()) < d.lb)
+	// UB test
+	Profit ub = d.sol_curr.profit() + ub_dantzig_from(d.instance, d.i, d.sol_curr.remaining_capacity());
+	if (ub <= d.lb)
 		return;
 
-	if (d.instance.weight(d.i) <= d.sol_curr.remaining_capacity()) {
-		DBG(if (opt_branch_mem) {
-			d.opt_branch = d.instance.instance_orig()->optimum(d.instance.index_orig(d.i));
-			std::cout << "1 " << std::flush;
-		})
-		d.sol_curr.set(d.i, true);
-		d.i++;
-		opt_bab_rec_rec(d);
-		d.i--;
-		d.sol_curr.set(d.i, false);
-		DBG(d.opt_branch = opt_branch_mem;)
-	}
-
-	DBG(if (opt_branch_mem) {
-		d.opt_branch = !(d.instance.instance_orig()->optimum(d.instance.index_orig(d.i)));
-		std::cout << "0 " << std::flush;
-	})
+	// Recursive calls
 	d.i++;
-	opt_bab_rec_rec(d);
+	if (d.instance.weight(d.i-1) <= d.sol_curr.remaining_capacity()) {
+		d.sol_curr.set(d.i-1, true);
+		sopt_bab_rec_rec(d);
+		d.sol_curr.set(d.i-1, false);
+	}
+	sopt_bab_rec_rec(d);
 	d.i--;
-	DBG(d.opt_branch = opt_branch_mem;)
 }
 
-Profit opt_bab_rec(BabData& data,
-		boost::property_tree::ptree* pt, bool verbose)
+Profit sopt_bab_rec(BabData& data)
 {
-	DBG(std::cout << std::endl;)
-	DBG(std::cout << "LB: " << data.lb << std::endl;)
-	DBG(std::cout << "UB: " << data.ub << std::endl;)
-	opt_bab_rec_rec(data);
-	DBG(std::cout << std::endl;)
-	DBG(std::cout << "OPT: " << data.sol_best.profit() << std::endl;)
-	DBG(std::cout << "OPT: " << data.instance.optimum() << std::endl;)
-	DBG(std::cout << "OPT Orig: " << data.sol_best.profit_orig() << std::endl;;)
-	assert(data.lb == data.instance.optimum());
+	sopt_bab_rec_rec(data);
 
-	if (pt != NULL) {
-		pt->put("Solution.OPT",   data.sol_best.profit());
-		pt->put("Solution.Nodes", data.nodes);
+	if (data.pt != NULL) {
+		data.pt->put("Solution.OPT",   data.sol_best.profit());
+		data.pt->put("Solution.Nodes", data.nodes);
 	}
 
-	if (verbose) {
+	if (data.verbose) {
 		std::cout << "OPT: " << data.sol_best.profit() << std::endl;
+		std::cout << "EXP: " << data.instance.optimum() << std::endl;
 		std::cout << "Nodes: " << data.nodes << std::endl;
 	}
+
+	assert(data.lb == data.instance.optimum());
 
 	return data.sol_best.profit();
 }
@@ -101,8 +75,7 @@ Profit opt_bab_rec(BabData& data,
 #define DBG(x)
 //#define DBG(x) x
 
-Profit opt_bab_stack(BabData& data,
-		boost::property_tree::ptree* pt, bool verbose)
+Profit sopt_bab_stack(BabData& data)
 {
 	std::stack<ItemIdx> stack;
 	stack.push(1);
@@ -129,7 +102,7 @@ Profit opt_bab_stack(BabData& data,
 			if (data.sol_curr.profit() > data.lb) {
 				data.sol_best = data.sol_curr;
 				data.lb = data.sol_best.profit();
-				if (verbose)
+				if (data.verbose)
 					std::cout << "New best solution of value " << data.sol_best.profit() << " (node " << data.nodes << ")" << std::endl;
 			}
 			continue;
@@ -146,13 +119,13 @@ Profit opt_bab_stack(BabData& data,
 		}
 	}
 
-	if (pt != NULL) {
-		pt->put("Solution.OPT",          data.sol_best.profit());
-		pt->put("Solution.Nodes",        data.nodes);
-		pt->put("Solution.StackSizeMax", list_size_max);
+	if (data.pt != NULL) {
+		data.pt->put("Solution.OPT",          data.sol_best.profit());
+		data.pt->put("Solution.Nodes",        data.nodes);
+		data.pt->put("Solution.StackSizeMax", list_size_max);
 	}
 
-	if (verbose) {
+	if (data.verbose) {
 		std::cout << "OPT: " << data.sol_best.profit() << std::endl;
 		std::cout << "Nodes: " << data.nodes << std::endl;
 		std::cout << "StackSizeMax: " << list_size_max << std::endl;

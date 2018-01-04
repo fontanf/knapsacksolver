@@ -39,15 +39,15 @@ int main(int argc, char *argv[])
 	bool verbose = vm.count("verbose");
 
 	Instance instance(input_data);
-	Instance instance_sorted = Instance::sort_partially_by_efficiency(instance);
+	Instance instance_sorted = Instance::sort_by_efficiency(instance);
 	boost::property_tree::ptree pt;
-	BabData data(instance_sorted);
+	BabData data(instance_sorted, &pt, verbose);
 	if (algorithm == "") {
-		opt_bab(data, &pt, verbose);
+		sopt_bab(data);
 	} else if (algorithm == "rec") {
-		opt_bab_rec(data, &pt, verbose);
+		sopt_bab_rec(data);
 	} else if (algorithm == "stack") {
-		opt_bab_stack(data, &pt, verbose);
+		sopt_bab_stack(data);
 	}
 
 	// Write output file

@@ -3,7 +3,11 @@ cc_library(
         hdrs = ["bab.hpp"],
         srcs = ["bab.cpp"],
         visibility = ["//visibility:public"],
-        deps = ["//lib:cpp", "//ub_dantzig:libdantzig"],
+        deps = [
+                "//lib:cpp",
+                "//ub_dantzig:libdantzig",
+                "//ub_surrogate:libsurrogate",
+        ],
 )
 
 cc_binary(

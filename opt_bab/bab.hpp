@@ -9,32 +9,26 @@
 
 struct BabData
 {
-	BabData(const Instance& inst):
-		instance(inst),
-		sol_curr(inst), sol_best(inst),
-		n(instance.item_number()), c(instance.capacity()),
-		opt_instance(instance.optimum())
+	BabData(const Instance& inst,
+			boost::property_tree::ptree* pt = NULL, bool verbose = false):
+		instance(inst), sol_curr(inst), sol_best(inst),
+		pt(pt), verbose(verbose)
 	{ }
 	const Instance& instance;
 	Solution sol_curr;
 	Solution sol_best;
-	ItemIdx  n;
-	ItemIdx  i = 1;
-	Weight   c;
-	Profit   opt_instance = -1;
-	Profit   ub = 0;
-	Profit   lb = 0;
-	size_t   nodes = 0;
-	bool opt_branch = true; // debug
+	ItemIdx i = 1;
+	Profit ub = 0;
+	Profit lb = 0;
+	size_t nodes = 0;
+	boost::property_tree::ptree* pt;
+	bool verbose;
 };
 
-Profit opt_bab(BabData& data,
-		boost::property_tree::ptree* pt = NULL, bool verbose = false);
+Profit sopt_bab(BabData& data);
 
-Profit opt_bab_rec(BabData& data,
-		boost::property_tree::ptree* pt = NULL, bool verbose = false);
+Profit sopt_bab_rec(BabData& data);
 
-Profit opt_bab_stack(BabData& data,
-		boost::property_tree::ptree* pt = NULL, bool verbose = false);
+Profit sopt_bab_stack(BabData& data);
 
 #endif /* end of include guard: BAB_HPP_TKVNPYD8 */
