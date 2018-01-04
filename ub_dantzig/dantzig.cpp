@@ -3,7 +3,8 @@
 #define DBG(x)
 //#define DBG(x) x
 
-Profit ub_dantzig(const Instance& instance)
+Profit ub_dantzig(const Instance& instance,
+		boost::property_tree::ptree* pt, bool verbose)
 {
 	DBG(std::cout << "upper_bound_danzig()..." << std::endl;)
 	ItemIdx i;
@@ -24,6 +25,15 @@ Profit ub_dantzig(const Instance& instance)
 	DBG(std::cout << "UB: " << p << " " << std::endl;)
 	assert(instance.optimum() == 0 || p >= instance.optimum());
 	DBG(std::cout << "upper_bound_danzig()... END" << std::endl;)
+
+	if (pt != NULL) {
+		pt->put("UB.Value", p);
+	}
+	if (verbose)
+		std::cout
+			<< "UB " << p
+			<< " GAP " << p - instance.optimum()
+			<< std::endl;
 	return p;
 }
 

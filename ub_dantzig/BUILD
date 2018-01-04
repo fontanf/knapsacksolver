@@ -11,3 +11,14 @@ cc_library(
         hdrs = ["dantzig.hpp"],
         visibility = ["//visibility:public"],
 )
+
+cc_binary(
+        name = "main",
+        srcs = ["main.cpp"],
+        deps = [":libdantzig", "//lib:cpp"],
+        linkopts = [
+                "-lboost_system",
+                "-lboost_filesystem",
+                "-lboost_program_options"
+        ],
+)
