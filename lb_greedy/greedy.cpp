@@ -12,7 +12,7 @@ Profit lb_extgreedy(const Instance& instance)
 		}
 	}
 
-	ItemIdx j = instance.profit_max();
+	ItemIdx j = instance.max_profit_item();
 	Profit p2 = 0;
 	if (j != 0) {
 		remaining_capacity = instance.capacity() - instance.weight(j);
@@ -42,7 +42,7 @@ Solution sol_extgreedy(const Instance& instance,
 			solution1.set(i, true);
 
 	Solution solution2(instance);
-	ItemIdx j = instance.profit_max();
+	ItemIdx j = instance.max_profit_item();
 	if (j != 0) {
 		solution2.set(j, true);
 		for (ItemIdx i=1; i<=instance.item_number(); ++i) {
