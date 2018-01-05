@@ -470,7 +470,7 @@ void Instance::surrogate_minus(const Instance& instance, Weight multiplier, Item
 			solution_->set(i, true);
 		}
 	}
-	c_ -= c_ - multiplier * bound;
+	c_ -= multiplier * bound;
 
 	partial_sort(
 			i_, n_,

@@ -12,10 +12,10 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/fstream.hpp>
 
-typedef  int_fast64_t Profit;
-typedef  int_fast64_t Weight;
-typedef uint_fast64_t ItemIdx;
-typedef uint_fast64_t ValIdx;
+typedef int_fast64_t Profit;
+typedef int_fast64_t Weight;
+typedef int_fast64_t ItemIdx;
+typedef int_fast64_t ValIdx;
 
 class Solution;
 

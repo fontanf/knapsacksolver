@@ -165,23 +165,24 @@ Profit ub_surrogate(const Instance& instance, Profit lower_bound,
 {
 	DBG(std::cout << "ub_surrogate()..." << std::endl;)
 
+	if (instance.item_number() == 0)
+		return 0;
+
 	SurrogateInfos infos(pt, verbose, instance);
 
-	ItemIdx b = 0;
-	Weight r = instance.capacity();
-	Profit p = 0;
-	for (ItemIdx i=1; i<=instance.item_number(); ++i) {
-		Weight wi = instance.weight(i);
-		if (r < wi) {
-			b = i;
+	ItemIdx b = 1;
+	Weight  r = instance.capacity();
+	Profit  p = 0;
+	for (b=1; b<=instance.item_number(); ++b) {
+		Weight wi = instance.weight(b);
+		if (r < wi)
 			break;
-		}
 		r -= wi;
-		p += instance.profit(i);
+		p += instance.profit(b);
 	}
 	DBG(std::cout << "b: " << b << std::endl;)
 
-	if (r == 0) {
+	if (r == 0 || b == instance.item_number() + 1) {
 		DBG(std::cout << "UB: " << p << " (" << instance.optimum() << ")" << std::endl;)
 		assert(instance.optimum() == 0 || p >= instance.optimum());
 		DBG(std::cout << "ub_surrogate()... end" << std::endl;)
@@ -204,6 +205,8 @@ Profit ub_surrogate(const Instance& instance, Profit lower_bound,
 		r -= wi;
 	}
 	DBG(std::cout << "kw: " << kw << std::endl;)
+	if (kw == 0)
+		return 0;
 	if (kw == b - 1) {
 		ub_kw = ub_surrogate_cardinality_max(instance, kw, infos);
 		DBG(std::cout << "UB: " << ub_kw << " (" << instance.optimum() << ")" << std::endl;)
