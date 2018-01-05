@@ -75,6 +75,24 @@ Profit ub_dantzig_from(const Instance& instance, ItemIdx j, Weight c)
 	return p;
 }
 
+Profit ub_dantzig_rev_from(const Instance& instance, ItemIdx j, Weight r)
+{
+	assert(r <= 0);
+	ItemIdx i = j;
+	Profit  p = 0;
+	for (; i>=1; i--) {
+		Weight wi = instance.weight(i);
+		if (wi + r > 0)
+			break;
+		p -= instance.profit(i);
+		r += wi;
+	}
+	if (i != 0 && r < 0)
+		p -= (instance.profit(i) * -r) / instance.weight(i);
+	assert(p <= 0);
+	return p;
+}
+
 Profit ub_dantzig_from_to(const Instance& instance, ItemIdx i1, ItemIdx i2, Weight c)
 {
 	ItemIdx i = i1;

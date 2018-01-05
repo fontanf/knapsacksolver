@@ -16,6 +16,12 @@ Profit ub_dantzig(const Instance& instance,
 Profit ub_dantzig_from(const Instance& instance, ItemIdx j, Weight c);
 
 /**
+ * Dantzig upper bound for unfeasible solution. Remove items from j down to 1
+ * Require r <= 0 and the return profit is non-positive.
+ */
+Profit ub_dantzig_rev_from(const Instance& instance, ItemIdx j, Weight r);
+
+/**
  * Dantzig upper bound, using items i1..i2
  */
 Profit ub_dantzig_from_to(const Instance& instance, ItemIdx i1, ItemIdx i2, Weight c);
