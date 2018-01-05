@@ -830,8 +830,8 @@ Solution sopt_bellman_rec_list(const Instance& instance,
 
 /******************************************************************************/
 
-//#define DBG(x)
-#define DBG(x) x
+#define DBG(x)
+//#define DBG(x) x
 
 /**
  * Return the list of undominated states.
@@ -903,8 +903,6 @@ std::vector<State> opts_bellman_ub(const Instance& instance,
 		}
 		std::reverse(l.begin(), l.end());
 		l0 = std::move(l);
-		if (verbose && !opt && i % 100 == 0)
-			std::cout << "i " << i << " " << l0.size() << std::endl;
 	}
 	return l0;
 }
