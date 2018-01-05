@@ -14,7 +14,13 @@ cc_binary(
                 "-lboost_filesystem",
                 "-lboost_program_options"
         ],
-        deps = ["//lib:cpp", ":libdpprofits"],
+        deps = [
+                "//lib:cpp",
+                ":libdpprofits",
+                "//ub_surrogate:libsurrogate",
+                "//ub_dantzig:libdantzig",
+                "//lb_greedy:libgreedy",
+        ],
 )
 
 cc_test(

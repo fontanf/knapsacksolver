@@ -1,4 +1,7 @@
 #include "dpprofits.hpp"
+#include "../ub_dantzig/dantzig.hpp"
+#include "../ub_surrogate/surrogate.hpp"
+#include "../lb_greedy/greedy.hpp"
 
 #include <iostream>
 
@@ -40,12 +43,15 @@ int main(int argc, char *argv[])
 
 	Instance instance(input_data);
 	Solution solution(instance);
+	Instance instance_sorted = Instance::sort_by_efficiency(instance);
+	Profit lb = lb_extgreedy(instance_sorted);
+	Profit ub = ub_surrogate(instance_sorted, lb);
 	boost::property_tree::ptree pt;
 
 	if (algorithm == "") {
-		opt_dpprofits(instance, -1, &pt, verbose);
+		opt_dpprofits(instance_sorted, ub, &pt, verbose);
 	} else if (algorithm == "1") {
-		solution = sopt_dpprofits_1(instance, -1, &pt, verbose);
+		solution = sopt_dpprofits_1(instance_sorted, ub, &pt, verbose).get_orig();
 	}
 
 	// Write output file
