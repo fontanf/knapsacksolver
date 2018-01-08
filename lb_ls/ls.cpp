@@ -2,9 +2,13 @@
 
 #include <set>
 
+#define DBG(x)
+//#define DBG(x) x
+
 Profit sol_ls(Solution& solution, Profit ub,
 		boost::property_tree::ptree* pt, bool verbose)
 {
+	DBG(std::cout << "LS" << std::endl;)
 	const Instance* instance = solution.instance();
 	ItemIdx n = instance->item_number();
 
@@ -32,11 +36,13 @@ Profit sol_ls(Solution& solution, Profit ub,
 		if (solution.get(i)) {
 			taken.insert(i);
 		} else {
-			left.insert(i);
+			if (instance->weight(i) <= instance->capacity())
+				left.insert(i);
 		}
 	}
 
-	//std::cout << *instance << std::endl;
+	if (taken.size() == 0 || left.size() == 0)
+		return solution.profit();
 
 	bool b = true;
 	while (b) {
@@ -45,20 +51,24 @@ Profit sol_ls(Solution& solution, Profit ub,
 		if (solution.profit() == ub)
 			break;
 
-		//std::cout << "taken ";
-		//for (ItemIdx i: taken)
-			//std::cout << i << " ";
-		//std::cout << std::endl;
-		//std::cout << "left ";
-		//for (ItemIdx j: left)
-			//std::cout << j << " " ;
-		//std::cout << std::endl;
+		DBG(std::cout << "taken ";
+		for (ItemIdx i: taken)
+			std::cout << i << " ";
+		std::cout << std::endl;
+		std::cout << "left ";
+		for (ItemIdx j: left)
+			std::cout << j << " " ;
+		std::cout << std::endl;)
 
 		auto i1   = left.begin();
 		auto i2_1 = left.begin();
 		auto i2_2 = left.begin(); i2_2++;
 		bool i1_end = false;
 		bool i2_end = false;
+		if (left.size() == 0)
+			i1_end = true;
+		if (left.size() <= 1)
+			i2_end = true;
 		Profit pi_prec = -1;
 		Weight wi1 = 0, wi2 = 0, wi2_1 = 0, wi2_2 = 0;
 		Profit pi1 = 0, pi2 = 0, pi2_1 = 0, pi2_2 = 0;
@@ -67,7 +77,7 @@ Profit sol_ls(Solution& solution, Profit ub,
 			if (!i1_end) {
 				wi1 = instance->weight(*i1);
 				pi1 = instance->profit(*i1);
-				//std::cout << "i1 " << *i1 << " wi1 " << wi1 << " pi1 " << pi1 << std::endl;
+				DBG(std::cout << "i1 " << *i1 << " wi1 " << wi1 << " pi1 " << pi1 << std::endl;)
 			}
 			if (!i2_end) {
 				wi2_1 = instance->weight(*i2_1);
@@ -76,7 +86,7 @@ Profit sol_ls(Solution& solution, Profit ub,
 				pi2_2 = instance->profit(*i2_2);
 				wi2 = wi2_1 + wi2_2;
 				pi2 = pi2_1 + pi2_2;
-				//std::cout << "i2_1 " << *i2_1 << " i2_2 " << *i2_2 << " wi2 " << wi2 << " pi2 " << pi2 << std::endl;
+				DBG(std::cout << "i2_1 " << *i2_1 << " i2_2 " << *i2_2 << " wi2 " << wi2 << " pi2 " << pi2 << std::endl;)
 			}
 			Weight wi = 0;
 			Profit pi = 0;
@@ -115,28 +125,30 @@ Profit sol_ls(Solution& solution, Profit ub,
 					}
 				}
 			}
-			//std::cout << "wi " << wi << " wi+r " << wi + solution.remaining_capacity() << " pi " << pi << " to_add ";
-			//for (auto i: to_add)
-				//std::cout << *i << " ";
-			//std::cout << std::endl;
+			DBG(std::cout << "wi " << wi << " wi+r " << wi + solution.remaining_capacity() << " pi " << pi << " to_add ";
+			for (auto i: to_add)
+				std::cout << *i << " ";
+			std::cout << std::endl;)
 
-			if (pi <= pi_prec) {
-				//std::cout << "Continue" << std::endl;
+			if (pi <= pi_prec)
 				continue;
-			}
 
 			auto j1   = taken.begin();
 			auto j2_1 = taken.begin();
 			auto j2_2 = taken.begin(); j2_2++;
 			bool j1_end = false;
 			bool j2_end = false;
+			if (taken.size() == 0)
+				j1_end = true;
+			if (taken.size() <= 1)
+				j2_end = true;
 			Weight wj1 = 0, wj2 = 0, wj2_1 = 0, wj2_2 = 0;
 			Profit pj1 = 0, pj2 = 0, pj2_1 = 0, pj2_2 = 0;
 			while (!j1_end || !j2_end) {
 				if (!j1_end) {
 					pj1 = instance->profit(*j1);
 					wj1 = instance->weight(*j1);
-					//std::cout << "j1 " << *j1 << " wj1 " << wj1 << " pj1 " << pj1 << std::endl;
+					DBG(std::cout << "j1 " << *j1 << " wj1 " << wj1 << " pj1 " << pj1 << std::endl;)
 				}
 				if (!j2_end) {
 					wj2_1 = instance->weight(*j2_1);
@@ -145,7 +157,7 @@ Profit sol_ls(Solution& solution, Profit ub,
 					pj2_2 = instance->profit(*j2_2);
 					wj2 = wj2_1 + wj2_2;
 					pj2 = pj2_1 + pj2_2;
-					//std::cout << "j2_1 " << *j2_1 << " j2_2 " << *j2_2 << " wj2 " << wj2 << " pj2 " << pj2 << std::endl;
+					DBG(std::cout << "j2_1 " << *j2_1 << " j2_2 " << *j2_2 << " wj2 " << wj2 << " pj2 " << pj2 << std::endl;)
 				}
 				Weight wj = 0;
 				Profit pj = 0;
@@ -186,15 +198,13 @@ Profit sol_ls(Solution& solution, Profit ub,
 					}
 				}
 
-				//std::cout << "wj " << wj << " pj " << pj << " to_remove ";
-				//for (auto j: to_remove)
-					//std::cout << *j << " ";
-				//std::cout << std::endl;
+				DBG(std::cout << "wj " << wj << " pj " << pj << " to_remove ";
+				for (auto j: to_remove)
+					std::cout << *j << " ";
+				std::cout << std::endl;)
 
-				if (wi > wj + solution.remaining_capacity()) {
-					//std::cout << "Break" << std::endl;
+				if (wi > wj + solution.remaining_capacity())
 					break;
-				}
 
 				if (pj < pi || (pj == pi && wi < wj)) {
 					if (verbose) {
@@ -240,6 +250,7 @@ Profit sol_ls(Solution& solution, Profit ub,
 			<< "LB " << solution.profit()
 			<< " GAP " << instance->optimum() - solution.profit()
 			<< std::endl;
+	DBG(std::cout << "LS END" << std::endl;)
 	return solution.profit();
 }
 
@@ -256,3 +267,4 @@ Profit lb_ls(const Instance& instance, Profit ub)
 	return sol_ls(instance, ub).profit();
 }
 
+#undef DBG
