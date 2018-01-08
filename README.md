@@ -6,7 +6,7 @@ This project uses Bazel https://bazel.build/
 
 Compile:
 ```
-bazel build --compilation_mode=opt -- lb_greedy:main
+bazel build --compilation_mode=opt -- //...
 ```
 
 Execute:
@@ -37,7 +37,7 @@ bazel-bin/lb_greedy/main -i ...
 - Version 2, Time O(n2c), Space O(c+n) `opt_bellman/main -a 2`
 - Recursive scheme Time O(nc), Space O(n+c) `opt_bellman/main -a rec`
 
-### With llists *(See "Knapsack Problem", 3.4, 3.5 - Kellerer et al., 2004)*
+### With lists *(See "Knapsack Problem", 3.4, 3.5 - Kellerer et al., 2004)*
 
 - Only optimal value `opt_bellman/main -a list`
 - Recursive scheme `opt_bellman/main -a reclist`
@@ -48,6 +48,10 @@ bazel-bin/lb_greedy/main -i ...
 
 - Only optimal value `opt_dpreaching/main`
 - With solution `opt_bellman/main -a 1`
+
+## Balanced Dynamic Programming *(See "Knapsack Problem", 5.3.1 - Kellerer et al., 2004)*
+
+- Only optimal value `opt_balknap/main`
 
 ## Branch-and-bound
 
