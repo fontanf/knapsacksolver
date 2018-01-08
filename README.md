@@ -52,6 +52,7 @@ bazel-bin/lb_greedy/main -i ...
 ## Balanced Dynamic Programming *(See "Knapsack Problem", 5.3.1 - Kellerer et al., 2004)*
 
 - Only optimal value `opt_balknap/main`
+- With solution `opt_balknap/main -a 1`
 
 ## Branch-and-bound
 

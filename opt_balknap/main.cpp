@@ -52,10 +52,12 @@ int main(int argc, char *argv[])
 	if (algorithm == "") {
 		opt_balknap(instance_sorted, solution.profit(), &pt, verbose);
 	} else if (algorithm == "1") {
-		//sopt_balknap(instance_sorted, solution, &pt, verbose);
+		sopt_balknap(instance_sorted, solution, &pt, verbose);
 	} else {
 		std::cout << "Unknwow algorithm" << std::endl;
 	}
+
+	Solution sol_orig = solution.get_orig();
 
 	// Write output file
 	if (output_file != "")
@@ -65,7 +67,7 @@ int main(int argc, char *argv[])
 	if (cert_file != "") {
 		std::ofstream cert;
 		cert.open(cert_file);
-		cert << solution;
+		cert << sol_orig;
 		cert.close();
 	}
 

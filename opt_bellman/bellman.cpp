@@ -732,7 +732,7 @@ void sopt_bellman_rec_list_rec(RecListData& d)
 						DBG(std::cout << i2 << " " << std::flush;)
 							i2++;
 					}
-				assert(i2 < l2.size());
+				assert(i2 < (Weight)l2.size());
 				DBG(std::cout << i2 << " " << std::flush;)
 					Profit z = l1[i1].p + l2[i2].p;
 				if (z > z_max) {
@@ -971,7 +971,7 @@ void sopt_bellman_rec_ub_rec(const Instance& instance,
 				while (l1[i1].w + l2[i2].w > c) {
 					i2++;
 				}
-				assert(i2 < l2.size());
+				assert(i2 < (Weight)l2.size());
 				Profit z = l1[i1].p + l2[i2].p;
 				if (z > z_max) {
 					z_max = z;
