@@ -187,6 +187,7 @@ void Instance::init(const Instance& instance)
 	format_   = instance.format_;
 	parent_   = &instance;
 	solution_ = new Solution(instance);
+	sort_type_ = instance.sort_type();
 }
 
 Instance::Instance(const Instance& instance):
@@ -296,6 +297,7 @@ Instance Instance::sort_by_profit(const Instance& instance)
 	instance_new.c_   = instance.capacity();
 	instance_new.opt_ = instance.optimum();
 	instance_new.i_   = new ItemIdx[instance_new.n_];
+	instance_new.sort_type_ = "profit";
 	for (ItemIdx i=1; i<=instance_new.n_; ++i)
 		instance_new.set_index(i, i);
 	std::sort(instance_new.i_, instance_new.i_ + instance_new.n_,
@@ -314,6 +316,7 @@ Instance Instance::sort_by_weight(const Instance& instance)
 	instance_new.c_   = instance.capacity();
 	instance_new.opt_ = instance.optimum();
 	instance_new.i_   = new ItemIdx[instance_new.n_];
+	instance_new.sort_type_ = "weight";
 	for (ItemIdx i=1; i<=instance_new.n_; ++i)
 		instance_new.set_index(i, i);
 	std::sort(instance_new.i_, instance_new.i_ + instance_new.n_,
@@ -332,6 +335,7 @@ Instance Instance::sort_by_efficiency(const Instance& instance)
 	instance_new.c_   = instance.capacity();
 	instance_new.opt_ = instance.optimum();
 	instance_new.i_   = new ItemIdx[instance_new.n_];
+	instance_new.sort_type_ = "efficiency";
 	for (ItemIdx i=1; i<=instance_new.n_; ++i)
 		instance_new.set_index(i, i);
 	std::sort(instance_new.i_, instance_new.i_ + instance_new.n_,
@@ -351,6 +355,7 @@ Instance Instance::sort_partially_by_profit(const Instance& instance, Profit lb)
 	instance_new.c_   = instance.capacity();
 	instance_new.opt_ = instance.optimum();
 	instance_new.i_   = new ItemIdx[instance_new.n_];
+	instance_new.sort_type_ = "partial_profit";
 	for (ItemIdx i=1; i<=instance_new.n_; ++i)
 		instance_new.set_index(i, i);
 
@@ -374,6 +379,7 @@ Instance Instance::sort_partially_by_weight(const Instance& instance)
 	instance_new.c_   = instance.capacity();
 	instance_new.opt_ = instance.optimum();
 	instance_new.i_   = new ItemIdx[instance_new.n_];
+	instance_new.sort_type_ = "partial_weight";
 	for (ItemIdx i=1; i<=instance_new.n_; ++i)
 		instance_new.set_index(i, i);
 
@@ -397,6 +403,7 @@ Instance Instance::sort_partially_by_efficiency(const Instance& instance)
 	instance_new.c_   = instance.capacity();
 	instance_new.opt_ = instance.optimum();
 	instance_new.i_   = new ItemIdx[instance_new.n_];
+	instance_new.sort_type_ = "partial_efficiency";
 	for (ItemIdx i=1; i<=instance_new.n_; ++i)
 		instance_new.set_index(i, i);
 

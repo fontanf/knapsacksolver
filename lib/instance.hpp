@@ -148,6 +148,8 @@ public:
 	inline std::string name()   const { return name_; }
 	inline std::string format() const { return format_; }
 
+	std::string sort_type() const { return sort_type_; }
+
 	/**
 	 * Parent instance.
 	 */
@@ -212,12 +214,14 @@ private:
 	ItemIdx n_;
 	Weight  c_;
 	Profit  opt_ = 0;
+	std::string sort_type_ = "";
 	Weight* w_  = NULL;
 	Profit* p_  = NULL;
 	bool*   x_  = NULL;
 	ItemIdx* i_ = NULL;
 	const Instance* parent_   = NULL;
 	Solution*       solution_ = NULL;
+
 };
 
 std::ostream& operator<<(std::ostream &os, const Instance& instance);

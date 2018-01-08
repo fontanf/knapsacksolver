@@ -7,6 +7,7 @@ Profit ub_dantzig(const Instance& instance,
 		boost::property_tree::ptree* pt, bool verbose)
 {
 	DBG(std::cout << "upper_bound_danzig()..." << std::endl;)
+	assert(instance.sort_type() == "efficiency");
 	ItemIdx i;
 	Profit p = 0;
 	Weight remaining_capacity = instance.capacity();
@@ -41,6 +42,7 @@ Profit ub_dantzig(const Instance& instance,
 
 Profit ub_dantzig_without(const Instance& instance, ItemIdx j, Weight c)
 {
+	assert(instance.sort_type() == "efficiency");
 	ItemIdx i = 1;
 	Profit p = 0;
 	Weight remaining_capacity = c;
@@ -60,6 +62,7 @@ Profit ub_dantzig_without(const Instance& instance, ItemIdx j, Weight c)
 
 Profit ub_dantzig_from(const Instance& instance, ItemIdx j, Weight c)
 {
+	assert(instance.sort_type() == "efficiency");
 	ItemIdx i = 1;
 	Profit p = 0;
 	Weight remaining_capacity = c;
@@ -77,6 +80,7 @@ Profit ub_dantzig_from(const Instance& instance, ItemIdx j, Weight c)
 
 Profit ub_dantzig_rev_from(const Instance& instance, ItemIdx j, Weight r)
 {
+	assert(instance.sort_type() == "efficiency");
 	assert(r <= 0);
 	ItemIdx i = j;
 	Profit  p = 0;
@@ -95,6 +99,7 @@ Profit ub_dantzig_rev_from(const Instance& instance, ItemIdx j, Weight r)
 
 Profit ub_dantzig_from_to(const Instance& instance, ItemIdx i1, ItemIdx i2, Weight c)
 {
+	assert(instance.sort_type() == "efficiency");
 	ItemIdx i = i1;
 	Profit  p = 0;
 	Weight  r = c;
@@ -116,6 +121,7 @@ Profit ub_dantzig_from_to(const Instance& instance, ItemIdx i1, ItemIdx i2, Weig
 Profit ub_dantzig_except(const Instance& instance,
 		ItemIdx n1, ItemIdx i1, ItemIdx i2, ItemIdx n2, Weight c)
 {
+	assert(instance.sort_type() == "efficiency");
 	DBG(std::cout << "ub_dantzig_except " << n1 << " " << i1 << " " << i2 << " " << n2 << " " << c << std::endl;)
 	ItemIdx i = n1;
 	if (i == i1)
