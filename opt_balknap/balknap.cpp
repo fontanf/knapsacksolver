@@ -241,6 +241,8 @@ Profit opt_balknap(const Instance& instance, Profit lb,
 
 #undef DBG
 
+/******************************************************************************/
+
 //#define DBG(x)
 #define DBG(x) x
 
@@ -529,17 +531,35 @@ Profit sopt_balknap(const Instance& instance, Solution& sol_curr,
 
 #undef DBG
 
-//#define DBG(x)
-#define DBG(x) x
+/******************************************************************************/
+
+#define DBG(x)
+//#define DBG(x) x
 
 struct State1
 {
 	Weight mu;
 	Profit pi;
 	ItemIdx a;
+	ItemIdx a_prec;
+};
+
+struct State2
+{
+	Weight mu;
+	Profit pi;
+	ItemIdx a;
+	ItemIdx a_prec;
+	const State2* pred;
 };
 
 std::ostream& operator<<(std::ostream& os, const State1& s)
+{
+	os << "(" << s.mu << " " << s.pi << " " << s.a << ")";
+	return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const State2& s)
 {
 	os << "(" << s.mu << " " << s.pi << " " << s.a << ")";
 	return os;
@@ -550,15 +570,33 @@ struct CustomCompare
 	bool operator()(const State1& s1, const State1& s2)
 	{
 		if (s1.mu != s2.mu)
-			return s1.mu > s2.mu;
+			return s1.mu < s2.mu;
 		if (s1.pi != s2.pi)
-			return s1.pi > s2.pi;
+			return s1.pi < s2.pi;
 		if (s1.a > s2.a) {
 			State1& s2_ = const_cast<State1&>(s2);
-			s2_.a = s1.a;
+			s2_.a      = s1.a;
 		} else {
 			State1& s1_ = const_cast<State1&>(s1);
+			s1_.a      = s2.a;
+		}
+		return false;
+	}
+
+	bool operator()(const State2& s1, const State2& s2)
+	{
+		if (s1.mu != s2.mu)
+			return s1.mu < s2.mu;
+		if (s1.pi != s2.pi)
+			return s1.pi < s2.pi;
+		if (s1.a > s2.a) {
+			State2& s2_ = const_cast<State2&>(s2);
+			s2_.a = s1.a;
+			s2_.pred = s1.pred;
+		} else {
+			State2& s1_ = const_cast<State2&>(s1);
 			s1_.a = s2.a;
+			s1_.pred = s2.pred;
 		}
 		return false;
 	}
@@ -653,14 +691,12 @@ Profit opt_balknap_list(const Instance& instance, Profit lb,
 	}
 
 	// Create memory table
-	DBG(std::cout << "Create memory table" << std::endl;)
-
-	std::set<State1, CustomCompare> set0;
+	std::set<State1, CustomCompare> set;
 
 	// Initialization
-	set0.insert({w_bar,p_bar,b}); // s(w_bar,p_bar) = b
+	set.insert({w_bar,p_bar,b,b}); // s(w_bar,p_bar) = b
 
-	DBG(for (const State1 s: set0)
+	DBG(for (const State1 s: set)
 	std::cout << s << " ";
 	std::cout << std::endl;)
 
@@ -668,29 +704,32 @@ Profit opt_balknap_list(const Instance& instance, Profit lb,
 		Weight wt = instance.weight(t);
 		Profit pt = instance.profit(t);
 		DBG(std::cout << "t " << t << " pt " << pt << " wt " << wt << std::endl;)
-		std::set<State1, CustomCompare> set1 = set0;
 
 		// Add item t
+		auto s = set.upper_bound({c+1,0,0,0});
+		auto hint = s;
+		hint--;
 		DBG(std::cout << "+ ";)
-		auto hint = set1.begin();
-		for (const State1& s: set0) {
-			Weight mu_ = s.mu + wt;
-			Weight pi_ = s.pi + pt;
+		while (s != set.begin() && (--s)->mu <= c) {
+			Weight mu_ = s->mu + wt;
+			Weight pi_ = s->pi + pt;
 			Profit x_  = ((c -   mu_) * pb) / wb;
 			if (x_ < 0)
 				x_ -= 1;
-			if (z + 1 - x_ <= pi_ && pi_ <= u - x_)
-				hint = set1.insert(hint, {mu_, pi_, s.a});
+			if (pi_ < z + 1 - x_ || pi_ > u - x_)
+				continue;
+
+			hint = set.insert(hint, {mu_, pi_, s->a, 1});
+			hint--;
 		}
 
 		// Remove previously added items
 		DBG(std::cout << "- ";)
-		for (auto s = set1.begin(); s->mu > c; ++s) {
-			auto s0 = set0.find(*s);
-			ItemIdx a0 = 1;
-			if (s0 != set0.end())
-				a0 = s0->a;
-			for (ItemIdx j = a0; j < s->a; ++j) {
+		for (auto s = set.rbegin(); s->mu > c; ++s) {
+			if (s->mu > c + wt)
+				continue;
+
+			for (ItemIdx j = s->a_prec; j < s->a; ++j) {
 				Weight mu_ = s->mu - instance.weight(j);
 				Profit pi_ = s->pi - instance.profit(j);
 				Profit x_  = ((c - mu_) * pb) / wb;
@@ -698,24 +737,23 @@ Profit opt_balknap_list(const Instance& instance, Profit lb,
 					x_ -= 1;
 				if (pi_ < z + 1 - x_ || pi_ > u - x_)
 					continue;
-				set1.insert({mu_,pi_,j});
+				set.insert({mu_,pi_,j, 1});
 			}
+			State1* s_ = const_cast<State1*>(&(*s));
+			s_->a_prec = s->a;
 		}
 		DBG(std::cout << std::endl;)
 
-		// Swap sets
-		set0 = std::move(set1);
-
-		DBG(for (const State1 s: set0)
+		DBG(for (const State1 s: set)
 			std::cout << s << " ";
 		std::cout << std::endl;)
 	}
 
 	// Get optimal value
 	Profit opt = z;
-	for (const State1& s: set0)
+	for (const State1& s: set)
 		if (s.mu <= c && s.pi > opt)
-				opt = s.pi;
+			opt = s.pi;
 
 	if (pt != NULL) {
 		pt->put("Solution.OPT", opt);
@@ -729,3 +767,4 @@ Profit opt_balknap_list(const Instance& instance, Profit lb,
 }
 
 #undef DBG
+
