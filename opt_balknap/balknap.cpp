@@ -3,6 +3,8 @@
 #include "../lb_ls/ls.hpp"
 #include "../lb_greedy/greedy.hpp"
 
+#include <set>
+
 #define IDX2(k,w,p) rl2*(k) + rl1*(w) + (p)
 #define IDX1(  w,p)           rl1*(w) + (p)
 
@@ -239,8 +241,8 @@ Profit opt_balknap(const Instance& instance, Profit lb,
 
 #undef DBG
 
-#define DBG(x)
-//#define DBG(x) x
+//#define DBG(x)
+#define DBG(x) x
 
 Profit sopt_balknap(const Instance& instance, Solution& sol_curr,
 		boost::property_tree::ptree* pt, bool verbose)
@@ -475,7 +477,7 @@ Profit sopt_balknap(const Instance& instance, Solution& sol_curr,
 		Profit pi = p + z + 1 - x;
 		DBG(std::cout << "t " << t << " wt " << instance.weight(t) << " pt " << instance.profit(t) << " mu " << mu << " pi " << pi << std::endl;)
 
-		while (sol_curr.profit() != opt && sol_curr.remaining_capacity() >= 0) {
+		while (!(sol_curr.profit() == opt && sol_curr.remaining_capacity() >= 0)) {
 			size_t  idx_next = pred[idx];
 			ItemIdx k_next   = idx_next / rl2;
 			ItemIdx t_next   = k_next + b - 1;
@@ -523,6 +525,207 @@ Profit sopt_balknap(const Instance& instance, Solution& sol_curr,
 	delete[] pred;
 
 	return sol_curr.profit();
+}
+
+#undef DBG
+
+//#define DBG(x)
+#define DBG(x) x
+
+struct State1
+{
+	Weight mu;
+	Profit pi;
+	ItemIdx a;
+};
+
+std::ostream& operator<<(std::ostream& os, const State1& s)
+{
+	os << "(" << s.mu << " " << s.pi << " " << s.a << ")";
+	return os;
+}
+
+struct CustomCompare
+{
+	bool operator()(const State1& s1, const State1& s2)
+	{
+		if (s1.mu != s2.mu)
+			return s1.mu > s2.mu;
+		if (s1.pi != s2.pi)
+			return s1.pi > s2.pi;
+		if (s1.a > s2.a) {
+			State1& s2_ = const_cast<State1&>(s2);
+			s2_.a = s1.a;
+		} else {
+			State1& s1_ = const_cast<State1&>(s1);
+			s1_.a = s2.a;
+		}
+		return false;
+	}
+};
+
+Profit opt_balknap_list(const Instance& instance, Profit lb,
+		boost::property_tree::ptree* pt, bool verbose)
+{
+	DBG(std::cout << instance << std::endl;)
+
+	Weight  c = instance.capacity();
+	ItemIdx n = instance.item_number();
+
+	// If there is only 1 item
+	if (n == 1) {
+		Solution solution(instance);
+		if (instance.weight(1) <= instance.capacity())
+			solution.set(1, true);
+		if (pt != NULL)
+			pt->put("Solution.OPT", solution.profit());
+		if (verbose) {
+			std::cout << "OPT " << solution.profit() << std::endl;
+			std::cout << "EXP " << instance.optimum() << std::endl;
+		}
+		return solution.profit();
+	}
+
+	// Compute weight max
+	ItemIdx j_wmax = instance.max_weight_item();
+	if (j_wmax == 0) {
+		if (pt != NULL) {
+			pt->put("Solution.OPT", 0);
+		}
+		if (verbose) {
+			std::cout << "OPT " << 0 << std::endl;
+			std::cout << "EXP " << instance.optimum() << std::endl;
+		}
+		return 0;
+	}
+	Weight w_max = instance.weight(j_wmax);
+	if (verbose)
+		std::cout
+			<< "wmax " << w_max
+			<< " c " << c
+			<< " wmax/c " << (double)w_max/(double)c << std::endl;
+
+	// Compute break item
+	Weight  r = c;
+	ItemIdx b = 0;
+	Profit  p_bar = 0;
+	for (b=1; b<=n; ++b) {
+		Weight wi = instance.weight(b);
+		if (wi > r)
+			break;
+		r     -= wi;
+		p_bar += instance.profit(b);
+	}
+
+	if (b == n+1) { // all items are in the break solution
+		if (pt != NULL)
+			pt->put("Solution.OPT", p_bar);
+		if (verbose) {
+			std::cout << "OPT " << p_bar << std::endl;
+			std::cout << "EXP " << instance.optimum() << std::endl;
+		}
+		return p_bar;
+	}
+	Profit pb    = instance.profit(b);
+	Weight wb    = instance.weight(b);
+	Weight w_bar = instance.capacity() - r;
+	Profit z     = p_bar;
+	Profit u     = p_bar + r * pb / wb;
+	if (z < lb)
+		z = lb;
+
+	DBG(std::cout << "n " << n << " c " << c << std::endl;)
+	DBG(std::cout << "b " << b << " pb " << pb << " wb " << wb << std::endl;)
+	DBG(std::cout << "p_bar " << p_bar << " w_bar " << w_bar << std::endl;)
+	DBG(std::cout << "z " << z << " u " << u << std::endl;)
+
+	if (verbose)
+		std::cout << "z " << z << " u " << u << " GAP " << u - z << std::endl;
+
+	if (z == u) { // If UB == LB, then stop
+		if (pt != NULL)
+			pt->put("Solution.OPT", z);
+		if (verbose) {
+			std::cout << "OPT " << z << std::endl;
+			std::cout << "EXP " << instance.optimum() << std::endl;
+		}
+		return z;
+	}
+
+	// Create memory table
+	DBG(std::cout << "Create memory table" << std::endl;)
+
+	std::set<State1, CustomCompare> set0;
+
+	// Initialization
+	set0.insert({w_bar,p_bar,b}); // s(w_bar,p_bar) = b
+
+	DBG(for (const State1 s: set0)
+	std::cout << s << " ";
+	std::cout << std::endl;)
+
+	for (ItemIdx t=b; t<=n; ++t) { // Recursion
+		Weight wt = instance.weight(t);
+		Profit pt = instance.profit(t);
+		DBG(std::cout << "t " << t << " pt " << pt << " wt " << wt << std::endl;)
+		std::set<State1, CustomCompare> set1 = set0;
+
+		// Add item t
+		DBG(std::cout << "+ ";)
+		auto hint = set1.begin();
+		for (const State1& s: set0) {
+			Weight mu_ = s.mu + wt;
+			Weight pi_ = s.pi + pt;
+			Profit x_  = ((c -   mu_) * pb) / wb;
+			if (x_ < 0)
+				x_ -= 1;
+			if (z + 1 - x_ <= pi_ && pi_ <= u - x_)
+				hint = set1.insert(hint, {mu_, pi_, s.a});
+		}
+
+		// Remove previously added items
+		DBG(std::cout << "- ";)
+		for (auto s = set1.begin(); s->mu > c; ++s) {
+			auto s0 = set0.find(*s);
+			ItemIdx a0 = 1;
+			if (s0 != set0.end())
+				a0 = s0->a;
+			for (ItemIdx j = a0; j < s->a; ++j) {
+				Weight mu_ = s->mu - instance.weight(j);
+				Profit pi_ = s->pi - instance.profit(j);
+				Profit x_  = ((c - mu_) * pb) / wb;
+				if (x_ < 0)
+					x_ -= 1;
+				if (pi_ < z + 1 - x_ || pi_ > u - x_)
+					continue;
+				set1.insert({mu_,pi_,j});
+			}
+		}
+		DBG(std::cout << std::endl;)
+
+		// Swap sets
+		set0 = std::move(set1);
+
+		DBG(for (const State1 s: set0)
+			std::cout << s << " ";
+		std::cout << std::endl;)
+	}
+
+	// Get optimal value
+	Profit opt = z;
+	for (const State1& s: set0)
+		if (s.mu <= c && s.pi > opt)
+				opt = s.pi;
+
+	if (pt != NULL) {
+		pt->put("Solution.OPT", opt);
+	}
+	if (verbose) {
+		std::cout << "OPT " << opt << std::endl;
+		std::cout << "EXP " << instance.optimum() << std::endl;
+	}
+
+	return opt;
 }
 
 #undef DBG

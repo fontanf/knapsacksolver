@@ -48,11 +48,12 @@ int main(int argc, char *argv[])
 	//Instance instance_sorted = Instance::sort_partially_by_efficiency(instance);
 	Instance instance_sorted = Instance::sort_by_efficiency(instance);
 	Solution solution = sol_ls(instance_sorted);
-	//Solution solution = sol_extgreedy(instance_sorted);
 	if (algorithm == "") {
 		opt_balknap(instance_sorted, solution.profit(), &pt, verbose);
 	} else if (algorithm == "1") {
 		sopt_balknap(instance_sorted, solution, &pt, verbose);
+	} else if (algorithm == "list") {
+		opt_balknap_list(instance_sorted, solution.profit(), &pt, verbose);
 	} else {
 		std::cout << "Unknwow algorithm" << std::endl;
 	}

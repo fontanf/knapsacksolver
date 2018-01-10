@@ -53,6 +53,7 @@ bazel-bin/lb_greedy/main -i ...
 
 - Only optimal value `opt_balknap/main`
 - With solution `opt_balknap/main -a 1`
+- With lists (sets), only optimal value `opt_balknap/main -a list`
 
 ## Branch-and-bound
 
