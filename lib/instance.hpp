@@ -16,6 +16,7 @@ typedef int_fast64_t Profit;
 typedef int_fast64_t Weight;
 typedef int_fast64_t ItemIdx;
 typedef int_fast64_t ValIdx;
+typedef int_fast64_t StateIdx;
 
 class Solution;
 
@@ -130,7 +131,15 @@ public:
 	/**
 	 * Return true if item i is in the known solution, false otherwise.
 	 */
-	inline bool optimum(ItemIdx i) const { assert(i > 0 && i <= n_ && x_ != NULL); return x_[i-1]; }
+	inline bool optimum(ItemIdx i) const
+	{
+		assert(i > 0 && i <= n_);
+		if (x_ != NULL) {
+			return x_[i-1];
+		} else {
+			return instance_orig()->optimum(index_orig(i));
+		}
+	}
 
 	/**
 	 * Index of item i in the parent solution.
