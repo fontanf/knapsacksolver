@@ -60,9 +60,8 @@ bazel-bin/lb_greedy/main -i ...
 
 ## Primal Branch-and-bound *(See "Knapsack Problem", 2.4 Branch-and-Bound - Kellerer et al., 2004)*
 
-- Complete sorting, Dantizg UB
-  - Implementation with a recursive function (default) `opt_bab/main -a rec`
-  - Implementation with a stack simulating a recusrive function `opt_bab/main -a stack`
+- Implementation with a recursive function (default) `opt_bab/main -a rec`
+- Implementation with a stack simulating a recusrive function `opt_bab/main -a stack`
 
 ## Primal-Dual Branch-and-bound *(See "Knapsack Problem", 5.1.4 Branch-and-Bound Implementations - Kellerer et al., 2004)*
 

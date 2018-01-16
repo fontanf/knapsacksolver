@@ -50,6 +50,8 @@ void sopt_bab_rec_rec(BabData& d)
 
 Profit sopt_bab_rec(BabData& data)
 {
+	assert(data.instance.sort_type() == "efficiency");
+
 	sopt_bab_rec_rec(data);
 
 	if (data.pt != NULL) {
@@ -77,6 +79,8 @@ Profit sopt_bab_rec(BabData& data)
 
 Profit sopt_bab_stack(BabData& data)
 {
+	assert(data.instance.sort_type() == "efficiency");
+
 	std::stack<ItemIdx> stack;
 	stack.push(1);
 	size_t list_size_max = 1;
