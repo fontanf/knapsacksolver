@@ -2,6 +2,7 @@
 
 #include "../lb_ls/ls.hpp"
 #include "../lb_greedy/greedy.hpp"
+#include "../ub_dantzig/dantzig.hpp"
 
 #include <map>
 
@@ -673,11 +674,25 @@ Profit opt_balknap_list(const Instance& instance, Profit lb,
 		while (s != map.begin() && (--s)->first.mu <= c) {
 			Weight mu_ = s->first.mu + wt;
 			Weight pi_ = s->first.pi + pt;
-			Profit x_  = ((c -   mu_) * pb) / wb;
-			if (c < mu_)
-				x_ -= 1;
-			if (pi_ < z + 1 - x_ || pi_ > u - x_)
-				continue;
+
+			// Bounding
+			if (instance.sort_type() == "partial_efficiency") {
+				Profit x_  = ((c -   mu_) * pb) / wb;
+				if (c < mu_)
+					x_ -= 1;
+				if (pi_ < z + 1 - x_ || pi_ > u - x_)
+					continue;
+			} else {
+				assert(instance.sort_type() == "efficiency");
+				Profit ub = pi_;
+				if (c < mu_) {
+					ub += ub_dantzig_rev_from(instance, s->second.a-1, c-mu_);
+				} else {
+					ub += ub_dantzig_from(instance, t, c-mu_);
+				}
+				if (ub <= z || ub > u)
+					continue;
+			}
 
 			hint = map.insert(hint, {{mu_, pi_}, {s->second.a, 1}});
 			hint--;
@@ -692,11 +707,26 @@ Profit opt_balknap_list(const Instance& instance, Profit lb,
 			for (ItemIdx j = s->second.a_prec; j < s->second.a; ++j) {
 				Weight mu_ = s->first.mu - instance.weight(j);
 				Profit pi_ = s->first.pi - instance.profit(j);
-				Profit x_  = ((c - mu_) * pb) / wb;
-				if (c < mu_)
-					x_ -= 1;
-				if (pi_ < z + 1 - x_ || pi_ > u - x_)
-					continue;
+
+				// Bounding
+				if (instance.sort_type() == "partial_efficiency") {
+					Profit x_  = ((c - mu_) * pb) / wb;
+					if (c < mu_)
+						x_ -= 1;
+					if (pi_ < z + 1 - x_ || pi_ > u - x_)
+						continue;
+				} else {
+					assert(instance.sort_type() == "efficiency");
+					Profit ub = pi_;
+					if (c < mu_) {
+						ub += ub_dantzig_rev_from(instance, j-1, c-mu_);
+					} else {
+						ub += ub_dantzig_from(instance, t+1, c-mu_);
+					}
+					if (ub <= z || ub > u)
+						continue;
+				}
+
 				auto res = map.insert({{mu_,pi_},{j, 1}});
 				if (!res.second)
 					if (res.first->second.a < j)
@@ -778,6 +808,9 @@ Profit sopt_balknap_list(const Instance& instance, Solution& sol_curr,
 		boost::property_tree::ptree* pt, bool verbose)
 {
 	DBG(std::cout << "sopt_balknap..." << std::endl;);
+
+	assert(instance.sort_type() == "efficiency" ||
+			instance.sort_type() == "partial_efficiency");
 
 	Weight  c = instance.capacity();
 	ItemIdx n = instance.item_number();
@@ -911,17 +944,31 @@ Profit sopt_balknap_list(const Instance& instance, Solution& sol_curr,
 		while (s != maps[k].begin() && (--s)->first.mu <= c) {
 			Weight mu_ = s->first.mu + wt;
 			Weight pi_ = s->first.pi + pt;
-			Profit x_  = ((c -   mu_) * pb) / wb;
-			if (c < mu_)
-				x_ -= 1;
 
-			DBG(std::cout << "s " << s << " ";)
-			DBG(std::cout << "mu_ " << mu_ << " pi_ " << pi_ << " ";)
-			DBG(std::cout << "alpha " << z + 1 - x_ << " beta " << u - x_ << " ";)
-			DBG(std::cout << std::endl;)
+			// Bounding
+			if (instance.sort_type() == "partial_efficiency") {
+				Profit x_  = ((c -   mu_) * pb) / wb;
+				if (c < mu_)
+					x_ -= 1;
 
-			if (pi_ < z + 1 - x_ || pi_ > u - x_)
-				continue;
+				DBG(std::cout << "s " << s << " ";)
+				DBG(std::cout << "mu_ " << mu_ << " pi_ " << pi_ << " ";)
+				DBG(std::cout << "alpha " << z + 1 - x_ << " beta " << u - x_ << " ";)
+				DBG(std::cout << std::endl;)
+
+				if (pi_ < z + 1 - x_ || pi_ > u - x_)
+					continue;
+			} else {
+				assert(instance.sort_type() == "efficiency");
+				Profit ub = pi_;
+				if (c < mu_) {
+					ub += ub_dantzig_rev_from(instance, s->second.a-1, c-mu_);
+				} else {
+					ub += ub_dantzig_from(instance, t, c-mu_);
+				}
+				if (ub <= z || ub > u)
+					continue;
+			}
 
 			hint = maps[k].insert(hint, {{mu_, pi_, t}, {s->second.a, 1, s->second.pred}});
 			// If (mu_,pi_,t) existed but should be updated
@@ -953,14 +1000,29 @@ Profit sopt_balknap_list(const Instance& instance, Solution& sol_curr,
 				//std::cout << "j " << j << std::endl;
 				Weight mu_ = s->first.mu - instance.weight(j);
 				Profit pi_ = s->first.pi - instance.profit(j);
-				Profit x_  = ((c - mu_) * pb) / wb;
-				if (c < mu_)
-					x_ -= 1;
-				//DBG(std::cout << "mu_ " << mu_ << " pi_ " << pi_ << " ";)
-				//DBG(std::cout << "alpha " << z + 1 - x_ << " beta " << u - x_ << " ";)
-				//DBG(std::cout << std::endl;)
-				if (pi_ < z + 1 - x_ || pi_ > u - x_)
-					continue;
+
+				// Bounding
+				if (instance.sort_type() == "partial_efficiency") {
+					Profit x_  = ((c - mu_) * pb) / wb;
+					if (c < mu_)
+						x_ -= 1;
+					//DBG(std::cout << "mu_ " << mu_ << " pi_ " << pi_ << " ";)
+					//DBG(std::cout << "alpha " << z + 1 - x_ << " beta " << u - x_ << " ";)
+					//DBG(std::cout << std::endl;)
+					if (pi_ < z + 1 - x_ || pi_ > u - x_)
+						continue;
+				} else {
+					assert(instance.sort_type() == "efficiency");
+					Profit ub = pi_;
+					if (c < mu_) {
+						ub += ub_dantzig_rev_from(instance, j-1, c-mu_);
+					} else {
+						ub += ub_dantzig_from(instance, t+1, c-mu_);
+					}
+					if (ub <= z || ub > u)
+						continue;
+				}
+
 				auto res = maps[k].insert({{mu_, pi_, t}, {j, 1, s}});
 				// If (mu_,pi_,t) existed and should be updated
 				if (!res.second && res.first->second.a < j) {

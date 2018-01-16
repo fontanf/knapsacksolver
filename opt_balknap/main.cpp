@@ -44,26 +44,38 @@ int main(int argc, char *argv[])
 
 	Instance instance(input_data);
 	boost::property_tree::ptree pt;
+	Solution sol_orig(instance);
 
-	//Instance instance_sorted = Instance::sort_partially_by_efficiency(instance);
-	Instance instance_sorted = Instance::sort_by_efficiency(instance);
-	Solution solution = sol_ls(instance_sorted);
-	//Solution solution = sol_extgreedy(instance_sorted);
-	//Solution solution(instance_sorted);
-	//Profit ub = ub_surrogate(instance_sorted, solution.profit());
-	if (algorithm == "") {
+	if (algorithm == "opt") {
+		Instance instance_sorted = Instance::sort_partially_by_efficiency(instance);
+		Solution solution = sol_extgreedy(instance_sorted);
 		opt_balknap(instance_sorted, solution.profit(), &pt, verbose);
-	} else if (algorithm == "1") {
+	} else if (algorithm == "sopt") {
+		Instance instance_sorted = Instance::sort_partially_by_efficiency(instance);
+		Solution solution = sol_extgreedy(instance_sorted);
 		sopt_balknap(instance_sorted, solution, &pt, verbose);
-	} else if (algorithm == "list") {
+		sol_orig = solution.get_orig();
+	} else if (algorithm == "opt_list_partsorted") {
+		Instance instance_sorted = Instance::sort_partially_by_efficiency(instance);
+		Solution solution = sol_extgreedy(instance_sorted);
 		opt_balknap_list(instance_sorted, solution.profit(), &pt, verbose);
-	} else if (algorithm == "1list") {
+	} else if (algorithm == "opt_list_sorted") {
+		Instance instance_sorted = Instance::sort_by_efficiency(instance);
+		Solution solution = sol_extgreedy(instance_sorted);
+		opt_balknap_list(instance_sorted, solution.profit(), &pt, verbose);
+	} else if (algorithm == "sopt_list_partsorted") {
+		Instance instance_sorted = Instance::sort_partially_by_efficiency(instance);
+		Solution solution = sol_extgreedy(instance_sorted);
 		sopt_balknap_list(instance_sorted, solution, &pt, verbose);
+		sol_orig = solution.get_orig();
+	} else if (algorithm == "sopt_list_sorted") {
+		Instance instance_sorted = Instance::sort_by_efficiency(instance);
+		Solution solution = sol_ls(instance_sorted);
+		sopt_balknap_list(instance_sorted, solution, &pt, verbose);
+		sol_orig = solution.get_orig();
 	} else {
 		std::cout << "Unknwow algorithm" << std::endl;
 	}
-
-	Solution sol_orig = solution.get_orig();
 
 	// Write output file
 	if (output_file != "")

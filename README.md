@@ -51,10 +51,12 @@ bazel-bin/lb_greedy/main -i ...
 
 ## Balanced Dynamic Programming *(See "Knapsack Problem", 5.3.1 - Kellerer et al., 2004)*
 
-- Only optimal value `opt_balknap/main`
-- With solution `opt_balknap/main -a 1`
-- With lists (maps), only optimal value `opt_balknap/main -a list`
-- With lists (maps), optimal solution `opt_balknap/main -a 1list`
+- Only optimal value, partial sorting, Dembo and Hammer UB, `opt_balknap/main -a opt`
+- Optimal solution, partial sorting, Dembo and Hammer UB, `opt_balknap/main -a sopt`
+- With lists (maps), only optimal value, partial sorting, Dembo and Hammer UB, `opt_balknap/main -a opt_list_partsorted`
+- With lists (maps), only optimal value, complete sorting, Dantzig UB, `opt_balknap/main -a opt_list_sorted`
+- With lists (maps), optimal solution, partial sorting, Dembo and Hammer UB, `opt_balknap/main -a sopt_list_partsorted`
+- With lists (maps), optimal solution, complete sorting, Dantzig UB, `opt_balknap/main -a sopt_list_sorted`
 
 ## Branch-and-bound
 
