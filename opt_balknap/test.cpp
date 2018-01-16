@@ -6,6 +6,7 @@ TEST(Balknap, SimpleInstances)
 	p /= boost::filesystem::path("opt_balknap");
 	p /= boost::filesystem::path("main");
 
+	test(p.string() + " -a 1list", "sopt");
 	test(p.string() + " -a list",   "opt");
 	test(p.string() + " -a 1",     "sopt");
 	test(p.string(),                "opt");
