@@ -20,6 +20,7 @@ struct BabPDData
 			sol_curr.set(b, true);
 			sol_best.set(b, true);
 		}
+		break_item = b;
 		a = b-1;
 		lb = sol_curr.profit();
 	}
@@ -28,6 +29,7 @@ struct BabPDData
 	Solution sol_best;
 	ItemIdx  a;
 	ItemIdx  b  = 0;
+	ItemIdx  break_item;
 	Profit   ub = 0;
 	Profit   lb;
 	size_t   nodes = 0;

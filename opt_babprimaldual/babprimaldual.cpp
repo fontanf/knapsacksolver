@@ -25,8 +25,15 @@ void sopt_babprimaldual_rec(BabPDData& d)
 			return;
 		}
 
-		Profit ub = d.sol_curr.profit() // UB test
-			+ ub_dantzig_from(d.instance, d.b, d.sol_curr.remaining_capacity());
+		// UB test
+		Profit ub = d.sol_curr.profit();
+		if (d.instance.sort_type() == "efficiency") {
+			ub += ub_dantzig_from(d.instance, d.b, d.sol_curr.remaining_capacity());
+		} else {
+			assert(d.instance.sort_type() == "partial_efficiency");
+			ub += (d.instance.profit(d.break_item) * d.sol_curr.remaining_capacity())
+				/ d.instance.weight(d.break_item);
+		}
 		if (ub <= d.lb)
 			return;
 
@@ -42,8 +49,15 @@ void sopt_babprimaldual_rec(BabPDData& d)
 		if (d.a == 0) // Stop condition
 			return;
 
-		Profit ub = d.sol_curr.profit() // UB test
-			+ ub_dantzig_rev_from(d.instance, d.a, d.sol_curr.remaining_capacity());
+		// UB test
+		Profit ub = d.sol_curr.profit();
+		if (d.instance.sort_type() == "efficiency") {
+			ub += ub_dantzig_rev_from(d.instance, d.a, d.sol_curr.remaining_capacity());
+		} else {
+			assert(d.instance.sort_type() == "partial_efficiency");
+			ub -= (d.instance.profit(d.break_item) * -d.sol_curr.remaining_capacity())
+				/ d.instance.weight(d.break_item);
+		}
 		if (ub <= d.lb)
 			return;
 
@@ -58,7 +72,12 @@ void sopt_babprimaldual_rec(BabPDData& d)
 
 Profit sopt_babprimaldual(BabPDData& data)
 {
-	std::cout << data.sol_curr.profit() << std::endl;
+	assert(data.instance.sort_type() == "efficiency" ||
+			data.instance.sort_type() == "partial_efficiency");
+
+	if (data.verbose)
+		std::cout << "Initial solution value " << data.sol_curr.profit() << std::endl;
+
 	sopt_babprimaldual_rec(data);
 
 	if (data.pt != NULL) {
@@ -71,6 +90,8 @@ Profit sopt_babprimaldual(BabPDData& data)
 		std::cout << "EXP: " << data.instance.optimum() << std::endl;
 		std::cout << "Nodes: " << data.nodes << std::endl;
 	}
+
+	assert(data.instance.optimum() == 0 || data.sol_best.profit() == data.instance.optimum());
 
 	return data.sol_best.profit();
 }

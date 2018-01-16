@@ -21,6 +21,7 @@ int main(int argc, char *argv[])
 		("input-data,i",  boost::program_options::value<std::string>(&input_data)->required(), "set input data (required)")
 		("output-file,o", boost::program_options::value<std::string>(&output_file),            "set output file")
 		("cert-file,c",   boost::program_options::value<std::string>(&cert_file),              "set certificate output file")
+		("algorithm,a",   boost::program_options::value<std::string>(&algorithm),              "set algorithm")
 		("verbose,v",                                                                          "enable verbosity")
 		;
 	boost::program_options::variables_map vm;
@@ -38,10 +39,23 @@ int main(int argc, char *argv[])
 	bool verbose = vm.count("verbose");
 
 	Instance instance(input_data);
-	Instance instance_sorted = Instance::sort_by_efficiency(instance);
 	boost::property_tree::ptree pt;
-	BabPDData data(instance_sorted, &pt, verbose);
-	sopt_babprimaldual(data);
+	Solution sol_orig(instance);
+
+	if (algorithm == "partsorted") {
+		Instance instance_sorted = Instance::sort_partially_by_efficiency(instance);
+		BabPDData data(instance_sorted, &pt, verbose);
+		sopt_babprimaldual(data);
+		sol_orig = data.sol_best.get_orig();
+	} else if (algorithm == "sorted") {
+		Instance instance_sorted = Instance::sort_by_efficiency(instance);
+		BabPDData data(instance_sorted, &pt, verbose);
+		sopt_babprimaldual(data);
+		sol_orig = data.sol_best.get_orig();
+	} else {
+		assert(false);
+		std::cout << "Unknwow algorithm" << std::endl;
+	}
 
 	// Write output file
 	if (output_file != "")
@@ -51,7 +65,7 @@ int main(int argc, char *argv[])
 	if (cert_file != "") {
 		std::ofstream cert;
 		cert.open(cert_file);
-		cert << data.sol_best;
+		cert << sol_orig;
 		cert.close();
 	}
 

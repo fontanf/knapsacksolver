@@ -58,10 +58,14 @@ bazel-bin/lb_greedy/main -i ...
 - With lists (maps), optimal solution, partial sorting, Dembo and Hammer UB, `opt_balknap/main -a sopt_list_partsorted`
 - With lists (maps), optimal solution, complete sorting, Dantzig UB, `opt_balknap/main -a sopt_list_sorted`
 
-## Branch-and-bound
+## Primal Branch-and-bound *(See "Knapsack Problem", 2.4 Branch-and-Bound - Kellerer et al., 2004)*
 
-- Primal Branch-and-bound (the classical one) *(See "Knapsack Problem", 2.4 Branch-and-Bound - Kellerer et al., 2004)*
+- Complete sorting, Dantizg UB
   - Implementation with a recursive function (default) `opt_bab/main -a rec`
   - Implementation with a stack simulating a recusrive function `opt_bab/main -a stack`
-- Primal-Dual Branch-and-bound `opt_babprimaldual/main` *(See "Knapsack Problem", 5.1.4 Branch-and-Bound Implementations - Kellerer et al., 2004)*
+
+## Primal-Dual Branch-and-bound *(See "Knapsack Problem", 5.1.4 Branch-and-Bound Implementations - Kellerer et al., 2004)*
+
+- Partial sorting, Dembo and Hammer UB, `opt_babprimaldual/main -a partsorted`
+- Complete sorting, Dantzig UB, `opt_babprimaldual/main -a sorted`
 
