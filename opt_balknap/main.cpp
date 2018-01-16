@@ -74,6 +74,7 @@ int main(int argc, char *argv[])
 		sopt_balknap_list(instance_sorted, solution, &pt, verbose);
 		sol_orig = solution.get_orig();
 	} else {
+		assert(false);
 		std::cout << "Unknwow algorithm" << std::endl;
 	}
 

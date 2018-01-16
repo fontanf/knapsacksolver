@@ -568,6 +568,9 @@ Profit opt_balknap_list(const Instance& instance, Profit lb,
 {
 	DBG(std::cout << instance << std::endl;)
 
+	assert(instance.sort_type() == "efficiency" ||
+			instance.sort_type() == "partial_efficiency");
+
 	Weight  c = instance.capacity();
 	ItemIdx n = instance.item_number();
 
