@@ -76,6 +76,8 @@ void test(std::string exec, std::string test)
 			continue;
 		if (itr->path().filename() == "BUILD")
 			continue;
+		if (itr->path().extension() != ".txt")
+			continue;
 		if (test == "sopt") {
 			check_sopt(exec, itr->path());
 		} else if (test == "opt") {
