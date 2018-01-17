@@ -1,6 +1,7 @@
 #include "bellman.hpp"
 
 #include <iostream>
+#include <chrono>
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
@@ -42,35 +43,48 @@ int main(int argc, char *argv[])
 	Solution solution(instance);
 	boost::property_tree::ptree pt;
 
-	if (algorithm == "") {
+	std::chrono::high_resolution_clock::time_point t1
+		= std::chrono::high_resolution_clock::now();
+
+	if (algorithm == "opt") {
 		opt_bellman(instance, &pt, verbose);
-	} else if (algorithm == "1") {
+	} else if (algorithm == "sopt_1") {
 		solution = sopt_bellman_1(instance, &pt, verbose);
-	} else if (algorithm == "1it") {
+	} else if (algorithm == "sopt_1it") {
 		solution = sopt_bellman_1_it(instance, &pt, verbose);
-	} else if (algorithm == "1rec") {
+	} else if (algorithm == "sopt_1rec") {
 		solution = sopt_bellman_1_rec(instance, &pt, verbose);
-	} else if (algorithm == "1stack") {
+	} else if (algorithm == "sopt_1stack") {
 		solution = sopt_bellman_1_stack(instance, &pt, verbose);
-	} else if (algorithm == "1map") {
+	} else if (algorithm == "sopt_1map") {
 		solution = sopt_bellman_1_map(instance, &pt, verbose);
-	} else if (algorithm == "2") {
+	} else if (algorithm == "sopt_2") {
 		solution = sopt_bellman_2(instance, &pt, verbose);
-	} else if (algorithm == "rec") {
+	} else if (algorithm == "sopt_rec") {
 		solution = sopt_bellman_rec(instance, &pt, verbose);
-	} else if (algorithm == "list") {
+	} else if (algorithm == "opt_list") {
 		opt_bellman_list(instance, &pt, verbose);
-	} else if (algorithm == "reclist") {
+	} else if (algorithm == "sopt_list_rec") {
 		solution = sopt_bellman_rec_list(instance, &pt, verbose);
-	} else if (algorithm == "ub") {
+	} else if (algorithm == "opt_ub") {
 		Instance instance_sorted = Instance::sort_by_efficiency(instance);
 		opt_bellman_ub(instance_sorted, &pt, verbose);
-	} else if (algorithm == "recub") {
+	} else if (algorithm == "sopt_ub_rec") {
 		Instance instance_sorted = Instance::sort_by_efficiency(instance);
 		solution = sopt_bellman_rec_ub(instance_sorted, &pt, verbose).get_orig();
 	} else {
 		std::cout << "Unknwow algorithm" << std::endl;
 	}
+
+	std::chrono::high_resolution_clock::time_point t2
+		= std::chrono::high_resolution_clock::now();
+
+	std::chrono::duration<double> time_span
+		= std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
+
+	pt.put("Solution.Time", time_span.count());
+	if (verbose)
+		std::cout << "Time " << time_span.count() << std::endl;
 
 	// Write output file
 	if (output_file != "")

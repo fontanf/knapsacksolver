@@ -6,17 +6,17 @@ TEST(BellmanRecursion, SimpleInstances)
 	p /= boost::filesystem::path("opt_bellman");
 	p /= boost::filesystem::path("main");
 
-	test(p.string() + " -a recub",   "sopt");
-	test(p.string() + " -a ub",       "opt");
-	test(p.string() + " -a reclist", "sopt");
-	test(p.string() + " -a list",     "opt");
-	test(p.string() + " -a rec",     "sopt");
-	test(p.string() + " -a 2",       "sopt");
-	test(p.string() + " -a 1",       "sopt");
-	test(p.string() + " -a 1it",     "sopt");
-	test(p.string() + " -a 1rec",    "sopt");
-	test(p.string() + " -a 1stack",  "sopt");
-	test(p.string() + " -a 1map",    "sopt");
-	test(p.string(),                  "opt");
+	test(p.string() + " -a sopt_ub_rec",   "sopt");
+	test(p.string() + " -a opt_ub",         "opt");
+	test(p.string() + " -a sopt_list_rec", "sopt");
+	test(p.string() + " -a opt_list",       "opt");
+	test(p.string() + " -a sopt_rec",      "sopt");
+	test(p.string() + " -a sopt_2",        "sopt");
+	test(p.string() + " -a sopt_1stack",   "sopt");
+	test(p.string() + " -a sopt_1rec",     "sopt");
+	test(p.string() + " -a sopt_1map",     "sopt");
+	test(p.string() + " -a sopt_1it",      "sopt");
+	test(p.string() + " -a sopt_1",        "sopt");
+	test(p.string() + " -a opt",            "opt");
 }
 
