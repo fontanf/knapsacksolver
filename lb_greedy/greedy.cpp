@@ -2,6 +2,9 @@
 
 Profit lb_extgreedy(const Instance& instance)
 {
+	assert(instance.sort_type() == "efficiency" ||
+			instance.sort_type() == "partial_efficiency");
+
 	Weight remaining_capacity = instance.capacity();
 	Profit p1 = 0;
 	for (ItemIdx i=1; i<=instance.item_number(); ++i) {
@@ -36,6 +39,9 @@ Profit lb_extgreedy(const Instance& instance)
 Solution sol_extgreedy(const Instance& instance,
 		boost::property_tree::ptree* pt, bool verbose)
 {
+	assert(instance.sort_type() == "efficiency" ||
+			instance.sort_type() == "partial_efficiency");
+
 	Solution solution1(instance);
 	for (ItemIdx i=1; i<=instance.item_number(); ++i)
 		if (solution1.remaining_capacity() >= instance.weight(i))
@@ -103,5 +109,4 @@ Profit lb_greedy_except(const Instance& instance,
 			i = i2;
 	}
 	return p;
-
 }
