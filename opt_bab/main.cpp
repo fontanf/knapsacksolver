@@ -1,6 +1,7 @@
 #include "bab.hpp"
 
 #include <iostream>
+#include <chrono>
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
@@ -39,8 +40,12 @@ int main(int argc, char *argv[])
 	bool verbose = vm.count("verbose");
 
 	Instance instance(input_data);
-	Instance instance_sorted = Instance::sort_by_efficiency(instance);
 	boost::property_tree::ptree pt;
+
+	std::chrono::high_resolution_clock::time_point t1
+		= std::chrono::high_resolution_clock::now();
+
+	Instance instance_sorted = Instance::sort_by_efficiency(instance);
 	BabData data(instance_sorted, &pt, verbose);
 	if (algorithm == "") {
 		sopt_bab(data);
@@ -50,6 +55,16 @@ int main(int argc, char *argv[])
 		sopt_bab_stack(data);
 	}
 
+	std::chrono::high_resolution_clock::time_point t2
+		= std::chrono::high_resolution_clock::now();
+
+	std::chrono::duration<double> time_span
+		= std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
+
+	pt.put("Solution.Time", time_span.count());
+	if (verbose)
+		std::cout << "Time " << time_span.count() << std::endl;
+
 	// Write output file
 	if (output_file != "")
 		write_ini(output_file, pt);
@@ -58,7 +73,7 @@ int main(int argc, char *argv[])
 	if (cert_file != "") {
 		std::ofstream cert;
 		cert.open(cert_file);
-		cert << data.sol_best;
+		cert << data.sol_best.get_orig();
 		cert.close();
 	}
 
