@@ -52,20 +52,12 @@ int main(int argc, char *argv[])
 
 	if (algorithm == "opt") {
 		Instance instance_sorted = Instance::sort_partially_by_efficiency(instance);
-		Profit ub = ub_dantzig(instance_sorted);
+		Profit lb = lb_extgreedy(instance_sorted);
+		Profit ub = ub_surrogate(instance_sorted, lb);
 		opt_dpprofits(instance_sorted, ub, &pt, verbose);
 	} else if (algorithm == "sopt") {
 		Instance instance_sorted = Instance::sort_partially_by_efficiency(instance);
-		Profit ub = ub_dantzig(instance_sorted);
-		solution = sopt_dpprofits_1(instance_sorted, ub, &pt, verbose).get_orig();
-	} else if (algorithm == "opt_sorted") {
-		Instance instance_sorted = Instance::sort_by_efficiency(instance);
-		Profit lb = lb_ls(instance_sorted);
-		Profit ub = ub_surrogate(instance_sorted, lb);
-		opt_dpprofits(instance_sorted, ub, &pt, verbose);
-	} else if (algorithm == "sopt_sorted") {
-		Instance instance_sorted = Instance::sort_by_efficiency(instance);
-		Profit lb = lb_ls(instance_sorted);
+		Profit lb = lb_extgreedy(instance_sorted);
 		Profit ub = ub_surrogate(instance_sorted, lb);
 		solution = sopt_dpprofits_1(instance_sorted, ub, &pt, verbose).get_orig();
 	}

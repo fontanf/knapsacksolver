@@ -46,10 +46,8 @@ bazel-bin/lb_greedy/main -i ...
 
 ## DP by profits *(See "Knapsack Problem", 2.3 - Kellerer et al., 2004)*
 
-- Only optimal value, Partial sorting, Dantzig UB, `opt_dpreaching/main -a opt`
-- Optimal solution, Partial sorting, Dantzig UB, `opt_bellman/main -a sopt`
-- Only optimal value, Complete sorting, Surrogate relaxation UB, `opt_dpreaching/main -a opt_sorted`
-- Optimal solution, Complete sorting, Surrogate relaxation UB, `opt_bellman/main -a sopt_sorted`
+- Only optimal value, `opt_dpreaching/main -a opt`
+- Optimal solution, `opt_bellman/main -a sopt`
 
 ## Balanced Dynamic Programming *(See "Knapsack Problem", 5.3.1 - Kellerer et al., 2004)*
 

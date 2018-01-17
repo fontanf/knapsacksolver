@@ -6,8 +6,6 @@ TEST(DynamicProgrammingByReaching, SimpleInstances)
 	p /= boost::filesystem::path("opt_dpprofits");
 	p /= boost::filesystem::path("main");
 
-	test(p.string() + " -a sopt_sorted", "sopt");
-	test(p.string() + " -a opt_sorted",   "opt");
 	test(p.string() + " -a sopt",        "sopt");
 	test(p.string() + " -a opt",          "opt");
 }
