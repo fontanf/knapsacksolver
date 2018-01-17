@@ -2,8 +2,8 @@
 
 #include "../ub_dantzig/dantzig.hpp"
 
-#define DBG(x)
-//#define DBG(x) x
+//#define DBG(x)
+#define DBG(x) x
 
 #define INDEX(i,q) (i)*(ub+1) + (q)
 
@@ -13,9 +13,9 @@ Profit opt_dpprofits(const Instance& instance, Profit ub,
 	// Initialize memory table
 	ItemIdx n = instance.item_number();
 	Weight  c = instance.capacity();
-	if (ub == -1)
-		ub = ub_dantzig(instance);
 	Weight* values = new Weight[ub+1];
+
+	DBG(std::cout << "UB " << ub << std::endl;)
 
 	// Compute optimal value
 	values[0] = 0;
@@ -28,7 +28,7 @@ Profit opt_dpprofits(const Instance& instance, Profit ub,
 		Profit pi = instance.profit(i);
 		Weight wi = instance.weight(i);
 		for (Profit q=ub+1; q-->0;) {
-			Weight w = (q < pi)? wi: values[q-pi] + wi;
+			Weight w = (q == pi)? wi: values[q-pi] + wi;
 			if (w < values[q])
 				values[q] = w;
 		}
@@ -38,8 +38,11 @@ Profit opt_dpprofits(const Instance& instance, Profit ub,
 	}
 
 	Profit opt = 0;
-	for (opt=0; opt<=ub && values[opt]<=c; ++opt);
-	opt--;
+	for (Profit q=0; q<=ub; ++q)
+		if (values[q] <= c)
+			opt = q;
+
+	DBG(std::cout << "OPT " << opt << std::endl;)
 
 	if (pt != NULL)
 		pt->put("Solution.OPT", opt);
@@ -58,8 +61,6 @@ Solution sopt_dpprofits_1(const Instance& instance, Profit ub,
 	// Initialize memory table
 	ItemIdx n = instance.item_number();
 	Weight  c = instance.capacity();
-	if (ub == -1)
-		ub = ub_dantzig(instance);
 	ValIdx values_size = (n+1)*(ub+1);
 	Weight* values = new Weight[values_size];
 
@@ -72,7 +73,7 @@ Solution sopt_dpprofits_1(const Instance& instance, Profit ub,
 		Profit wi = instance.weight(i);
 		for (Profit q=0; q<=ub; ++q) {
 			Weight v0 = values[INDEX(i-1,q)];
-			Weight v1 = (q < pi)? wi: values[INDEX(i-1,q-pi)] + wi;
+			Weight v1 = (q == pi)? wi: values[INDEX(i-1,q-pi)] + wi;
 			values[INDEX(i,q)] = (v1 < v0)? v1: v0;
 		}
 	}
@@ -85,25 +86,25 @@ Solution sopt_dpprofits_1(const Instance& instance, Profit ub,
 	})
 
 	Profit opt = 0;
-	for (opt=0; opt<=ub && values[INDEX(n,opt)]<=c; ++opt);
-	opt--;
+	for (Profit v=0; v<=ub; ++v)
+		if (values[INDEX(n,v)] <= c)
+			opt = v;
 	DBG(std::cout << "OPT: " << opt << std::endl;)
 
 	// Retrieve optimal solution
 	Solution solution(instance);
 	ItemIdx i = n;
 	Profit  q = opt;
-	ValIdx xopt = n*(ub+1) + opt;
-	Weight  v = values[xopt];
-	while (v > 0) {
-		DBG(std::cout << q << " " << v << " " << i << std::endl;)
+	Weight  w = values[INDEX(i,opt)];
+	while (w > 0) {
+		DBG(std::cout << q << " " << w << " " << i << std::endl;)
 		Weight wi = instance.weight(i);
 		Profit pi = instance.profit(i);
 		Weight v0 = values[INDEX(i-1,q)];
 		Weight v1 = (q < pi)? instance.capacity() + 1: values[INDEX(i-1,q-pi)] + wi;
 		if (v1 < v0) {
 			q -= pi;
-			v -= wi;
+			w -= wi;
 			solution.set(i, true);
 		}
 		i--;

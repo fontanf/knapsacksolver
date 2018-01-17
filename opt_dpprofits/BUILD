@@ -20,6 +20,7 @@ cc_binary(
                 "//ub_surrogate:libsurrogate",
                 "//ub_dantzig:libdantzig",
                 "//lb_greedy:libgreedy",
+                "//lb_ls:libls",
         ],
 )
 

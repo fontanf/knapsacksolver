@@ -2,8 +2,10 @@
 #include "../ub_dantzig/dantzig.hpp"
 #include "../ub_surrogate/surrogate.hpp"
 #include "../lb_greedy/greedy.hpp"
+#include "../lb_ls/ls.hpp"
 
 #include <iostream>
+#include <chrono>
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
@@ -43,16 +45,40 @@ int main(int argc, char *argv[])
 
 	Instance instance(input_data);
 	Solution solution(instance);
-	Instance instance_sorted = Instance::sort_by_efficiency(instance);
-	Profit lb = lb_extgreedy(instance_sorted);
-	Profit ub = ub_surrogate(instance_sorted, lb);
 	boost::property_tree::ptree pt;
 
-	if (algorithm == "") {
+	std::chrono::high_resolution_clock::time_point t1
+		= std::chrono::high_resolution_clock::now();
+
+	if (algorithm == "opt") {
+		Instance instance_sorted = Instance::sort_partially_by_efficiency(instance);
+		Profit ub = ub_dantzig(instance_sorted);
 		opt_dpprofits(instance_sorted, ub, &pt, verbose);
-	} else if (algorithm == "1") {
+	} else if (algorithm == "sopt") {
+		Instance instance_sorted = Instance::sort_partially_by_efficiency(instance);
+		Profit ub = ub_dantzig(instance_sorted);
+		solution = sopt_dpprofits_1(instance_sorted, ub, &pt, verbose).get_orig();
+	} else if (algorithm == "opt_sorted") {
+		Instance instance_sorted = Instance::sort_by_efficiency(instance);
+		Profit lb = lb_ls(instance_sorted);
+		Profit ub = ub_surrogate(instance_sorted, lb);
+		opt_dpprofits(instance_sorted, ub, &pt, verbose);
+	} else if (algorithm == "sopt_sorted") {
+		Instance instance_sorted = Instance::sort_by_efficiency(instance);
+		Profit lb = lb_ls(instance_sorted);
+		Profit ub = ub_surrogate(instance_sorted, lb);
 		solution = sopt_dpprofits_1(instance_sorted, ub, &pt, verbose).get_orig();
 	}
+
+	std::chrono::high_resolution_clock::time_point t2
+		= std::chrono::high_resolution_clock::now();
+
+	std::chrono::duration<double> time_span
+		= std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
+
+	pt.put("Solution.Time", time_span.count());
+	if (verbose)
+		std::cout << "Time " << time_span.count() << std::endl;
 
 	// Write output file
 	if (output_file != "")

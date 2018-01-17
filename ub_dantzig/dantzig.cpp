@@ -7,7 +7,7 @@ Profit ub_dantzig(const Instance& instance,
 		boost::property_tree::ptree* pt, bool verbose)
 {
 	DBG(std::cout << "upper_bound_danzig()..." << std::endl;)
-	assert(instance.sort_type() == "efficiency");
+	assert(instance.sort_type() == "efficiency" || instance.sort_type() == "partial_efficiency");
 	ItemIdx i;
 	Profit p = 0;
 	Weight remaining_capacity = instance.capacity();
