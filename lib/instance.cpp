@@ -243,6 +243,45 @@ inline void swap(ItemIdx* v, ItemIdx i, ItemIdx j)
 template<typename Func1, typename Func2, typename Q>
 void partial_sort(ItemIdx* v, ItemIdx n, Func1 compare, Q capacity, Func2 weight)
 {
+	if (n <= 1)
+		return;
+
+	// Check if data are already partially sorted
+	DBG(std::cout << "Check if data are already partially sorted" << std::endl;)
+	bool partially_sorted = true;
+	Q r = capacity;
+	ItemIdx i_max = 0;
+	ItemIdx i = 0;
+	ItemIdx b = -1;
+	for (; i<n; ++i) {
+		if (weight(v[i]) > r) {
+			DBG(std::cout << "b = " << i << std::endl;)
+			b = i;
+			break;
+		}
+		if (compare(v[i], v[i_max]))
+			i_max = i;
+		r -= weight(v[i]);
+	}
+	if (i != n) {
+		if (compare(v[b], v[i_max])) {
+			partially_sorted = false;
+		} else {
+			for (ItemIdx i=b+1; i<n; ++i) {
+				if (compare(v[i], v[b])) {
+					partially_sorted = false;
+					break;
+				}
+			}
+		}
+	}
+	if (partially_sorted) {
+		DBG(std::cout << "Already partially sorted" << std::endl;)
+		return;
+	}
+	
+	// Quicksort like partial sorting
+	DBG(std::cout << "Quicksort" << std::endl;)
 	ItemIdx f = 0;
 	ItemIdx l = (n > 0)? n - 1: 0;
 	Q w = 0; // Sum of the weights of the items after l
@@ -279,7 +318,7 @@ void partial_sort(ItemIdx* v, ItemIdx n, Func1 compare, Q capacity, Func2 weight
 		}
 
 		DBG(std::cout << std::endl;
-		for (ItemIdx i=0; i<v.size(); ++i)
+		for (ItemIdx i=0; i<n; ++i)
 			std::cout << v[i] << " " << std::flush;)
 		DBG(std::cout << std::endl;)
 		DBG(std::cout << "f " << f << " l " << l << std::flush;)

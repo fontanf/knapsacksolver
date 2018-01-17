@@ -69,13 +69,18 @@ TEST(Instance, SortPartiallyByEfficiency2)
 TEST(Instance, SortPartiallyByEfficiency3)
 {
 	for (ItemIdx n = 0; n <= 1000; ++n) {
-		Weight c = 64 * n;
 		std::vector<Profit> p(n, 1);
 		std::vector<Weight> w(n);
 		iota(w.begin(), w.end(), 1);
+		Weight c = 0;
+		for (ItemIdx i=0; i<n; ++i)
+			c += w[i];
+		c /= 2;
+		std::cout << "n " << n << " c " << c << std::endl;
 		std::random_shuffle(w.begin(), w.end());
 
 		Instance instance(n, c, p, w);
+		std::cout << instance << std::endl;
 		Instance instance_eff  = Instance::sort_by_efficiency(instance);
 		Instance instance_peff = Instance::sort_partially_by_efficiency(instance);
 
@@ -87,9 +92,10 @@ TEST(Instance, SortPartiallyByEfficiency3)
 			Weight wi  = instance_eff.weight(i);
 			Weight wip = instance_peff.weight(i);
 			if (wi > r) {
-				std::cout << i << std::endl;
+				std::cout << "b " << i << std::endl;
 				EXPECT_GT(wip, rp);
 				EXPECT_EQ(pr, prp);
+				EXPECT_EQ(r, rp);
 				break;
 			}
 			pr  += instance_eff.profit(i);
