@@ -28,21 +28,21 @@ bazel-bin/lb_greedy/main -i ...
 
 ### With arrays *(See "Knapsack Problem", 2.3, 3.3 - Kellerer et al., 2004)*
 
-- Only optimal value, Time O(nc), Space O(c) `opt_bellman/main`
-- Version 1, Time O(nc), Space O(nc) `opt_bellman/main -a 1`
-  - Iterative implementation (default) `opt_bellman/main -a 1it`
-  - Implementation with a recursive function `opt_bellman/main -a 1rec`
-  - Implementation with a stack simulating a recursive function `opt_bellman/main -a 1stack`
-  - Recursive implementation using a map as memory `opt_bellman/main -a 1map`
-- Version 2, Time O(n2c), Space O(c+n) `opt_bellman/main -a 2`
-- Recursive scheme Time O(nc), Space O(n+c) `opt_bellman/main -a rec`
+- Only optimal value, Time O(nc), Space O(c) `opt_bellman/main -a opt`
+- Version 1, Time O(nc), Space O(nc) `opt_bellman/main -a sopt_1`
+  - Iterative implementation (default) `opt_bellman/main -a sopt_1it`
+  - Implementation with a recursive function `opt_bellman/main -a sopt_1rec`
+  - Implementation with a stack simulating a recursive function `opt_bellman/main -a sopt_1stack`
+  - Recursive implementation using a map as memory `opt_bellman/main -a sopt_1map`
+- Version 2, Time O(n2c), Space O(c+n) `opt_bellman/main -a sopt_2`
+- Recursive scheme Time O(nc), Space O(n+c) `opt_bellman/main -a sopt_rec`
 
 ### With lists *(See "Knapsack Problem", 3.4, 3.5 - Kellerer et al., 2004)*
 
-- Only optimal value `opt_bellman/main -a list`
-- Recursive scheme `opt_bellman/main -a reclist`
-- With Upper Bounds, only optimal value `opt_bellman/main -a ub`
-- With Upper Bounds, recursive scheme `opt_bellman/main -a recub`
+- Only optimal value `opt_bellman/main -a opt_list`
+- Recursive scheme `opt_bellman/main -a sopt_list_rec`
+- With Upper Bounds, only optimal value `opt_bellman/main -a opt_ub`
+- With Upper Bounds, recursive scheme `opt_bellman/main -a sopt_ub_rec`
 
 ## DP by profits *(See "Knapsack Problem", 2.3 - Kellerer et al., 2004)*
 
