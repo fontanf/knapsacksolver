@@ -53,12 +53,12 @@ int main(int argc, char *argv[])
 	if (algorithm == "opt") {
 		Instance instance_sorted = Instance::sort_partially_by_efficiency(instance);
 		Profit lb = lb_extgreedy(instance_sorted);
-		Profit ub = ub_surrogate(instance_sorted, lb);
+		Profit ub = ub_surrogate(instance_sorted, lb).ub;
 		opt_dpprofits(instance_sorted, ub, &pt, verbose);
 	} else if (algorithm == "sopt") {
 		Instance instance_sorted = Instance::sort_partially_by_efficiency(instance);
 		Profit lb = lb_extgreedy(instance_sorted);
-		Profit ub = ub_surrogate(instance_sorted, lb);
+		Profit ub = ub_surrogate(instance_sorted, lb).ub;
 		solution = sopt_dpprofits_1(instance_sorted, ub, &pt, verbose).get_orig();
 	}
 

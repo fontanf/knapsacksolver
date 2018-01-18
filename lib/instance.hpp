@@ -47,12 +47,6 @@ public:
 	Instance& operator=(const Instance& instance);
 
 	/**
-	 * Create an instance with items ordered according to non-increasing
-	 * profit.
-	 */
-	static Instance sort_by_profit(const Instance& instance);
-
-	/**
 	 * Create an instance with items ordered according to non-decreasing
 	 * weight.
 	 */
@@ -72,7 +66,6 @@ public:
 	 * described in "A Minimal Algorithm for the 0-1 Knapsack Problem"
 	 * (Pisinger, 1997).
 	 */
-	static Instance sort_partially_by_profit(const Instance& instance, Profit lb);
 	static Instance sort_partially_by_weight(const Instance& instance);
 	static Instance sort_partially_by_efficiency(const Instance& instance);
 
@@ -97,13 +90,12 @@ public:
 
 	/**
 	 * Create an instance partially ordered according to non-increasing
-	 * profit-to-weight ratio, with weights equal to wi + S (resp.  wi - S) and
-	 * capacity c + Sk (resp. c - Sk). This is used for surrogate relaxation.
-	 * See "Dynamic Programming and Strong Bounds for the 0-1
-	 * Knapsack Problem" (Martello, 1999).
+	 * profit-to-weight ratio, with weights equal to wi + S and capacity c
+	 * + Sk. This is used for surrogate relaxation.  See "Dynamic
+	 * Programming and Strong Bounds for the 0-1 Knapsack Problem"
+	 * (Martello, 1999).
 	 */
-	void surrogate_plus(const Instance& instance, Weight multiplier, ItemIdx bound);
-	void surrogate_minus(const Instance& instance, Weight multiplier, ItemIdx bound);
+	void surrogate(const Instance& instance, Weight multiplier, ItemIdx bound);
 
 	static Instance child(const Instance& instance);
 
@@ -153,6 +145,11 @@ public:
 
 	ItemIdx max_weight_item() const;
 	ItemIdx max_profit_item() const;
+
+	ItemIdx break_item()     const { return b_; }
+	Profit  break_profit()   const { return psum_; };
+	Weight  break_weight()   const { return wsum_; }
+	Weight  break_capacity() const { return r_; }
 
 	inline std::string name()   const { return name_; }
 	inline std::string format() const { return format_; }
@@ -217,6 +214,8 @@ private:
 	Profit profit_parent(ItemIdx i) const { return parent()->profit(index(i));}
 	Weight weight_parent(ItemIdx i) const { return parent()->weight(index(i));}
 
+	void compute_break();
+
 	std::string name_;
 	std::string format_;
 
@@ -230,6 +229,11 @@ private:
 	ItemIdx* i_ = NULL;
 	const Instance* parent_   = NULL;
 	Solution*       solution_ = NULL;
+
+	ItemIdx b_ = 0;
+	Weight r_    = -1;
+	Profit psum_ = -1;
+	Weight wsum_ = -1;
 
 };
 

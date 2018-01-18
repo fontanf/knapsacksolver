@@ -5,248 +5,239 @@
 #define DBG(x)
 //#define DBG(x) x
 
-class SurrogateInfos
+inline void swap(ItemIdx* v, ItemIdx i, ItemIdx j)
 {
+	ItemIdx tmp = v[j];
+	v[j] = v[i];
+	v[i] = tmp;
+}
 
-public:
+ItemIdx max_card(const Instance& instance)
+{
+	ItemIdx* index = new ItemIdx[instance.item_number()];
+	std::iota(index, index+instance.item_number(), 1);
 
-	SurrogateInfos(boost::property_tree::ptree* pt, bool verbose, const Instance& instance):
-		pt_(pt), verbose_(verbose), instance_(instance) {  }
+	ItemIdx kp1 = 0;
+	ItemIdx f = 0;
+	ItemIdx l = instance.item_number() - 1;
+	Weight  w = 0;
+	Weight  c = instance.capacity();
+	while (f < l) {
+		ItemIdx pivot = f + 1 + rand() % (l - f); // Select pivot
 
-	~SurrogateInfos() {  }
+		//for (ItemIdx i=0; i<instance.item_number(); ++i)
+			//std::cout << index[i] << " (" << instance.weight(index[i]) << ") ";
+		//std::cout << std::endl;
+		//std::cout << "f " << f << " l " << l << " pivot " << pivot << std::endl;
 
-	Profit write(Profit ub, std::string str, Weight s)
-	{
-		if (pt_ != NULL) {
-			pt_->put("UB" + std::to_string(k_) + ".Value", ub);
-			pt_->put("UB" + std::to_string(k_) + ".Type", str);
-			pt_->put("UB" + std::to_string(k_) + ".Multiplier", s);
+		swap(index, pivot, l);
+		ItemIdx j = f;
+		for (ItemIdx i=f; i<l; ++i) {
+			if (instance.weight(index[i]) > instance.weight(index[l]))
+				continue;
+			swap(index, i, j);
+			j++;
 		}
-		if (verbose_)
-			std::cout
-				<< "UB " << ub
-				<< " GAP " << ub - instance_.optimum()
-				<< " (" << str << ", " << s << ")"
-				<< std::endl;
-		k_++;
-		return ub;
+		swap(index, j, l);
+
+		Weight w_curr = w;
+		for (ItemIdx i=f; i<j; ++i)
+			w_curr += instance.weight(index[i]);
+		//std::cout << "w " << w_curr << " c " << c << " w+pj " << w_curr + instance.weight(index[j]) << std::endl;
+
+		if (w_curr + instance.weight(index[j]) <= c) {
+			f = j;
+			w = w_curr;
+		} else if (w_curr > c) {
+			l = j-1;
+		} else {
+			kp1 = j;
+			break;
+		}
 	}
+	if (kp1 == 0)
+		kp1 = f;
+	ItemIdx k = kp1 - 1;
 
-private:
+	//for (ItemIdx i=0; i<instance.item_number(); ++i)
+		//std::cout << index[i] << " (" << instance.weight(index[i]) << ") ";
+	//std::cout << std::endl;
 
-	boost::property_tree::ptree* pt_;
-	bool verbose_;
-	const Instance& instance_;
-	size_t k_ = 1;
+	DBG(std::cout << "kmax " << k+1 << std::endl;
+	Weight ww = 0;
+	for (ItemIdx i=0; i<=k; ++i)
+		ww += instance.weight(index[i]);
+	std::cout << "ww " << ww << " <= c " << c << " < ww+wk+1 " << ww + instance.weight(index[k+1]) << std::endl;
+	assert(ww <= c && ww + instance.weight(index[k+1]) > c);)
 
-};
+	delete[] index;
+	return k+1;
+}
 
-Profit ub_surrogate_cardinality_max(const Instance& instance, ItemIdx k,
-		SurrogateInfos& infos)
+ItemIdx min_card(const Instance& instance, Profit lb)
 {
-	DBG(std::cout << "ub_cardinality_max " << k << std::endl;)
+	ItemIdx* index = new ItemIdx[instance.item_number()];
+	std::iota(index, index+instance.item_number(), 1);
 
-	Instance instance_tmp = Instance::child(instance);
-	ItemIdx i = 0;
-	Weight  r = 0;
-	Profit  p = 0;
-	Profit ub = ub_dantzig(instance);
-	infos.write(ub, "W", -1);
+	ItemIdx f = 0;
+	ItemIdx l = instance.item_number() - 1;
+	ItemIdx km1 = 0;
+	Profit p = 0;
+	while (f < l) {
+		ItemIdx pivot = f + 1 + rand() % (l - f); // Select pivot
+
+		//for (ItemIdx i=0; i<instance.item_number(); ++i)
+			//std::cout << index[i] << " (" << instance.profit(index[i]) << ") ";
+		//std::cout << std::endl;
+		//std::cout << "f " << f << " l " << l << " pivot " << pivot << std::endl;
+
+		swap(index, pivot, l);
+		ItemIdx j = f;
+		for (ItemIdx i=f; i<l; ++i) {
+			if (instance.profit(index[i]) < instance.profit(index[l]))
+				continue;
+			swap(index, i, j);
+			j++;
+		}
+		swap(index, j, l);
+
+		Profit p_curr = p;
+		for (ItemIdx i=f; i<j; ++i)
+			p_curr += instance.profit(index[i]);
+		//std::cout << "p " << p_curr << " lb " << lb << " p+pj " << p_curr + instance.profit(index[j]) << std::endl;
+
+		if (p_curr > lb) {
+			l = j-1;
+		} else if (p_curr + instance.profit(index[j]) <= lb) {
+			f = j;
+			p = p_curr;
+		} else {
+			km1 = j-1;
+			break;
+		}
+	}
+	if (km1 == 0) {
+		std::cout << "f" << std::endl;
+		km1 = f;
+	}
+	ItemIdx k = km1 + 1;
+
+	//for (ItemIdx i=0; i<instance.item_number(); ++i)
+		//std::cout << index[i] << " (" << instance.profit(index[i]) << ") ";
+	//std::cout << std::endl;
+
+	DBG(std::cout << "kmin " << k+1 << std::endl;
+	Weight pp = 0;
+	for (ItemIdx i=0; i<k; ++i)
+		pp += instance.profit(index[i]);
+	std::cout << "pp " << pp << " <= z " << lb << " < pp+pk " << pp + instance.profit(index[k]) << std::endl;
+	assert(pp <= lb && pp + instance.profit(index[k]) > lb);)
+
+	delete[] index;
+	return k+1;
+}
+
+void ub_surrogate_solve(const Instance& instance, ItemIdx k,
+		Weight s_min, Weight s_max, SurrogateOut& out)
+{
+	Instance is = Instance::child(instance);
 	ItemIdx gamma = 0;
-	Profit p_max = instance.profit(instance.max_profit_item());
-	Weight w_max = instance.weight(instance.max_weight_item());
 	Weight  s = 0;
-	Weight s1 = 0;
-	Weight s2 = p_max * w_max - 1;
+	Weight s1 = s_min;
+	Weight s2 = s_max;
 
 	while (s1 <= s2) {
 		s = (s1 + s2) / 2;
-		DBG(std::cout << "s1: " << s1 << "; s: " << s << "; s2: " << s2 << " - ";)
 
-		instance_tmp.surrogate_plus(instance, s, k);
-		p = 0;
-		r = instance_tmp.capacity();
-		for (i=1; i<=instance_tmp.item_number(); ++i) {
-			Weight wi = instance_tmp.weight(i);
-			if (r < wi)
-				break;
-			r -= wi;
-			p += instance_tmp.profit(i);
-		}
-		if (r > 0 && i != instance_tmp.item_number() + 1)
-			p += (instance_tmp.profit(i) * r) / instance_tmp.weight(i);
-		gamma = i - 1;
-		DBG(std::cout << " " << gamma << " " << p << std::flush;)
+		is.surrogate(instance, s, k);
+		Profit p = is.solution()->profit() + is.break_profit();
+		if (is.break_capacity() > 0 && is.break_item() != is.item_number() + 1)
+			p += (is.profit(is.break_item()) * is.break_capacity()) / is.weight(is.break_item());
+		gamma = is.break_item() - 1 + is.solution()->item_number();
 
-		if (p < ub) {
-			ub = p;
-			infos.write(ub, "W", s);
+		DBG(std::cout
+				<< "s1 " << s1 << " s " << s << " s2 " << s2
+				<< " g " << gamma
+				<< " ub " << p
+				<< " GAP " << p - instance.optimum()
+				<< std::endl;)
+
+		if (p < out.ub) {
+			out.ub         = p;
+			out.multiplier = s;
 		}
-		if (gamma >= k) {
-			DBG(std::cout << " >" << std::endl;)
+
+		if (gamma == k && is.break_capacity() == 0)
+			return;
+
+		if ((s_min == 0 && gamma >= k) || (s_max == 0 && gamma >= k)) {
 			s1 = s + 1;
-		} else if (gamma < k) {
-			DBG(std::cout << " <" << std::endl;)
+		} else {
 			s2 = s - 1;
 		}
 	}
-
-	return ub;
 }
 
-//#undef DBG
-
-//#define DBG(x)
-//#define DBG(x) x
-
-Profit ub_surrogate_cardinality_min(const Instance& instance, ItemIdx k,
-		SurrogateInfos& infos)
-{
-	DBG(std::cout << "ub_cardinality_min" << std::endl;)
-
-	Instance instance_tmp = Instance::child(instance);
-	ItemIdx i = 0;
-	Weight  r = 0;
-	Profit  p = 0;
-	Profit ub = ub_dantzig(instance);
-	infos.write(ub, "Z", -1);
-	ItemIdx gamma = 0;
-	Profit p_max = instance.profit(instance.max_profit_item());
-	Weight w_max = instance.weight(instance.max_weight_item());
-	Weight  s = 0;
-	Weight s1 = 0;
-	Weight s2 = p_max * w_max - 1;
-
-	while (s1 <= s2) {
-		s = (s1 + s2) / 2;
-		DBG(std::cout << "s1: " << s1 << "; s: " << s << "; s2: " << s2 << " - ";)
-
-		instance_tmp.surrogate_minus(instance, s, k);
-		p = instance_tmp.solution()->profit();
-		DBG(std::cout << p << " " << std::flush;)
-		r = instance_tmp.capacity();
-		for (i=1; i<=instance_tmp.item_number(); ++i) {
-			Weight wi = instance_tmp.weight(i);
-			if (r < wi)
-				break;
-			r -= wi;
-			p += instance_tmp.profit(i);
-		}
-		DBG(std::cout << p << " " << std::flush;)
-		if (r > 0 && i != instance_tmp.item_number() + 1)
-			p += (instance_tmp.profit(i) * r) / instance_tmp.weight(i);
-		gamma = i - 1 + instance_tmp.solution()->item_number();
-		DBG(std::cout << p << " " << gamma << " " << std::flush;)
-
-		if (p < ub) {
-			ub = p;
-			infos.write(ub, "Z", s);
-		}
-		if (gamma < k) {
-			DBG(std::cout << ">" << std::endl;)
-			s1 = s + 1;
-		} else if (gamma >= k) {
-			DBG(std::cout << "<" << std::endl;)
-			s2 = s - 1;
-		}
-	}
-
-	DBG(std::cout << "ub_cardinality_min END" << std::endl;)
-	return ub;
-}
-
-//#undef DBG
-
-//#define DBG(x)
-//#define DBG(x) x
-
-Profit ub_surrogate(const Instance& instance, Profit lower_bound,
+SurrogateOut ub_surrogate(const Instance& instance, Profit lb,
 		boost::property_tree::ptree* pt, bool verbose)
 {
-	DBG(std::cout << "ub_surrogate()..." << std::endl;)
+	assert(instance.sort_type() == "efficiency" ||
+			instance.sort_type() == "partial_efficiency");
 
+	SurrogateOut out(pt, verbose);
+
+	// Trivial cases
 	if (instance.item_number() == 0)
-		return 0;
+		return out;
+	out.ub = ub_dantzig(instance);
+	if (instance.break_capacity() == 0 || instance.break_item() == instance.item_number() + 1)
+		return out;
+	ItemIdx i_wmax = instance.max_weight_item();
+	//ItemIdx i_pmax = instance.max_profit_item();
+	if (i_wmax == 0)
+		return out;
 
-	SurrogateInfos infos(pt, verbose, instance);
+	// Should ideally be: maxp*maxp, but may cause overflow (sic)
+	//Weight s_max = instance.weight(i_wmax) * instance.profit(i_pmax);
+	Weight s_max = instance.weight(i_wmax);
+	// Should ideally be: -maxp*maxw, but may cause overflow (sic)
+	Weight s_min = -s_max;
 
-	ItemIdx b = 1;
-	Weight  r = instance.capacity();
-	Profit  p = 0;
-	for (b=1; b<=instance.item_number(); ++b) {
-		Weight wi = instance.weight(b);
-		if (r < wi)
-			break;
-		r -= wi;
-		p += instance.profit(b);
-	}
-	DBG(std::cout << "b: " << b << std::endl;)
+	std::cout
+		<< "z " << lb
+		<< " GAP " << instance.optimum() - lb
+		<< " b " << instance.break_item()
+		<< " s_max " << s_max
+		<< std::endl;
 
-	if (r == 0 || b == instance.item_number() + 1) {
-		DBG(std::cout << "UB: " << p << " (" << instance.optimum() << ")" << std::endl;)
-		assert(instance.optimum() == 0 || p >= instance.optimum());
-		DBG(std::cout << "ub_surrogate()... end" << std::endl;)
-		return infos.write(p, "D", -1);
-	}
-
-	Profit ub_kw = -1;
-	Profit ub_kz = -1;
-
-	// Compute kw
-	Instance instance_weight = Instance::sort_by_weight(instance);
-	ItemIdx kw = 0;
-	r = instance_weight.capacity();
-	for (ItemIdx i=1; i<=instance_weight.item_number(); ++i) {
-		Weight wi = instance_weight.weight(i);
-		if (r < wi) {
-			kw = i - 1;
-			break;
-		}
-		r -= wi;
-	}
-	DBG(std::cout << "kw: " << kw << std::endl;)
-	if (kw == 0)
-		return 0;
-	if (kw == b - 1) {
-		ub_kw = ub_surrogate_cardinality_max(instance, kw, infos);
-		DBG(std::cout << "UB: " << ub_kw << " (" << instance.optimum() << ")" << std::endl;)
-		assert(instance.optimum() == 0 || ub_kw >= instance.optimum());
-	}
-
-	// Compute kz
-	Instance instance_profit = Instance::sort_by_profit(instance);
-	ItemIdx kz = 0;
-	for (ItemIdx i=1; i<=instance_profit.item_number(); ++i) {
-		Profit pi = instance_profit.profit(i);
-		if (lower_bound < pi) {
-			kz = i;
-			break;
-		}
-		lower_bound -= pi;
-	}
-	DBG(std::cout << "kz: " << kz << std::endl;)
-	if (kz == b) {
-		ub_kz = ub_surrogate_cardinality_min(instance, kz, infos);
-		DBG(std::cout << "UB: " << ub_kz << " (" << instance.optimum() << ")" << std::endl;)
-		assert(instance.optimum() == 0 || ub_kz >= instance.optimum());
-	}
-
-	if (ub_kw != -1 && ub_kz != -1) {
-		return (ub_kw > ub_kz)? ub_kz: ub_kw;
-	} else if (ub_kw != -1) {
-		return ub_kw;
-	} else if (ub_kz != -1) {
-		return ub_kz;
+	if (max_card(instance) == instance.break_item() - 1) {
+		ub_surrogate_solve(instance, instance.break_item() - 1, 0, s_max, out);
+	} else if (min_card(instance, lb) == instance.break_item()) {
+		ub_surrogate_solve(instance, instance.break_item(), s_min, 0, out);
+		if (out.ub < lb)
+			out.ub = lb;
 	} else {
-		ub_kw = ub_surrogate_cardinality_max(instance, b-1, infos);
-		DBG(std::cout << "ub_kw: " << ub_kw << std::endl;)
-		ub_kz = ub_surrogate_cardinality_min(instance, b, infos);
-		DBG(std::cout << "ub_kz: " << ub_kz << " (" << instance.optimum() << ")" << std::endl;)
-		Profit ub = (ub_kw > ub_kz)? ub_kw: ub_kz;
-		assert(instance.optimum() == 0 || ub >= instance.optimum());
-		infos.write(ub, "WZ", -1);
-		return ub;
+		SurrogateOut out2(pt, verbose);
+		out2.ub = out.ub;
+		ub_surrogate_solve(instance, instance.break_item()-1, 0, s_max, out);
+		ub_surrogate_solve(instance, instance.break_item(), s_min, 0, out2);
+		if (out2.ub > out.ub) {
+			out.ub         = out2.ub;
+			out.multiplier = out2.multiplier;
+		}
 	}
+
+	if (verbose) {
+		std::cout
+			<< "UB " << out.ub
+			<< " GAP " << out.ub - instance.optimum()
+			<< std::endl;
+	}
+	if (pt != NULL) {
+		pt->put("UB.Value", out.ub);
+	}
+	assert(instance.optimum() == 0 || out.ub >= instance.optimum());
+	return out;
 }
 
 #undef DBG
