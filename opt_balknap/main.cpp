@@ -5,6 +5,7 @@
 #include "../ub_surrogate/surrogate.hpp"
 
 #include <iostream>
+#include <chrono>
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
@@ -46,6 +47,9 @@ int main(int argc, char *argv[])
 	boost::property_tree::ptree pt;
 	Solution sol_orig(instance);
 
+	std::chrono::high_resolution_clock::time_point t1
+		= std::chrono::high_resolution_clock::now();
+
 	if (algorithm == "opt") {
 		Instance instance_sorted = Instance::sort_partially_by_efficiency(instance);
 		Solution solution = sol_extgreedy(instance_sorted);
@@ -77,6 +81,16 @@ int main(int argc, char *argv[])
 		assert(false);
 		std::cout << "Unknwow algorithm" << std::endl;
 	}
+
+	std::chrono::high_resolution_clock::time_point t2
+		= std::chrono::high_resolution_clock::now();
+
+	std::chrono::duration<double> time_span
+		= std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
+
+	pt.put("Solution.Time", time_span.count());
+	if (verbose)
+		std::cout << "Time " << time_span.count() << std::endl;
 
 	// Write output file
 	if (output_file != "")
