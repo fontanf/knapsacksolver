@@ -32,11 +32,6 @@ Profit opt_bellman(const Instance& instance,
 	opts_bellman(instance, values, 1, n, c);
 	Profit opt = values[c];
 
-	if (pt != NULL)
-		pt->put("Solution.OPT", opt);
-	if (verbose)
-		std::cout << "OPT: " << opt << std::endl;
-
 	delete[] values; // Free memory
 	return opt;
 }
@@ -92,12 +87,6 @@ Solution sopt_bellman_1_it(const Instance& instance,
 	}
 
 	delete[] values; // Free memory
-
-	if (pt != NULL)
-		pt->put("Solution.OPT", opt);
-	if (verbose)
-		std::cout << "OPT: " << opt << std::endl;
-
 	return solution;
 }
 
@@ -184,15 +173,11 @@ Solution sopt_bellman_1_rec(const Instance& instance,
 		i--;
 	}
 
-	if (verbose)
-		std::cout << "OPT: " << solution.profit() << std::endl;
-
 	size_t nodes_max = (n + 1) * (c + 1);
 
 	if (pt != NULL) {
 		pt->put("Solution.Values", data.nodes);
 		pt->put("Solution.ValuesRatio",  (double)data.nodes / (double)nodes_max);
-		pt->put("Solution.OPT", solution.profit());
 	}
 
 	return solution;
@@ -307,17 +292,12 @@ Solution sopt_bellman_1_stack(const Instance& instance,
 	size_t nodes_max = (n + 1) * (c + 1);
 
 	if (pt != NULL) {
-		pt->put("Solution.OPT",          opt);
 		pt->put("Solution.StackMaxSize", size_max);
 		pt->put("Solution.Values",       nodes);
 		pt->put("Solution.ValuesRatio",  (double)nodes / (double)nodes_max);
 	}
 
-	if (verbose)
-		std::cout << "OPT: " << opt << std::endl;
-
 	delete[] values; // Free memory
-
 	return solution;
 }
 
@@ -399,13 +379,9 @@ Solution sopt_bellman_1_map(const Instance& instance,
 	size_t map_max_size = (instance.item_number() + 1) * (instance.capacity() + 1);
 
 	if (pt != NULL) {
-		pt->put("Solution.OPT", opt);
 		pt->put("Solution.MapSize", map_size);
 		pt->put("Solution.MapRatio", (double)map_size / (double)map_max_size);
 	}
-
-	if (verbose)
-		std::cout << "OPT: " << opt << std::endl;
 
 	return solution;
 }
@@ -454,16 +430,11 @@ Solution sopt_bellman_2(const Instance& instance,
 	if (verbose)
 		std::cout << std::endl;
 
-	if (verbose)
-		std::cout << "OPT: " << solution.profit() << std::endl;
-
 	if (pt != NULL) {
 		pt->put("Solution.Iterations", iter);
-		pt->put("Solution.OPT", solution.profit());
 	}
 
 	delete[] values; // Free memory
-
 	return solution;
 }
 
@@ -551,33 +522,19 @@ void sopt_bellman_rec_rec(RecData2& d)
 Solution sopt_bellman_rec(const Instance& instance,
 		boost::property_tree::ptree* pt, bool verbose)
 {
-	if (instance.item_number() == 0) {
-		Solution solution(instance);
-		if (pt != NULL)
-			pt->put("Solution.OPT", 0);
-		return solution;
-	}
+	if (instance.item_number() == 0)
+		return Solution(instance);
 
 	if (instance.item_number() == 1) {
 		Solution solution(instance);
 		if (instance.weight(1) <= instance.capacity())
 			solution.set(1, true);
-		if (pt != NULL)
-			pt->put("Solution.OPT", solution.profit());
 		return solution;
 	}
 
 	RecData2 data(instance);
 	sopt_bellman_rec_rec(data);
-
-	if (pt != NULL)
-		pt->put("Solution.OPT", data.sol_curr.profit());
-
-	if (verbose)
-		std::cout << "OPT: " << data.sol_curr.profit() << std::endl;
-
 	DBG(std::cout << data.sol_curr << std::endl;)
-
 	return data.sol_curr;
 }
 
@@ -657,25 +614,17 @@ Profit opt_bellman_list(const Instance& instance,
 	Weight  c = instance.capacity();
 	ItemIdx n = instance.item_number();
 
-	if (n == 0) {
-		if (pt != NULL)
-			pt->put("Solution.OPT", 0);
-		if (verbose)
-			std::cout << "OPT: " << 0 << std::endl;
+	if (n == 0)
 		return 0;
-	}
 
 	std::vector<State> l0 = opts_bellman_list(instance, 1, n, c);
 	Profit opt = l0.front().p;
 
 	if (pt != NULL) {
-		pt->put("Solution.OPT", opt);
 		pt->put("Solution.States", l0.size());
 		pt->put("Solution.StateRatio", (double)l0.size() / (double)instance.capacity());
 	}
-
 	if (verbose) {
-		std::cout << "OPT "        << opt << std::endl;
 		std::cout << "States "     << l0.size() << std::endl;
 		std::cout << "StateRatio " << (double)l0.size() / (double)instance.capacity() << std::endl;
 	}
@@ -796,33 +745,19 @@ void sopt_bellman_rec_list_rec(RecListData& d)
 Solution sopt_bellman_rec_list(const Instance& instance,
 		boost::property_tree::ptree* pt, bool verbose)
 {
-	if (instance.item_number() == 0) {
-		Solution solution(instance);
-		if (pt != NULL)
-			pt->put("Solution.OPT", 0);
-		return solution;
-	}
+	if (instance.item_number() == 0)
+		return Solution(instance);
 
 	if (instance.item_number() == 1) {
 		Solution solution(instance);
 		if (instance.weight(1) <= instance.capacity())
 			solution.set(1, true);
-		if (pt != NULL)
-			pt->put("Solution.OPT", solution.profit());
 		return solution;
 	}
 
 	RecListData data(instance);
 	sopt_bellman_rec_list_rec(data);
-
-	if (pt != NULL)
-		pt->put("Solution.OPT", data.sol_curr.profit());
-
-	if (verbose)
-		std::cout << "OPT: " << data.sol_curr.profit() << std::endl;
-
 	DBG(std::cout << data.sol_curr << std::endl;)
-
 	return data.sol_curr;
 }
 
@@ -913,28 +848,12 @@ Profit opt_bellman_ub(const Instance& instance,
 	Weight  c = instance.capacity();
 	ItemIdx n = instance.item_number();
 
-	if (n == 0) {
-		if (pt != NULL)
-			pt->put("Solution.OPT", 0);
-		if (verbose)
-			std::cout << "OPT: " << 0 << std::endl;
+	if (n == 0)
 		return 0;
-	}
 
 	Profit lb = lb_extgreedy(instance) - 1;
 	std::vector<State> l0 = opts_bellman_ub(instance, 1, n, 1, n, c, lb, false, verbose);
-	Profit opt = l0.front().p;
-
-	if (pt != NULL) {
-		pt->put("Solution.OPT", opt);
-	}
-
-	if (verbose) {
-		std::cout << "OPT " << opt << std::endl;
-		std::cout << "EXP " << instance.optimum() << std::endl;
-	}
-
-	return opt;
+	return l0.front().p;
 }
 
 #undef DBG
@@ -1019,36 +938,20 @@ void sopt_bellman_rec_ub_rec(const Instance& instance,
 Solution sopt_bellman_rec_ub(const Instance& instance,
 		boost::property_tree::ptree* pt, bool verbose)
 {
-	if (instance.item_number() == 0) {
-		Solution solution(instance);
-		if (pt != NULL)
-			pt->put("Solution.OPT", 0);
-		return solution;
-	}
+	if (instance.item_number() == 0)
+		return Solution(instance);
 
 	if (instance.item_number() == 1) {
 		Solution solution(instance);
 		if (instance.weight(1) <= instance.capacity())
 			solution.set(1, true);
-		if (pt != NULL)
-			pt->put("Solution.OPT", solution.profit());
 		return solution;
 	}
 
 	Solution sol_curr(instance);
 	sopt_bellman_rec_ub_rec(instance,
 			1, instance.item_number(), instance.capacity(), -1, sol_curr, verbose);
-
-	if (pt != NULL)
-		pt->put("Solution.OPT", sol_curr.profit());
-
-	if (verbose) {
-		std::cout << "OPT " << sol_curr.profit() << std::endl;
-		std::cout << "EXP " << instance.optimum()     << std::endl;
-	}
-
 	assert(sol_curr.profit() == instance.optimum());
-
 	return sol_curr;
 }
 

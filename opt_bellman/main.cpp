@@ -41,37 +41,47 @@ int main(int argc, char *argv[])
 
 	Instance instance(input_data);
 	Solution solution(instance);
+	Profit opt = -1;
 	boost::property_tree::ptree pt;
 
 	std::chrono::high_resolution_clock::time_point t1
 		= std::chrono::high_resolution_clock::now();
 
 	if (algorithm == "opt") {
-		opt_bellman(instance, &pt, verbose);
+		opt = opt_bellman(instance, &pt, verbose);
 	} else if (algorithm == "sopt_1") {
 		solution = sopt_bellman_1(instance, &pt, verbose);
+		opt = solution.profit();
 	} else if (algorithm == "sopt_1it") {
 		solution = sopt_bellman_1_it(instance, &pt, verbose);
+		opt = solution.profit();
 	} else if (algorithm == "sopt_1rec") {
 		solution = sopt_bellman_1_rec(instance, &pt, verbose);
+		opt = solution.profit();
 	} else if (algorithm == "sopt_1stack") {
 		solution = sopt_bellman_1_stack(instance, &pt, verbose);
+		opt = solution.profit();
 	} else if (algorithm == "sopt_1map") {
 		solution = sopt_bellman_1_map(instance, &pt, verbose);
+		opt = solution.profit();
 	} else if (algorithm == "sopt_2") {
 		solution = sopt_bellman_2(instance, &pt, verbose);
+		opt = solution.profit();
 	} else if (algorithm == "sopt_rec") {
 		solution = sopt_bellman_rec(instance, &pt, verbose);
+		opt = solution.profit();
 	} else if (algorithm == "opt_list") {
-		opt_bellman_list(instance, &pt, verbose);
+		opt = opt_bellman_list(instance, &pt, verbose);
 	} else if (algorithm == "sopt_list_rec") {
 		solution = sopt_bellman_rec_list(instance, &pt, verbose);
+		opt = solution.profit();
 	} else if (algorithm == "opt_ub") {
 		Instance instance_sorted = Instance::sort_by_efficiency(instance);
-		opt_bellman_ub(instance_sorted, &pt, verbose);
+		opt = opt_bellman_ub(instance_sorted, &pt, verbose);
 	} else if (algorithm == "sopt_ub_rec") {
 		Instance instance_sorted = Instance::sort_by_efficiency(instance);
 		solution = sopt_bellman_rec_ub(instance_sorted, &pt, verbose).get_orig();
+		opt = solution.profit();
 	} else {
 		std::cout << "Unknwow algorithm" << std::endl;
 	}
@@ -82,9 +92,13 @@ int main(int argc, char *argv[])
 	std::chrono::duration<double> time_span
 		= std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
 
+	pt.put("Solution.OPT", opt);
 	pt.put("Solution.Time", time_span.count());
-	if (verbose)
+	if (verbose) {
+		std::cout << "OPT " << opt << std::endl;
+		std::cout << "EXP " << instance.optimum() << std::endl;
 		std::cout << "Time " << time_span.count() << std::endl;
+	}
 
 	// Write output file
 	if (output_file != "")
