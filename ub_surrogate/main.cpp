@@ -4,6 +4,7 @@
 #include "../lb_ls/ls.hpp"
 
 #include <iostream>
+#include <chrono>
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
@@ -41,10 +42,24 @@ int main(int argc, char *argv[])
 	bool verbose = vm.count("verbose");
 
 	Instance instance(input_data);
-	Instance instance_sorted = Instance::sort_by_efficiency(instance);
 	boost::property_tree::ptree pt;
+
+	std::chrono::high_resolution_clock::time_point t1
+		= std::chrono::high_resolution_clock::now();
+
+	Instance instance_sorted = Instance::sort_partially_by_efficiency(instance);
 	Profit lb = lb_extgreedy(instance_sorted);
 	ub_surrogate(instance_sorted, lb, &pt, verbose);
+
+	std::chrono::high_resolution_clock::time_point t2
+		= std::chrono::high_resolution_clock::now();
+
+	std::chrono::duration<double> time_span
+		= std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
+
+	pt.put("Solution.Time", time_span.count());
+	if (verbose)
+		std::cout << "Time " << time_span.count() << std::endl;
 
 	// Write output file
 	if (output_file != "")
