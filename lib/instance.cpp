@@ -46,6 +46,8 @@ Instance::Instance(boost::filesystem::path filepath)
 	i_ = new ItemIdx[n_];
 	for (ItemIdx i=1; i<=n_; ++i)
 		set_index(i, i);
+
+	assert(check());
 }
 
 void Instance::read_standard(boost::filesystem::path filepath)
@@ -116,6 +118,14 @@ void Instance::read_pisinger(boost::filesystem::path filepath)
 	}
 
 	file.close();
+}
+
+bool Instance::check()
+{
+	for (ItemIdx i=1; i<=item_number(); ++i)
+		if (weight(i) <= 0 || weight(i) > capacity())
+			return false;
+	return true;
 }
 
 Instance::~Instance()
@@ -230,6 +240,39 @@ void Instance::set_profits_and_weights_from_parent()
 	}
 }
 
+Instance Instance::sort_by_efficiency(const Instance& instance)
+{
+	Instance ins;
+	ins.init(instance);
+	ins.name_ += "_eff";
+	ins.n_   = instance.item_number();
+	ins.c_   = instance.capacity();
+	ins.opt_ = instance.optimum();
+	ins.i_   = new ItemIdx[ins.n_];
+	ins.sort_type_ = "efficiency";
+	for (ItemIdx i=1; i<=ins.n_; ++i)
+		ins.set_index(i, i);
+	std::sort(ins.i_, ins.i_ + ins.n_,
+			[&instance](ItemIdx i1, ItemIdx i2) {
+			return instance.profit(i1) * instance.weight(i2)
+			     > instance.profit(i2) * instance.weight(i1);});
+	ins.set_profits_and_weights_from_parent();
+
+	ins.r_    = ins.capacity();
+	ins.psum_ = 0;
+	ins.b_    = ins.item_number() + 1;
+	for (ItemIdx i=1; i<=ins.item_number(); ++i) {
+		if (ins.r_ < ins.weight(i)) {
+			ins.b_ = i;
+			break;
+		}
+		ins.r_    -= ins.weight(i);
+		ins.psum_ += ins.profit(i);
+	}
+	ins.wsum_ = ins.capacity() - ins.r_;
+	return ins;
+}
+
 #define DBG(x)
 //#define DBG(x) x
 
@@ -240,105 +283,97 @@ inline void swap(ItemIdx* v, ItemIdx i, ItemIdx j)
 	v[i] = tmp;
 }
 
-template<typename Func1, typename Func2, typename Q>
-void partial_sort(ItemIdx* v, ItemIdx n, Func1 compare, Q capacity, Func2 weight)
+void Instance::partial_sort(Weight s)
 {
-	DBG(std::cout << "partial_sort()..." << std::endl;)
-
-	if (n <= 1)
+	DBG(std::cout << "Partial sort s " << s << std::endl;)
+	if (item_number() == 0) {
+		b_    = 1;
+		psum_ = 0;
+		wsum_ = 0;
+		r_    = capacity();
 		return;
+	} else if (item_number() == 1) {
+		b_    = 2;
+		psum_ = parent()->profit(1);
+		wsum_ = parent()->weight(1);
+		r_    = capacity() - wsum_;
+		return;
+	}
 
 	ItemIdx f = 0;
-	ItemIdx l = (n > 0)? n - 1: 0;
-	Q w = 0; // Sum of the weights of the items after l
-	DBG(std::cout << "f " << f << " l " << l << std::flush;)
+	ItemIdx l = (n_ > 0)? n_ - 1: 0;
+	wsum_ = 0;
+	psum_ = 0;
 	while (f < l) {
 		ItemIdx pivot = f + 1 + rand() % (l - f); // Select pivot
-		DBG(std::cout << " pivot " << pivot << std::flush;)
-		swap(v, pivot, l);
 
+		//for (ItemIdx i=0; i<item_number(); ++i)
+			//std::cout << i_[i] << " ";
+		//std::cout << std::endl;
+		//std::cout << "f " << f << " l " << l << " pivot " << pivot << std::endl;
+
+		swap(i_, pivot, l);
 		ItemIdx j = f;
 		for (ItemIdx i=f; i<l; ++i) {
-			if (!compare(v[i], v[l]))
+			if (parent()->profit(i_[i])*(parent()->weight(i_[l])+s)
+					<= parent()->profit(i_[l])*(parent()->weight(i_[i])+s))
 				continue;
-			swap(v, i, j);
+			swap(i_, i, j);
 			j++;
 		}
+		swap(i_, j, l);
 
-		Q w_curr = w;
+		Weight w_curr = wsum_;
 		for (ItemIdx i=f; i<j; ++i)
-			w_curr += weight(v[i]);
+			w_curr += parent()->weight(i_[i]) + s;
+		//std::cout << "j " << j << " w " << w_curr << " c " << c_ << " w+wj " << w_curr + parent()->weight(i_[j]) + s << std::endl;
 
-		swap(v, j, l);
-		DBG(std::cout << " j " << j << std::flush;)
-		DBG(std::cout << " w_curr " << w_curr << std::flush;)
-
-		if (w_curr + weight(v[j]) <= capacity) {
+		if (w_curr + parent()->weight(i_[j]) + s <= c_) {
+			for (ItemIdx i=f; i<=j; ++i)
+				psum_ += parent()->profit(i_[i]);
+			wsum_ = w_curr + parent()->weight(i_[j]) + s;
 			f = j+1;
-			w = w_curr + weight(v[j]);
-			DBG(std::cout << " w " << w << std::flush;)
-		} else if (w_curr > capacity) {
+		} else if (w_curr > c_) {
 			l = j-1;
 		} else {
+			for (ItemIdx i=f; i<j; ++i)
+				psum_ += parent()->profit(i_[i]);
+			wsum_ = w_curr;
+			f = j;
 			break;
 		}
-
-		DBG(std::cout << std::endl;
-		for (ItemIdx i=0; i<n; ++i)
-			std::cout << v[i] << " " << std::flush;)
-		DBG(std::cout << std::endl;)
-		DBG(std::cout << "f " << f << " l " << l << std::flush;)
 	}
-	DBG(std::cout << "partial_sort()..." << std::endl;)
-}
+	if (f == item_number() - 1 && wsum_ + parent()->weight(i_[f]) + s <= c_) {
+		b_ = item_number() + 1;
+		wsum_ += parent()->weight(i_[f]) + s;
+		psum_ += parent()->profit(i_[f]);
+	} else {
+		b_ = f+1;
+	}
+	r_ = c_ - wsum_;
 
-#undef DBG
+	//for (ItemIdx i=0; i<item_number(); ++i)
+		//std::cout << i_[i] << " ";
+	//std::cout << std::endl;
 
-Instance Instance::sort_by_efficiency(const Instance& instance)
-{
-	Instance instance_new;
-	instance_new.init(instance);
-	instance_new.name_ += "_efficiency";
-	instance_new.n_   = instance.item_number();
-	instance_new.c_   = instance.capacity();
-	instance_new.opt_ = instance.optimum();
-	instance_new.i_   = new ItemIdx[instance_new.n_];
-	instance_new.sort_type_ = "efficiency";
-	for (ItemIdx i=1; i<=instance_new.n_; ++i)
-		instance_new.set_index(i, i);
-	std::sort(instance_new.i_, instance_new.i_ + instance_new.n_,
-			[&instance](ItemIdx i1, ItemIdx i2) {
-			return instance.profit(i1) * instance.weight(i2)
-			     > instance.profit(i2) * instance.weight(i1);});
-	instance_new.set_profits_and_weights_from_parent();
-	instance_new.compute_break();
-	return instance_new;
+	//std::cout << "b " << b_ << " wsum " << wsum_ << " psum " << psum_ << " r " << r_ << std::endl;
+	DBG(std::cout << "Partial sort END" << std::endl;)
 }
 
 Instance Instance::sort_partially_by_efficiency(const Instance& instance)
 {
-	Instance instance_new;
-	instance_new.init(instance);
-	instance_new.name_ += "_partefficiency";
-	instance_new.n_   = instance.item_number();
-	instance_new.c_   = instance.capacity();
-	instance_new.opt_ = instance.optimum();
-	instance_new.i_   = new ItemIdx[instance_new.n_];
-	instance_new.sort_type_ = "partial_efficiency";
-	for (ItemIdx i=1; i<=instance_new.n_; ++i)
-		instance_new.set_index(i, i);
-
-	partial_sort(
-			instance_new.i_, instance_new.n_,
-			[&instance](ItemIdx i1, ItemIdx i2) {
-			return instance.profit(i1) * instance.weight(i2)
-			     > instance.profit(i2) * instance.weight(i1);},
-			instance_new.capacity(),
-			[&instance](ItemIdx i) { return instance.weight(i); });
-
-	instance_new.set_profits_and_weights_from_parent();
-	instance_new.compute_break();
-	return instance_new;
+	Instance ins;
+	ins.init(instance);
+	ins.name_ += "_peff";
+	ins.n_   = instance.item_number();
+	ins.c_   = instance.capacity();
+	ins.opt_ = instance.optimum();
+	ins.i_   = new ItemIdx[ins.n_];
+	std::iota(ins.i_, ins.i_+instance.item_number(), 1);
+	ins.sort_type_ = "partial_efficiency";
+	ins.partial_sort(0);
+	ins.set_profits_and_weights_from_parent();
+	return ins;
 }
 
 #undef DBG
@@ -366,43 +401,12 @@ void Instance::surrogate(const Instance& instance, Weight multiplier, ItemIdx bo
 		}
 	}
 	c_ += multiplier * bound;
-
-	//std::sort(i_, i_ + n_,
-			//[&instance, &multiplier](ItemIdx i1, ItemIdx i2) {
-			//Profit pi1 = instance.profit(i1);
-			//Profit pi2 = instance.profit(i2);
-			//Weight wi1 = instance.weight(i1) + multiplier;
-			//Weight wi2 = instance.weight(i2) + multiplier;
-			//if (pi1 * wi2 > pi2 * wi1) {
-				//return true;
-			//} else if (pi1 * wi2 < pi2 * wi1) {
-				//return false;
-			//} else {
-				//return instance.weight(i1) > instance.weight(i2);
-			//}});
-	partial_sort(
-			i_, n_,
-			[&instance, &multiplier](ItemIdx i1, ItemIdx i2) {
-			Profit pi1 = instance.profit(i1);
-			Profit pi2 = instance.profit(i2);
-			Weight wi1 = instance.weight(i1) + multiplier;
-			Weight wi2 = instance.weight(i2) + multiplier;
-			if (pi1 * wi2 > pi2 * wi1) {
-				return true;
-			} else if (pi1 * wi2 < pi2 * wi1) {
-				return false;
-			} else {
-				return instance.weight(i1) > instance.weight(i2);
-			}},
-			capacity(),
-			[&instance, &multiplier](ItemIdx i) { return instance.weight(i) + multiplier; });
-
+	partial_sort(multiplier);
 	for (ItemIdx i=1; i<=n_; ++i) {
 		assert(weight_parent(i) + multiplier > 0);
 		set_weight(i, weight_parent(i) + multiplier);
 		set_profit(i, profit_parent(i));
 	}
-	compute_break();
 	DBG(std::cout << "Instance::surrogate()... END" << std::endl;)
 }
 
@@ -638,18 +642,3 @@ ItemIdx Instance::max_profit_item() const
 	return j;
 }
 
-void Instance::compute_break()
-{
-	r_    = capacity();
-	psum_ = 0;
-	b_    = item_number() + 1;
-	for (ItemIdx i=1; i<=item_number(); ++i) {
-		if (r_ < weight(i)) {
-			b_ = i;
-			break;
-		}
-		r_    -= weight(i);
-		psum_ += profit(i);
-	}
-	wsum_ = capacity() - r_;
-}

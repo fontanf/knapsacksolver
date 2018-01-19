@@ -206,6 +206,10 @@ private:
 	 */
 	void init(const Instance& instance);
 
+	bool check();
+
+	void partial_sort(Weight s);
+
 	inline void set_profit(ItemIdx i, Profit p) { assert(i > 0 && i <= n_); p_[i-1] = p; }
 	inline void set_weight(ItemIdx i, Weight w) { assert(i > 0 && i <= n_); w_[i-1] = w; }
 	inline void set_index(ItemIdx i, ItemIdx j) { assert(i > 0 && i <= n_); i_[i-1] = j; }

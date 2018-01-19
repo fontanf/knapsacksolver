@@ -25,45 +25,20 @@ TEST(Instance, SortByEfficiency)
 
 TEST(Instance, SortPartiallyByEfficiency1)
 {
-	Instance instance(9, 4,
+	Instance instance(9, 4, // break item b = 3 (1, 3)
 			{1, 1, 1, 1, 1, 1, 1, 1, 1},
 			{1, 2, 3, 4, 5, 6, 7, 8, 9});
-	// break item b = 3 (1, 3)
 	Instance instance_sorted = Instance::sort_partially_by_efficiency(instance);
-
-	ItemIdx b = 0;
-	Weight r = instance_sorted.capacity();
-	for (ItemIdx i=1; i<=instance_sorted.item_number(); ++i) {
-		Weight wi = instance_sorted.weight(i);
-		if (wi > r) {
-			b = i;
-			break;
-		}
-		r -= wi;
-	}
-	EXPECT_EQ(instance_sorted.index_orig(b), 3);
+	EXPECT_EQ(instance_sorted.index_orig(instance_sorted.break_item()), 3);
 }
 
 TEST(Instance, SortPartiallyByEfficiency2)
 {
-	Instance instance(9, 6,
+	Instance instance(9, 6, // break item b = 3 (1, 3)
 			{1, 1, 1, 1, 1, 1, 1, 1, 1},
 			{1, 9, 2, 8, 3, 7, 4, 5, 6});
-	// break item b = 3 (1, 3)
 	Instance instance_sorted = Instance::sort_partially_by_efficiency(instance);
-	std::cout << instance_sorted << std::endl;
-
-	ItemIdx b = 0;
-	Weight r = instance_sorted.capacity();
-	for (ItemIdx i=1; i<=instance_sorted.item_number(); ++i) {
-		Weight wi = instance_sorted.weight(i);
-		if (wi > r) {
-			b = i;
-			break;
-		}
-		r -= wi;
-	}
-	EXPECT_EQ(instance_sorted.index_orig(b), 7);
+	EXPECT_EQ(instance_sorted.index_orig(instance_sorted.break_item()), 7);
 }
 
 TEST(Instance, SortPartiallyByEfficiency3)
@@ -76,32 +51,24 @@ TEST(Instance, SortPartiallyByEfficiency3)
 		for (ItemIdx i=0; i<n; ++i)
 			c += w[i];
 		c /= 2;
+		c += 10;
 		std::cout << "n " << n << " c " << c << std::endl;
 		std::random_shuffle(w.begin(), w.end());
 
 		Instance instance(n, c, p, w);
-		std::cout << instance << std::endl;
 		Instance instance_eff  = Instance::sort_by_efficiency(instance);
 		Instance instance_peff = Instance::sort_partially_by_efficiency(instance);
-
-		Weight r   = c;
-		Weight rp  = c;
-		Profit pr  = 0;
-		Profit prp = 0;
-		for (ItemIdx i=1; i<=n; ++i) {
-			Weight wi  = instance_eff.weight(i);
-			Weight wip = instance_peff.weight(i);
-			if (wi > r) {
-				std::cout << "b " << i << std::endl;
-				EXPECT_GT(wip, rp);
-				EXPECT_EQ(pr, prp);
-				EXPECT_EQ(r, rp);
-				break;
-			}
-			pr  += instance_eff.profit(i);
-			prp += instance_peff.profit(i);
-			r   -= wi;
-			rp  -= wip;
-		}
+		EXPECT_EQ(
+				instance_eff.break_item(),
+				instance_peff.break_item());
+		EXPECT_EQ(
+				instance_eff.break_profit(),
+				instance_peff.break_profit());
+		EXPECT_EQ(
+				instance_eff.break_weight(),
+				instance_peff.break_weight());
+		EXPECT_EQ(
+				instance_eff.break_capacity(),
+				instance_peff.break_capacity());
 	}
 }
