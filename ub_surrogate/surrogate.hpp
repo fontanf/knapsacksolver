@@ -14,6 +14,7 @@ struct SurrogateOut
 	boost::property_tree::ptree* pt;
 	bool verbose;
 	Profit ub = 0;
+	ItemIdx bound = 0;
 	Weight multiplier = 0;
 };
 

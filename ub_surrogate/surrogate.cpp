@@ -14,9 +14,11 @@ inline void swap(ItemIdx* v, ItemIdx i, ItemIdx j)
 
 ItemIdx max_card(const Instance& instance)
 {
+	if (instance.item_number() == 1)
+		return (instance.weight(1) <= instance.capacity())? 1: 0;
+
 	ItemIdx* index = new ItemIdx[instance.item_number()];
 	std::iota(index, index+instance.item_number(), 1);
-
 	ItemIdx kp1 = 0;
 	ItemIdx f = 0;
 	ItemIdx l = instance.item_number() - 1;
@@ -51,12 +53,11 @@ ItemIdx max_card(const Instance& instance)
 		} else if (w_curr > c) {
 			l = j-1;
 		} else {
-			kp1 = j;
+			f = j;
 			break;
 		}
 	}
-	if (kp1 == 0)
-		kp1 = f;
+	kp1 = f;
 	ItemIdx k = kp1 - 1;
 
 	//for (ItemIdx i=0; i<instance.item_number(); ++i)
@@ -76,9 +77,11 @@ ItemIdx max_card(const Instance& instance)
 
 ItemIdx min_card(const Instance& instance, Profit lb)
 {
+	if (instance.item_number() <= 1)
+		return (instance.profit(1) <= lb)? 1: 0;
+
 	ItemIdx* index = new ItemIdx[instance.item_number()];
 	std::iota(index, index+instance.item_number(), 1);
-
 	ItemIdx f = 0;
 	ItemIdx l = instance.item_number() - 1;
 	ItemIdx km1 = 0;
@@ -140,6 +143,7 @@ ItemIdx min_card(const Instance& instance, Profit lb)
 void ub_surrogate_solve(const Instance& instance, ItemIdx k,
 		Weight s_min, Weight s_max, SurrogateOut& out)
 {
+	out.bound = k;
 	Instance is = Instance::child(instance);
 	ItemIdx gamma = 0;
 	Weight  s = 0;
@@ -203,19 +207,21 @@ SurrogateOut ub_surrogate(const Instance& instance, Profit lb,
 	// Should ideally be: -maxp*maxw, but may cause overflow (sic)
 	Weight s_min = -s_max;
 
-	std::cout
+	DBG(std::cout
 		<< "z " << lb
 		<< " GAP " << instance.optimum() - lb
 		<< " b " << instance.break_item()
 		<< " s_max " << s_max
-		<< std::endl;
+		<< std::endl;)
 
 	if (max_card(instance) == instance.break_item() - 1) {
 		ub_surrogate_solve(instance, instance.break_item() - 1, 0, s_max, out);
 	} else if (min_card(instance, lb) == instance.break_item()) {
 		ub_surrogate_solve(instance, instance.break_item(), s_min, 0, out);
-		if (out.ub < lb)
+		if (out.ub < lb) {
+			assert(instance.optimum() == 0 || lb == instance.optimum());
 			out.ub = lb;
+		}
 	} else {
 		SurrogateOut out2(pt, verbose);
 		out2.ub = out.ub;
@@ -224,6 +230,7 @@ SurrogateOut ub_surrogate(const Instance& instance, Profit lb,
 		if (out2.ub > out.ub) {
 			out.ub         = out2.ub;
 			out.multiplier = out2.multiplier;
+			out.bound      = out2.bound;
 		}
 	}
 
