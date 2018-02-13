@@ -3,7 +3,7 @@ cc_library(
         hdrs = ["instance.hpp", "solution.hpp"],
         srcs = ["instance.cpp", "solution.cpp"],
         visibility = ["//visibility:public"],
-        deps = ["//ub_dantzig:libdantzig"],
+        deps = [],
 )
 
 cc_library(

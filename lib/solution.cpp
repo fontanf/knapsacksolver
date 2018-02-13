@@ -1,76 +1,63 @@
 #include "solution.hpp"
 
-Solution::Solution(const Instance& instance):
-	instance_(&instance), k_(0), p_(0), r_(instance.capacity())
-{
-	x_ = new bool[instance_->instance_orig()->item_number()];
-	for (ItemIdx i=1; i<=instance_->item_number(); i++)
-		x_[i-1] = false;
-	assert(profit() == 0);
-}
+Solution::Solution(const Instance& instance): instance_(instance),
+	x_(std::vector<int>(instance.total_item_number(), 0)) { }
 
 Solution::Solution(const Solution& solution):
-	instance_(solution.instance()), k_(0), p_(0), r_(solution.instance()->capacity())
-{
-	ItemIdx n = instance_->item_number();
-	x_ = new bool[n];
-	for (ItemIdx i=1; i<=n; i++) {
-		x_[i-1] = false;
-		set(i, solution.get(i));
-	}
-}
+	instance_(solution.instance()), k_(solution.item_number()),
+	p_(solution.profit()), w_(solution.weight()), x_(solution.data())
+{ }
 
 Solution& Solution::operator=(const Solution& solution)
 {
 	if (this != &solution) {
-		assert(instance() == solution.instance());
-		ItemIdx n = solution.instance()->item_number();
-		if (instance()->item_number() == n) {
-			k_ = 0;
-			r_ = solution.instance()->capacity();
-			instance_ = solution.instance();
-			for (ItemIdx i=1; i<=n; i++)
-				set(i, solution.get(i));
-		} else {
-			k_ = 0;
-			r_ = solution.instance()->capacity();
-			instance_ = solution.instance();
-			if (x_ != NULL)
-				delete[] x_;
-			x_ = new bool[n];
-			for (ItemIdx i=1; i<=n; i++) {
-				x_[i-1] = false;
-				set(i, solution.get(i));
-			}
-		}
+		k_ = solution.item_number();
+		p_ = solution.profit();
+		w_ = solution.weight();
+		x_ = solution.data();
 	}
 	return *this;
 }
 
-void Solution::set(ItemIdx i, bool b)
+int Solution::contains(ItemPos i) const
 {
-	if (get(i) == b)
-		return;
-	if (b) {
-		p_ += instance()->profit(i);
-		r_ -= instance()->weight(i);
-		k_++;
-	} else {
-		p_ -= instance()->profit(i);
-		r_ += instance()->weight(i);
-		k_--;
-	}
-	x_[i-1] = b;
+	assert(i >= 0 && i < instance().total_item_number());
+	assert(instance().item(i).i >= 0 && instance().item(i).i < instance().total_item_number());
+	return x_[instance().item(i).i];
 }
 
-Solution Solution::get_orig() const
+void Solution::set(ItemPos i, int b)
 {
-	return instance()->solution_orig(*this);
+	assert(b == 0 || b == 1);
+	assert(i >= 0 && i < instance().total_item_number());
+	assert(instance().item(i).i >= 0 && instance().item(i).i < instance().total_item_number());
+	if (contains(i) == b)
+		return;
+	if (b) {
+		p_ += instance().item(i).p;
+		w_ += instance().item(i).w;
+		k_++;
+	} else {
+		p_ -= instance().item(i).p;
+		w_ -= instance().item(i).w;
+		k_--;
+	}
+	x_[instance().item(i).i] = b;
+}
+
+bool Solution::update(const Solution& sol)
+{
+	if (sol.profit() <= profit())
+		return false;
+	*this = sol;
+	return true;
 }
 
 std::ostream& operator<<(std::ostream& os, const Solution& solution)
 {
-	for (ItemIdx i=1; i<=solution.instance()->item_number(); ++i)
-		os << (solution.get(i)? 1: 0) << std::endl;
+	const Instance& instance = solution.instance();
+	for (ItemPos i=0; i<instance.total_item_number(); ++i)
+		os << solution.data()[i] << std::endl;
 	return os;
 }
+
