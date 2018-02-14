@@ -9,10 +9,30 @@ cc_library(
 cc_binary(
         name = "main",
         srcs = ["main.cpp"],
-        deps = [":libgreedy", "//lib:cpp"],
+        deps = [
+                ":libgreedy",
+                "//lib:cpp"
+        ],
         linkopts = [
                 "-lboost_system",
                 "-lboost_filesystem",
                 "-lboost_program_options"
         ],
 )
+
+cc_test(
+        name = "test",
+        srcs = ["test.cpp"],
+        deps = [
+                ":libgreedy",
+                "//lib:cpp",
+                "@googletest//:gtest_main",
+        ],
+        linkopts = [
+                "-lboost_system",
+                "-lboost_filesystem",
+                "-lboost_program_options"
+        ],
+        timeout = "short",
+)
+
