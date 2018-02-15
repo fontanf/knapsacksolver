@@ -197,6 +197,11 @@ void Instance::sort_partially()
     ItemPos l = (n_ > 0)? n_ - 1: 0;
     wsum_ = 0;
     psum_ = 0;
+    while (item(f).w <= 0) {
+        wsum_ += item(f).w;
+        psum_ += item(f).p;
+        f++;
+    }
     while (f < l) {
         ItemPos pivot = f + 1 + rand() % (l - f); // Select pivot
         DBG(std::cout << "f " << f << " l " << l << " pivot " << pivot << std::endl;)
@@ -218,7 +223,7 @@ void Instance::sort_partially()
             w_curr += item(i).w;
 
         // Update f and l
-        if (w_curr + item(j).w <= c_) {
+        if (w_curr + item(j).w <= c_ || w_curr <= 0) {
             for (ItemPos i=f; i<=j; ++i)
                 psum_ += item(i).p;
             wsum_ = w_curr + item(j).w;
@@ -258,7 +263,7 @@ void Instance::sort_partially()
 void Instance::surrogate(Weight multiplier, ItemIdx bound)
 {
     DBG(std::cout << "SURROGATE..." << std::endl;)
-        ItemIdx k = 0;
+    ItemIdx k = 0;
     for (ItemIdx i=0; i<item_number(); ++i) {
         items_[i].w += multiplier;
         if (item(i).w <= 0) {
@@ -494,6 +499,11 @@ bool Instance::check_lb(Profit p) const
     return (optimum() == 0
             || item_number() != total_item_number()
             || p <= optimum());
+}
+
+bool Instance::check_sol(const Solution& sol) const
+{
+    return (sol.weight() <= total_capacity());
 }
 
 ////////////////////////////////////////////////////////////////////////////////

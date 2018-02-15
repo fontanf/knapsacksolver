@@ -135,6 +135,7 @@ public:
     bool check_opt(Profit p) const;
     bool check_ub(Profit p) const;
     bool check_lb(Profit p) const;
+    bool check_sol(const Solution& sol) const;
 
 private:
 

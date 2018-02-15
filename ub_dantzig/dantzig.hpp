@@ -8,7 +8,7 @@
 #include <boost/property_tree/ini_parser.hpp>
 
 Profit ub_dantzig(const Instance& instance,
-		boost::property_tree::ptree* pt = NULL, bool verbose = false);
+        boost::property_tree::ptree* pt = NULL, bool verbose = false);
 
 /**
  * Dantzig upper bound, using items j..n
@@ -25,11 +25,6 @@ Profit ub_dantzig_rev_from(const Instance& instance, ItemIdx j, Weight r);
  * Dantzig upper bound, using items i1..i2
  */
 Profit ub_dantzig_from_to(const Instance& instance, ItemIdx i1, ItemIdx i2, Weight c);
-
-/**
- * Dantzig upper bound, using all items except j
- */
-Profit ub_dantzig_without(const Instance& instance, ItemIdx j, Weight c);
 
 /**
  * Dantzig upper bound, using items n1..i1-1,i2+1..n2
