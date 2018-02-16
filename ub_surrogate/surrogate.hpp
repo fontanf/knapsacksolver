@@ -18,7 +18,7 @@ struct SurrogateOut
 	Weight multiplier = 0;
 };
 
-SurrogateOut ub_surrogate(const Instance& instance, Profit lower_bound,
+SurrogateOut ub_surrogate(Instance& instance, Profit lb,
 		boost::property_tree::ptree* pt = NULL, bool verbose = false);
 
 #endif /* end of include guard: MARTELLO_HPP_YNPESKFM */

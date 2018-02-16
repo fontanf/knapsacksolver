@@ -1,7 +1,6 @@
 #include "surrogate.hpp"
 
 #include "../lb_greedy/greedy.hpp"
-#include "../lb_ls/ls.hpp"
 
 #include <iostream>
 #include <chrono>
@@ -47,9 +46,9 @@ int main(int argc, char *argv[])
 	std::chrono::high_resolution_clock::time_point t1
 		= std::chrono::high_resolution_clock::now();
 
-	Instance instance_sorted = Instance::sort_partially_by_efficiency(instance);
-	Profit lb = lb_extgreedy(instance_sorted);
-	ub_surrogate(instance_sorted, lb, &pt, verbose);
+	instance.sort_partially();
+	Solution sol = sol_bestgreedy(instance);
+	Profit ub = ub_surrogate(instance, sol.profit(), &pt, verbose).ub;
 
 	std::chrono::high_resolution_clock::time_point t2
 		= std::chrono::high_resolution_clock::now();
@@ -57,9 +56,13 @@ int main(int argc, char *argv[])
 	std::chrono::duration<double> time_span
 		= std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
 
-	pt.put("Solution.Time", time_span.count());
-	if (verbose)
+	pt.put("UB.Time", time_span.count());
+    pt.put("UB.Value", ub);
+	if (verbose) {
+		std::cout << "UB " << ub << std::endl;
+		std::cout << "GAP " << ub - instance.optimum() << std::endl;
 		std::cout << "Time " << time_span.count() << std::endl;
+	}
 
 	// Write output file
 	if (output_file != "")

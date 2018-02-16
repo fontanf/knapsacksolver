@@ -487,6 +487,14 @@ bool Instance::check_opt(Profit p) const
             || p == optimum());
 }
 
+bool Instance::check_sopt(const Solution& sol) const
+{
+    return (sol.weight() <= total_capacity()
+            && (optimum() == 0
+                || item_number() != total_item_number()
+                || sol.profit() == optimum()));
+}
+
 bool Instance::check_ub(Profit p) const
 {
     return (optimum() == 0
@@ -503,7 +511,10 @@ bool Instance::check_lb(Profit p) const
 
 bool Instance::check_sol(const Solution& sol) const
 {
-    return (sol.weight() <= total_capacity());
+    return (sol.weight() <= total_capacity()
+            && (optimum() == 0
+                || item_number() != total_item_number()
+                || sol.profit() <= optimum()));
 }
 
 ////////////////////////////////////////////////////////////////////////////////

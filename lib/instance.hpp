@@ -133,6 +133,7 @@ public:
     Profit check(boost::filesystem::path cert_file);
 
     bool check_opt(Profit p) const;
+    bool check_sopt(const Solution& sol) const;
     bool check_ub(Profit p) const;
     bool check_lb(Profit p) const;
     bool check_sol(const Solution& sol) const;

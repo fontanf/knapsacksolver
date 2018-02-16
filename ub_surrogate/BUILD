@@ -13,7 +13,6 @@ cc_binary(
                 ":libsurrogate",
                 "//lib:cpp",
                 "//lb_greedy:libgreedy",
-                "//lb_ls:libls",
         ],
         linkopts = [
                 "-lboost_system",
