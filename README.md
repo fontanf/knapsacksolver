@@ -1,3 +1,5 @@
+*Note: Rewritinig in progress*
+
 # Knapsack
 
 Implementations of classical algorithms for the Knapsack Problem. Most algorithms are detailed in the "Knapsack Problem" book (Kellerer et al., 2004).
@@ -17,7 +19,6 @@ bazel-bin/lb_greedy/main -i ...
 ## Lower bounds
 
 - Ext-Greedy `lb_greedy/main` *(See "Knapsack Problem", 2.5 Approximation Algorithms - Kellerer et al., 2004)*
-- Local search `lb_ls/main`
 
 ## Upper bounds
 
