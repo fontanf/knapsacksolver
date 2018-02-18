@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
         ("output-file,o", boost::program_options::value<std::string>(&output_file),            "set output file")
         ("cert-file,c",   boost::program_options::value<std::string>(&cert_file),              "set certificate output file")
         ("algorithm,a",   boost::program_options::value<std::string>(&algorithm),              "set algorithm")
-        ("reduction,r",   boost::program_options::value<std::string>(&algorithm),              "choose variable reduction")
+        ("reduction,r",   boost::program_options::value<std::string>(&reduction),              "choose variable reduction")
         ("verbose,v",                                                                          "enable verbosity")
         ;
     boost::program_options::variables_map vm;
@@ -106,7 +106,9 @@ int main(int argc, char *argv[])
         sol_best.update(sopt_bellman_rec_ub(instance, &pt, verbose));
         opt = sol_best.profit();
     } else {
-        std::cout << "Unknwow algorithm" << std::endl;
+        std::cerr << "Unknown or missing algorithm" << std::endl;
+        assert(false);
+        return 1;
     }
 
     std::chrono::high_resolution_clock::time_point t2
