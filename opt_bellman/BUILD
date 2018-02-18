@@ -6,7 +6,6 @@ cc_library(
         deps = [
                 "//lib:cpp",
                 "//ub_dantzig:libdantzig",
-                "//lb_ls:libls",
                 "//lb_greedy:libgreedy",
         ],
 )
