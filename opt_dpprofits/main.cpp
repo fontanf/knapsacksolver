@@ -78,9 +78,9 @@ int main(int argc, char *argv[])
     if (sol_best.profit() == ub) {
         opt = sol_best.profit();
     } else if (algorithm == "opt") {
-        opt = opt_dpprofits(instance, ub, &pt, verbose);
-        DBG(std::cout << "OPT " << opt << std::endl;)
-        opt = (opt > sol_best.profit())? opt: sol_best.profit();
+        opt = std::max(
+                sol_best.profit(),
+                opt_dpprofits(instance, ub, &pt, verbose));
     } else if (algorithm == "sopt") {
         sol_best.update(sopt_dpprofits_1(instance, ub, &pt, verbose));
         opt = sol_best.profit();
