@@ -197,7 +197,7 @@ void Instance::sort_partially()
     ItemPos l = (n_ > 0)? n_ - 1: 0;
     wsum_ = 0;
     psum_ = 0;
-    while (item(f).w <= 0) {
+    while (f < n_ && item(f).w <= 0) {
         wsum_ += item(f).w;
         psum_ += item(f).p;
         f++;

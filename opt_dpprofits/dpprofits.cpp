@@ -8,6 +8,8 @@
 Profit opt_dpprofits(const Instance& instance, Profit ub,
         boost::property_tree::ptree* pt, bool verbose)
 {
+    DBG(std::cout << "DPPROFITS..." << std::endl;)
+
     // Initialize memory table
     ItemIdx n = instance.item_number();
     Weight  c = instance.capacity();
@@ -34,6 +36,7 @@ Profit opt_dpprofits(const Instance& instance, Profit ub,
         if (values[q-p0] <= c)
             opt = q;
     assert(instance.check_opt(opt));
+    DBG(std::cout << "DPPROFITS... END" << std::endl;)
     return opt;
 }
 

@@ -154,6 +154,7 @@ void ub_surrogate_solve(Instance& ins, ItemIdx k,
 SurrogateOut ub_surrogate(Instance& ins, Profit lb,
         boost::property_tree::ptree* pt, bool verbose)
 {
+    DBG(std::cout << "SURROGATERELAX..." << std::endl;)
     assert(ins.sort_type() == "eff" || ins.sort_type() == "peff");
 
     SurrogateOut out(pt, verbose);
@@ -201,6 +202,7 @@ SurrogateOut ub_surrogate(Instance& ins, Profit lb,
         out2.ub = out.ub;
         ub_surrogate_solve(ins, ins.break_item(), 0, s_max, out);
         ub_surrogate_solve(ins, ins.break_item() + 1, s_min, 0, out2);
+        DBG(std::cout << "Compute UB..." << std::endl;)
         if (out2.ub > out.ub) {
             out.ub         = out2.ub;
             out.multiplier = out2.multiplier;
@@ -213,6 +215,7 @@ SurrogateOut ub_surrogate(Instance& ins, Profit lb,
     }
 
     assert(ins.check_ub(out.ub));
+    DBG(std::cout << "SURROGATERELAX... END" << std::endl;)
     return out;
 }
 

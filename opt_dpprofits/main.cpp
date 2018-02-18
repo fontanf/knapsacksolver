@@ -12,8 +12,8 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/program_options.hpp>
 
-//#define DBG(x)
-#define DBG(x) x
+#define DBG(x)
+//#define DBG(x) x
 
 int main(int argc, char *argv[])
 {
