@@ -52,6 +52,16 @@ bool Solution::update(const Solution& sol)
     return true;
 }
 
+void Solution::write_cert(std::string file)
+{
+    if (file != "") {
+        std::ofstream cert;
+        cert.open(file);
+        cert << *this;
+        cert.close();
+    }
+}
+
 std::ostream& operator<<(std::ostream& os, const Solution& solution)
 {
     const Instance& instance = solution.instance();

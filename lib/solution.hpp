@@ -24,6 +24,8 @@ public:
 
     bool update(const Solution& sol);
 
+    void write_cert(std::string file);
+
 private:
 
     const Instance& instance_;

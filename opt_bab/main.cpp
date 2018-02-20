@@ -85,17 +85,7 @@ int main(int argc, char *argv[])
         std::cout << "TIME " << t << std::endl;
     }
 
-    // Write output file
-    if (output_file != "")
-        write_ini(output_file, info.pt);
-
-    // Write certificate file
-    if (cert_file != "") {
-        std::ofstream cert;
-        cert.open(cert_file);
-        cert << data.sol_best;
-        cert.close();
-    }
-
+    info.write_ini(output_file); // Write output file
+    data.sol_best.write_cert(cert_file); // Write certificate file
     return 0;
 }

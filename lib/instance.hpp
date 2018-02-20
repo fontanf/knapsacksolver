@@ -36,6 +36,12 @@ struct Info
         return (info != NULL && info->verbose_);
     }
 
+    void write_ini(std::string file)
+    {
+        if (file != "")
+            boost::property_tree::write_ini(file, pt);
+    }
+
     double elapsed_time() const
     {
         std::chrono::high_resolution_clock::time_point t2
