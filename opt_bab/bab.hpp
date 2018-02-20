@@ -9,20 +9,20 @@
 
 struct BabData
 {
-	BabData(const Instance& inst,
-			boost::property_tree::ptree* pt = NULL, bool verbose = false):
-		instance(inst), sol_curr(inst), sol_best(inst),
-		pt(pt), verbose(verbose)
-	{ }
-	const Instance& instance;
-	Solution sol_curr;
-	Solution sol_best;
-	ItemIdx i = 1;
-	Profit ub = 0;
-	Profit lb = 0;
-	size_t nodes = 0;
-	boost::property_tree::ptree* pt;
-	bool verbose;
+    BabData(const Instance& inst,
+            boost::property_tree::ptree* pt = NULL, bool verbose = false):
+        instance(inst), sol_curr(*inst.reduced_solution()), sol_best(*inst.reduced_solution()),
+        pt(pt), verbose(verbose)
+    { }
+    const Instance& instance;
+    Solution sol_curr;
+    Solution sol_best;
+    ItemIdx i = 0;
+    Profit ub = 0;
+    Profit lb = 0;
+    size_t nodes = 0;
+    boost::property_tree::ptree* pt;
+    bool verbose;
 };
 
 Profit sopt_bab(BabData& data);

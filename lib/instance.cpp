@@ -148,14 +148,21 @@ Profit Instance::check(boost::filesystem::path cert_file)
 
 ////////////////////////////////////////////////////////////////////////////////
 
+#define DBG(x)
+//#define DBG(x) x
+
 void Instance::sort()
 {
+    DBG(std::cout << "SORT..." << std::endl;)
     if (sort_type() == "eff")
         return;
     sort_type_ = "eff";
-    std::sort(items_.begin(), items_.begin() + n_,
-            [](const Item& i1, const Item& i2) {
-            return i1.p * i2.w > i2.p * i1.w;});
+
+    if (item_number() > 1)
+        std::sort(items_.begin(), items_.begin() + n_,
+                [](const Item& i1, const Item& i2) {
+                return i1.p * i2.w > i2.p * i1.w;});
+
     for (ItemPos i=0; i<item_number(); ++i) {
         if (wsum_ + item(i).w > capacity()) {
             b_ = i;
@@ -165,6 +172,30 @@ void Instance::sort()
         psum_ += item(i).p;
     }
     r_ = capacity() - wsum_;
+
+    isum_ = std::vector<Item>(item_number()+1);
+    isum_[0] = {0,0,0};
+    for (ItemPos i=1; i<=item_number(); ++i) {
+        isum_[i].i = i;
+        isum_[i].w = isum_[i-1].w + item(i-1).w;
+        isum_[i].p = isum_[i-1].p + item(i-1).p;
+    }
+    DBG(for (const Item& item: isum_)
+        std::cout << item << " ";
+    std::cout << std::endl;)
+    DBG(std::cout << "SORT... END" << std::endl;)
+}
+
+#undef DBG
+
+ItemPos Instance::ub_item(Item item) const
+{
+    assert(sort_type_ == "eff");
+    auto s = std::upper_bound(isum_.begin(), isum_.end(), item,
+            [](const Item& i1, const Item& i2) { return i1.w < i2.w;});
+    if (s == isum_.end())
+        return item_number();
+    return s->i-1;
 }
 
 #define DBG(x)

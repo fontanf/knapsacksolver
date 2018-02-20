@@ -13,7 +13,7 @@ cc_library(
 cc_binary(
         name = "main",
         srcs = ["main.cpp"],
-        deps = [":libbab", "//lib:cpp"],
+        deps = [":libbab", "//lib:cpp", "//lb_greedy:libgreedy"],
         linkopts = [
                 "-lboost_system",
                 "-lboost_filesystem",

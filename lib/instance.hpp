@@ -122,6 +122,9 @@ public:
     Weight  break_weight()   const { return wsum_; }
     Weight  break_capacity() const { return r_; }
 
+    const Item& isum(ItemPos i) const { assert(sort_type_ == "eff"); return isum_[i]; }
+    ItemPos ub_item(Item item) const;
+
     /**
      * Compute GCD of capacity and weights.
      */
@@ -162,6 +165,7 @@ private:
     Weight r_;
     Profit psum_ = 0;
     Weight wsum_ = 0;
+    std::vector<Item> isum_;
 };
 
 std::ostream& operator<<(std::ostream &os, const Item& item);

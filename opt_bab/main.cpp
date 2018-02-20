@@ -1,5 +1,7 @@
 #include "bab.hpp"
 
+#include "../lb_greedy/greedy.hpp"
+
 #include <iostream>
 #include <chrono>
 
@@ -11,71 +13,100 @@
 
 int main(int argc, char *argv[])
 {
-	// Parse program options
-	std::string input_data  = "";
-	std::string output_file = "";
-	std::string cert_file   = "";
-	std::string algorithm   = "";
-	boost::program_options::options_description desc("Allowed options");
-	desc.add_options()
-		("help,h", "produce help message")
-		("input-data,i",  boost::program_options::value<std::string>(&input_data)->required(), "set input data (required)")
-		("output-file,o", boost::program_options::value<std::string>(&output_file),            "set output file")
-		("cert-file,c",   boost::program_options::value<std::string>(&cert_file),              "set certificate output file")
-		("algorithm,a",   boost::program_options::value<std::string>(&algorithm),              "set algorithm")
-		("verbose,v",                                                                          "enable verbosity")
-		;
-	boost::program_options::variables_map vm;
-	boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
-	if (vm.count("help")) {
-		std::cout << desc << std::endl;;
-		return 1;
-	}
-	try {
-		boost::program_options::notify(vm);
-	} catch (boost::program_options::required_option e) {
-		std::cout << desc << std::endl;;
-		return 1;
-	}
-	bool verbose = vm.count("verbose");
+    namespace po = boost::program_options;
 
-	Instance instance(input_data);
-	boost::property_tree::ptree pt;
+    // Parse program options
+    std::string input_data  = "";
+    std::string output_file = "";
+    std::string cert_file   = "";
+    std::string algorithm   = "";
+    std::string reduction   = "";
+    po::options_description desc("Allowed options");
+    desc.add_options()
+        ("help,h", "produce help message")
+        ("input-data,i",  po::value<std::string>(&input_data)->required(), "set input data (required)")
+        ("output-file,o", po::value<std::string>(&output_file),            "set output file")
+        ("cert-file,c",   po::value<std::string>(&cert_file),              "set certificate output file")
+        ("algorithm,a",   po::value<std::string>(&algorithm),              "set algorithm")
+        ("reduction,r",   po::value<std::string>(&reduction),              "set reduction")
+        ("verbose,v",                                                                          "enable verbosity")
+        ;
+    po::variables_map vm;
+    po::store(po::parse_command_line(argc, argv, desc), vm);
+    if (vm.count("help")) {
+        std::cout << desc << std::endl;;
+        return 1;
+    }
+    try {
+        po::notify(vm);
+    } catch (po::required_option e) {
+        std::cout << desc << std::endl;;
+        return 1;
+    }
+    bool verbose = vm.count("verbose");
 
-	std::chrono::high_resolution_clock::time_point t1
-		= std::chrono::high_resolution_clock::now();
+    Instance instance(input_data);
+    Solution sol_best(instance);
+    boost::property_tree::ptree pt;
 
-	Instance instance_sorted = Instance::sort_by_efficiency(instance);
-	BabData data(instance_sorted, &pt, verbose);
-	if (algorithm == "") {
-		sopt_bab(data);
-	} else if (algorithm == "rec") {
-		sopt_bab_rec(data);
-	} else if (algorithm == "stack") {
-		sopt_bab_stack(data);
-	}
+    std::chrono::high_resolution_clock::time_point t1
+        = std::chrono::high_resolution_clock::now();
 
-	std::chrono::high_resolution_clock::time_point t2
-		= std::chrono::high_resolution_clock::now();
+    if (reduction == "") {
+        instance.sort_partially();
+        sol_best = sol_bestgreedy(instance);
+    } else if (reduction == "1") {
+        instance.sort_partially();
+        sol_best = sol_bestgreedy(instance);
+        instance.reduce1(sol_best, verbose);
+    } else if (reduction == "2") {
+        instance.sort();
+        sol_best = sol_bestgreedy(instance);
+        instance.reduce2(sol_best, verbose);
+    }
 
-	std::chrono::duration<double> time_span
-		= std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
+    BabData data(instance, &pt, verbose);
+    if (algorithm == "") {
+        instance.sort();
+        sopt_bab(data);
+    } else if (algorithm == "rec") {
+        instance.sort();
+        sopt_bab_rec(data);
+    } else if (algorithm == "stack") {
+        instance.sort();
+        sopt_bab_stack(data);
+    } else {
+        std::cerr << "Unknown or missing algorithm" << std::endl;
+        assert(false);
+        return 1;
+    }
+    sol_best.update(data.sol_best);
 
-	pt.put("Solution.Time", time_span.count());
-	if (verbose)
-		std::cout << "Time " << time_span.count() << std::endl;
+    std::chrono::high_resolution_clock::time_point t2
+        = std::chrono::high_resolution_clock::now();
 
-	// Write output file
-	if (output_file != "")
-		write_ini(output_file, pt);
+    std::chrono::duration<double> time_span
+        = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
 
-	// Write certificate file
-	if (cert_file != "") {
-		std::ofstream cert;
-		cert.open(cert_file);
-		cert << data.sol_best.get_orig();
-		cert.close();
-	}
+    pt.put("Solution.Time", time_span.count());
+    pt.put("Solution.OPT", sol_best.profit());
+    if (verbose) {
+        std::cout << "OPT " << sol_best.profit() << std::endl;
+        std::cout << "EXP " << instance.optimum() << std::endl;
+        std::cout << "Time " << time_span.count() << std::endl;
+    }
 
-	return 0;
+    // Write output file
+    if (output_file != "")
+        write_ini(output_file, pt);
+
+    // Write certificate file
+    if (cert_file != "") {
+        std::ofstream cert;
+        cert.open(cert_file);
+        cert << data.sol_best;
+        cert.close();
+    }
+
+    return 0;
 }
