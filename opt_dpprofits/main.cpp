@@ -52,11 +52,10 @@ int main(int argc, char *argv[])
     Instance instance(input_data);
     Solution sol_best(instance);
     Profit opt;
-    boost::property_tree::ptree pt;
+    Info info;
+    info.verbose(verbose);
 
-    std::chrono::high_resolution_clock::time_point t1
-        = std::chrono::high_resolution_clock::now();
-
+    // Variable reduction
     if (reduction == "") {
         instance.sort_partially();
         sol_best = sol_bestgreedy(instance);
@@ -69,20 +68,21 @@ int main(int argc, char *argv[])
         sol_best = sol_bestgreedy(instance);
         instance.reduce2(sol_best, verbose);
     }
+
+    // DPProfits
     Profit ub = ub_surrogate(instance, sol_best.profit()).ub;
     if (verbose) {
         std::cout << "LB " << sol_best.profit() << " GAP " << instance.optimum() - sol_best.profit() << std::endl;
         std::cout << "UB " << ub << " GAP " << ub - instance.optimum() << std::endl;
     }
-
     if (sol_best.profit() == ub) {
         opt = sol_best.profit();
     } else if (algorithm == "opt") {
         opt = std::max(
                 sol_best.profit(),
-                opt_dpprofits(instance, ub, &pt, verbose));
+                opt_dpprofits(instance, ub, &info));
     } else if (algorithm == "sopt") {
-        sol_best.update(sopt_dpprofits_1(instance, ub, &pt, verbose));
+        sol_best.update(sopt_dpprofits_1(instance, ub, &info));
         opt = sol_best.profit();
     } else {
         std::cerr << "Unknown or missing algorithm" << std::endl;
@@ -90,31 +90,17 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    std::chrono::high_resolution_clock::time_point t2
-        = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> time_span
-        = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
-
-    pt.put("Solution.Time", time_span.count());
-    pt.put("Solution.OPT", opt);
+    double t = info.elapsed_time();
+    info.pt.put("Solution.Time", t);
+    info.pt.put("Solution.OPT", opt);
     if (verbose) {
         std::cout << "---" << std::endl;
         std::cout << "OPT " << opt << std::endl;
         std::cout << "EXP " << instance.optimum() << std::endl;
-        std::cout << "Time " << time_span.count() << std::endl;
+        std::cout << "Time " << t << std::endl;
     }
 
-    // Write output file
-    if (output_file != "")
-        write_ini(output_file, pt);
-
-    // Write certificate file
-    if (cert_file != "") {
-        std::ofstream cert;
-        cert.open(cert_file);
-        cert << sol_best;
-        cert.close();
-    }
-
+    info.write_ini(output_file); // Write output file
+    sol_best.write_cert(cert_file); // Write certificate file
     return 0;
 }

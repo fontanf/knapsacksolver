@@ -5,8 +5,7 @@
 
 #define INDEX(i,q) (i+1)*(ub-p0+1) + (q)
 
-Profit opt_dpprofits(const Instance& instance, Profit ub,
-        boost::property_tree::ptree* pt, bool verbose)
+Profit opt_dpprofits(const Instance& instance, Profit ub, Info* info)
 {
     DBG(std::cout << "DPPROFITS..." << std::endl;)
 
@@ -40,8 +39,7 @@ Profit opt_dpprofits(const Instance& instance, Profit ub,
     return opt;
 }
 
-Solution sopt_dpprofits_1(const Instance& instance, Profit ub,
-        boost::property_tree::ptree* pt, bool verbose)
+Solution sopt_dpprofits_1(const Instance& instance, Profit ub, Info* info)
 {
     // Initialize memory table
     ItemIdx n = instance.item_number();
