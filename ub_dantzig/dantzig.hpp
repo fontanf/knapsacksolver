@@ -30,6 +30,6 @@ Profit ub_dantzig_from_to(const Instance& instance, ItemIdx i1, ItemIdx i2, Weig
  * Dantzig upper bound, using items n1..i1-1,i2+1..n2
  */
 Profit ub_dantzig_except(const Instance& instance,
-		ItemIdx n1, ItemIdx i1, ItemIdx i2, ItemIdx n2, Weight c);
+        ItemIdx n1, ItemIdx i1, ItemIdx i2, ItemIdx n2, Weight c);
 
 #endif /* end of include guard: DANTZIG_HPP_6HA0XAKO */
