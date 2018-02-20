@@ -2,71 +2,55 @@
 
 #include "../lb_greedy/greedy.hpp"
 
-#include <iostream>
-#include <chrono>
-
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/ini_parser.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
 #include <boost/program_options.hpp>
 
 int main(int argc, char *argv[])
 {
-	// Parse program options
-	std::string input_data  = "";
-	std::string output_file = "";
-	std::string cert_file   = "";
-	std::string algorithm   = "";
-	boost::program_options::options_description desc("Allowed options");
-	desc.add_options()
-		("help,h", "produce help message")
-		("input-data,i",  boost::program_options::value<std::string>(&input_data)->required(), "set input data (required)")
-		("output-file,o", boost::program_options::value<std::string>(&output_file),            "set output file")
-		("cert-file,c",   boost::program_options::value<std::string>(&cert_file),              "set certificate output file")
-		("verbose,v",                                                                          "enable verbosity")
-		;
-	boost::program_options::variables_map vm;
-	boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
-	if (vm.count("help")) {
-		std::cout << desc << std::endl;;
-		return 1;
-	}
-	try {
-		boost::program_options::notify(vm);
-	} catch (boost::program_options::required_option e) {
-		std::cout << desc << std::endl;;
-		return 1;
-	}
-	bool verbose = vm.count("verbose");
+    namespace po = boost::program_options;
 
-	Instance instance(input_data);
-	boost::property_tree::ptree pt;
+    // Parse program options
+    std::string input_data  = "";
+    std::string output_file = "";
+    std::string cert_file   = "";
+    std::string algorithm   = "";
+    po::options_description desc("Allowed options");
+    desc.add_options()
+        ("help,h", "produce help message")
+        ("input-data,i",  po::value<std::string>(&input_data)->required(), "set input data (required)")
+        ("output-file,o", po::value<std::string>(&output_file),            "set output file")
+        ("cert-file,c",   po::value<std::string>(&cert_file),              "set certificate output file")
+        ("verbose,v",                                                                          "enable verbosity")
+        ;
+    po::variables_map vm;
+    po::store(po::parse_command_line(argc, argv, desc), vm);
+    if (vm.count("help")) {
+        std::cout << desc << std::endl;;
+        return 1;
+    }
+    try {
+        po::notify(vm);
+    } catch (po::required_option e) {
+        std::cout << desc << std::endl;;
+        return 1;
+    }
 
-	std::chrono::high_resolution_clock::time_point t1
-		= std::chrono::high_resolution_clock::now();
+    Instance instance(input_data);
+    Info info;
+    info.verbose(vm.count("verbose"));
 
-	instance.sort_partially();
-	Solution sol = sol_bestgreedy(instance);
-	Profit ub = ub_surrogate(instance, sol.profit(), &pt, verbose).ub;
+    instance.sort_partially();
+    Solution sol = sol_bestgreedy(instance);
+    Profit ub = ub_surrogate(instance, sol.profit(), &info).ub;
 
-	std::chrono::high_resolution_clock::time_point t2
-		= std::chrono::high_resolution_clock::now();
+    double t = info.elapsed_time();
+    info.pt.put("UB.Time", t);
+    info.pt.put("UB.Value", ub);
+    if (Info::verbose(&info)) {
+        std::cout << "UB " << ub << std::endl;
+        std::cout << "GAP " << ub - instance.optimum() << std::endl;
+        std::cout << "TIME " << t << std::endl;
+    }
 
-	std::chrono::duration<double> time_span
-		= std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
-
-	pt.put("UB.Time", time_span.count());
-    pt.put("UB.Value", ub);
-	if (verbose) {
-		std::cout << "UB " << ub << std::endl;
-		std::cout << "GAP " << ub - instance.optimum() << std::endl;
-		std::cout << "Time " << time_span.count() << std::endl;
-	}
-
-	// Write output file
-	if (output_file != "")
-		write_ini(output_file, pt);
-
-	return 0;
+    info.write_ini(output_file); // Write output file
+    return 0;
 }

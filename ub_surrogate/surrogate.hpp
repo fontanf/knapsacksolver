@@ -9,16 +9,14 @@
 
 struct SurrogateOut
 {
-	SurrogateOut(boost::property_tree::ptree* pt, bool verbose):
-		pt(pt), verbose(verbose) {}
-	boost::property_tree::ptree* pt;
-	bool verbose;
-	Profit ub = 0;
-	ItemIdx bound = 0;
-	Weight multiplier = 0;
+    SurrogateOut(Info* info): info(info) {}
+    Info* info;
+    bool verbose;
+    Profit ub = 0;
+    ItemIdx bound = 0;
+    Weight multiplier = 0;
 };
 
-SurrogateOut ub_surrogate(Instance& instance, Profit lb,
-		boost::property_tree::ptree* pt = NULL, bool verbose = false);
+SurrogateOut ub_surrogate(Instance& instance, Profit lb, Info* info = NULL);
 
 #endif /* end of include guard: MARTELLO_HPP_YNPESKFM */

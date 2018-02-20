@@ -151,13 +151,12 @@ void ub_surrogate_solve(Instance& ins, ItemIdx k,
     ins.surrogate(-s, k);
 }
 
-SurrogateOut ub_surrogate(Instance& ins, Profit lb,
-        boost::property_tree::ptree* pt, bool verbose)
+SurrogateOut ub_surrogate(Instance& ins, Profit lb, Info* info)
 {
     DBG(std::cout << "SURROGATERELAX..." << std::endl;)
     assert(ins.sort_type() == "eff" || ins.sort_type() == "peff");
 
-    SurrogateOut out(pt, verbose);
+    SurrogateOut out(info);
 
     // Trivial cases
     if (ins.item_number() == 0)
@@ -182,10 +181,10 @@ SurrogateOut ub_surrogate(Instance& ins, Profit lb,
 
     if (max_card(ins) == ins.break_item()) {
         ub_surrogate_solve(ins, ins.break_item(), 0, s_max, out);
-        if (pt != NULL)
-            pt->put("UB.Type", "max");
-        if (verbose)
-            std::cout << "Using maximum cardinality constraint." << std::endl;
+        if (info != NULL)
+            info->pt.put("UB.Type", "max");
+        if (Info::verbose(info))
+            std::cout << "MAXCARD" << std::endl;
     } else if (min_card(ins, lb) == ins.break_item() + 1) {
         ub_surrogate_solve(ins, ins.break_item() + 1, s_min, 0, out);
         if (out.ub < lb) {
@@ -193,12 +192,12 @@ SurrogateOut ub_surrogate(Instance& ins, Profit lb,
                     || lb == ins.optimal_solution()->profit());
             out.ub = lb;
         }
-        if (pt != NULL)
-            pt->put("UB.Type", "min");
-        if (verbose)
-            std::cout << "Using minimum cardinality constraint." << std::endl;
+        if (info != NULL)
+            info->pt.put("UB.Type", "min");
+        if (Info::verbose(info))
+            std::cout << "MINCARD" << std::endl;
     } else {
-        SurrogateOut out2(pt, verbose);
+        SurrogateOut out2(info);
         out2.ub = out.ub;
         ub_surrogate_solve(ins, ins.break_item(), 0, s_max, out);
         ub_surrogate_solve(ins, ins.break_item() + 1, s_min, 0, out2);
@@ -208,10 +207,10 @@ SurrogateOut ub_surrogate(Instance& ins, Profit lb,
             out.multiplier = out2.multiplier;
             out.bound      = out2.bound;
         }
-        if (pt != NULL)
-            pt->put("UB.Type", "maxmin");
-        if (verbose)
-            std::cout << "Using maximum and minimum cardinality constraint." << std::endl;
+        if (info != NULL)
+            info->pt.put("UB.Type", "maxmin");
+        if (Info::verbose(info))
+            std::cout << "MAXCARD MINCARD" << std::endl;
     }
 
     assert(ins.check_ub(out.ub));
