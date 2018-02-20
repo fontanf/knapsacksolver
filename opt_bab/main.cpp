@@ -3,10 +3,6 @@
 #include "../lb_greedy/greedy.hpp"
 
 #include <iostream>
-#include <chrono>
-
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/ini_parser.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/program_options.hpp>
@@ -47,10 +43,8 @@ int main(int argc, char *argv[])
 
     Instance instance(input_data);
     Solution sol_best(instance);
-    boost::property_tree::ptree pt;
-
-    std::chrono::high_resolution_clock::time_point t1
-        = std::chrono::high_resolution_clock::now();
+    Info info;
+    info.verbose(verbose);
 
     if (reduction == "") {
         instance.sort_partially();
@@ -65,7 +59,7 @@ int main(int argc, char *argv[])
         instance.reduce2(sol_best, verbose);
     }
 
-    BabData data(instance, &pt, verbose);
+    BabData data(instance, &info);
     if (algorithm == "") {
         instance.sort();
         sopt_bab(data);
@@ -82,23 +76,18 @@ int main(int argc, char *argv[])
     }
     sol_best.update(data.sol_best);
 
-    std::chrono::high_resolution_clock::time_point t2
-        = std::chrono::high_resolution_clock::now();
-
-    std::chrono::duration<double> time_span
-        = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
-
-    pt.put("Solution.Time", time_span.count());
-    pt.put("Solution.OPT", sol_best.profit());
+    double t = info.elapsed_time();
+    info.pt.put("Solution.Time", t);
+    info.pt.put("Solution.OPT", sol_best.profit());
     if (verbose) {
         std::cout << "OPT " << sol_best.profit() << std::endl;
         std::cout << "EXP " << instance.optimum() << std::endl;
-        std::cout << "Time " << time_span.count() << std::endl;
+        std::cout << "TIME " << t << std::endl;
     }
 
     // Write output file
     if (output_file != "")
-        write_ini(output_file, pt);
+        write_ini(output_file, info.pt);
 
     // Write certificate file
     if (cert_file != "") {

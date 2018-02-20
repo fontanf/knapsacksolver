@@ -3,6 +3,8 @@
 #include "../ub_dantzig/dantzig.hpp"
 #include "../ub_surrogate/surrogate.hpp"
 
+#include <iomanip>
+
 Profit sopt_bab(BabData& data)
 {
     return sopt_bab_rec(data);
@@ -26,8 +28,13 @@ void sopt_bab_rec_rec(BabData& d)
         if (d.sol_curr.profit() > d.lb) {
             d.sol_best = d.sol_curr;
             d.lb = d.sol_best.profit();
-            if (d.verbose)
-                std::cout << "LB " << d.sol_best.profit() << " GAP " << d.instance.optimum() - d.sol_best.profit() << std::endl;
+            if (Info::verbose(d.info))
+                std::cout
+                    <<  "LB "   << d.sol_best.profit()
+                    << " GAP "  << d.instance.optimum() - d.sol_best.profit()
+                    << " NODE " << std::scientific << (double)d.nodes << std::defaultfloat
+                    << " TIME " << d.info->elapsed_time()
+                    << std::endl;
         }
         return;
     }
@@ -54,11 +61,11 @@ Profit sopt_bab_rec(BabData& data)
 
     sopt_bab_rec_rec(data);
 
-    if (data.pt != NULL) {
-        data.pt->put("Solution.Nodes", data.nodes);
+    if (data.info != NULL) {
+        data.info->pt.put("Solution.Nodes", data.nodes);
     }
-    if (data.verbose) {
-        std::cout << "Nodes " << data.nodes << std::endl;
+    if (Info::verbose(data.info)) {
+        std::cout << "NODES " << data.nodes << std::endl;
     }
     assert(data.instance.check_sopt(data.sol_best));
     return data.sol_best.profit();
@@ -100,8 +107,14 @@ Profit sopt_bab_stack(BabData& data)
             if (data.sol_curr.profit() > data.lb) {
                 data.sol_best = data.sol_curr;
                 data.lb = data.sol_best.profit();
-                if (data.verbose)
-                    std::cout << "LB " << data.sol_best.profit() << " (node " << data.nodes << ")" << std::endl;
+                if (Info::verbose(data.info)) {
+                    std::cout
+                        <<  "LB "   << data.sol_best.profit()
+                        << " GAP "  << data.instance.optimum() - data.sol_best.profit()
+                        << " NODE " << std::scientific << (double)data.nodes << std::defaultfloat
+                        << " TIME " << data.info->elapsed_time()
+                        << std::endl;
+                }
             }
             continue;
         }
@@ -117,13 +130,13 @@ Profit sopt_bab_stack(BabData& data)
         }
     }
 
-    if (data.pt != NULL) {
-        data.pt->put("Solution.Nodes",        data.nodes);
-        data.pt->put("Solution.StackSizeMax", list_size_max);
+    if (data.info != NULL) {
+        data.info->pt.put("Solution.Nodes",        data.nodes);
+        data.info->pt.put("Solution.MaxStackSize", list_size_max);
     }
-    if (data.verbose) {
-        std::cout << "Nodes " << data.nodes << std::endl;
-        std::cout << "StackSizeMax " << list_size_max << std::endl;
+    if (Info::verbose(data.info)) {
+        std::cout << "NODES " << data.nodes << std::endl;
+        std::cout << "MAXSTACKSIZE " << list_size_max << std::endl;
     }
     assert(data.instance.check_sopt(data.sol_best));
     return data.sol_best.profit();
