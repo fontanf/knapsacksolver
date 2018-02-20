@@ -2,9 +2,6 @@
 
 #include "../lb_greedy/greedy.hpp"
 
-#include <iostream>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
 #include <boost/program_options.hpp>
 
 int main(int argc, char *argv[])
@@ -46,9 +43,9 @@ int main(int argc, char *argv[])
     Info info;
     info.verbose(verbose);
 
+    // Variable reduction
     if (reduction == "") {
-        instance.sort_partially();
-        sol_best = sol_bestgreedy(instance);
+        sol_best = Solution(instance);
     } else if (reduction == "1") {
         instance.sort_partially();
         sol_best = sol_bestgreedy(instance);
@@ -59,6 +56,7 @@ int main(int argc, char *argv[])
         instance.reduce2(sol_best, verbose);
     }
 
+    // Branch-and-bounds
     BabData data(instance, &info);
     if (algorithm == "") {
         instance.sort();
