@@ -22,8 +22,7 @@ void opts_bellman(const Instance& instance, std::vector<Profit>& values,
     }
 }
 
-Profit opt_bellman(const Instance& instance,
-        boost::property_tree::ptree* pt, bool verbose)
+Profit opt_bellman(const Instance& instance, Info* info)
 {
     Weight  c = instance.capacity();
     ItemPos n = instance.item_number();
@@ -35,16 +34,14 @@ Profit opt_bellman(const Instance& instance,
 
 /******************************************************************************/
 
-Solution sopt_bellman_1(const Instance& instance,
-        boost::property_tree::ptree* pt, bool verbose)
+Solution sopt_bellman_1(const Instance& instance, Info* info)
 {
-    return sopt_bellman_1_it(instance, pt, verbose);
+    return sopt_bellman_1_it(instance, info);
 }
 
 /******************************************************************************/
 
-Solution sopt_bellman_1_it(const Instance& instance,
-        boost::property_tree::ptree* pt, bool verbose)
+Solution sopt_bellman_1_it(const Instance& instance, Info* info)
 {
     // Initialize memory table
     ItemPos n = instance.item_number();
@@ -139,8 +136,7 @@ Profit sopt_bellman_1_rec_rec(RecData& d)
     }
 }
 
-Solution sopt_bellman_1_rec(const Instance& instance,
-        boost::property_tree::ptree* pt, bool verbose)
+Solution sopt_bellman_1_rec(const Instance& instance, Info* info)
 {
     ItemPos n = instance.item_number();
     Weight  c = instance.capacity();
@@ -169,9 +165,9 @@ Solution sopt_bellman_1_rec(const Instance& instance,
 
     size_t nodes_max = (n + 1) * (c + 1);
 
-    if (pt != NULL) {
-        pt->put("Solution.Values", data.nodes);
-        pt->put("Solution.ValuesRatio",  (double)data.nodes / (double)nodes_max);
+    if (info != NULL) {
+        info->pt.put("Solution.Values", data.nodes);
+        info->pt.put("Solution.ValuesRatio",  (double)data.nodes / (double)nodes_max);
     }
     assert(instance.check_sol(solution));
     return solution;
@@ -190,8 +186,7 @@ struct Node
     Node* parent;
 };
 
-Solution sopt_bellman_1_stack(const Instance& instance,
-        boost::property_tree::ptree* pt, bool verbose)
+Solution sopt_bellman_1_stack(const Instance& instance, Info* info)
 {
     // Initialize memory table
     ItemPos n = instance.item_number();
@@ -283,10 +278,10 @@ Solution sopt_bellman_1_stack(const Instance& instance,
 
     size_t nodes_max = (n + 1) * (c + 1);
 
-    if (pt != NULL) {
-        pt->put("Solution.StackMaxSize", size_max);
-        pt->put("Solution.Values",       nodes);
-        pt->put("Solution.ValuesRatio",  (double)nodes / (double)nodes_max);
+    if (info != NULL) {
+        info->pt.put("Solution.StackMaxSize", size_max);
+        info->pt.put("Solution.Values",       nodes);
+        info->pt.put("Solution.ValuesRatio",  (double)nodes / (double)nodes_max);
     }
     assert(instance.check_sopt(solution));
     return solution;
@@ -337,8 +332,7 @@ Profit sopt_bellman_1_map_rec(MapData& d)
     }
 }
 
-Solution sopt_bellman_1_map(const Instance& instance,
-        boost::property_tree::ptree* pt, bool verbose)
+Solution sopt_bellman_1_map(const Instance& instance, Info* info)
 {
     // Compute optimal value
     MapData data(instance);
@@ -365,9 +359,9 @@ Solution sopt_bellman_1_map(const Instance& instance,
     for (ItemPos i=-1; i<instance.item_number(); ++i)
         map_size += data.values[i+1].size();
     size_t map_max_size = (instance.item_number() + 1) * (instance.capacity() + 1);
-    if (pt != NULL) {
-        pt->put("Solution.MapSize", map_size);
-        pt->put("Solution.MapRatio", (double)map_size / (double)map_max_size);
+    if (info != NULL) {
+        info->pt.put("Solution.MapSize", map_size);
+        info->pt.put("Solution.MapRatio", (double)map_size / (double)map_max_size);
     }
     assert(instance.check_sopt(solution));
     return solution;
@@ -378,8 +372,7 @@ Solution sopt_bellman_1_map(const Instance& instance,
 #define DBG(x)
 //#define DBG(x) x
 
-Solution sopt_bellman_2(const Instance& instance,
-        boost::property_tree::ptree* pt, bool verbose)
+Solution sopt_bellman_2(const Instance& instance, Info* info)
 {
     ItemPos n = instance.item_number();
     Weight  c = instance.capacity();
@@ -414,8 +407,8 @@ Solution sopt_bellman_2(const Instance& instance,
     }
     DBG(std::cout << std::endl;)
 
-    if (pt != NULL) {
-        pt->put("Solution.Iterations", iter);
+    if (info != NULL) {
+        info->pt.put("Solution.Iterations", iter);
     }
     assert(instance.check_sopt(solution));
     return solution;
@@ -503,8 +496,7 @@ void sopt_bellman_rec_rec(RecData2& d)
     }
 }
 
-Solution sopt_bellman_rec(const Instance& instance,
-        boost::property_tree::ptree* pt, bool verbose)
+Solution sopt_bellman_rec(const Instance& instance, Info* info)
 {
     if (instance.item_number() == 0)
         return *instance.reduced_solution();
@@ -592,8 +584,7 @@ std::vector<State> opts_bellman_list(const Instance& instance,
     return l0;
 }
 
-Profit opt_bellman_list(const Instance& instance,
-        boost::property_tree::ptree* pt, bool verbose)
+Profit opt_bellman_list(const Instance& instance, Info* info)
 {
     Weight  c = instance.capacity();
     ItemPos n = instance.item_number();
@@ -604,11 +595,11 @@ Profit opt_bellman_list(const Instance& instance,
     std::vector<State> l0 = opts_bellman_list(instance, 0, n-1, c);
     Profit opt = instance.reduced_solution()->profit() + l0.front().p;
 
-    if (pt != NULL) {
-        pt->put("Solution.States", l0.size());
-        pt->put("Solution.StateRatio", (double)l0.size() / (double)instance.capacity());
+    if (info != NULL) {
+        info->pt.put("Solution.States", l0.size());
+        info->pt.put("Solution.StateRatio", (double)l0.size() / (double)instance.capacity());
     }
-    if (verbose) {
+    if (Info::verbose(info)) {
         std::cout << "States "     << l0.size() << std::endl;
         std::cout << "StateRatio " << (double)l0.size() / (double)instance.capacity() << std::endl;
     }
@@ -726,8 +717,7 @@ void sopt_bellman_rec_list_rec(RecListData& d)
     }
 }
 
-Solution sopt_bellman_rec_list(const Instance& instance,
-        boost::property_tree::ptree* pt, bool verbose)
+Solution sopt_bellman_rec_list(const Instance& instance, Info* info)
 {
     if (instance.item_number() == 0)
         return *instance.reduced_solution();
@@ -826,8 +816,7 @@ std::vector<State> opts_bellman_ub(const Instance& instance,
     return l0;
 }
 
-Profit opt_bellman_ub(const Instance& instance,
-        boost::property_tree::ptree* pt, bool verbose)
+Profit opt_bellman_ub(const Instance& instance, Info* info)
 {
     Weight  c = instance.capacity();
     ItemPos n = instance.item_number();
@@ -836,7 +825,7 @@ Profit opt_bellman_ub(const Instance& instance,
         return instance.reduced_solution()->profit();
 
     Profit lb = sol_bestgreedy(instance).profit() - 1;
-    std::vector<State> l0 = opts_bellman_ub(instance, 0, n-1, 0, n-1, c, lb, false, verbose);
+    std::vector<State> l0 = opts_bellman_ub(instance, 0, n-1, 0, n-1, c, lb, false, info);
     assert(instance.check_opt(instance.reduced_solution()->profit() + l0.front().p));
     return instance.reduced_solution()->profit() + l0.front().p;
 }
@@ -850,7 +839,7 @@ Profit opt_bellman_ub(const Instance& instance,
 
 void sopt_bellman_rec_ub_rec(const Instance& instance,
         ItemPos n1, ItemPos n2, Weight c, Profit lb, Solution& sol_curr,
-        bool verbose)
+        Info* info)
 {
     ItemPos k = (2*n1 + 8*n2) / 10;
 
@@ -863,8 +852,8 @@ void sopt_bellman_rec_ub_rec(const Instance& instance,
         bool opt = (lb != -1);
         if (!opt)
             lb = lb_greedy_from_to(instance, n1, n2, c);
-        std::vector<State> l1 = opts_bellman_ub(instance, n1,  k,  n1, n2, c, lb, opt, verbose);
-        std::vector<State> l2 = opts_bellman_ub(instance, k+1, n2, n1, n2, c, lb, opt, verbose);
+        std::vector<State> l1 = opts_bellman_ub(instance, n1,  k,  n1, n2, c, lb, opt, info);
+        std::vector<State> l2 = opts_bellman_ub(instance, k+1, n2, n1, n2, c, lb, opt, info);
 
         Profit z_max  = 0;
         Weight i1_opt = 0;
@@ -909,19 +898,18 @@ void sopt_bellman_rec_ub_rec(const Instance& instance,
         if (p1_opt == instance.item(n1).p)
             sol_curr.set(n1, true);
     } else {
-        sopt_bellman_rec_ub_rec(instance, n1, k, w1_opt, p1_opt, sol_curr, verbose);
+        sopt_bellman_rec_ub_rec(instance, n1, k, w1_opt, p1_opt, sol_curr, info);
     }
 
     if (k+1 == n2) {
         if (p2_opt == instance.item(n2).p)
             sol_curr.set(n2, true);
     } else {
-        sopt_bellman_rec_ub_rec(instance, k+1, n2, w2_opt, p2_opt, sol_curr, verbose);
+        sopt_bellman_rec_ub_rec(instance, k+1, n2, w2_opt, p2_opt, sol_curr, info);
     }
 }
 
-Solution sopt_bellman_rec_ub(const Instance& instance,
-        boost::property_tree::ptree* pt, bool verbose)
+Solution sopt_bellman_rec_ub(const Instance& instance, Info* info)
 {
     ItemPos n = instance.item_number();
 
@@ -935,7 +923,7 @@ Solution sopt_bellman_rec_ub(const Instance& instance,
 
     Solution sol_curr = *instance.reduced_solution();
     sopt_bellman_rec_ub_rec(instance,
-            0, n-1, instance.capacity(), -1, sol_curr, verbose);
+            0, n-1, instance.capacity(), -1, sol_curr, info);
     assert(instance.check_sopt(sol_curr));
     return sol_curr;
 }

@@ -46,11 +46,10 @@ int main(int argc, char *argv[])
     Instance instance(input_data);
     Solution sol_best(instance);
     Profit opt;
-    boost::property_tree::ptree pt;
+    Info info;
+    info.verbose(verbose);
 
-    std::chrono::high_resolution_clock::time_point t1
-        = std::chrono::high_resolution_clock::now();
-
+    // Variable reduction
     if (reduction == "") {
         instance.sort_partially();
         sol_best = sol_bestgreedy(instance);
@@ -67,43 +66,43 @@ int main(int argc, char *argv[])
     if (algorithm == "opt") {
         opt = std::max(
                 sol_best.profit(),
-                opt_bellman(instance, &pt, verbose));
+                opt_bellman(instance, &info));
     } else if (algorithm == "sopt_1") {
-        sol_best.update(sopt_bellman_1(instance, &pt, verbose));
+        sol_best.update(sopt_bellman_1(instance, &info));
         opt = sol_best.profit();
     } else if (algorithm == "sopt_1it") {
-        sol_best.update(sopt_bellman_1_it(instance, &pt, verbose));
+        sol_best.update(sopt_bellman_1_it(instance, &info));
         opt = sol_best.profit();
     } else if (algorithm == "sopt_1rec") {
-        sol_best.update(sopt_bellman_1_rec(instance, &pt, verbose));
+        sol_best.update(sopt_bellman_1_rec(instance, &info));
         opt = sol_best.profit();
     } else if (algorithm == "sopt_1stack") {
-        sol_best.update(sopt_bellman_1_stack(instance, &pt, verbose));
+        sol_best.update(sopt_bellman_1_stack(instance, &info));
         opt = sol_best.profit();
     } else if (algorithm == "sopt_1map") {
-        sol_best.update(sopt_bellman_1_map(instance, &pt, verbose));
+        sol_best.update(sopt_bellman_1_map(instance, &info));
         opt = sol_best.profit();
     } else if (algorithm == "sopt_2") {
-        sol_best.update(sopt_bellman_2(instance, &pt, verbose));
+        sol_best.update(sopt_bellman_2(instance, &info));
         opt = sol_best.profit();
     } else if (algorithm == "sopt_rec") {
-        sol_best.update(sopt_bellman_rec(instance, &pt, verbose));
+        sol_best.update(sopt_bellman_rec(instance, &info));
         opt = sol_best.profit();
     } else if (algorithm == "opt_list") {
         opt = std::max(
                 sol_best.profit(),
-                opt_bellman_list(instance, &pt, verbose));
+                opt_bellman_list(instance, &info));
     } else if (algorithm == "sopt_list_rec") {
-        sol_best.update(sopt_bellman_rec_list(instance, &pt, verbose));
+        sol_best.update(sopt_bellman_rec_list(instance, &info));
         opt = sol_best.profit();
     } else if (algorithm == "opt_ub") {
         instance.sort();
         opt = std::max(
                 sol_best.profit(),
-                opt_bellman_ub(instance, &pt, verbose));
+                opt_bellman_ub(instance, &info));
     } else if (algorithm == "sopt_ub_rec") {
         instance.sort();
-        sol_best.update(sopt_bellman_rec_ub(instance, &pt, verbose));
+        sol_best.update(sopt_bellman_rec_ub(instance, &info));
         opt = sol_best.profit();
     } else {
         std::cerr << "Unknown or missing algorithm" << std::endl;
@@ -111,31 +110,16 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    std::chrono::high_resolution_clock::time_point t2
-        = std::chrono::high_resolution_clock::now();
-
-    std::chrono::duration<double> time_span
-        = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
-
-    pt.put("Solution.OPT", opt);
-    pt.put("Solution.Time", time_span.count());
+    double t = info.elapsed_time();
+    info.pt.put("Solution.OPT", opt);
+    info.pt.put("Solution.Time", t);
     if (verbose) {
         std::cout << "OPT " << opt << std::endl;
         std::cout << "EXP " << instance.optimum() << std::endl;
-        std::cout << "Time " << time_span.count() << std::endl;
+        std::cout << "Time " << t << std::endl;
     }
 
-    // Write output file
-    if (output_file != "")
-        write_ini(output_file, pt);
-
-    // Write certificate file
-    if (cert_file != "") {
-        std::ofstream cert;
-        cert.open(cert_file);
-        cert << sol_best;
-        cert.close();
-    }
-
+    info.write_ini(output_file); // Write output file
+    sol_best.write_cert(cert_file); // Write certificate file
     return 0;
 }
