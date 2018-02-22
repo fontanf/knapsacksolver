@@ -117,10 +117,18 @@ TEST(Instance, ReductionSmallCoeff)
             assert(boost::filesystem::exists(ii->path()));
             if (ii->path().filename() == "FORMAT.txt")
                 continue;
-            Instance instance(ii->path().string());
-            instance.sort();
-            Solution sol = sol_bestgreedy(instance);
-            instance.reduce2(sol);
+            {
+                Instance instance(ii->path().string());
+                instance.sort_partially();
+                Solution sol = sol_bestgreedy(instance);
+                instance.reduce1(sol);
+            }
+            {
+                Instance instance(ii->path().string());
+                instance.sort();
+                Solution sol = sol_bestgreedy(instance);
+                instance.reduce2(sol);
+            }
         }
     }
 }
@@ -143,10 +151,18 @@ TEST(Instance, ReductionLargeCoeff)
             assert(boost::filesystem::exists(ii->path()));
             if (ii->path().filename() == "FORMAT.txt")
                 continue;
-            Instance instance(ii->path().string());
-            instance.sort();
-            Solution sol = sol_bestgreedy(instance);
-            instance.reduce2(sol);
+            {
+                Instance instance(ii->path().string());
+                instance.sort_partially();
+                Solution sol = sol_bestgreedy(instance);
+                instance.reduce1(sol);
+            }
+            {
+                Instance instance(ii->path().string());
+                instance.sort();
+                Solution sol = sol_bestgreedy(instance);
+                instance.reduce2(sol);
+            }
         }
     }
 }
@@ -169,10 +185,18 @@ TEST(Instance, ReductionHardInstances)
             assert(boost::filesystem::exists(ii->path()));
             if (ii->path().filename() == "FORMAT.txt")
                 continue;
-            Instance instance(ii->path().string());
-            instance.sort();
-            Solution sol = sol_bestgreedy(instance);
-            instance.reduce2(sol);
+            {
+                Instance instance(ii->path().string());
+                instance.sort_partially();
+                Solution sol = sol_bestgreedy(instance);
+                instance.reduce1(sol);
+            }
+            {
+                Instance instance(ii->path().string());
+                instance.sort();
+                Solution sol = sol_bestgreedy(instance);
+                instance.reduce2(sol);
+            }
         }
     }
 }

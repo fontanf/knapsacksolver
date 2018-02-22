@@ -455,7 +455,7 @@ void Instance::reduce2(const Solution& sol_curr, bool verbose)
             fixed_1.push_back(item(i));
         } else {
             if (i != b_) {
-                std::cout << " ?" << std::flush;
+                DBG(std::cout << " ?" << std::flush;)
                 not_fixed.push_back(item(i));
             }
         }
@@ -466,7 +466,7 @@ void Instance::reduce2(const Solution& sol_curr, bool verbose)
             continue;
         DBG(std::cout << "i " << i << " (" << item(i).i << ")" << std::flush;)
         if (sol_curr.contains(i)) {
-            std::cout << " ?" << std::endl;
+            DBG(std::cout << " ?" << std::endl;)
             not_fixed.push_back(item(i));
             continue;
         }
@@ -525,8 +525,8 @@ void Instance::reduce2(const Solution& sol_curr, bool verbose)
 
     if (verbose) {
         std::cout
-            << "REDUCTION LB " << sol_curr.profit() << " GAP " << optimum() - sol_curr.profit() << "  "
-            << "N " << item_number() << " / " << total_item_number() << " (" << (double)item_number() / (double)total_item_number() << ")  "
+            << "REDUCTION LB " << sol_curr.profit() << " GAP " << optimum() - sol_curr.profit() << " - "
+            << "N " << item_number() << " / " << total_item_number() << " (" << (double)item_number() / (double)total_item_number() << ") - "
             << "C " << capacity()    << " / " << total_capacity()    << " (" << (double)capacity()    / (double)total_capacity()    << ")"
             << std::endl;
     }
