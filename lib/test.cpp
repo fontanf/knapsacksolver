@@ -121,13 +121,13 @@ TEST(Instance, ReductionSmallCoeff)
                 Instance instance(ii->path().string());
                 instance.sort_partially();
                 Solution sol = sol_bestgreedy(instance);
-                instance.reduce1(sol);
+                instance.reduce1(sol, true);
             }
             {
                 Instance instance(ii->path().string());
                 instance.sort();
                 Solution sol = sol_bestgreedy(instance);
-                instance.reduce2(sol);
+                instance.reduce2(sol, true);
             }
         }
     }

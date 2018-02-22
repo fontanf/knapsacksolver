@@ -44,7 +44,7 @@ cc_test(
                 "-lboost_program_options",
                 "-lboost_regex",
         ],
-        timeout = "eternal",
+        timeout = "moderate",
 )
 
 cc_binary(

@@ -405,9 +405,9 @@ void Instance::reduce1(const Solution& sol_curr, bool verbose)
 
     if (verbose) {
         std::cout
-            << "LB " << sol_curr.profit() << " GAP " << optimum() - sol_curr.profit() << std::endl
-            << item_number() << " / " << total_item_number() << " (" << (double)item_number() / (double)total_item_number() << "); "
-            << capacity()    << " / " << total_capacity()    << " (" << (double)capacity()    / (double)total_capacity()    << "); "
+            << "REDUCTION LB " << sol_curr.profit() << " GAP " << optimum() - sol_curr.profit() << " - "
+            << "N " << item_number() << " / " << total_item_number() << " (" << (double)item_number() / (double)total_item_number() << ") - "
+            << "C " << capacity()    << " / " << total_capacity()    << " (" << (double)capacity()    / (double)total_capacity()    << ")"
             << std::endl;
     }
 
