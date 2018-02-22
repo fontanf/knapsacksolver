@@ -1,11 +1,14 @@
 #include "instance.hpp"
 #include "solution.hpp"
 
+#include "../lb_greedy/greedy.hpp"
+
 #include <gtest/gtest.h>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
+#include <boost/regex.hpp>
 
-TEST(Instance, SortByEfficiency)
+TEST(Instance, Sort)
 {
     Instance instance(5, 100,{
             {0, 10, 10},
@@ -28,7 +31,7 @@ TEST(Instance, SortByEfficiency)
     EXPECT_EQ(instance.item(0).i, 4);
 }
 
-TEST(Instance, SortPartiallyByEfficiency1)
+TEST(Instance, SortPartially)
 {
     Instance instance(9, 4, {// break item b = 3 (1, 3)
             {0, 1, 1},
@@ -44,7 +47,7 @@ TEST(Instance, SortPartiallyByEfficiency1)
     EXPECT_EQ(instance.item(instance.break_item()).i, 2);
 }
 
-TEST(Instance, SortPartiallyByEfficiency2)
+TEST(Instance, SortPartially2)
 {
     Instance instance(9, 6, {// break item b = 3 (1, 3)
             {0, 1, 1},
@@ -60,7 +63,7 @@ TEST(Instance, SortPartiallyByEfficiency2)
     EXPECT_EQ(instance.item(instance.break_item()).i, 6);
 }
 
-TEST(Instance, SortPartiallyByEfficiency3)
+TEST(Instance, SortPartially3)
 {
     for (ItemIdx n = 0; n <= 1000; ++n) {
         std::vector<Item> items;
@@ -93,5 +96,83 @@ TEST(Instance, SortPartiallyByEfficiency3)
         EXPECT_EQ(
                 instance_eff.break_capacity(),
                 instance_peff.break_capacity());
+    }
+}
+
+TEST(Instance, ReductionSmallCoeff)
+{
+    auto data_dir = boost::filesystem::current_path();
+    data_dir /= "external";
+    data_dir /= "KnapsackPisingerInstances";
+    data_dir /= "smallcoeff";
+    const boost::regex my_filter("knapPI_.*_.*_1000");
+    boost::filesystem::directory_iterator end_itr;
+    for (boost::filesystem::directory_iterator i(data_dir); i != end_itr; ++i) {
+        std::cout << i->path() << std::endl;
+        boost::smatch what;
+        if(!boost::regex_match(i->path().filename().string(), what, my_filter))
+            continue;
+        for (boost::filesystem::directory_iterator ii(i->path()); ii != end_itr; ++ii) {
+            std::cout << "FILE " << ii->path() << std::endl;
+            assert(boost::filesystem::exists(ii->path()));
+            if (ii->path().filename() == "FORMAT.txt")
+                continue;
+            Instance instance(ii->path().string());
+            instance.sort();
+            Solution sol = sol_bestgreedy(instance);
+            instance.reduce2(sol);
+        }
+    }
+}
+
+TEST(Instance, ReductionLargeCoeff)
+{
+    auto data_dir = boost::filesystem::current_path();
+    data_dir /= "external";
+    data_dir /= "KnapsackPisingerInstances";
+    data_dir /= "largecoeff";
+    const boost::regex my_filter("knapPI_.*_50_.*");
+    boost::filesystem::directory_iterator end_itr;
+    for (boost::filesystem::directory_iterator i(data_dir); i != end_itr; ++i) {
+        std::cout << i->path() << std::endl;
+        boost::smatch what;
+        if(!boost::regex_match(i->path().filename().string(), what, my_filter))
+            continue;
+        for (boost::filesystem::directory_iterator ii(i->path()); ii != end_itr; ++ii) {
+            std::cout << "FILE " << ii->path() << std::endl;
+            assert(boost::filesystem::exists(ii->path()));
+            if (ii->path().filename() == "FORMAT.txt")
+                continue;
+            Instance instance(ii->path().string());
+            instance.sort();
+            Solution sol = sol_bestgreedy(instance);
+            instance.reduce2(sol);
+        }
+    }
+}
+
+TEST(Instance, ReductionHardInstances)
+{
+    auto data_dir = boost::filesystem::current_path();
+    data_dir /= "external";
+    data_dir /= "KnapsackPisingerInstances";
+    data_dir /= "hardinstances";
+    const boost::regex my_filter("knapPI_.*_100_.*");
+    boost::filesystem::directory_iterator end_itr;
+    for (boost::filesystem::directory_iterator i(data_dir); i != end_itr; ++i) {
+        std::cout << i->path() << std::endl;
+        boost::smatch what;
+        if(!boost::regex_match(i->path().filename().string(), what, my_filter))
+            continue;
+        for (boost::filesystem::directory_iterator ii(i->path()); ii != end_itr; ++ii) {
+            std::cout << "FILE " << ii->path() << std::endl;
+            assert(boost::filesystem::exists(ii->path()));
+            if (ii->path().filename() == "FORMAT.txt")
+                continue;
+            Instance instance(ii->path().string());
+            instance.sort();
+            Solution sol = sol_bestgreedy(instance);
+            instance.reduce2(sol);
+        }
     }
 }
