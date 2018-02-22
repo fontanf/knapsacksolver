@@ -181,6 +181,7 @@ private:
     bool check();
     inline void swap(ItemPos i, ItemPos j) { Item tmp = items_[i]; items_[i] = items_[j]; items_[j] = tmp; };
     void swap(ItemPos i1, ItemPos i2, ItemPos i3, ItemPos i4);
+    void update_isum();
 
     std::string name_;
     std::string format_;

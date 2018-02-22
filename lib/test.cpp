@@ -7,68 +7,91 @@
 
 TEST(Instance, SortByEfficiency)
 {
-	Instance instance(5, 100, {10, 15, 5, 12, 20}, {10, 10, 10, 10, 10});
-	Instance instance_sorted = Instance::sort_by_efficiency(instance);
+    Instance instance(5, 100,{
+            {0, 10, 10},
+            {1, 10, 15},
+            {2, 10, 5},
+            {3, 10, 12},
+            {4, 10, 20}});
+    instance.sort();
 
-	EXPECT_EQ(instance_sorted.profit(5), 5);
-	EXPECT_EQ(instance_sorted.profit(4), 10);
-	EXPECT_EQ(instance_sorted.profit(3), 12);
-	EXPECT_EQ(instance_sorted.profit(2), 15);
-	EXPECT_EQ(instance_sorted.profit(1), 20);
+    EXPECT_EQ(instance.item(4).p, 5);
+    EXPECT_EQ(instance.item(3).p, 10);
+    EXPECT_EQ(instance.item(2).p, 12);
+    EXPECT_EQ(instance.item(1).p, 15);
+    EXPECT_EQ(instance.item(0).p, 20);
 
-	EXPECT_EQ(instance_sorted.index(5), 3);
-	EXPECT_EQ(instance_sorted.index(4), 1);
-	EXPECT_EQ(instance_sorted.index(3), 4);
-	EXPECT_EQ(instance_sorted.index(2), 2);
-	EXPECT_EQ(instance_sorted.index(1), 5);
+    EXPECT_EQ(instance.item(4).i, 2);
+    EXPECT_EQ(instance.item(3).i, 0);
+    EXPECT_EQ(instance.item(2).i, 3);
+    EXPECT_EQ(instance.item(1).i, 1);
+    EXPECT_EQ(instance.item(0).i, 4);
 }
 
 TEST(Instance, SortPartiallyByEfficiency1)
 {
-	Instance instance(9, 4, // break item b = 3 (1, 3)
-			{1, 1, 1, 1, 1, 1, 1, 1, 1},
-			{1, 2, 3, 4, 5, 6, 7, 8, 9});
-	Instance instance_sorted = Instance::sort_partially_by_efficiency(instance);
-	EXPECT_EQ(instance_sorted.index_orig(instance_sorted.break_item()), 3);
+    Instance instance(9, 4, {// break item b = 3 (1, 3)
+            {0, 1, 1},
+            {1, 2, 1},
+            {2, 3, 1},
+            {3, 4, 1},
+            {4, 5, 1},
+            {5, 6, 1},
+            {6, 7, 1},
+            {7, 8, 1},
+            {8, 9, 1}});
+    instance.sort_partially();
+    EXPECT_EQ(instance.item(instance.break_item()).i, 2);
 }
 
 TEST(Instance, SortPartiallyByEfficiency2)
 {
-	Instance instance(9, 6, // break item b = 3 (1, 3)
-			{1, 1, 1, 1, 1, 1, 1, 1, 1},
-			{1, 9, 2, 8, 3, 7, 4, 5, 6});
-	Instance instance_sorted = Instance::sort_partially_by_efficiency(instance);
-	EXPECT_EQ(instance_sorted.index_orig(instance_sorted.break_item()), 7);
+    Instance instance(9, 6, {// break item b = 3 (1, 3)
+            {0, 1, 1},
+            {1, 9, 1},
+            {2, 2, 1},
+            {3, 8, 1},
+            {4, 3, 1},
+            {5, 7, 1},
+            {6, 4, 1},
+            {7, 5, 1},
+            {8, 6, 1}});
+    instance.sort_partially();
+    EXPECT_EQ(instance.item(instance.break_item()).i, 6);
 }
 
 TEST(Instance, SortPartiallyByEfficiency3)
 {
-	for (ItemIdx n = 0; n <= 1000; ++n) {
-		std::vector<Profit> p(n, 1);
-		std::vector<Weight> w(n);
-		iota(w.begin(), w.end(), 1);
-		Weight c = 0;
-		for (ItemIdx i=0; i<n; ++i)
-			c += w[i];
-		c /= 2;
-		c += 10;
-		std::cout << "n " << n << " c " << c << std::endl;
-		std::random_shuffle(w.begin(), w.end());
+    for (ItemIdx n = 0; n <= 1000; ++n) {
+        std::vector<Item> items;
+        std::vector<Profit> p(n, 1);
+        std::vector<Weight> w(n);
+        iota(w.begin(), w.end(), 1);
+        Weight c = 0;
+        for (ItemIdx i=0; i<n; ++i) {
+            items.push_back({i, i, 1});
+            c += w[i];
+        }
+        c /= 2;
+        c += 10;
+        std::cout << "n " << n << " c " << c << std::endl;
+        std::random_shuffle(w.begin(), w.end());
 
-		Instance instance(n, c, p, w);
-		Instance instance_eff  = Instance::sort_by_efficiency(instance);
-		Instance instance_peff = Instance::sort_partially_by_efficiency(instance);
-		EXPECT_EQ(
-				instance_eff.break_item(),
-				instance_peff.break_item());
-		EXPECT_EQ(
-				instance_eff.break_profit(),
-				instance_peff.break_profit());
-		EXPECT_EQ(
-				instance_eff.break_weight(),
-				instance_peff.break_weight());
-		EXPECT_EQ(
-				instance_eff.break_capacity(),
-				instance_peff.break_capacity());
-	}
+        Instance instance_eff(n, c, items);
+        Instance instance_peff(n, c, items);
+        instance_eff.sort();
+        instance_peff.sort_partially();
+        EXPECT_EQ(
+                instance_eff.break_item(),
+                instance_peff.break_item());
+        EXPECT_EQ(
+                instance_eff.break_profit(),
+                instance_peff.break_profit());
+        EXPECT_EQ(
+                instance_eff.break_weight(),
+                instance_peff.break_weight());
+        EXPECT_EQ(
+                instance_eff.break_capacity(),
+                instance_peff.break_capacity());
+    }
 }
