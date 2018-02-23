@@ -50,64 +50,68 @@ int main(int argc, char *argv[])
     info.verbose(verbose);
 
     // Variable reduction
+    bool optimal = false;
     if (reduction == "") {
         instance.sort_partially();
         sol_best = sol_bestgreedy(instance);
     } else if (reduction == "1") {
         instance.sort_partially();
         sol_best = sol_bestgreedy(instance);
-        instance.reduce1(sol_best, verbose);
+        optimal = instance.reduce1(sol_best, verbose);
     } else if (reduction == "2") {
         instance.sort();
         sol_best = sol_bestgreedy(instance);
-        instance.reduce2(sol_best, verbose);
+        optimal = instance.reduce2(sol_best, verbose);
     }
 
-    if (algorithm == "opt") {
-        opt = std::max(
-                sol_best.profit(),
-                opt_bellman(instance, &info));
-    } else if (algorithm == "sopt_1") {
-        sol_best.update(sopt_bellman_1(instance, &info));
-        opt = sol_best.profit();
-    } else if (algorithm == "sopt_1it") {
-        sol_best.update(sopt_bellman_1_it(instance, &info));
-        opt = sol_best.profit();
-    } else if (algorithm == "sopt_1rec") {
-        sol_best.update(sopt_bellman_1_rec(instance, &info));
-        opt = sol_best.profit();
-    } else if (algorithm == "sopt_1stack") {
-        sol_best.update(sopt_bellman_1_stack(instance, &info));
-        opt = sol_best.profit();
-    } else if (algorithm == "sopt_1map") {
-        sol_best.update(sopt_bellman_1_map(instance, &info));
-        opt = sol_best.profit();
-    } else if (algorithm == "sopt_2") {
-        sol_best.update(sopt_bellman_2(instance, &info));
-        opt = sol_best.profit();
-    } else if (algorithm == "sopt_rec") {
-        sol_best.update(sopt_bellman_rec(instance, &info));
-        opt = sol_best.profit();
-    } else if (algorithm == "opt_list") {
-        opt = std::max(
-                sol_best.profit(),
-                opt_bellman_list(instance, &info));
-    } else if (algorithm == "sopt_list_rec") {
-        sol_best.update(sopt_bellman_rec_list(instance, &info));
-        opt = sol_best.profit();
-    } else if (algorithm == "opt_ub") {
-        instance.sort();
-        opt = std::max(
-                sol_best.profit(),
-                opt_bellman_ub(instance, &info));
-    } else if (algorithm == "sopt_ub_rec") {
-        instance.sort();
-        sol_best.update(sopt_bellman_rec_ub(instance, &info));
-        opt = sol_best.profit();
-    } else {
-        std::cerr << "Unknown or missing algorithm" << std::endl;
-        assert(false);
-        return 1;
+    // Bellman
+    if (!optimal) {
+        if (algorithm == "opt") {
+            opt = std::max(
+                    sol_best.profit(),
+                    opt_bellman(instance, &info));
+        } else if (algorithm == "sopt_1") {
+            sol_best.update(sopt_bellman_1(instance, &info));
+            opt = sol_best.profit();
+        } else if (algorithm == "sopt_1it") {
+            sol_best.update(sopt_bellman_1_it(instance, &info));
+            opt = sol_best.profit();
+        } else if (algorithm == "sopt_1rec") {
+            sol_best.update(sopt_bellman_1_rec(instance, &info));
+            opt = sol_best.profit();
+        } else if (algorithm == "sopt_1stack") {
+            sol_best.update(sopt_bellman_1_stack(instance, &info));
+            opt = sol_best.profit();
+        } else if (algorithm == "sopt_1map") {
+            sol_best.update(sopt_bellman_1_map(instance, &info));
+            opt = sol_best.profit();
+        } else if (algorithm == "sopt_2") {
+            sol_best.update(sopt_bellman_2(instance, &info));
+            opt = sol_best.profit();
+        } else if (algorithm == "sopt_rec") {
+            sol_best.update(sopt_bellman_rec(instance, &info));
+            opt = sol_best.profit();
+        } else if (algorithm == "opt_list") {
+            opt = std::max(
+                    sol_best.profit(),
+                    opt_bellman_list(instance, &info));
+        } else if (algorithm == "sopt_list_rec") {
+            sol_best.update(sopt_bellman_rec_list(instance, &info));
+            opt = sol_best.profit();
+        } else if (algorithm == "opt_ub") {
+            instance.sort();
+            opt = std::max(
+                    sol_best.profit(),
+                    opt_bellman_ub(instance, &info));
+        } else if (algorithm == "sopt_ub_rec") {
+            instance.sort();
+            sol_best.update(sopt_bellman_rec_ub(instance, &info));
+            opt = sol_best.profit();
+        } else {
+            std::cerr << "Unknown or missing algorithm" << std::endl;
+            assert(false);
+            return 1;
+        }
     }
 
     double t = info.elapsed_time();
