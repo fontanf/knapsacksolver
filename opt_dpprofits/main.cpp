@@ -4,12 +4,7 @@
 #include "../lb_greedy/greedy.hpp"
 
 #include <iostream>
-#include <chrono>
 
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/ini_parser.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
 #include <boost/program_options.hpp>
 
 #define DBG(x)
@@ -56,38 +51,41 @@ int main(int argc, char *argv[])
     info.verbose(verbose);
 
     // Variable reduction
+    bool optimal = false;
     if (reduction == "") {
         instance.sort_partially();
         sol_best = sol_bestgreedy(instance);
     } else if (reduction == "1") {
         instance.sort_partially();
         sol_best = sol_bestgreedy(instance);
-        instance.reduce1(sol_best, verbose);
+        optimal = instance.reduce1(sol_best, verbose);
     } else if (reduction == "2") {
         instance.sort();
         sol_best = sol_bestgreedy(instance);
-        instance.reduce2(sol_best, verbose);
+        optimal = instance.reduce2(sol_best, verbose);
     }
 
     // DPProfits
-    Profit ub = ub_surrogate(instance, sol_best.profit()).ub;
-    if (verbose) {
-        std::cout << "LB " << sol_best.profit() << " GAP " << instance.optimum() - sol_best.profit() << std::endl;
-        std::cout << "UB " << ub << " GAP " << ub - instance.optimum() << std::endl;
-    }
-    if (sol_best.profit() == ub) {
-        opt = sol_best.profit();
-    } else if (algorithm == "opt") {
-        opt = std::max(
-                sol_best.profit(),
-                opt_dpprofits(instance, ub, &info));
-    } else if (algorithm == "sopt") {
-        sol_best.update(sopt_dpprofits_1(instance, ub, &info));
-        opt = sol_best.profit();
-    } else {
-        std::cerr << "Unknown or missing algorithm" << std::endl;
-        assert(false);
-        return 1;
+    if (!optimal) {
+        Profit ub = ub_surrogate(instance, sol_best.profit()).ub;
+        if (verbose) {
+            std::cout << "LB " << sol_best.profit() << " GAP " << instance.optimum() - sol_best.profit() << std::endl;
+            std::cout << "UB " << ub << " GAP " << ub - instance.optimum() << std::endl;
+        }
+        if (sol_best.profit() == ub) {
+            opt = sol_best.profit();
+        } else if (algorithm == "opt") {
+            opt = std::max(
+                    sol_best.profit(),
+                    opt_dpprofits(instance, ub, &info));
+        } else if (algorithm == "sopt") {
+            sol_best.update(sopt_dpprofits_1(instance, ub, &info));
+            opt = sol_best.profit();
+        } else {
+            std::cerr << "Unknown or missing algorithm" << std::endl;
+            assert(false);
+            return 1;
+        }
     }
 
     double t = info.elapsed_time();

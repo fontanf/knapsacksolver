@@ -82,6 +82,7 @@ int main(int argc, char *argv[])
     info.pt.put("Solution.Time", t);
     info.pt.put("Solution.OPT", sol_best.profit());
     if (verbose) {
+        std::cout << "---" << std::endl;
         std::cout << "OPT " << sol_best.profit() << std::endl;
         std::cout << "EXP " << instance.optimum() << std::endl;
         std::cout << "TIME " << t << std::endl;
