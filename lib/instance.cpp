@@ -180,10 +180,11 @@ void Instance::update_isum()
         isum_[i].w = isum_[i-1].w + item(i-1).w;
         isum_[i].p = isum_[i-1].p + item(i-1).p;
     }
+    //std::cout << *this << std::endl;
     //DBG(for (const Item& item: isum_)
         //std::cout << item << " ";
     //std::cout << std::endl;)
-    DBG(std::cout << "UPDATEISUM... END" << std::endl;)
+    //DBG(std::cout << "UPDATEISUM... END" << std::endl;)
 }
 
 #undef DBG
@@ -354,15 +355,18 @@ void Instance::swap(ItemPos i1, ItemPos i2, ItemPos i3, ItemPos i4)
 #define DBG(x)
 //#define DBG(x) x
 
-void Instance::reduce1(const Solution& sol_curr, bool verbose)
+bool Instance::reduce1(const Solution& sol_curr, bool verbose)
 {
     DBG(std::cout << "REDUCE1... LB " << sol_curr.profit() << std::endl;)
     assert(sort_type() == "eff" || sort_type() == "peff");
 
+    DBG(std::cout << "b " << b_ << std::endl;)
     for (ItemIdx i=0; i<=b_; ++i) {
-        if (!sol_curr.contains(i))
-            continue;
         DBG(std::cout << "i " << i << " (" << item(i).i << ")";)
+        if (!sol_curr.contains(i)) {
+            DBG(std::cout << " ?" << std::endl;)
+            continue;
+        }
         Profit ub = reduced_solution()->profit() + break_profit() - item(i).p
                 + ((break_capacity() + item(i).w) * item(b_).p) / item(b_).w;
         DBG(std::cout << " UB " << ub;)
@@ -379,13 +383,17 @@ void Instance::reduce1(const Solution& sol_curr, bool verbose)
             b_--;
             n_--;
             i--;
+        } else {
+            DBG(std::cout << " ?";)
         }
         DBG(std::cout << std::endl;)
     }
     for (ItemPos i=b_; i<n_; ++i) {
-        if (sol_curr.contains(item(i).i))
-            continue;
         DBG(std::cout << "i " << i << " (" << item(i).i << ")";)
+        if (sol_curr.contains(item(i).i)) {
+            DBG(std::cout << " ?" << std::endl;)
+            continue;
+        }
         Profit ub = reduced_solution()->profit() + break_profit() + item(i).p
                 + ((break_capacity() - item(i).w) * item(b_).p) / item(b_).w;
         DBG(std::cout << " UB " << ub;)
@@ -397,6 +405,8 @@ void Instance::reduce1(const Solution& sol_curr, bool verbose)
             swap(i, n_-1);
             n_ -= 1;
             i  -= 1;
+        } else {
+            DBG(std::cout << " ?";)
         }
         DBG(std::cout << std::endl;)
     }
@@ -412,9 +422,10 @@ void Instance::reduce1(const Solution& sol_curr, bool verbose)
     }
 
     DBG(std::cout << "REDUCE1... END" << std::endl;)
+    return (capacity() <= 0);
 }
 
-void Instance::reduce2(const Solution& sol_curr, bool verbose)
+bool Instance::reduce2(const Solution& sol_curr, bool verbose)
 {
     DBG(std::cout << "REDUCE2... LB " << sol_curr.profit() << std::endl;)
     assert(sort_type() == "eff");
@@ -426,26 +437,29 @@ void Instance::reduce2(const Solution& sol_curr, bool verbose)
     DBG(std::cout << "b " << b_ << std::endl;)
     for (ItemIdx i=0; i<=b_; ++i) {
         DBG(std::cout << "i " << i << " (" << item(i).i << ")" << std::flush;)
-        if (!sol_curr.contains(item(i).i) && i != b_) {
+        if (!sol_curr.contains(i) && i != b_) {
             DBG(std::cout << " ?" << std::endl;)
             not_fixed.push_back(item(i));
             continue;
         }
         Item ubitem = {0, capacity() + item(i).w, 0};
         ItemPos bb = ub_item(ubitem);
+        DBG(std::cout << " bb " << bb << std::flush;)
         Profit ub = 0;
         if (bb == item_number()) {
             ub = isum(n_).p - item(i).p;
+            DBG(std::cout << " UB " << ub << std::flush;)
         } else if (bb == item_number() - 1) {
             Profit ub1 = isum(bb  ).p - item(i).p;
-            Profit ub2 = isum(bb+1).p - item(i).p + ((capacity() + item(i).w - isum(bb+1).w) * item(bb-1).p) / item(bb-1).w;
+            Profit ub2 = isum(bb+1).p - item(i).p + ((capacity() + item(i).w - isum(bb+1).w) * item(bb-1).p + 1) / item(bb-1).w - 1;
             ub = (ub1 > ub2)? ub1: ub2;
+            DBG(std::cout << " UB1 " << ub1 << " UB2 " << ub2 << " UB " << ub << std::flush;)
         } else {
-            Profit ub1 = isum(bb  ).p - item(i).p + ((capacity() + item(i).w - isum(bb  ).w) * item(bb+1).p) / item(bb+1).w;
-            Profit ub2 = isum(bb+1).p - item(i).p + ((capacity() + item(i).w - isum(bb+1).w) * item(bb-1).p) / item(bb-1).w;
+            Profit ub1 = isum(bb  ).p - item(i).p + ((capacity() + item(i).w - isum(bb  ).w) * item(bb+1).p    ) / item(bb+1).w;
+            Profit ub2 = isum(bb+1).p - item(i).p + ((capacity() + item(i).w - isum(bb+1).w) * item(bb-1).p + 1) / item(bb-1).w - 1;
             ub = (ub1 > ub2)? ub1: ub2;
+            DBG(std::cout << " UB1 " << ub1 << " UB2 " << ub2 << " UB " << ub << std::flush;)
         }
-        DBG(std::cout << " UB " << ub << std::flush;)
         if (ub <= sol_curr.profit()) {
             DBG(std::cout << " 1";)
             assert(optimum() == -1
@@ -454,8 +468,8 @@ void Instance::reduce2(const Solution& sol_curr, bool verbose)
             sol_red_->set(i, true);
             fixed_1.push_back(item(i));
         } else {
+            DBG(std::cout << " ?" << std::flush;)
             if (i != b_) {
-                DBG(std::cout << " ?" << std::flush;)
                 not_fixed.push_back(item(i));
             }
         }
@@ -473,22 +487,25 @@ void Instance::reduce2(const Solution& sol_curr, bool verbose)
 
         Item ubitem = {0, capacity() - item(i).w, 0};
         ItemPos bb = ub_item(ubitem);
-        //std::cout << " bb " << bb << " n " << item_number() << std::endl;
+        DBG(std::cout << " bb " << bb << std::flush;)
         Profit ub = 0;
         if (bb == item_number()) {
             ub = isum(n_).p + item(i).p;
+            DBG(std::cout << " UB " << ub << std::flush;)
         } else if (bb == item_number() - 1) {
             Profit ub1 = isum(bb  ).p + item(i).p;
-            Profit ub2 = isum(bb+1).p + item(i).p + ((capacity() - item(i).w - isum(bb+1).w) * item(bb-1).p) / item(bb-1).w;
+            Profit ub2 = isum(bb+1).p + item(i).p + ((capacity() - item(i).w - isum(bb+1).w) * item(bb-1).p + 1) / item(bb-1).w - 1;
             ub = (ub1 > ub2)? ub1: ub2;
+            DBG(std::cout << " UB " << ub << std::flush;)
         } else if (bb == 0) {
             ub = ((capacity() + item(i).w) * item(bb).p) / item(bb).w;
+            DBG(std::cout << " UB " << ub << std::flush;)
         } else {
             Profit ub1 = isum(bb  ).p + item(i).p + ((capacity() - item(i).w - isum(bb  ).w) * item(bb+1).p) / item(bb+1).w;
-            Profit ub2 = isum(bb+1).p + item(i).p + ((capacity() - item(i).w - isum(bb+1).w) * item(bb-1).p) / item(bb-1).w;
+            Profit ub2 = isum(bb+1).p + item(i).p + ((capacity() - item(i).w - isum(bb+1).w) * item(bb-1).p + 1) / item(bb-1).w - 1;
             ub = (ub1 > ub2)? ub1: ub2;
+            DBG(std::cout << " UB1 " << ub1 << " UB2 " << ub2 << " UB " << ub << std::flush;)
         }
-        DBG(std::cout << " UB " << ub << std::flush;)
 
         if (ub <= sol_curr.profit()) {
             DBG(std::cout << " 0" << std::flush;)
@@ -531,6 +548,7 @@ void Instance::reduce2(const Solution& sol_curr, bool verbose)
             << std::endl;
     }
     DBG(std::cout << "REDUCE2... END" << std::endl;)
+    return (capacity() <= 0);
 }
 
 #undef DBG

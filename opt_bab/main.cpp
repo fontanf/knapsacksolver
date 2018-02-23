@@ -44,35 +44,39 @@ int main(int argc, char *argv[])
     info.verbose(verbose);
 
     // Variable reduction
+    bool optimal = false;
     if (reduction == "") {
         sol_best = Solution(instance);
     } else if (reduction == "1") {
         instance.sort_partially();
         sol_best = sol_bestgreedy(instance);
-        instance.reduce1(sol_best, verbose);
+        optimal = instance.reduce1(sol_best, verbose);
     } else if (reduction == "2") {
         instance.sort();
         sol_best = sol_bestgreedy(instance);
-        instance.reduce2(sol_best, verbose);
+        optimal = instance.reduce2(sol_best, verbose);
     }
 
     // Branch-and-bounds
-    BabData data(instance, &info);
-    if (algorithm == "") {
+    if (!optimal) {
         instance.sort();
-        sopt_bab(data);
-    } else if (algorithm == "rec") {
-        instance.sort();
-        sopt_bab_rec(data);
-    } else if (algorithm == "stack") {
-        instance.sort();
-        sopt_bab_stack(data);
-    } else {
-        std::cerr << "Unknown or missing algorithm" << std::endl;
-        assert(false);
-        return 1;
+        BabData data(instance, &info);
+        data.update_best_solution(sol_bestgreedy(instance));
+        if (algorithm == "") {
+            sopt_bab(data);
+        } else if (algorithm == "rec") {
+            instance.sort();
+            sopt_bab_rec(data);
+        } else if (algorithm == "stack") {
+            instance.sort();
+            sopt_bab_stack(data);
+        } else {
+            std::cerr << "Unknown or missing algorithm" << std::endl;
+            assert(false);
+            return 1;
+        }
+        sol_best.update(data.sol_best);
     }
-    sol_best.update(data.sol_best);
 
     double t = info.elapsed_time();
     info.pt.put("Solution.Time", t);
@@ -84,6 +88,6 @@ int main(int argc, char *argv[])
     }
 
     info.write_ini(output_file); // Write output file
-    data.sol_best.write_cert(cert_file); // Write certificate file
+    sol_best.write_cert(cert_file); // Write certificate file
     return 0;
 }
