@@ -7,14 +7,20 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
 
+/**
+ * ub_type: "trivial", "dantzig" or "dantzig_2"
+ */
 struct BabData
 {
-    BabData(const Instance& inst, Info* info = NULL):
+    BabData(const Instance& inst, std::string ub_type, Info* info = NULL):
         instance(inst),
         sol_curr(*inst.reduced_solution()),
         sol_best(*inst.reduced_solution()),
+        ub_type(ub_type),
         info(info)
-    { }
+    {
+        assert(ub_type == "trivial" || ub_type == "dantzig" || ub_type == "dantzig_2");
+    }
     const Instance& instance;
     Solution sol_curr;
     Solution sol_best;
@@ -22,6 +28,7 @@ struct BabData
     Profit ub = 0;
     Profit lb = 0;
     size_t nodes = 0;
+    std::string ub_type;
     Info* info;
 
     bool update_best_solution() { return update_best_solution(sol_curr); }

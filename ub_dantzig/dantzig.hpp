@@ -10,10 +10,27 @@
 Profit ub_dantzig(const Instance& instance,
         boost::property_tree::ptree* pt = NULL, bool verbose = false);
 
+////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * u = c * p1 / w1
+ * Time O(1)
+ */
+Profit ub_trivial_from(const Instance& instance, ItemPos j, const Solution& sol_curr);
+
 /**
  * Dantzig upper bound, using items j..n
+ * Time O(n)
  */
-Profit ub_dantzig_from(const Instance& instance, ItemIdx j, Weight r);
+Profit ub_dantzig_from(const Instance& instance, ItemIdx j, const Solution& sol_curr);
+
+/**
+ * Dantzig upper bound but consider wether or not to pack to break item.
+ * This bound dominates the classical Dantzig upper bound.
+ * Time O(n)
+ */
+Profit ub_dantzig_2_from(const Instance& instance, ItemIdx j, const Solution& sol_curr);
+
 
 /**
  * Dantzig upper bound for unfeasible solution. Remove items from j down to 1

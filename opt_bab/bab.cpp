@@ -30,7 +30,16 @@ void sopt_bab_rec_rec(BabData& d)
     }
 
     // UB test
-    Profit ub = d.sol_curr.profit() + ub_dantzig_from(d.instance, d.i, d.sol_curr.remaining_capacity());
+    Profit ub = 0;
+    if (d.ub_type == "trivial") {
+        ub = ub_trivial_from(d.instance, d.i, d.sol_curr);
+    } else if (d.ub_type == "dantzig") {
+        ub = ub_dantzig_from(d.instance, d.i, d.sol_curr);
+    } else if (d.ub_type == "dantzig_2") {
+        ub = ub_dantzig_2_from(d.instance, d.i, d.sol_curr);
+    } else {
+        assert(false);
+    }
     if (ub <= d.lb)
         return;
 
@@ -98,7 +107,17 @@ Profit sopt_bab_stack(BabData& data)
             continue;
         }
 
-        if (data.sol_curr.profit() < data.lb && data.sol_curr.profit() + ub_dantzig_from(data.instance, data.i, data.sol_curr.remaining_capacity()) < data.lb)
+        Profit ub = 0;
+        if (data.ub_type == "trivial") {
+            ub = ub_trivial_from(data.instance, data.i, data.sol_curr);
+        } else if (data.ub_type == "dantzig") {
+            ub = ub_dantzig_from(data.instance, data.i, data.sol_curr);
+        } else if (data.ub_type == "dantzig_2") {
+            ub = ub_dantzig_2_from(data.instance, data.i, data.sol_curr);
+        } else {
+            assert(false);
+        }
+        if (ub <= data.lb)
             continue;
 
         stack.push(data.i+1);

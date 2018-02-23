@@ -12,8 +12,9 @@ int main(int argc, char *argv[])
     std::string input_data  = "";
     std::string output_file = "";
     std::string cert_file   = "";
-    std::string algorithm   = "";
+    std::string algorithm   = "rec";
     std::string reduction   = "";
+    std::string upper_bound = "dantzig_2";
     po::options_description desc("Allowed options");
     desc.add_options()
         ("help,h", "produce help message")
@@ -22,7 +23,8 @@ int main(int argc, char *argv[])
         ("cert-file,c",   po::value<std::string>(&cert_file),              "set certificate output file")
         ("algorithm,a",   po::value<std::string>(&algorithm),              "set algorithm")
         ("reduction,r",   po::value<std::string>(&reduction),              "set reduction")
-        ("verbose,v",                                                                          "enable verbosity")
+        ("upper-bound,u", po::value<std::string>(&upper_bound),            "set upper bound")
+        ("verbose,v",                                                      "enable verbosity")
         ;
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -60,7 +62,7 @@ int main(int argc, char *argv[])
     // Branch-and-bounds
     if (!optimal) {
         instance.sort();
-        BabData data(instance, &info);
+        BabData data(instance, upper_bound, &info);
         data.update_best_solution(sol_best);
         if (algorithm == "") {
             sopt_bab(data);

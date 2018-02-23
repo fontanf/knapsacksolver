@@ -595,9 +595,13 @@ bool Instance::check_sopt(const Solution& sol) const
 
 bool Instance::check_ub(Profit p) const
 {
-    return (optimum() == 0
-            || item_number() != total_item_number()
-            || p >= optimum());
+    if (optimum() != 0
+            && item_number() == total_item_number()
+            && p < optimum()) {
+        std::cout << "u " << p << " < OPT " << optimum() << std::endl;
+        return false;
+    }
+    return true;
 }
 
 bool Instance::check_lb(Profit p) const
