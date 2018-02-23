@@ -25,28 +25,18 @@ void sopt_bab_rec_rec(BabData& d)
 
     // Stop condition
     if (d.i == d.instance.item_number()) {
-        if (d.sol_curr.profit() > d.lb) {
-            d.sol_best = d.sol_curr;
-            d.lb = d.sol_best.profit();
-            if (Info::verbose(d.info))
-                std::cout
-                    <<  "LB "   << d.sol_best.profit()
-                    << " GAP "  << d.instance.optimum() - d.sol_best.profit()
-                    << " NODE " << std::scientific << (double)d.nodes << std::defaultfloat
-                    << " TIME " << d.info->elapsed_time()
-                    << std::endl;
-        }
+        d.update_best_solution();
         return;
     }
 
     // UB test
-    Profit ub = d.sol_curr.profit() + ub_dantzig_from(d.instance, d.i, d.sol_curr.weight());
+    Profit ub = d.sol_curr.profit() + ub_dantzig_from(d.instance, d.i, d.sol_curr.remaining_capacity());
     if (ub <= d.lb)
         return;
 
     // Recursive calls
     d.i++;
-    if (d.sol_curr.weight() + d.instance.item(d.i-1).w <= d.instance.capacity()) {
+    if (d.sol_curr.remaining_capacity() >= d.instance.item(d.i-1).w) {
         d.sol_curr.set(d.i-1, true);
         sopt_bab_rec_rec(d);
         d.sol_curr.set(d.i-1, false);
@@ -104,27 +94,16 @@ Profit sopt_bab_stack(BabData& data)
         i_prec = data.i;
 
         if (data.i == data.instance.item_number()) {
-            if (data.sol_curr.profit() > data.lb) {
-                data.sol_best = data.sol_curr;
-                data.lb = data.sol_best.profit();
-                if (Info::verbose(data.info)) {
-                    std::cout
-                        <<  "LB "   << data.sol_best.profit()
-                        << " GAP "  << data.instance.optimum() - data.sol_best.profit()
-                        << " NODE " << std::scientific << (double)data.nodes << std::defaultfloat
-                        << " TIME " << data.info->elapsed_time()
-                        << std::endl;
-                }
-            }
+            data.update_best_solution();
             continue;
         }
 
-        if (data.sol_curr.profit() < data.lb && data.sol_curr.profit() + ub_dantzig_from(data.instance, data.i, data.sol_curr.weight()) < data.lb)
+        if (data.sol_curr.profit() < data.lb && data.sol_curr.profit() + ub_dantzig_from(data.instance, data.i, data.sol_curr.remaining_capacity()) < data.lb)
             continue;
 
         stack.push(data.i+1);
 
-        if (data.sol_curr.weight() + data.instance.item(data.i).w <= data.instance.capacity()) {
+        if (data.sol_curr.remaining_capacity() >= data.instance.item(data.i).w) {
             data.sol_curr.set(data.i, true);
             stack.push(data.i+1);
         }

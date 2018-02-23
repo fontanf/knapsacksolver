@@ -35,36 +35,30 @@ Profit ub_dantzig(const Instance& instance,
 #define DBG(x)
 //#define DBG(x) x
 
-Profit ub_dantzig_from(const Instance& instance, ItemIdx j, Weight w)
+Profit ub_dantzig_from(const Instance& instance, ItemIdx j, Weight r)
 {
-    DBG(std::cout << "UBDANTZIGFROM... j " << j << " w " << w << std::endl;)
+    DBG(std::cout << "UBDANTZIGFROM... j " << j << " r " << r << std::endl;)
     assert(instance.sort_type() == "eff");
-    Weight  r = instance.capacity() - w;
-    Profit  u;
+    Profit  u = 0;
     ItemPos b;
-    DBG(std::cout << "r " << r << std::endl;)
-
-    {
-        r = instance.capacity() - w;
-        Item ubitem = {0, instance.isum(j).w + r, 0};
-        b = instance.ub_item(ubitem);
-        u  = instance.isum(b).p - instance.isum(j).p;
-        r += instance.isum(j).w - instance.isum(b).w;
-        DBG(std::cout << "ubitem " << instance.isum(b) << std::endl;)
-        DBG(std::cout << "u " << u << " b " << b << " r " << r << std::endl;)
-    }
 
     //{
         //r = instance.capacity() - w;
-        //u = 0;
-        //for (b=j; b<instance.item_number(); b++) {
-            //if (instance.item(b).w > r)
-                //break;
-            //u += instance.item(b).p;
-            //r -= instance.item(b).w;
-        //}
+        //Item ubitem = {0, instance.isum(j).w + r, 0};
+        //b  = instance.ub_item(ubitem);
+        //u  = instance.isum(b).p - instance.isum(j).p;
+        //r += instance.isum(j).w - instance.isum(b).w;
+        //DBG(std::cout << "ubitem " << instance.isum(b) << std::endl;)
         //DBG(std::cout << "u " << u << " b " << b << " r " << r << std::endl;)
     //}
+
+    for (b=j; b<instance.item_number(); b++) {
+        if (instance.item(b).w > r)
+            break;
+        u += instance.item(b).p;
+        r -= instance.item(b).w;
+    }
+    DBG(std::cout << "u " << u << " b " << b << " r " << r << std::endl;)
 
     if (b != instance.item_number() && r > 0)
         u += (instance.item(b).p * r) / instance.item(b).w;

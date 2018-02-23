@@ -23,6 +23,23 @@ struct BabData
     Profit lb = 0;
     size_t nodes = 0;
     Info* info;
+
+    bool update_best_solution() { return update_best_solution(sol_curr); }
+    bool update_best_solution(const Solution& sol)
+    {
+        if (sol.profit() <= lb)
+            return false;
+        sol_best = sol;
+        lb = sol_best.profit();
+        if (Info::verbose(info))
+            std::cout
+                <<  "LB "   << sol_best.profit()
+                << " GAP "  << instance.optimum() - sol_best.profit()
+                << " NODE " << std::scientific << (double)nodes << std::defaultfloat
+                << " TIME " << info->elapsed_time()
+                << std::endl;
+        return true;
+    }
 };
 
 Profit sopt_bab(BabData& data);

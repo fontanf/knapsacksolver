@@ -13,11 +13,12 @@ public:
     Solution& operator=(const Solution& solution);
     ~Solution() { };
 
-    inline const Instance& instance() const { return instance_; }
-    inline Weight weight()            const { return w_; }
-    inline Profit profit()            const { return p_; }
-    inline ItemIdx item_number()      const { return k_; }
-    const std::vector<int>& data()   const { return x_; }
+    inline const Instance& instance()  const { return instance_; }
+    inline Weight weight()             const { return w_; }
+    inline Weight remaining_capacity() const { return instance_.total_capacity() - weight(); }
+    inline Profit profit()             const { return p_; }
+    inline ItemIdx item_number()       const { return k_; }
+    const std::vector<int>& data()     const { return x_; }
 
     void set(ItemPos i, int b);
     int contains(ItemPos i) const;
