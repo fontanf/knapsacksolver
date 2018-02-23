@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
     if (!optimal) {
         instance.sort();
         BabData data(instance, &info);
-        data.update_best_solution(sol_bestgreedy(instance));
+        data.update_best_solution(sol_best);
         if (algorithm == "") {
             sopt_bab(data);
         } else if (algorithm == "rec") {
