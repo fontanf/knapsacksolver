@@ -2,23 +2,24 @@
 
 int main(int argc, char *argv[])
 {
-	(void)argc;
-	(void)argv;
+    (void)argc;
+    (void)argv;
 
-	ItemIdx n = 10000000;
-	Weight c = 64 * n;
-	std::vector<Profit> p(n, 1);
-	std::vector<Weight> w(n);
-	iota(w.begin(), w.end(), 1);
-	std::random_shuffle(w.begin(), w.end());
+    ItemIdx n = 10000000;
+    Weight c = 64 * n;
+    std::vector<Item> items(n);
+    for (ItemPos i=0; i<n; ++i)
+        items[i] = {i, i, 1};
+    std::random_shuffle(items.begin(), items.end());
 
-	Instance instance(n, c, p, w);
+    Instance instance_eff(n, c, items);
+    Instance instance_peff(n, c, items);
 
-	std::cout << "sort_by_efficiency" << std::endl;
-	Instance instance_eff  = Instance::sort_by_efficiency(instance);
+    std::cout << "Conmplete sorting" << std::endl;
+    instance_eff.sort();
 
-	std::cout << "sort_partially_by_efficiency" << std::endl;
-	Instance instance_peff = Instance::sort_partially_by_efficiency(instance);
+    std::cout << "Partial sorting" << std::endl;
+    instance_eff.sort_partially();
 
-	return 0;
+    return 0;
 }
