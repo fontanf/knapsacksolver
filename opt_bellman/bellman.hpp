@@ -38,10 +38,12 @@ Solution sopt_bellman_rec(const Instance& instance, Info* info = NULL);
 /**
  * Time:  O(nc)
  * Space: O(c), at most (c+1) * (sizeof(Profit) + sizeof(Weight)) + cst
+ * lb_type: "none", "greedy" or "best_greedy"
+ * ub_type: "none", "trivial" or "dantzig"
  */
-Profit    opt_bellman_list(const Instance& instance, Info* info = NULL);
-Solution sopt_bellman_rec_list(const Instance& instance, Info* info = NULL);
-Profit    opt_bellman_ub(const Instance& instance, Info* info = NULL);
-Solution sopt_bellman_rec_ub(const Instance& instance, Info* info = NULL);
+Profit    opt_bellman_list    (const Instance& instance, Profit lb,
+        std::string lb_type = "none", std::string ub_type = "none", Info* info = NULL);
+Solution sopt_bellman_rec_list(const Instance& instance, const Solution& sol,
+        std::string lb_type = "none", std::string ub_type = "none", Info* info = NULL);
 
 #endif /* end of include guard: BELLMAN_HPP_0M1MVTFZ */

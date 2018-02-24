@@ -13,31 +13,37 @@
 
 int main(int argc, char *argv[])
 {
+    namespace po = boost::program_options;
+
     // Parse program options
     std::string input_data  = "";
     std::string output_file = "";
     std::string cert_file   = "";
-    std::string algorithm   = "";
+    std::string algorithm   = "sopt_1";
     std::string reduction   = "";
-    boost::program_options::options_description desc("Allowed options");
+    std::string lower_bound = "none";
+    std::string upper_bound = "none";
+    po::options_description desc("Allowed options");
     desc.add_options()
         ("help,h", "produce help message")
-        ("input-data,i",  boost::program_options::value<std::string>(&input_data)->required(), "set input data (required)")
-        ("output-file,o", boost::program_options::value<std::string>(&output_file),            "set output file")
-        ("cert-file,c",   boost::program_options::value<std::string>(&cert_file),              "set certificate output file")
-        ("algorithm,a",   boost::program_options::value<std::string>(&algorithm),              "set algorithm")
-        ("reduction,r",   boost::program_options::value<std::string>(&reduction),              "choose variable reduction")
-        ("verbose,v",                                                                          "enable verbosity")
+        ("input-data,i",  po::value<std::string>(&input_data)->required(), "set input data (required)")
+        ("output-file,o", po::value<std::string>(&output_file),            "set output file")
+        ("cert-file,c",   po::value<std::string>(&cert_file),              "set certificate output file")
+        ("algorithm,a",   po::value<std::string>(&algorithm),              "set algorithm")
+        ("reduction,r",   po::value<std::string>(&reduction),              "choose variable reduction")
+        ("lower-bound,l", po::value<std::string>(&lower_bound),            "set lower bound")
+        ("upper-bound,u", po::value<std::string>(&upper_bound),            "set upper bound")
+        ("verbose,v",                                                      "enable verbosity")
         ;
-    boost::program_options::variables_map vm;
-    boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
+    po::variables_map vm;
+    po::store(po::parse_command_line(argc, argv, desc), vm);
     if (vm.count("help")) {
         std::cout << desc << std::endl;;
         return 1;
     }
     try {
-        boost::program_options::notify(vm);
-    } catch (boost::program_options::required_option e) {
+        po::notify(vm);
+    } catch (po::required_option e) {
         std::cout << desc << std::endl;;
         return 1;
     }
@@ -92,20 +98,15 @@ int main(int argc, char *argv[])
             sol_best.update(sopt_bellman_rec(instance, &info));
             opt = sol_best.profit();
         } else if (algorithm == "opt_list") {
+            if (upper_bound != "none")
+                instance.sort();
             opt = std::max(
                     sol_best.profit(),
-                    opt_bellman_list(instance, &info));
+                    opt_bellman_list(instance, sol_best.profit(), lower_bound, upper_bound, &info));
         } else if (algorithm == "sopt_list_rec") {
-            sol_best.update(sopt_bellman_rec_list(instance, &info));
-            opt = sol_best.profit();
-        } else if (algorithm == "opt_ub") {
-            instance.sort();
-            opt = std::max(
-                    sol_best.profit(),
-                    opt_bellman_ub(instance, &info));
-        } else if (algorithm == "sopt_ub_rec") {
-            instance.sort();
-            sol_best.update(sopt_bellman_rec_ub(instance, &info));
+            if (upper_bound != "none")
+                instance.sort();
+            sol_best.update(sopt_bellman_rec_list(instance, sol_best, lower_bound, upper_bound, &info));
             opt = sol_best.profit();
         } else {
             std::cerr << "Unknown or missing algorithm" << std::endl;

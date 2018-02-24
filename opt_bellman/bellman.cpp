@@ -540,271 +540,126 @@ std::ostream& operator<<(std::ostream& os, std::vector<State>& l)
     return os;
 }
 
+/**
+ * Return the list of undominated states.
+ * opt == true iff lb == OPT - 1
+ */
 std::vector<State> opts_bellman_list(const Instance& instance,
-        ItemPos n1, ItemPos n2, Weight c)
+        ItemPos n1, ItemPos n2, ItemPos first, ItemPos last,
+        Weight c, Profit &lb, bool opt,
+        std::string lb_type, std::string ub_type, Info* info)
 {
     // Note that list L'i-1 is not explicitly created and that the
     // implementation requires Li-1 to be reversed (since pop_back is O(1)
     // whereas pop_front() is O(n) for std::vector).
-    std::vector<State> l0{{0, 0}};
-    for (ItemPos i=n1; i<=n2; ++i) {
-        Weight wi = instance.item(i).w;
-        Profit pi = instance.item(i).p;
-        std::vector<State> l{{0, 0}};
-        std::vector<State>::reverse_iterator it = l0.rbegin();
-        while (!l0.empty()) {
-            if (it != l0.rend() && it->w <= l0.back().w + wi) {
-                if (it->p > l.back().p) {
-                    if (it->w == l.back().w) {
-                        l.back() = *it;
-                    } else {
-                        l.push_back(*it);
-                    }
-                }
-                ++it;
-            } else {
-                if (l0.back().w + wi > c)
-                    break;
-                if (l0.back().p + pi > l.back().p) {
-                    if (l0.back().w + wi == l.back().w) {
-                        l.back() = {l0.back().w + wi, l0.back().p + pi};
-                    } else {
-                        l.push_back({l0.back().w + wi, l0.back().p + pi});
-                    }
-                }
-                l0.pop_back();
-            }
-        }
-        DBG(for (State& s: l)
-                std::cout << "(" << s.w << "," << s.p << ") " << std::flush;
-                std::cout << std::endl;)
-            std::reverse(l.begin(), l.end());
-        l0 = std::move(l);
-    }
-    return l0;
-}
-
-Profit opt_bellman_list(const Instance& instance, Info* info)
-{
-    Weight  c = instance.capacity();
-    ItemPos n = instance.item_number();
-
-    if (n == 0)
-        return instance.reduced_solution()->profit();
-
-    std::vector<State> l0 = opts_bellman_list(instance, 0, n-1, c);
-    Profit opt = instance.reduced_solution()->profit() + l0.front().p;
-
-    if (info != NULL) {
-        info->pt.put("Solution.States", l0.size());
-        info->pt.put("Solution.StateRatio", (double)l0.size() / (double)instance.capacity());
-    }
-    if (Info::verbose(info)) {
-        std::cout << "States "     << l0.size() << std::endl;
-        std::cout << "StateRatio " << (double)l0.size() / (double)instance.capacity() << std::endl;
-    }
-    assert(instance.check_opt(opt));
-    return opt;
-}
-
-#undef DBG
-
-/******************************************************************************/
-
-#define DBG(x)
-//#define DBG(x) x
-
-struct RecListData
-{
-    RecListData(const Instance& instance):
-        instance(instance), n1(0), n2(instance.item_number()-1),
-        c(instance.capacity()), sol_curr(instance) { }
-    const Instance& instance;
-    ItemPos n1;
-    ItemPos n2;
-    Weight  c;
-    Solution sol_curr;
-};
-
-void sopt_bellman_rec_list_rec(RecListData& d)
-{
-    DBG(std::cout << "Rec n1 " << d.n1 << " n2 " << d.n2 << " c " << d.c << std::endl;)
-    DBG(std::cout << d.sol_curr << std::endl;)
-    ItemPos k = (d.n1 + d.n2) / 2;
-    DBG(std::cout << "k " << k << std::endl;)
-    ItemPos n2 = d.n2;
-
-    Weight w1_opt = 0;
-    Weight w2_opt = 0;
-    Profit p1_opt = 0;
-    Profit p2_opt = 0;
-
-    {
-        std::vector<State> l1 = opts_bellman_list(d.instance, d.n1, k, d.c);
-        std::vector<State> l2 = opts_bellman_list(d.instance, k+1, d.n2, d.c);
-
-        DBG(std::cout << "Find" << std::endl;)
-        Profit z_max  = 0;
-        Weight i1_opt = 0;
-        Weight i2_opt = 0;
-        if (l1.size() > 0) {
-            ItemPos i2 = 0;
-            for (Weight i1=l1.size(); i1-->0;) {
-                DBG(std::cout << "i1 " << i1 << " " << std::flush;)
-                DBG(std::cout << "i2 " << std::flush;)
-                while (l1[i1].w + l2[i2].w > d.c) {
-                    DBG(std::cout << i2 << " " << std::flush;)
-                    i2++;
-                }
-                assert(i2 < (Weight)l2.size());
-                DBG(std::cout << i2 << " " << std::flush;)
-                Profit z = l1[i1].p + l2[i2].p;
-                if (z > z_max) {
-                    z_max = z;
-                    i1_opt = i1;
-                    i2_opt = i2;
-                }
-            }
-        }
-        if (l2.size() > 0) {
-            ItemPos i1 = 0;
-            for (Weight i2=l2.size(); i2-->0;) {
-                while (l2[i2].w + l1[i1].w > d.c)
-                    i1++;
-                Profit z = l1[i1].p + l2[i2].p;
-                if (z > z_max) {
-                    z_max = z;
-                    i1_opt = i1;
-                    i2_opt = i2;
-                }
-            }
-        }
-
-        w1_opt = l1[i1_opt].w;
-        w2_opt = l2[i2_opt].w;
-        p1_opt = l1[i1_opt].p;
-        p2_opt = l2[i2_opt].p;
-    }
-
-    DBG(std::cout << "c1 " << w1_opt << " c2 " << w2_opt << std::endl;)
-
-    DBG(std::cout << "Conquer" << std::endl;)
-    if (k == d.n1) {
-        DBG(std::cout << "Leaf" << std::endl;)
-        if (p1_opt == d.instance.item(d.n1).p) {
-            DBG(std::cout << "Set " << d.n1 << std::endl;)
-            d.sol_curr.set(d.n1, true);
-        }
-    } else {
-        DBG(std::cout << "..." << std::endl;)
-        d.n2 = k;
-        d.c  = w1_opt;
-        sopt_bellman_rec_list_rec(d);
-    }
-
-    if (k+1 == n2) {
-        DBG(std::cout << "Leaf" << std::endl;)
-        if (p2_opt == d.instance.item(n2).p) {
-            DBG(std::cout << "Set " << n2 << std::endl;)
-            d.sol_curr.set(n2, true);
-        }
-    } else {
-        DBG(std::cout << "..." << std::endl;)
-        d.n1 = k+1;
-        d.n2 = n2;
-        d.c  = w2_opt;
-        sopt_bellman_rec_list_rec(d);
-    }
-}
-
-Solution sopt_bellman_rec_list(const Instance& instance, Info* info)
-{
-    if (instance.item_number() == 0)
-        return *instance.reduced_solution();
-
-    if (instance.item_number() == 1) {
-        Solution solution = *instance.reduced_solution();
-        solution.set(0, true);
-        return solution;
-    }
-
-    RecListData data(instance);
-    sopt_bellman_rec_list_rec(data);
-    DBG(std::cout << data.sol_curr << std::endl;)
-    assert(instance.check_sopt(data.sol_curr));
-    return data.sol_curr;
-}
-
-#undef DBG
-
-/******************************************************************************/
-
-#define DBG(x)
-//#define DBG(x) x
-
-/**
- * Return the list of undominated states.
- * opt == true iff lb is indeed the optimal value
- */
-std::vector<State> opts_bellman_ub(const Instance& instance,
-        ItemPos n1, ItemPos n2, ItemPos first, ItemPos last,
-        Weight c, Profit &lb, bool opt, bool verbose)
-{
-    DBG(std::cout << "opts_bellman_ub n1 " << n1 << " n2 " << n2 << " c " << c << std::endl;)
+    DBG(std::cout << "OPTSBELLMANLIST n1 " << n1 << " n2 " << n2 << " c " << c << std::endl;)
     if (c == 0)
         return {{0, 0}};
     std::vector<State> l0{{0, 0}};
     for (ItemPos i=n1; i<=n2; ++i) {
+        DBG(std::cout << "I " << i << std::endl;)
         Weight wi = instance.item(i).w;
         Profit pi = instance.item(i).p;
         std::vector<State> l{{0, 0}};
         std::vector<State>::reverse_iterator it = l0.rbegin();
         while (!l0.empty()) {
             if (it != l0.rend() && it->w <= l0.back().w + wi) {
+                DBG(std::cout << "STATE " << *it << std::endl;)
                 if (it->p > l.back().p) {
                     if (it->w == l.back().w) {
                         l.back() = *it;
                     } else {
-                        if (!opt) {
-                            Profit lb_tmp = it->p + lb_greedy_except(
-                                    instance, first, n1, i, last, c-it->w);
-                            if (lb_tmp > lb) {
-                                lb = lb_tmp;
-                                if (verbose)
-                                    std::cout
-                                        << "LB " << lb
-                                        << " GAP " << instance.optimum() - lb
-                                        << std::endl;
-                            }
-                        }
-                        if (it->p + ub_dantzig_except(
-                                    instance, first, n1, i, last, c-it->w) >= lb)
+                        if (ub_type == "none") {
                             l.push_back(*it);
+                        } else {
+                            if (!opt) {
+                                Profit lb_tmp = 0;
+                                if (lb_type == "none") {
+                                    lb_tmp = it->p;
+                                } else if (lb_type == "greedy") {
+                                    lb_tmp = it->p + lb_greedy_except(
+                                            instance, first, n1, i, last, c-it->w);
+                                } else if (lb_type == "best_greedy") {
+                                    // TODO
+                                    assert(false);
+                                } else {
+                                    assert(false);
+                                }
+                                DBG(std::cout << "LBTMP " << lb_tmp << std::endl;)
+                                if (lb_tmp > lb) {
+                                    lb = lb_tmp;
+                                    if (Info::verbose(info))
+                                        std::cout
+                                            <<  "LB "  << lb
+                                            << " GAP " << instance.optimum() - lb
+                                            << std::endl;
+                                }
+                            }
+                            Profit ub = 0;
+                            if (ub_type == "trivial") {
+                                // TODO
+                                assert(false);
+                            } else if (ub_type == "dantzig") {
+                                ub = it->p + ub_dantzig_except(
+                                        instance, first, n1, i, last, c-it->w);
+                            } else {
+                                assert(false);
+                            }
+                            DBG(std::cout << "UB " << ub << std::endl;)
+                            if (ub >= lb)
+                                l.push_back(*it);
+                        }
                     }
                 }
                 ++it;
             } else {
+                DBG(std::cout << "STATE (" << l0.back().w + wi << "," << l0.back().p + pi << ")" << std::endl;)
                 if (l0.back().w + wi > c)
                     break;
                 if (l0.back().p + pi > l.back().p) {
                     if (l0.back().w + wi == l.back().w) {
                         l.back() = {l0.back().w + wi, l0.back().p + pi};
                     } else {
-                        if (!opt) {
-                            Profit lb_tmp = l0.back().p + pi + lb_greedy_except(
-                                    instance, first, n1, i, last, c-l0.back().w-wi);
-                            if (lb_tmp > lb) {
-                                lb = lb_tmp;
-                                if (verbose)
-                                    std::cout
-                                        << "LB " << lb
-                                        << " GAP " << instance.optimum() - lb
-                                        << std::endl;
-                            }
-                        }
-                        if (l0.back().p + pi + ub_dantzig_except(
-                                    instance, first, n1, i, last, c-l0.back().w-wi) >= lb)
+                        if (ub_type == "none") {
                             l.push_back({l0.back().w + wi, l0.back().p + pi});
+                        } else {
+                            if (!opt) {
+                                Profit lb_tmp = 0;
+                                if (lb_type == "none") {
+                                    lb_tmp = l0.back().p + pi;
+                                } else if (lb_type == "greedy") {
+                                    lb_tmp = l0.back().p + pi + lb_greedy_except(
+                                            instance, first, n1, i, last, c-l0.back().w-wi);
+                                } else if (lb_type == "best_greedy") {
+                                    // TODO
+                                    assert(false);
+                                } else {
+                                    assert(false);
+                                }
+                                DBG(std::cout << "LBTMP " << lb_tmp << std::endl;)
+                                if (lb_tmp > lb) {
+                                    lb = lb_tmp;
+                                    if (Info::verbose(info))
+                                        std::cout
+                                            <<  "LB " << lb
+                                            << " GAP " << instance.optimum() - lb
+                                            << std::endl;
+                                }
+                            }
+                            Profit ub = 0;
+                            if (ub_type == "trivial") {
+                                // TODO
+                                assert(false);
+                            } else if (ub_type == "dantzig") {
+                                ub = l0.back().p + pi + ub_dantzig_except(
+                                        instance, first, n1, i, last, c-l0.back().w-wi);
+                            } else {
+                                assert(false);
+                            }
+                            DBG(std::cout << "UB " << ub << std::endl;)
+                            if (ub >= lb)
+                                l.push_back({l0.back().w + wi, l0.back().p + pi});
+                        }
                     }
                 }
                 l0.pop_back();
@@ -812,11 +667,13 @@ std::vector<State> opts_bellman_ub(const Instance& instance,
         }
         std::reverse(l.begin(), l.end());
         l0 = std::move(l);
+        DBG(std::cout << "L " << l0 << std::endl;)
     }
+    DBG(std::cout << "OPTSBELLMANLIST... END" << std::endl;)
     return l0;
 }
 
-Profit opt_bellman_ub(const Instance& instance, Info* info)
+Profit opt_bellman_list(const Instance& instance, Profit lb, std::string lb_type, std::string ub_type, Info* info)
 {
     Weight  c = instance.capacity();
     ItemPos n = instance.item_number();
@@ -824,10 +681,11 @@ Profit opt_bellman_ub(const Instance& instance, Info* info)
     if (n == 0)
         return instance.reduced_solution()->profit();
 
-    Profit lb = sol_bestgreedy(instance).profit() - 1;
-    std::vector<State> l0 = opts_bellman_ub(instance, 0, n-1, 0, n-1, c, lb, false, info);
-    assert(instance.check_opt(instance.reduced_solution()->profit() + l0.front().p));
-    return instance.reduced_solution()->profit() + l0.front().p;
+    lb -= instance.reduced_solution()->profit();
+    std::vector<State> l0 = opts_bellman_list(instance, 0, n-1, 0, n-1, c, lb, false, lb_type, ub_type, info);
+    Profit opt = (l0.size() > 0)? l0.front().p: lb;
+    assert(instance.check_opt(instance.reduced_solution()->profit() + opt));
+    return instance.reduced_solution()->profit() + opt;
 }
 
 #undef DBG
@@ -837,9 +695,9 @@ Profit opt_bellman_ub(const Instance& instance, Info* info)
 #define DBG(x)
 //#define DBG(x) x
 
-void sopt_bellman_rec_ub_rec(const Instance& instance,
+void sopt_bellman_rec_list_rec(const Instance& instance,
         ItemPos n1, ItemPos n2, Weight c, Profit lb, Solution& sol_curr,
-        Info* info)
+        std::string lb_type, std::string ub_type, Info* info)
 {
     ItemPos k = (2*n1 + 8*n2) / 10;
 
@@ -849,11 +707,9 @@ void sopt_bellman_rec_ub_rec(const Instance& instance,
     Profit p2_opt = 0;
 
     {
-        bool opt = (lb != -1);
-        if (!opt)
-            lb = lb_greedy_from_to(instance, n1, n2, c);
-        std::vector<State> l1 = opts_bellman_ub(instance, n1,  k,  n1, n2, c, lb, opt, info);
-        std::vector<State> l2 = opts_bellman_ub(instance, k+1, n2, n1, n2, c, lb, opt, info);
+        bool opt = (n1 != 0 || n2 != instance.item_number() - 1);
+        std::vector<State> l1 = opts_bellman_list(instance, n1,  k,  n1, n2, c, lb, opt, lb_type, ub_type, info);
+        std::vector<State> l2 = opts_bellman_list(instance, k+1, n2, n1, n2, c, lb, opt, lb_type, ub_type, info);
 
         Profit z_max  = 0;
         Weight i1_opt = 0;
@@ -891,25 +747,26 @@ void sopt_bellman_rec_ub_rec(const Instance& instance,
         w2_opt = l2[i2_opt].w;
         p1_opt = l1[i1_opt].p;
         p2_opt = l2[i2_opt].p;
-        assert(!opt || z_max == lb);
+        assert(!opt || z_max == lb + 1);
     }
 
     if (k == n1) {
         if (p1_opt == instance.item(n1).p)
             sol_curr.set(n1, true);
     } else {
-        sopt_bellman_rec_ub_rec(instance, n1, k, w1_opt, p1_opt, sol_curr, info);
+        sopt_bellman_rec_list_rec(instance, n1, k, w1_opt, p1_opt-1, sol_curr, lb_type, ub_type, info);
     }
 
     if (k+1 == n2) {
         if (p2_opt == instance.item(n2).p)
             sol_curr.set(n2, true);
     } else {
-        sopt_bellman_rec_ub_rec(instance, k+1, n2, w2_opt, p2_opt, sol_curr, info);
+        sopt_bellman_rec_list_rec(instance, k+1, n2, w2_opt, p2_opt-1, sol_curr, lb_type, ub_type, info);
     }
 }
 
-Solution sopt_bellman_rec_ub(const Instance& instance, Info* info)
+Solution sopt_bellman_rec_list(const Instance& instance, const Solution& sol,
+        std::string lb_type, std::string ub_type, Info* info)
 {
     ItemPos n = instance.item_number();
 
@@ -922,10 +779,18 @@ Solution sopt_bellman_rec_ub(const Instance& instance, Info* info)
     }
 
     Solution sol_curr = *instance.reduced_solution();
-    sopt_bellman_rec_ub_rec(instance,
-            0, n-1, instance.capacity(), -1, sol_curr, info);
-    assert(instance.check_sopt(sol_curr));
-    return sol_curr;
+    sopt_bellman_rec_list_rec(instance,
+            0, n-1,
+            instance.capacity(), sol.profit() - instance.reduced_solution()->profit(),
+            sol_curr,
+            lb_type, ub_type, info);
+    if (sol_curr.profit() > sol.profit()) {
+        assert(instance.check_sopt(sol_curr));
+        return sol_curr;
+    } else {
+        assert(instance.check_sopt(sol));
+        return sol;
+    }
 }
 
 #undef DBG
