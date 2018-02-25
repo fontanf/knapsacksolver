@@ -16,6 +16,20 @@ Execute:
 bazel-bin/lb_greedy/main -i ...
 ```
 
+Table of Contents
+=================
+
+  * [Lower bounds](#lower-bounds)
+  * [Upper bounds](#upper-bounds)
+  * [DP with Bellman recursion](#dp-with-bellman-recursion)
+    * [With arrays](#with-arrays)
+    * [With lists](#with-lists)
+  * [DP by profits](#dp-by-profits)
+  * [Balanced Dynamic Programming](#balanced-dynamic-programming)
+  * [Primal Branch-and-bound](#primal-branch-and-bound)
+  * [Primal-Dual Branch-and-bound](#primal-dual-branch-and-bound)
+
+
 ## Lower bounds
 
 *(See "Knapsack Problem",
