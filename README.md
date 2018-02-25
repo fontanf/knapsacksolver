@@ -18,7 +18,20 @@ bazel-bin/lb_greedy/main -i ...
 
 ## Lower bounds
 
-- Ext-Greedy `lb_greedy/main` *(See "Knapsack Problem", 2.5 Approximation Algorithms - Kellerer et al., 2004)*
+*(See "Knapsack Problem",
+2.5 Approximation Algorithms,
+5.1.2 Lower Bounds for (KP) - Kellerer et al., 2004)*
+
+The ``Max Greedy'' algorithm correspond to packing the item with the largest
+weight first and then filling the remaining capacity with the greedy algorithm.
+Thus, if used with Greedy, the algorithm has a relative performance guarantee of
+1/2.
+
+- Greedy `lb_greedy/main`
+- Max Greedy `lb_greedy/main -a max`
+- Forward Greedy `lb_greedy/main -a for`
+- Backward Greedy `lb_greedy/main -a back`
+- Best Greedy `lb_greedy/main -a best`
 
 ## Upper bounds
 
