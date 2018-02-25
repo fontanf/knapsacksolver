@@ -11,29 +11,31 @@
 
 int main(int argc, char *argv[])
 {
+    namespace po = boost::program_options;
+
     // Parse program options
     std::string input_data  = "";
     std::string output_file = "";
     std::string cert_file   = "";
     std::string algorithm   = "";
-    boost::program_options::options_description desc("Allowed options");
+    po::options_description desc("Allowed options");
     desc.add_options()
         ("help,h", "produce help message")
-        ("input-data,i",  boost::program_options::value<std::string>(&input_data)->required(), "set input data (required)")
-        ("output-file,o", boost::program_options::value<std::string>(&output_file),            "set output file")
-        ("cert-file,c",   boost::program_options::value<std::string>(&cert_file),              "set certificate output file")
-        ("algorithm,a",   boost::program_options::value<std::string>(&algorithm),              "set algorithm")
-        ("verbose,v",                                                                          "enable verbosity")
+        ("input-data,i",  po::value<std::string>(&input_data)->required(), "set input data (required)")
+        ("output-file,o", po::value<std::string>(&output_file),            "set output file")
+        ("cert-file,c",   po::value<std::string>(&cert_file),              "set certificate output file")
+        ("algorithm,a",   po::value<std::string>(&algorithm),              "set algorithm")
+        ("verbose,v",                                                      "enable verbosity")
         ;
-    boost::program_options::variables_map vm;
-    boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
+    po::variables_map vm;
+    po::store(po::parse_command_line(argc, argv, desc), vm);
     if (vm.count("help")) {
         std::cout << desc << std::endl;;
         return 1;
     }
     try {
-        boost::program_options::notify(vm);
-    } catch (boost::program_options::required_option e) {
+        po::notify(vm);
+    } catch (po::required_option e) {
         std::cout << desc << std::endl;;
         return 1;
     }
