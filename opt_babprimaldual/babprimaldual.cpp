@@ -7,93 +7,83 @@
 
 void sopt_babprimaldual_rec(BabPDData& d)
 {
-	// If upperbound is reached, stop
-	if (d.ub != 0 && d.sol_best.profit() == d.ub)
-		return;
+    DBG(std::cout << "BABPRIMALDUALREC... a " << d.a << " b " << d.b << " r " << d.sol_curr.remaining_capacity() << std::endl;)
 
-	d.nodes++;
+    // If upperbound is reached, stop
+    if (d.ub != 0 && d.sol_best.profit() == d.ub)
+        return;
 
-	if (d.sol_curr.remaining_capacity() >= 0) { // Try to insert item b
+    d.nodes++;
 
-		if (d.b == d.instance.item_number() + 1) { // Stop condition
-			if (d.sol_curr.profit() > d.lb) {
-				d.sol_best = d.sol_curr;
-				d.lb = d.sol_best.profit();
-				if (d.verbose)
-					std::cout << "New best solution of value " << d.sol_best.profit_orig() << std::endl;
-			}
-			return;
-		}
+    if (d.sol_curr.remaining_capacity() >= 0) { // Try to insert item b
 
-		// UB test
-		Profit ub = d.sol_curr.profit();
-		if (d.instance.sort_type() == "efficiency") {
-			ub += ub_dantzig_from(d.instance, d.b, d.sol_curr.remaining_capacity());
-		} else {
-			assert(d.instance.sort_type() == "partial_efficiency");
-			ub += (d.instance.profit(d.break_item) * d.sol_curr.remaining_capacity())
-				/ d.instance.weight(d.break_item);
-		}
-		if (ub <= d.lb)
-			return;
+        if (d.b == d.instance.item_number()) { // Stop condition
+            d.update_best_solution();
+            return;
+        }
 
-		d.b++; // Recurisve calls
-		d.sol_curr.set(d.b-1, true);
-		sopt_babprimaldual_rec(d);
-		d.sol_curr.set(d.b-1, false);
-		sopt_babprimaldual_rec(d);
-		d.b--;
+        // UB test
+        Profit ub = 0;
+        if (d.ub_type == "trivial") {
+            ub = ub_trivial_from(d.instance, d.b, d.sol_curr);
+        } else if (d.ub_type == "dantzig") {
+            ub = ub_dantzig_from(d.instance, d.b, d.sol_curr);
+        }
+        if (ub <= d.lb)
+            return;
 
-	} else { // Try to remove item a
+        d.b++; // Recurisve calls
+        d.sol_curr.set(d.b-1, true);
+        sopt_babprimaldual_rec(d);
+        d.sol_curr.set(d.b-1, false);
+        sopt_babprimaldual_rec(d);
+        d.b--;
 
-		if (d.a == 0) // Stop condition
-			return;
+    } else { // Try to remove item a
 
-		// UB test
-		Profit ub = d.sol_curr.profit();
-		if (d.instance.sort_type() == "efficiency") {
-			ub += ub_dantzig_rev_from(d.instance, d.a, d.sol_curr.remaining_capacity());
-		} else {
-			assert(d.instance.sort_type() == "partial_efficiency");
-			ub -= (d.instance.profit(d.break_item) * -d.sol_curr.remaining_capacity())
-				/ d.instance.weight(d.break_item);
-		}
-		if (ub <= d.lb)
-			return;
+        if (d.a == -1) // Stop condition
+            return;
 
-		d.a--; // Recurisve calls
-		d.sol_curr.set(d.a+1, false);
-		sopt_babprimaldual_rec(d);
-		d.sol_curr.set(d.a+1, true);
-		sopt_babprimaldual_rec(d);
-		d.a++;
-	}
+        // UB test
+        Profit ub = 0;
+        if (d.ub_type == "trivial") {
+            ub = ub_trivial_from_rev(d.instance, d.a, d.sol_curr);
+        } else if (d.ub_type == "dantzig") {
+            ub = ub_dantzig_from_rev(d.instance, d.a, d.sol_curr);
+        }
+        if (ub <= d.lb)
+            return;
+
+        d.a--; // Recurisve calls
+        d.sol_curr.set(d.a+1, false);
+        sopt_babprimaldual_rec(d);
+        d.sol_curr.set(d.a+1, true);
+        sopt_babprimaldual_rec(d);
+        d.a++;
+    }
+
+    DBG(std::cout << "BABPRIMALDUALREC... END a " << d.a << " b " << d.b << " r " << d.sol_curr.remaining_capacity() << std::endl;)
 }
 
 Profit sopt_babprimaldual(BabPDData& data)
 {
-	assert(data.instance.sort_type() == "efficiency" ||
-			data.instance.sort_type() == "partial_efficiency");
+    assert(data.instance.sort_type() == "eff" ||
+            data.instance.sort_type() == "peff");
 
-	if (data.verbose)
-		std::cout << "Initial solution value " << data.sol_curr.profit() << std::endl;
+    if (data.break_item == data.instance.item_number()) {
+        data.update_best_solution();
+    } else {
+        sopt_babprimaldual_rec(data);
+    }
 
-	sopt_babprimaldual_rec(data);
-
-	if (data.pt != NULL) {
-		data.pt->put("Solution.OPT",   data.sol_best.profit());
-		data.pt->put("Solution.Nodes", data.nodes);
-	}
-
-	if (data.verbose) {
-		std::cout << "OPT: " << data.sol_best.profit() << std::endl;
-		std::cout << "EXP: " << data.instance.optimum() << std::endl;
-		std::cout << "Nodes: " << data.nodes << std::endl;
-	}
-
-	assert(data.instance.optimum() == 0 || data.sol_best.profit() == data.instance.optimum());
-
-	return data.sol_best.profit();
+    if (data.info != NULL) {
+        data.info->pt.put("Solution.Nodes", data.nodes);
+    }
+    if (Info::verbose(data.info)) {
+        std::cout << "NODES " << data.nodes << std::endl;
+    }
+    assert(data.instance.check_sopt(data.sol_best));
+    return data.sol_best.profit();
 }
 
 #undef DBG

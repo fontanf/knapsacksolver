@@ -3,7 +3,12 @@ cc_library(
         hdrs = ["babprimaldual.hpp"],
         srcs = ["babprimaldual.cpp"],
         visibility = ["//visibility:public"],
-        deps = ["//lib:cpp", "//ub_dantzig:libdantzig"],
+        deps = [
+                "//lib:cpp",
+                "//ub_dantzig:libdantzig",
+                "//ub_surrogate:libsurrogate",
+                "//lb_greedy:libgreedy",
+        ],
 )
 
 cc_binary(
