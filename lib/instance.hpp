@@ -90,6 +90,11 @@ public:
      */
     Instance(boost::filesystem::path filename);
 
+    /**
+     * Copy constructor
+     */
+    Instance(const Instance& ins);
+
     /*
      * Sort items according to non-increasing profit-to-weight ratio.
      */
@@ -124,6 +129,7 @@ public:
     const Solution* reduced_solution() const { return sol_red_; }
     const Solution* optimal_solution() const { return sol_opt_; }
     Profit optimum() const;
+    void reset();
 
     /**
      * Create an instance with capacitiy and weights divided, keeping the
@@ -152,7 +158,7 @@ public:
     inline Weight  total_capacity()    const { return c_orig_; }
     inline const Item& item(ItemIdx i) const { assert(i >= 0 && i < total_item_number()); return items_[i]; }
 
-    ItemPos break_item()     const { return b_; }
+    ItemPos break_item()     const { assert(b_ >= 0 && b_ <= item_number()); return b_; }
     Profit  break_profit()   const { return psum_; };
     Weight  break_weight()   const { return wsum_; }
     Weight  break_capacity() const { return r_; }

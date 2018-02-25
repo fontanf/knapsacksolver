@@ -121,9 +121,9 @@ void ub_surrogate_solve(Instance& ins, ItemIdx k,
     while (s1 <= s2) {
         s = (s1 + s2) / 2;
         ins.surrogate(s-s_prec, k);
-        Profit  p = ins.reduced_solution()->profit() + ins.break_profit();
+        Profit  p = ins.break_profit();
         ItemPos b = ins.break_item();
-        if (ins.break_capacity() > 0 && ins.break_item() != -1)
+        if (ins.break_capacity() > 0 && ins.break_item() != ins.item_number())
             p += (ins.item(b).p * ins.break_capacity()) / ins.item(b).w;
 
         DBG(std::cout
@@ -132,6 +132,12 @@ void ub_surrogate_solve(Instance& ins, ItemIdx k,
                 << " ub "  << p
                 << " GAP " << p - ins.optimum()
                 << std::endl;)
+        //DBG(std::cout
+                //<< "pbar " << ins.break_profit()
+                //<< " r " << ins.break_capacity()
+                //<< " c " << ins.capacity()
+                //<< std::endl;)
+        assert(s_min < 0 || ins.capacity() > 0);
 
         if (p < out.ub) {
             out.ub         = p;
@@ -155,7 +161,8 @@ SurrogateOut ub_surrogate(const Instance& instance, Profit lb, Info* info)
 {
     DBG(std::cout << "SURROGATERELAX..." << std::endl;)
     Instance ins(instance);
-    assert(ins.sort_type() == "eff" || ins.sort_type() == "peff");
+    ins.reset();
+    ins.sort_partially();
 
     SurrogateOut out(info);
 
@@ -163,15 +170,11 @@ SurrogateOut ub_surrogate(const Instance& instance, Profit lb, Info* info)
     if (ins.item_number() == 0)
         return out;
     out.ub = ub_dantzig(ins);
-    if (ins.break_capacity() == 0 || ins.break_item() == -1)
+    if (ins.break_capacity() == 0 || ins.break_item() == ins.item_number())
         return out;
 
-    Weight wmax = ins.item(1).w;
-    for (ItemPos i=0; i<ins.item_number(); ++i)
-        if (ins.item(i).w > wmax)
-            wmax = ins.item(i).w;
-    Weight s_max = wmax;   // Should ideally be: maxp*maxp, but may cause overflow (sic)
-    Weight s_min = -s_max; // Should ideally be: -maxp*maxw, but may cause overflow (sic)
+    Weight s_max = INT_FAST64_MAX / ins.item_number() / ins.capacity(); // Should ideally be:  maxp*maxp, but may cause overflow (sic)
+    Weight s_min = INT_FAST64_MIN / 2; // Should ideally be: -maxp*maxw, but may cause overflow (sic)
 
     DBG(std::cout
             <<  "z "     << lb

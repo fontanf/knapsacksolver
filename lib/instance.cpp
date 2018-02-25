@@ -109,6 +109,26 @@ void Instance::read_pisinger(boost::filesystem::path filepath)
     file.close();
 }
 
+Instance::Instance(const Instance& ins)
+{
+    name_ = ins.name();
+    format_ = ins.format();
+
+    n_ = ins.item_number();
+    c_ = ins.capacity();
+    c_orig_ = ins.total_capacity();
+    sort_type_ = ins.sort_type();
+    items_ = ins.items_;
+
+    sol_opt_ = new Solution(*ins.optimal_solution());
+    sol_red_ = new Solution(*ins.reduced_solution());
+    b_ = ins.break_item();
+    r_ = ins.break_capacity();
+    psum_ = ins.break_profit();
+    wsum_ = ins.break_weight();
+    isum_ = ins.isum_;
+}
+
 bool Instance::check()
 {
     for (ItemPos i=0; i<item_number(); ++i)
@@ -199,8 +219,15 @@ ItemPos Instance::ub_item(Item item) const
     return s->i-1;
 }
 
+#define DBG(x)
+//#define DBG(x) x
+
 void Instance::compute_break_item()
 {
+    DBG(std::cout << "COMPUTEBREAKITEM..." << std::endl;)
+    wsum_ = 0;
+    psum_ = 0;
+    b_ = item_number();
     for (ItemPos i=0; i<item_number(); ++i) {
         if (wsum_ + item(i).w > capacity()) {
             b_ = i;
@@ -210,7 +237,11 @@ void Instance::compute_break_item()
         psum_ += item(i).p;
     }
     r_ = capacity() - wsum_;
+    DBG(std::cout << "b " << b_ << " wsum " << wsum_ << " psum " << psum << std::endl;)
+    DBG(std::cout << "COMPUTEBREAKITEM... END" << std::endl;)
 }
+
+#undef DBG
 
 void Instance::remove_big_items()
 {
@@ -228,7 +259,6 @@ void Instance::remove_big_items()
     compute_break_item();
 }
 
-
 #define DBG(x)
 //#define DBG(x) x
 
@@ -244,19 +274,19 @@ void Instance::sort_partially()
         psum_ = 0;
         wsum_ = 0;
         r_ = capacity();
-        b_ = -1;
+        b_ = 0;
         return;
     } else if (item_number() == 1) {
         psum_ = item(0).p;
         wsum_ = item(0).w;
         r_ = capacity() - wsum_;
-        b_ = -1;
+        b_ = 1;
         return;
     }
 
     // Quick sort like algorithm
     ItemPos f = 0;
-    ItemPos l = (item_number() > 0)? item_number() - 1: 0;
+    ItemPos l = item_number() - 1;
     wsum_ = 0;
     psum_ = 0;
     while (f < item_number() && item(f).w <= 0) {
@@ -304,9 +334,9 @@ void Instance::sort_partially()
     // Compute break weight, break profit and break item
     DBG(std::cout << "f " << f << " l " << l << std::endl;)
     if (f == item_number()) {
-        b_ = -1;
+        b_ = item_number();
     } else if (f == item_number() - 1 && wsum_ + item(f).w <= c_) {
-        b_ = -1;
+        b_ = item_number();
         wsum_ += item(f).w;
         psum_ += item(f).p;
     } else {
@@ -553,6 +583,25 @@ bool Instance::reduce2(const Solution& sol_curr, bool verbose)
 
 #undef DBG
 
+#define DBG(x)
+//#define DBG(x) x
+
+void Instance::reset()
+{
+    DBG(std::cout << "RESET..." << std::endl;)
+    if (item_number() != total_item_number()) {
+        DBG(std::cout << "OK" << std::endl;)
+        n_ = total_item_number();
+        c_ = total_capacity();
+        for (ItemPos i = 0; i < item_number(); ++i)
+            sol_red_->set(i, false);
+        sort_type_ = "";
+    }
+    DBG(std::cout << "RESET... END" << std::endl;)
+}
+
+#undef DBG
+
 ////////////////////////////////////////////////////////////////////////////////
 
 Weight Instance::gcd() const
@@ -587,10 +636,18 @@ bool Instance::check_opt(Profit p) const
 
 bool Instance::check_sopt(const Solution& sol) const
 {
-    return (sol.weight() <= total_capacity()
-            && (optimum() == 0
-                || item_number() != total_item_number()
-                || sol.profit() == optimum()));
+    if (sol.weight() > total_capacity()) {
+        std::cout << "w(S) " << sol.weight() << " > c " << total_capacity() << std::endl;
+        return false;
+    }
+    if (optimum() != 0
+                && item_number() == total_item_number()
+                && sol.profit() != optimum()) {
+        std::cout << "p(S) " << sol.profit() << " != OPT " << optimum() << std::endl;
+        return false;
+    }
+
+    return true;
 }
 
 bool Instance::check_ub(Profit p) const
@@ -614,13 +671,13 @@ bool Instance::check_lb(Profit p) const
 bool Instance::check_sol(const Solution& sol) const
 {
     if (sol.weight() > total_capacity()) {
-        std::cout << "sol.weight() " << sol.weight() << " > total_capacity() " << total_capacity() << std::endl;
+        std::cout << "w(S) " << sol.weight() << " > c " << total_capacity() << std::endl;
         return false;
     }
     if (optimum() != 0
                 && item_number() == total_item_number()
                 && sol.profit() > optimum()) {
-        std::cout << "sol.profit() " << sol.profit() << " > optimum() " << optimum() << std::endl;
+        std::cout << "p(S) " << sol.profit() << " > OPT " << optimum() << std::endl;
         return false;
     }
     return true;

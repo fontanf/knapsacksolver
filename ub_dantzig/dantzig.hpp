@@ -19,10 +19,21 @@ Profit ub_dantzig(const Instance& instance,
 Profit ub_trivial_from(const Instance& instance, ItemPos j, const Solution& sol_curr);
 
 /**
+ * For infeasible solutions
+ */
+Profit ub_trivial_from_rev(const Instance& instance, ItemPos j, const Solution& sol_curr);
+
+/**
  * Dantzig upper bound, using items j..n
  * Time O(n)
  */
 Profit ub_dantzig_from(const Instance& instance, ItemIdx j, const Solution& sol_curr);
+
+/**
+ * Dantzig upper bound for unfeasible solution. Remove items from j down to 1
+ * Require r <= 0 and the return profit is non-positive.
+ */
+Profit ub_dantzig_from_rev(const Instance& instance, ItemIdx j, const Solution& sol_curr);
 
 /**
  * Dantzig upper bound but consider wether or not to pack to break item.
@@ -30,13 +41,6 @@ Profit ub_dantzig_from(const Instance& instance, ItemIdx j, const Solution& sol_
  * Time O(n)
  */
 Profit ub_dantzig_2_from(const Instance& instance, ItemIdx j, const Solution& sol_curr);
-
-
-/**
- * Dantzig upper bound for unfeasible solution. Remove items from j down to 1
- * Require r <= 0 and the return profit is non-positive.
- */
-Profit ub_dantzig_rev_from(const Instance& instance, ItemIdx j, Weight r);
 
 /**
  * Dantzig upper bound, using items i1..i2
