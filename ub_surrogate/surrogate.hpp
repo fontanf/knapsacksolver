@@ -17,6 +17,6 @@ struct SurrogateOut
     Weight multiplier = 0;
 };
 
-SurrogateOut ub_surrogate(Instance& instance, Profit lb, Info* info = NULL);
+SurrogateOut ub_surrogate(const Instance& instance, Profit lb, Info* info = NULL);
 
 #endif /* end of include guard: MARTELLO_HPP_YNPESKFM */

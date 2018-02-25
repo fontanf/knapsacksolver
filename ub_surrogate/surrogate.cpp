@@ -151,9 +151,10 @@ void ub_surrogate_solve(Instance& ins, ItemIdx k,
     ins.surrogate(-s, k);
 }
 
-SurrogateOut ub_surrogate(Instance& ins, Profit lb, Info* info)
+SurrogateOut ub_surrogate(const Instance& instance, Profit lb, Info* info)
 {
     DBG(std::cout << "SURROGATERELAX..." << std::endl;)
+    Instance ins(instance);
     assert(ins.sort_type() == "eff" || ins.sort_type() == "peff");
 
     SurrogateOut out(info);
