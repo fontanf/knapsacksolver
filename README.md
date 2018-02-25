@@ -22,10 +22,13 @@ bazel-bin/lb_greedy/main -i ...
 2.5 Approximation Algorithms,
 5.1.2 Lower Bounds for (KP) - Kellerer et al., 2004)*
 
-The ``Max Greedy'' algorithm correspond to packing the item with the largest
+The *Max Greedy* algorithm correspond to packing the item with the largest
 weight first and then filling the remaining capacity with the greedy algorithm.
 Thus, if used with Greedy, the algorithm has a relative performance guarantee of
 1/2.
+
+The *Best Greedy* algorithm runs all the other greedy algorithms and keeps the
+best solution found.
 
 - Greedy `lb_greedy/main`
 - Max Greedy `lb_greedy/main -a max`
