@@ -1,6 +1,7 @@
 #include "bab.hpp"
 
 #include "../lb_greedy/greedy.hpp"
+#include "../ub_surrogate/surrogate.hpp"
 
 #include <boost/program_options.hpp>
 
@@ -38,32 +39,31 @@ int main(int argc, char *argv[])
         std::cout << desc << std::endl;;
         return 1;
     }
-    bool verbose = vm.count("verbose");
 
     Instance instance(input_data);
     Solution sol_best(instance);
     Info info;
-    info.verbose(verbose);
+    info.verbose(vm.count("verbose"));
 
     // Variable reduction
     bool optimal = false;
-    if (reduction == "") {
-        sol_best = Solution(instance);
-    } else if (reduction == "1") {
-        instance.sort_partially();
-        sol_best = sol_bestgreedy(instance);
-        optimal = instance.reduce1(sol_best, verbose);
+    instance.sort();
+    sol_best = sol_bestgreedy(instance);
+    Profit ub = ub_surrogate(instance, sol_best.profit()).ub;
+    if (reduction == "1") {
+        optimal = instance.reduce1(sol_best, Info::verbose(&info));
     } else if (reduction == "2") {
-        instance.sort();
-        sol_best = sol_bestgreedy(instance);
-        optimal = instance.reduce2(sol_best, verbose);
+        optimal = instance.reduce2(sol_best, Info::verbose(&info));
     }
 
     // Branch-and-bounds
     if (!optimal) {
-        instance.sort();
         BabData data(instance, upper_bound, &info);
         data.update_best_solution(sol_best);
+        data.ub = ub;
+        if (Info::verbose(&info))
+            std::cout << "UB " << ub << " GAP " << ub - instance.optimum() << std::endl;
+
         if (algorithm == "") {
             sopt_bab(data);
         } else if (algorithm == "rec") {
@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
     double t = info.elapsed_time();
     info.pt.put("Solution.Time", t);
     info.pt.put("Solution.OPT", sol_best.profit());
-    if (verbose) {
+    if (Info::verbose(&info)) {
         std::cout << "---" << std::endl;
         std::cout << "OPT " << sol_best.profit() << std::endl;
         std::cout << "EXP " << instance.optimum() << std::endl;
