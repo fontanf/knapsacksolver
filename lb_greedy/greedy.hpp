@@ -10,39 +10,33 @@
 /**
  * Return break solution.
  */
-Solution sol_break(const Instance& ins,
-        boost::property_tree::ptree* pt = NULL, bool verbose = false);
+Solution sol_break(const Instance& ins, Info* info = NULL);
 
 /**
  * Greedy algorithm
  */
-Solution sol_greedy(const Instance& ins,
-        boost::property_tree::ptree* pt = NULL, bool verbose = false);
+Solution sol_greedy(const Instance& ins, Info* info = NULL);
 
 /**
  * Add the item of maximum profit and then fill the knapsack with the greedy
  * algorithm.
  */
-Solution sol_greedymax(const Instance& ins,
-        boost::property_tree::ptree* pt = NULL, bool verbose = false);
+Solution sol_greedymax(const Instance& ins, Info* info = NULL);
 
 /**
  * Add the best item to the break solution.
  */
-Solution sol_forwardgreedy(const Instance& ins,
-        boost::property_tree::ptree* pt = NULL, bool verbose = false);
+Solution sol_forwardgreedy(const Instance& ins, Info* info = NULL);
 
 /**
  * Remove the worst item from the break solution with the break item.
  */
-Solution sol_backwardgreedy(const Instance& ins,
-        boost::property_tree::ptree* pt = NULL, bool verbose = false);
+Solution sol_backwardgreedy(const Instance& ins, Info* info = NULL);
 
 /**
  * Run all the previous greedy algorithm and return the best solution.
  */
-Solution sol_bestgreedy(const Instance& ins,
-        boost::property_tree::ptree* pt = NULL, bool verbose = false);
+Solution sol_bestgreedy(const Instance& ins, Info* info = NULL);
 
 /**
  * Greedy algorithm with items n1..n2

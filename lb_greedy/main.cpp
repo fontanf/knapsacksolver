@@ -37,53 +37,36 @@ int main(int argc, char *argv[])
         std::cout << desc << std::endl;;
         return 1;
     }
-    bool verbose = vm.count("verbose");
 
     Instance instance(input_data);
     Solution sol_best(instance);
-    boost::property_tree::ptree pt;
-
-    std::chrono::high_resolution_clock::time_point t1
-        = std::chrono::high_resolution_clock::now();
+    Info info;
+    info.verbose(vm.count("verbose"));
 
     instance.sort_partially();
 
     if (algorithm == "") {
-        sol_best = sol_greedy(instance, &pt, verbose);
+        sol_best = sol_greedy(instance, &info);
     } else if (algorithm == "max") {
-        sol_best = sol_greedymax(instance, &pt, verbose);
+        sol_best = sol_greedymax(instance, &info);
     } else if (algorithm == "for") {
-        sol_best = sol_forwardgreedy(instance, &pt, verbose);
+        sol_best = sol_forwardgreedy(instance, &info);
     } else if (algorithm == "back") {
-        sol_best = sol_backwardgreedy(instance, &pt, verbose);
+        sol_best = sol_backwardgreedy(instance, &info);
     } else if (algorithm == "best") {
-        sol_best = sol_bestgreedy(instance, &pt, verbose);
+        sol_best = sol_bestgreedy(instance, &info);
     }
 
-    std::chrono::high_resolution_clock::time_point t2
-        = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> time_span
-        = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
-
-    pt.put("Solution.Time", time_span.count());
-    pt.put("Solution.OPT", sol_best.profit());
-    if (verbose) {
+    double t = info.elapsed_time();
+    info.pt.put("Solution.Time", t);
+    info.pt.put("Solution.OPT", sol_best.profit());
+    if (Info::verbose(&info)) {
         std::cout << "OPT " << sol_best.profit() << std::endl;
         std::cout << "GAP " << instance.optimum() - sol_best.profit() << std::endl;
-        std::cout << "Time " << time_span.count() << std::endl;
+        std::cout << "TIME " << t << std::endl;
     }
 
-    // Write output file
-    if (output_file != "")
-        write_ini(output_file, pt);
-
-    // Write certificate file
-    if (cert_file != "") {
-        std::ofstream cert;
-        cert.open(cert_file);
-        cert << sol_best;
-        cert.close();
-    }
-
+    info.write_ini(output_file); // Write output file
+    sol_best.write_cert(cert_file); // Write certificate file
     return 0;
 }

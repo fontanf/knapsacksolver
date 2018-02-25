@@ -3,8 +3,7 @@
 #define DBG(x)
 //#define DBG(x) x
 
-Solution sol_break(const Instance& ins,
-        boost::property_tree::ptree* pt, bool verbose)
+Solution sol_break(const Instance& ins, Info* info)
 {
     assert(ins.sort_type() == "eff" || ins.sort_type() == "peff");
 
@@ -19,8 +18,7 @@ Solution sol_break(const Instance& ins,
     return sol;
 }
 
-Solution sol_greedy(const Instance& ins,
-        boost::property_tree::ptree* pt, bool verbose)
+Solution sol_greedy(const Instance& ins, Info* info)
 {
     assert(ins.sort_type() == "eff" || ins.sort_type() == "peff");
     DBG(std::cout << "GREEDY..." << std::endl;)
@@ -37,8 +35,7 @@ Solution sol_greedy(const Instance& ins,
     return sol;
 }
 
-Solution sol_greedymax(const Instance& ins,
-        boost::property_tree::ptree* pt, bool verbose)
+Solution sol_greedymax(const Instance& ins, Info* info)
 {
     DBG(std::cout << "GREEDYMAX..." << std::endl;)
     assert(ins.sort_type() == "eff" || ins.sort_type() == "peff");
@@ -62,8 +59,7 @@ Solution sol_greedymax(const Instance& ins,
     return sol;
 }
 
-Solution sol_forwardgreedy(const Instance& ins,
-        boost::property_tree::ptree* pt, bool verbose)
+Solution sol_forwardgreedy(const Instance& ins, Info* info)
 {
     DBG(std::cout << "GREEDYFW..." << std::endl;)
     assert(ins.sort_type() == "eff" || ins.sort_type() == "peff");
@@ -101,8 +97,7 @@ Solution sol_forwardgreedy(const Instance& ins,
     return sol;
 }
 
-Solution sol_backwardgreedy(const Instance& ins,
-        boost::property_tree::ptree* pt, bool verbose)
+Solution sol_backwardgreedy(const Instance& ins, Info* info)
 {
     DBG(std::cout << "GREEDYBW..." << std::endl;)
     assert(ins.sort_type() == "eff" || ins.sort_type() == "peff");
@@ -139,8 +134,7 @@ Solution sol_backwardgreedy(const Instance& ins,
     return sol;
 }
 
-Solution sol_bestgreedy(const Instance& ins,
-        boost::property_tree::ptree* pt, bool verbose)
+Solution sol_bestgreedy(const Instance& ins, Info* info)
 {
     DBG(std::cout << "GREEDYBEST..." << std::endl;)
     Solution sol = sol_greedy(ins);
@@ -153,7 +147,7 @@ Solution sol_bestgreedy(const Instance& ins,
         best = "Forward";
     if (sol.update(sol_backwardgreedy(ins)))
         best = "Backward";
-    if (verbose)
+    if (Info::verbose(info))
         std::cout << "ALG " << best << std::endl;
     DBG(std::cout << "GREEDYBEST... END" << std::endl;)
     return sol;
