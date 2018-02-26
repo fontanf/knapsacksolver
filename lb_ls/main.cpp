@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
     std::string input_data  = "";
     std::string output_file = "";
     std::string cert_file   = "";
-    std::string algorithm   = "";
+    std::string algorithm   = "for";
     po::options_description desc("Allowed options");
     desc.add_options()
         ("help,h", "produce help message")
@@ -42,8 +42,12 @@ int main(int argc, char *argv[])
 
     instance.sort_partially();
 
-    if (algorithm == "") {
+    if (algorithm == "for") {
         sol_best = sol_forwardgreedybest(instance, &info);
+    } else if (algorithm == "back") {
+        sol_best = sol_backwardgreedybest(instance, &info);
+    } else if (algorithm == "best") {
+        sol_best = sol_bestgreedyplus(instance, &info);
     }
 
     double t = info.elapsed_time();
