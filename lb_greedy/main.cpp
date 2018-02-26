@@ -1,12 +1,5 @@
 #include "greedy.hpp"
 
-#include <iostream>
-#include "chrono"
-
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/ini_parser.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
 #include <boost/program_options.hpp>
 
 int main(int argc, char *argv[])
@@ -63,6 +56,7 @@ int main(int argc, char *argv[])
     info.pt.put("Solution.Time", t);
     info.pt.put("Solution.OPT", sol_best.profit());
     if (Info::verbose(&info)) {
+        std::cout << "---" << std::endl;
         std::cout << "OPT " << sol_best.profit() << std::endl;
         std::cout << "GAP " << instance.optimum() - sol_best.profit() << std::endl;
         std::cout << "TIME " << t << std::endl;
