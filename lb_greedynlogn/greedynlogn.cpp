@@ -87,6 +87,9 @@ bool best_exchange(Solution& sol, Info* info)
 
 Solution sol_forwardgreedynlogn(const Instance& ins, Info* info)
 {
+    if (ins.break_item() == ins.item_number()
+            || ins.break_item() == 0)
+        return Solution(ins);
     DBG(std::cout << "FORWARDGREEDY..." << std::endl;)
     Solution sol = sol_break(ins);
     if (Info::verbose(info))
@@ -170,6 +173,9 @@ bool best_exchangeback(Solution& sol, Info* info)
 
 Solution sol_backwardgreedynlogn(const Instance& ins, Info* info)
 {
+    if (ins.break_item() == ins.item_number()
+            || ins.break_item() == 0)
+        return Solution(ins);
     DBG(std::cout << "BACKWARDGREEDYBEST..." << std::endl;)
     Solution sol = sol_break(ins);
     Solution sol0 = sol;
