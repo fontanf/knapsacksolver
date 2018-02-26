@@ -20,7 +20,7 @@ Table of Contents
 =================
 
   * [Lower bounds](#lower-bounds)
-     * [O(n) Greedy algorithm](#on-greedy-algorithm)
+     * [O(n) Greedy algorithms](#on-greedy-algorithms)
      * [O(n log n) Greedy algorithms](#on-log-n-greedy-algorithms)
   * [Upper bounds](#upper-bounds)
   * [DP with Bellman recursion](#dp-with-bellman-recursion)
@@ -34,7 +34,7 @@ Table of Contents
 
 ## Lower bounds
 
-### O(n) Greedy algorithm
+### O(n) Greedy algorithms
 
 *(See "Knapsack Problem",
 2.5 Approximation Algorithms,
