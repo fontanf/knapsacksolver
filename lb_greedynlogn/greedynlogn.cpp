@@ -1,4 +1,4 @@
-#include "ls.hpp"
+#include "greedynlogn.hpp"
 
 #include "../lb_greedy/greedy.hpp"
 
@@ -85,7 +85,7 @@ bool best_exchange(Solution& sol, Info* info)
     return true;
 }
 
-Solution sol_forwardgreedybest(const Instance& ins, Info* info)
+Solution sol_forwardgreedynlogn(const Instance& ins, Info* info)
 {
     DBG(std::cout << "FORWARDGREEDY..." << std::endl;)
     Solution sol = sol_break(ins);
@@ -168,7 +168,7 @@ bool best_exchangeback(Solution& sol, Info* info)
     return true;
 }
 
-Solution sol_backwardgreedybest(const Instance& ins, Info* info)
+Solution sol_backwardgreedynlogn(const Instance& ins, Info* info)
 {
     DBG(std::cout << "BACKWARDGREEDYBEST..." << std::endl;)
     Solution sol = sol_break(ins);
@@ -186,7 +186,7 @@ Solution sol_backwardgreedybest(const Instance& ins, Info* info)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Solution sol_bestgreedyplus(const Instance& ins, Info* info)
+Solution sol_bestgreedynlogn(const Instance& ins, Info* info)
 {
     DBG(std::cout << "GREEDYBESTPLUS..." << std::endl;)
     Solution sol = sol_greedy(ins);
@@ -199,9 +199,9 @@ Solution sol_bestgreedyplus(const Instance& ins, Info* info)
         best = "Forward";
     if (sol.update(sol_backwardgreedy(ins)))
         best = "Backward";
-    if (sol.update(sol_forwardgreedybest(ins)))
+    if (sol.update(sol_forwardgreedynlogn(ins)))
         best = "ForwardBest";
-    if (sol.update(sol_backwardgreedybest(ins)))
+    if (sol.update(sol_backwardgreedynlogn(ins)))
         best = "BackwardBest";
     if (Info::verbose(info))
         std::cout << "ALG " << best << std::endl;

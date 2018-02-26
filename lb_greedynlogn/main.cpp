@@ -1,4 +1,4 @@
-#include "ls.hpp"
+#include "greedynlogn.hpp"
 
 #include <iostream>
 
@@ -43,11 +43,11 @@ int main(int argc, char *argv[])
     instance.sort_partially();
 
     if (algorithm == "for") {
-        sol_best = sol_forwardgreedybest(instance, &info);
+        sol_best = sol_forwardgreedynlogn(instance, &info);
     } else if (algorithm == "back") {
-        sol_best = sol_backwardgreedybest(instance, &info);
+        sol_best = sol_backwardgreedynlogn(instance, &info);
     } else if (algorithm == "best") {
-        sol_best = sol_bestgreedyplus(instance, &info);
+        sol_best = sol_bestgreedynlogn(instance, &info);
     }
 
     double t = info.elapsed_time();

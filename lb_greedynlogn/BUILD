@@ -1,7 +1,7 @@
 cc_library(
-        name = "libls",
-        hdrs = ["ls.hpp"],
-        srcs = ["ls.cpp"],
+        name = "libgreedynlogn",
+        hdrs = ["greedynlogn.hpp"],
+        srcs = ["greedynlogn.cpp"],
         visibility = ["//visibility:public"],
         deps = [
                 "//lib:cpp",
@@ -13,7 +13,7 @@ cc_binary(
         name = "main",
         srcs = ["main.cpp"],
         deps = [
-                ":libls",
+                ":libgreedynlogn",
                 "//lib:cpp"
         ],
         linkopts = [
@@ -27,7 +27,7 @@ cc_test(
         name = "test",
         srcs = ["test.cpp"],
         deps = [
-                ":libls",
+                ":libgreedynlogn",
                 "//lib:cpp",
                 "@googletest//:gtest_main",
         ],
