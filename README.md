@@ -59,9 +59,9 @@ best solution found.
 Those Greedy are similar to the one described in "A fast algorithm for strongly
 correlated knapsack problems" (Pisinger, 1998).
 
-- Forward Greedy Best `lb_ls/main -a for`
-- Backward Greedy Best `lb_ls/main -a back`
-- Best Greedy+ `lb_ls/main -a best`
+- Forward Greedy `lb_greedynlogn/main -a for`
+- Backward Greedy `lb_greedynlogn/main -a back`
+- Best Greedy `lb_greedynlogn/main -a best`
 
 ## Upper bounds
 
