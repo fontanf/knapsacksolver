@@ -2,6 +2,8 @@
 
 #include "../ub_dantzig/dantzig.hpp"
 
+#include <stdlib.h>
+
 #define DBG(x)
 //#define DBG(x) x
 
@@ -117,9 +119,53 @@ void ub_surrogate_solve(Instance& ins, ItemIdx k,
     Weight  s = 0;
     Weight s1 = s_min;
     Weight s2 = s_max;
+    Weight wmax = ins.item(0).w;
+    Weight wmin = ins.item(0).w;
+    Profit pmax = ins.item(0).p;
+    for (ItemPos i=1; i<ins.item_number(); ++i) {
+        if (ins.item(i).w > wmax)
+            wmax = ins.item(i).w;
+        if (ins.item(i).w < wmin)
+            wmin = ins.item(i).w;
+        if (ins.item(i).p > pmax)
+            pmax = ins.item(i).p;
+    }
+    Weight wabs = wmax;
+    Weight wlim = INT_FAST64_MAX / pmax;
 
     while (s1 <= s2) {
         s = (s1 + s2) / 2;
+        DBG(std::cout
+                << "s1 " << s1 << " s " << s << " s2 " << s2
+                << std::endl;)
+
+        // Avoid INT overflow
+        if (s_min == 0 && s != 0) {
+            if (INT_FAST64_MAX / s < k
+                    || ins.capacity() > INT_FAST64_MAX - s * k
+                    || INT_FAST64_MAX / ins.item_number() < wmax+s
+                    || wmax + s > wlim) {
+                DBG(std::cout << "s2 " << s2 << " => " << s-1 << std::endl;)
+                s2 = s - 1;
+                continue;
+            } else {
+                wmax += s - s_prec;
+            }
+        }
+        if (s_max == 0 && s != 0) {
+            wabs = (wmax+s > -wmin+s)? wmax+s: wmin+s;
+            if (INT_FAST64_MAX / -s < k
+                    || INT_FAST64_MAX / ins.item_number() < wabs
+                    || wabs > wlim) {
+                DBG(std::cout << "s1 " << s1 << " => " << s+1 << std::endl;)
+                s1 = s + 1;
+                continue;
+            } else {
+                wmax += s - s_prec;
+                wmin += s - s_prec;
+            }
+        }
+
         ins.surrogate(s-s_prec, k);
         Profit  p = ins.break_profit();
         ItemPos b = ins.break_item();
@@ -132,11 +178,14 @@ void ub_surrogate_solve(Instance& ins, ItemIdx k,
                 << " ub "  << p
                 << " GAP " << p - ins.optimum()
                 << std::endl;)
-        //DBG(std::cout
-                //<< "pbar " << ins.break_profit()
-                //<< " r " << ins.break_capacity()
-                //<< " c " << ins.capacity()
-                //<< std::endl;)
+        if (b != ins.item_number())
+            DBG(std::cout
+                    << "pbar " << ins.break_profit()
+                    << " r " << ins.break_capacity()
+                    << " pb " << ins.item(b).p
+                    << " wb " << ins.item(b).w
+                    << " c " << ins.capacity()
+                    << std::endl;)
         assert(s_min < 0 || ins.capacity() > 0);
 
         if (p < out.ub) {
@@ -173,8 +222,19 @@ SurrogateOut ub_surrogate(const Instance& instance, Profit lb, Info* info)
     if (ins.break_capacity() == 0 || ins.break_item() == ins.item_number())
         return out;
 
-    Weight s_max = INT_FAST64_MAX / ins.item_number() / ins.capacity(); // Should ideally be:  maxp*maxp, but may cause overflow (sic)
-    Weight s_min = INT_FAST64_MIN / 2; // Should ideally be: -maxp*maxw, but may cause overflow (sic)
+    // Compte s_min and s_max
+    // s_min and s_max should ideally be (-)pmax*wmax, but this may cause
+    // overflow
+    Weight wmax = ins.item(0).w;
+    Profit pmax = ins.item(0).p;
+    for (ItemPos i=1; i<ins.item_number(); ++i) {
+        if (ins.item(i).w > wmax)
+            wmax = ins.item(i).w;
+        if (ins.item(i).p > pmax)
+            pmax = ins.item(i).p;
+    }
+    Weight s_max = (INT_FAST64_MAX / pmax > wmax)?  pmax*wmax:  INT_FAST64_MAX;
+    Weight s_min = (INT_FAST64_MAX / pmax > wmax)? -pmax*wmax: -INT_FAST64_MAX;
 
     DBG(std::cout
             <<  "z "     << lb
