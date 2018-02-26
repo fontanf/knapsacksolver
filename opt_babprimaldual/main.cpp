@@ -1,6 +1,7 @@
 #include "babprimaldual.hpp"
 
 #include "../lb_greedy/greedy.hpp"
+#include "../lb_greedynlogn/greedynlogn.hpp"
 #include "../ub_surrogate/surrogate.hpp"
 
 #include <boost/program_options.hpp>
@@ -46,46 +47,36 @@ int main(int argc, char *argv[])
     info.verbose(vm.count("verbose"));
     Profit ub = 0;
 
-    // Variable reduction
     bool optimal = false;
-    if (reduction == "") {
-        instance.sort_partially();
-        sol_best = sol_bestgreedy(instance);
-        ub = ub_surrogate(instance, sol_best.profit()).ub;
-    } else if (reduction == "1") {
-        instance.sort_partially();
-        sol_best = sol_bestgreedy(instance);
-        ub = ub_surrogate(instance, sol_best.profit()).ub;
-        optimal = instance.reduce1(sol_best, Info::verbose(&info));
-    } else if (reduction == "2") {
+
+    // Variable reduction
+    if (reduction == "2" || upper_bound == "dantzig") {
         instance.sort();
+        sol_best = sol_bestgreedynlogn(instance);
+    } else {
+        instance.sort_partially();
         sol_best = sol_bestgreedy(instance);
-        ub = ub_surrogate(instance, sol_best.profit()).ub;
-        optimal = instance.reduce2(sol_best, Info::verbose(&info));
+    }
+    ub = ub_surrogate(instance, sol_best.profit()).ub;
+    optimal = (sol_best.profit() == ub);
+
+    if (!optimal) {
+        if (reduction == "1") {
+            optimal = instance.reduce1(sol_best, Info::verbose(&info));
+        } else if (reduction == "2") {
+            optimal = instance.reduce2(sol_best, Info::verbose(&info));
+        }
     }
 
     if (!optimal) {
         if (Info::verbose(&info))
             std::cout << "UB " << ub << " GAP " << ub - instance.optimum() << std::endl;
 
-        if (upper_bound == "trivial") {
-            instance.sort_partially();
-            BabPDData data(instance, upper_bound, &info);
-            data.update_best_solution(sol_best);
-            data.ub = ub;
-            sopt_babprimaldual(data);
-            sol_best.update(data.sol_best);
-        } else if (upper_bound == "dantzig") {
-            instance.sort();
-            BabPDData data(instance, upper_bound, &info);
-            data.update_best_solution(sol_best);
-            data.ub = ub;
-            sopt_babprimaldual(data);
-            sol_best.update(data.sol_best);
-        } else {
-            assert(false);
-            std::cout << "Unknwow algorithm" << std::endl;
-        }
+        BabPDData data(instance, upper_bound, &info);
+        data.update_best_solution(sol_best);
+        data.ub = ub;
+        sopt_babprimaldual(data);
+        sol_best.update(data.sol_best);
     }
 
     double t = info.elapsed_time();
