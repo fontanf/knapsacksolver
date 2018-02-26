@@ -20,10 +20,12 @@ Table of Contents
 =================
 
   * [Lower bounds](#lower-bounds)
+     * [O(n) Greedy algorithm](#on-greedy-algorithm)
+     * [O(n log n) Greedy algorithms](#on-log-n-greedy-algorithms)
   * [Upper bounds](#upper-bounds)
   * [DP with Bellman recursion](#dp-with-bellman-recursion)
-    * [With arrays](#with-arrays)
-    * [With lists](#with-lists)
+     * [With arrays](#with-arrays)
+     * [With lists](#with-lists)
   * [DP by profits](#dp-by-profits)
   * [Balanced Dynamic Programming](#balanced-dynamic-programming)
   * [Primal Branch-and-bound](#primal-branch-and-bound)
@@ -31,6 +33,8 @@ Table of Contents
 
 
 ## Lower bounds
+
+### O(n) Greedy algorithm
 
 *(See "Knapsack Problem",
 2.5 Approximation Algorithms,
@@ -49,6 +53,15 @@ best solution found.
 - Forward Greedy `lb_greedy/main -a for`
 - Backward Greedy `lb_greedy/main -a back`
 - Best Greedy `lb_greedy/main -a best`
+
+### O(n log n) Greedy algorithms
+
+Those Greedy are similar to the one described in "A fast algorithm for strongly
+correlated knapsack problems" (Pisinger, 1998).
+
+- Forward Greedy Best `lb_ls/main -a for`
+- Backward Greedy Best `lb_ls/main -a back`
+- Best Greedy+ `lb_ls/main -a best`
 
 ## Upper bounds
 
