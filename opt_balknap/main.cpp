@@ -1,107 +1,109 @@
 #include "balknap.hpp"
 
 #include "../lb_greedy/greedy.hpp"
+#include "../lb_greedynlogn/greedynlogn.hpp"
 #include "../ub_surrogate/surrogate.hpp"
-
-#include <iostream>
-#include <chrono>
-
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/ini_parser.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/program_options.hpp>
 
 int main(int argc, char *argv[])
 {
+    namespace po = boost::program_options;
+
     // Parse program options
     std::string input_data  = "";
     std::string output_file = "";
     std::string cert_file   = "";
-    std::string algorithm   = "";
-    boost::program_options::options_description desc("Allowed options");
+    std::string algorithm   = "sopt_1";
+    std::string reduction   = "";
+    std::string lower_bound = "none";
+    std::string upper_bound = "none";
+    po::options_description desc("Allowed options");
     desc.add_options()
         ("help,h", "produce help message")
-        ("input-data,i",  boost::program_options::value<std::string>(&input_data)->required(), "set input data (required)")
-        ("output-file,o", boost::program_options::value<std::string>(&output_file),            "set output file")
-        ("cert-file,c",   boost::program_options::value<std::string>(&cert_file),              "set certificate output file")
-        ("algorithm,a",   boost::program_options::value<std::string>(&algorithm),              "set algorithm")
-        ("verbose,v",                                                                          "enable verbosity")
+        ("input-data,i",  po::value<std::string>(&input_data)->required(), "set input data (required)")
+        ("output-file,o", po::value<std::string>(&output_file),            "set output file")
+        ("cert-file,c",   po::value<std::string>(&cert_file),              "set certificate output file")
+        ("algorithm,a",   po::value<std::string>(&algorithm),              "set algorithm")
+        ("reduction,r",   po::value<std::string>(&reduction),              "choose variable reduction")
+        ("lower-bound,l", po::value<std::string>(&lower_bound),            "set lower bound")
+        ("upper-bound,u", po::value<std::string>(&upper_bound),            "set upper bound")
+        ("verbose,v",                                                      "enable verbosity")
         ;
-    boost::program_options::variables_map vm;
-    boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
+    po::variables_map vm;
+    po::store(po::parse_command_line(argc, argv, desc), vm);
     if (vm.count("help")) {
         std::cout << desc << std::endl;;
         return 1;
     }
     try {
-        boost::program_options::notify(vm);
-    } catch (boost::program_options::required_option e) {
+        po::notify(vm);
+    } catch (po::required_option e) {
         std::cout << desc << std::endl;;
         return 1;
     }
-    bool verbose = vm.count("verbose");
 
     Instance instance(input_data);
-    boost::property_tree::ptree pt;
-    Solution sol_orig(instance);
+    Solution sol_best(instance);
+    Profit opt;
+    Info info;
+    info.verbose(vm.count("verbose"));
+    bool optimal = false;
 
-    std::chrono::high_resolution_clock::time_point t1
-        = std::chrono::high_resolution_clock::now();
-
-    if (algorithm == "opt") {
-        Instance instance_sorted = Instance::sort_partially_by_efficiency(instance);
-        Solution solution = sol_extgreedy(instance_sorted);
-        opt_balknap(instance_sorted, solution.profit(), &pt, verbose);
-    } else if (algorithm == "sopt") {
-        Instance instance_sorted = Instance::sort_partially_by_efficiency(instance);
-        Solution solution = sol_extgreedy(instance_sorted);
-        sopt_balknap(instance_sorted, solution, &pt, verbose);
-        sol_orig = solution.get_orig();
-    } else if (algorithm == "opt_list_partsorted") {
-        Instance instance_sorted = Instance::sort_partially_by_efficiency(instance);
-        Solution solution = sol_extgreedy(instance_sorted);
-        opt_balknap_list(instance_sorted, solution.profit(), &pt, verbose);
-    } else if (algorithm == "opt_list_sorted") {
-        Instance instance_sorted = Instance::sort_by_efficiency(instance);
-        Solution solution = sol_extgreedy(instance_sorted);
-        opt_balknap_list(instance_sorted, solution.profit(), &pt, verbose);
-    } else if (algorithm == "sopt_list_partsorted") {
-        Instance instance_sorted = Instance::sort_partially_by_efficiency(instance);
-        Solution solution = sol_extgreedy(instance_sorted);
-        sopt_balknap_list(instance_sorted, solution, &pt, verbose);
-        sol_orig = solution.get_orig();
-    } else if (algorithm == "sopt_list_sorted") {
-        Instance instance_sorted = Instance::sort_by_efficiency(instance);
-        Solution solution = sol_ls(instance_sorted);
-        sopt_balknap_list(instance_sorted, solution, &pt, verbose);
-        sol_orig = solution.get_orig();
+    // Variable reduction
+    if (reduction == "2" || upper_bound != "none") {
+        instance.sort();
+        sol_best = sol_bestgreedynlogn(instance);
     } else {
-        assert(false);
-        std::cout << "Unknwow algorithm" << std::endl;
+        instance.sort_partially();
+        sol_best = sol_bestgreedy(instance);
+    }
+    Profit ub = ub_surrogate(instance, sol_best.profit()).ub;
+    if (Info::verbose(&info)) {
+        std::cout
+            <<  "LB " << sol_best.profit() << " GAP " << instance.optimum() - sol_best.profit()
+            << " UB " << ub << " GAP " << ub - instance.optimum() << std::endl;
     }
 
-    std::chrono::high_resolution_clock::time_point t2
-        = std::chrono::high_resolution_clock::now();
-
-    std::chrono::duration<double> time_span
-        = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
-
-    pt.put("Solution.Time", time_span.count());
-    if (verbose)
-        std::cout << "Time " << time_span.count() << std::endl;
-
-    // Write output file
-    if (output_file != "")
-        write_ini(output_file, pt);
-
-    // Write certificate file
-    if (cert_file != "") {
-        std::ofstream cert;
-        cert.open(cert_file);
-        cert << sol_orig;
-        cert.close();
+    // Variable reduction
+    if (!optimal) {
+        if (reduction == "1") {
+            optimal = instance.reduce1(sol_best, Info::verbose(&info));
+        } else if (reduction == "2") {
+            optimal = instance.reduce2(sol_best, Info::verbose(&info));
+        }
     }
 
+    // Balknap
+    if (!optimal) {
+        if (algorithm == "opt") {
+            opt = std::max(
+                    sol_best.profit(),
+                    opt_balknap(instance, sol_best.profit(), &info));
+        } else if (algorithm == "sopt") {
+            sol_best.update(sopt_balknap(instance, sol_best, &info));
+            opt = sol_best.profit();
+        } else if (algorithm == "opt_list") {
+            opt = std::max(
+                    sol_best.profit(),
+                    opt_balknap_list(instance, sol_best.profit(), upper_bound, &info));
+        } else if (algorithm == "sopt_list") {
+            sol_best.update(sopt_balknap_list(instance, sol_best, upper_bound, &info));
+            opt = sol_best.profit();
+        } else {
+            assert(false);
+            std::cout << "Unknwow algorithm" << std::endl;
+        }
+    }
+
+    double t = info.elapsed_time();
+    info.pt.put("Solution.OPT", opt);
+    info.pt.put("Solution.Time", t);
+    if (Info::verbose(&info)) {
+        std::cout << "OPT " << opt << std::endl;
+        std::cout << "EXP " << instance.optimum() << std::endl;
+        std::cout << "Time " << t << std::endl;
+    }
+
+    info.write_ini(output_file); // Write output file
+    sol_best.write_cert(cert_file); // Write certificate file
     return 0;
 }
