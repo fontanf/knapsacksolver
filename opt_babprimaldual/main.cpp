@@ -4,8 +4,6 @@
 #include "../lb_greedynlogn/greedynlogn.hpp"
 #include "../ub_surrogate/surrogate.hpp"
 
-#include <boost/program_options.hpp>
-
 int main(int argc, char *argv[])
 {
     namespace po = boost::program_options;
@@ -45,11 +43,8 @@ int main(int argc, char *argv[])
     Solution sol_best(instance);
     Info info;
     info.verbose(vm.count("verbose"));
-    Profit ub = 0;
-
     bool optimal = false;
 
-    // Variable reduction
     if (reduction == "2" || upper_bound == "dantzig") {
         instance.sort();
         sol_best = sol_bestgreedynlogn(instance);
@@ -57,9 +52,15 @@ int main(int argc, char *argv[])
         instance.sort_partially();
         sol_best = sol_bestgreedy(instance);
     }
-    ub = ub_surrogate(instance, sol_best.profit()).ub;
+    Profit ub = ub_surrogate(instance, sol_best.profit()).ub;
+    if (Info::verbose(&info)) {
+        std::cout
+            <<  "LB " << sol_best.profit() << " GAP " << instance.optimum() - sol_best.profit()
+            << " UB " << ub << " GAP " << ub - instance.optimum() << std::endl;
+    }
     optimal = (sol_best.profit() == ub);
 
+    // Variable reduction
     if (!optimal) {
         if (reduction == "1") {
             optimal = instance.reduce1(sol_best, Info::verbose(&info));
@@ -69,9 +70,6 @@ int main(int argc, char *argv[])
     }
 
     if (!optimal) {
-        if (Info::verbose(&info))
-            std::cout << "UB " << ub << " GAP " << ub - instance.optimum() << std::endl;
-
         BabPDData data(instance, upper_bound, &info);
         data.update_best_solution(sol_best);
         data.ub = ub;

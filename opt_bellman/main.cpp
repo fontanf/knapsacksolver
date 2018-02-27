@@ -1,15 +1,8 @@
 #include "bellman.hpp"
 
 #include "../lb_greedy/greedy.hpp"
-
-#include <iostream>
-#include <chrono>
-
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/ini_parser.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/program_options.hpp>
+#include "../lb_greedynlogn/greedynlogn.hpp"
+#include "../ub_surrogate/surrogate.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -47,27 +40,36 @@ int main(int argc, char *argv[])
         std::cout << desc << std::endl;;
         return 1;
     }
-    bool verbose = vm.count("verbose");
 
     Instance instance(input_data);
     Solution sol_best(instance);
     Profit opt;
     Info info;
-    info.verbose(verbose);
+    info.verbose(vm.count("verbose"));
+    bool optimal = false;
 
     // Variable reduction
-    bool optimal = false;
-    if (reduction == "") {
-        instance.sort_partially();
-        sol_best = sol_bestgreedy(instance);
-    } else if (reduction == "1") {
-        instance.sort_partially();
-        sol_best = sol_bestgreedy(instance);
-        optimal = instance.reduce1(sol_best, verbose);
-    } else if (reduction == "2") {
+    if (reduction == "2" || upper_bound != "none") {
         instance.sort();
+        sol_best = sol_bestgreedynlogn(instance);
+    } else {
+        instance.sort_partially();
         sol_best = sol_bestgreedy(instance);
-        optimal = instance.reduce2(sol_best, verbose);
+    }
+    Profit ub = ub_surrogate(instance, sol_best.profit()).ub;
+    if (Info::verbose(&info)) {
+        std::cout
+            <<  "LB " << sol_best.profit() << " GAP " << instance.optimum() - sol_best.profit()
+            << " UB " << ub << " GAP " << ub - instance.optimum() << std::endl;
+    }
+
+    // Variable reduction
+    if (!optimal) {
+        if (reduction == "1") {
+            optimal = instance.reduce1(sol_best, Info::verbose(&info));
+        } else if (reduction == "2") {
+            optimal = instance.reduce2(sol_best, Info::verbose(&info));
+        }
     }
 
     // Bellman
@@ -98,14 +100,10 @@ int main(int argc, char *argv[])
             sol_best.update(sopt_bellman_rec(instance, &info));
             opt = sol_best.profit();
         } else if (algorithm == "opt_list") {
-            if (upper_bound != "none")
-                instance.sort();
             opt = std::max(
                     sol_best.profit(),
                     opt_bellman_list(instance, sol_best.profit(), lower_bound, upper_bound, &info));
         } else if (algorithm == "sopt_list_rec") {
-            if (upper_bound != "none")
-                instance.sort();
             sol_best.update(sopt_bellman_rec_list(instance, sol_best, lower_bound, upper_bound, &info));
             opt = sol_best.profit();
         } else {
@@ -118,7 +116,7 @@ int main(int argc, char *argv[])
     double t = info.elapsed_time();
     info.pt.put("Solution.OPT", opt);
     info.pt.put("Solution.Time", t);
-    if (verbose) {
+    if (Info::verbose(&info)) {
         std::cout << "OPT " << opt << std::endl;
         std::cout << "EXP " << instance.optimum() << std::endl;
         std::cout << "Time " << t << std::endl;

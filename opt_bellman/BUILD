@@ -6,7 +6,9 @@ cc_library(
         deps = [
                 "//lib:cpp",
                 "//ub_dantzig:libdantzig",
+                "//ub_surrogate:libsurrogate",
                 "//lb_greedy:libgreedy",
+                "//lb_greedynlogn:libgreedynlogn",
         ],
 )
 

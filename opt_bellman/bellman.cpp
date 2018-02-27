@@ -590,8 +590,8 @@ std::vector<State> opts_bellman_list(const Instance& instance,
                                     lb = lb_tmp;
                                     if (Info::verbose(info))
                                         std::cout
-                                            <<  "LB "  << lb
-                                            << " GAP " << instance.optimum() - lb
+                                            <<  "LB " << lb + instance.reduced_solution()->profit()
+                                            << " GAP " << instance.optimum() - lb - instance.reduced_solution()->profit()
                                             << std::endl;
                                 }
                             }
@@ -641,8 +641,8 @@ std::vector<State> opts_bellman_list(const Instance& instance,
                                     lb = lb_tmp;
                                     if (Info::verbose(info))
                                         std::cout
-                                            <<  "LB " << lb
-                                            << " GAP " << instance.optimum() - lb
+                                            <<  "LB " << lb + instance.reduced_solution()->profit()
+                                            << " GAP " << instance.optimum() - lb - instance.reduced_solution()->profit()
                                             << std::endl;
                                 }
                             }

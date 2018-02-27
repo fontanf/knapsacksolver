@@ -14,6 +14,7 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/fstream.hpp>
+#include <boost/program_options.hpp>
 
 typedef int_fast64_t Profit;
 typedef int_fast64_t Weight;
