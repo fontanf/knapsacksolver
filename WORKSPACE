@@ -30,10 +30,10 @@ cc_library(
 
 local_repository(
         name = "BenchTools",
-        path = "/home/fontanf/Dev/BenchTools/",
+        path = "/home/fontanf/Dev/bench/",
 )
 
 local_repository(
         name = "KnapsackPisingerInstances",
-        path = "/home/fontanf/Dev/KnapsackPisingerInstances/",
+        path = "/home/fontanf/Dev/knapsack_pisinger_instances/",
 )
