@@ -4,35 +4,30 @@
 #include "../lib/instance.hpp"
 #include "../lib/solution.hpp"
 
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/ini_parser.hpp>
-
 /**
  * Time  O(n*wmax*pmax)
  * Space O(wmax*pmax)
  */
-Profit opt_balknap(const Instance& instance, Profit lb = -1,
-		boost::property_tree::ptree* pt = NULL, bool verbose = false);
+Profit opt_balknap(const Instance& instance, Profit lb = -1, Info* info = NULL);
 
 /**
  * Time  O(n*wmax*pmax)
  * Space O(n*wmax*pmax)
  */
-Profit sopt_balknap(const Instance& instance, Solution& sol_curr,
-		boost::property_tree::ptree* pt = NULL, bool verbose = false);
+Profit sopt_balknap(const Instance& instance, Solution& sol_curr, Info* info = NULL);
 
 /**
  * Time  O(n*wmax*pmax*log(wmax*pmax))
  * Space O(wmax*pmax)
  */
-Profit opt_balknap_list(const Instance& instance, Profit lb = -1,
-		boost::property_tree::ptree* pt = NULL, bool verbose = false);
+Profit opt_balknap_list(const Instance& instance, Profit lb,
+        std::string ub_type, Info* info = NULL);
 
 /**
  * Time  O(n*wmax*pmax*log(wmax*pmax))
  * Space O(n*wmax*pmax)
  */
 Profit sopt_balknap_list(const Instance& instance, Solution& sol_curr,
-		boost::property_tree::ptree* pt = NULL, bool verbose = false);
+        std::string ub_type, Info* info = NULL);
 
 #endif /* end of include guard: BALKNAP_HPP_UHNG2R08 */
