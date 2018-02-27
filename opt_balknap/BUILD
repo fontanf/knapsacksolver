@@ -5,8 +5,8 @@ cc_library(
         visibility = ["//visibility:public"],
         deps = [
                 "//lib:cpp",
-                "//lb_ls:libls",
                 "//lb_greedy:libgreedy",
+                "//lb_greedynlogn:libgreedynlogn",
                 "//ub_surrogate:libsurrogate",
         ],
 )
