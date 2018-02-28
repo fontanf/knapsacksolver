@@ -1,5 +1,3 @@
-*Note: Rewritinig in progress*
-
 # Knapsack
 
 Implementations of classical algorithms for the Knapsack Problem. Most algorithms are detailed in the "Knapsack Problem" book (Kellerer et al., 2004).
@@ -19,7 +17,7 @@ bazel-bin/lb_greedy/main -i ...
 Table of Contents
 =================
 
-  * [Reductions](#reductions)
+  * [Variable reductions](#variable-reductions)
   * [Lower bounds](#lower-bounds)
      * [O(n) Greedy algorithms](#on-greedy-algorithms)
      * [O(n log n) Greedy algorithms](#on-log-n-greedy-algorithms)
@@ -32,7 +30,7 @@ Table of Contents
   * [Primal Branch-and-bound](#primal-branch-and-bound)
   * [Primal-Dual Branch-and-bound](#primal-dual-branch-and-bound)
 
-## Reductions
+## Variable reductions
 
 *(See "Knapsack Problem", 5.1.3 Variable Reduction - Kellerer et al., 2004)*
 
@@ -98,9 +96,8 @@ correlated knapsack problems" (Pisinger, 1998).
 
 *(See "Knapsack Problem", 3.4, 3.5 - Kellerer et al., 2004)*
 
-Options `-u` can be set to `trivial` or `dantzig` to combine Dynamic Programming
-with upper bounds. In this case, option `-l` can be set to `none` or `greedy` to
-select which lower bound to use.
+Use option `-u` (possible values: `trivial` or `dantzig`) to combine Dynamic Programming with upper bounds.
+In this case, use option `-l` (possible values: `none` or `greedy`) to select lower bound.
 
 - Only optimal value `opt_bellman/main -a opt_list`
 - Recursive scheme `opt_bellman/main -a sopt_list_rec`
@@ -116,9 +113,9 @@ select which lower bound to use.
 
 *(See "Knapsack Problem", 5.3.1 Balanced Dynamic Programming - Kellerer et al., 2004)*
 
-Option `-u` can be set to `dembo`, `trivial` or `dantzig`.
+Use option `-u` (possible values: `dembo`, `trivial` or `dantzig`) to select which upper bound is used.
 
-- With tables, Only optimal value, partial sorting, `opt_balknap/main -a opt`
+- With tables, Only optimal value, `opt_balknap/main -a opt`
 - With tables, Optimal solution, `opt_balknap/main -a sopt`
 - With lists (maps), only optimal value, `opt_balknap/main -a opt_list`
 - With lists (maps), optimal solution, `opt_balknap/main -a sopt_list`
@@ -127,7 +124,7 @@ Option `-u` can be set to `dembo`, `trivial` or `dantzig`.
 
 *(See "Knapsack Problem", 2.4 Branch-and-Bound - Kellerer et al., 2004)*
 
-Set option `-u` (possible values `trivial`, `dantzig`, `dantzig_2`) to select
+Use option `-u` (possible values: `trivial`, `dantzig` or `dantzig_2`) to select
 which upper bound is used.
 
 - Implementation with a recursive function (default) `opt_bab/main -a rec`
@@ -137,6 +134,7 @@ which upper bound is used.
 
 *(See "Knapsack Problem", 5.1.4 Branch-and-Bound Implementations - Kellerer et al., 2004)*
 
-- Partial sorting, Dembo and Hammer UB, `opt_babprimaldual/main -a partsorted`
-- Complete sorting, Dantzig UB, `opt_babprimaldual/main -a sorted`
+Use option `-u` (possible values: `trivial` or `dantzig`) to select which upper bound is used.
+
+- `opt_babprimaldual/main`
 
