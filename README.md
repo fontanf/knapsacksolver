@@ -19,6 +19,7 @@ bazel-bin/lb_greedy/main -i ...
 Table of Contents
 =================
 
+  * [Reductions](#reductions)
   * [Lower bounds](#lower-bounds)
      * [O(n) Greedy algorithms](#on-greedy-algorithms)
      * [O(n log n) Greedy algorithms](#on-log-n-greedy-algorithms)
@@ -30,6 +31,18 @@ Table of Contents
   * [Balanced Dynamic Programming](#balanced-dynamic-programming)
   * [Primal Branch-and-bound](#primal-branch-and-bound)
   * [Primal-Dual Branch-and-bound](#primal-dual-branch-and-bound)
+
+## Reductions
+
+*(See "Knapsack Problem",
+5.1.3 Variable Reduction
+- Kellerer et al., 2004)*
+
+The second reduction eliminates more items but is slower and require a complete
+sorting of the items.
+
+- Option `-r 1`: Partial sorting, Trivial upper bound
+- Option `-r 2`: Complete sorting, Dantzig upper bound
 
 
 ## Lower bounds
@@ -107,7 +120,7 @@ select which lower bound to use.
 
 *(See "Knapsack Problem", 5.3.1 Balanced Dynamic Programming - Kellerer et al., 2004)*
 
-Options `-u` can be set to `dembo`, `trivial` or `dantzig`.
+Option `-u` can be set to `dembo`, `trivial` or `dantzig`.
 
 - With tables, Only optimal value, partial sorting, `opt_balknap/main -a opt`
 - With tables, Optimal solution, `opt_balknap/main -a sopt`
