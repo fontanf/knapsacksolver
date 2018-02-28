@@ -214,6 +214,7 @@ private:
     Profit psum_ = 0;
     Weight wsum_ = 0;
     std::vector<Item> isum_;
+    bool sol_red_opt_ = false;
 };
 
 std::ostream& operator<<(std::ostream &os, const Item& item);

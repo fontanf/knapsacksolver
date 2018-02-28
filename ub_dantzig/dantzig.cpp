@@ -37,15 +37,29 @@ Profit ub_dantzig(const Instance& instance,
 
 Profit ub_trivial_from(const Instance& instance, ItemIdx j, const Solution& sol_curr)
 {
-    Profit u = sol_curr.profit() + (sol_curr.remaining_capacity() * instance.item(j).p) / instance.item(j).w;
+    return ub_trivial_from(instance, j, sol_curr.profit(), sol_curr.remaining_capacity());
+}
+
+Profit ub_trivial_from(const Instance& instance, ItemIdx j, Profit p, Weight r)
+{
+    Profit u = p;
+    if (j < instance.item_number())
+        u += (r * instance.item(j).p) / instance.item(j).w;
     assert(j > 0 || instance.check_ub(u));
     return u;
 }
 
 Profit ub_trivial_from_rev(const Instance& instance, ItemIdx j, const Solution& sol_curr)
 {
+    return ub_trivial_from_rev(instance, j, sol_curr.profit(), sol_curr.remaining_capacity());
+}
+
+Profit ub_trivial_from_rev(const Instance& instance, ItemIdx j, Profit p, Weight r)
+{
     DBG(std::cout << "UBTRIVIALFROMREV... j " << j << std::endl;)
-    Profit u = sol_curr.profit() + (sol_curr.remaining_capacity() * instance.item(j).p + 1) / instance.item(j).w - 1;
+    Profit u = p;
+    if (j >= 0)
+        u += (r * instance.item(j).p + 1) / instance.item(j).w - 1;
     DBG(std::cout << "UBTRIVIALFROMREV... END" << std::endl;)
     return u;
 }
@@ -57,9 +71,14 @@ Profit ub_trivial_from_rev(const Instance& instance, ItemIdx j, const Solution& 
 
 Profit ub_dantzig_from(const Instance& instance, ItemIdx j, const Solution& sol_curr)
 {
+    return ub_dantzig_from(instance, j, sol_curr.profit(), sol_curr.remaining_capacity());
+}
+
+Profit ub_dantzig_from(const Instance& instance, ItemIdx j, Profit p, Weight r)
+{
     DBG(std::cout << "UBDANTZIGFROM... j " << j << " r " << sol_curr.remaining_capacity() << std::endl;)
     assert(instance.sort_type() == "eff");
-    Profit  u = sol_curr.profit();
+    Profit  u = p;
     ItemPos b;
 
     //Weight r = sol_curr.remaining_capacity();
@@ -70,7 +89,6 @@ Profit ub_dantzig_from(const Instance& instance, ItemIdx j, const Solution& sol_
     //DBG(std::cout << "ubitem " << instance.isum(b) << std::endl;)
     //DBG(std::cout << "u " << u << " b " << b << " r " << r << std::endl;)
 
-    Weight r = sol_curr.remaining_capacity();
     for (b=j; b<instance.item_number(); b++) {
         if (instance.item(b).w > r)
             break;
@@ -88,11 +106,14 @@ Profit ub_dantzig_from(const Instance& instance, ItemIdx j, const Solution& sol_
 
 Profit ub_dantzig_from_rev(const Instance& instance, ItemIdx j, const Solution& sol_curr)
 {
+    return ub_dantzig_from_rev(instance, j, sol_curr.profit(), sol_curr.remaining_capacity());
+}
+
+Profit ub_dantzig_from_rev(const Instance& instance, ItemIdx j, Profit p, Weight r)
+{
     assert(instance.sort_type() == "eff");
-    assert(sol_curr.remaining_capacity() < 0);
+    assert(r < 0);
     ItemIdx i = j;
-    Profit  p = sol_curr.profit();
-    Weight  r = sol_curr.remaining_capacity();
     for (; i>=0; i--) {
         if (instance.item(i).w + r > 0)
             break;
@@ -156,24 +177,6 @@ Profit ub_dantzig_2_from(const Instance& instance, ItemIdx j, const Solution& so
 }
 
 #undef DBG
-
-Profit ub_dantzig_from_to(const Instance& instance, ItemIdx i1, ItemIdx i2, Weight c)
-{
-    assert(instance.sort_type() == "eff");
-    ItemIdx i = i1;
-    Profit  p = 0;
-    Weight  r = c;
-    for (; i<=i2; i++) {
-        Weight wi = instance.item(i).w;
-        if (wi > r)
-            break;
-        p += instance.item(i).p;
-        r -= wi;
-    }
-    if (i != i2 + 1 && r > 0)
-        p += (instance.item(i).p * r) / instance.item(i).w;
-    return p;
-}
 
 #define DBG(x)
 //#define DBG(x) x

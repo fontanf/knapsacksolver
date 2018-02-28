@@ -389,6 +389,7 @@ bool Instance::reduce1(const Solution& sol_curr, bool verbose)
 {
     DBG(std::cout << "REDUCE1... LB " << sol_curr.profit() << std::endl;)
     assert(sort_type() == "eff" || sort_type() == "peff");
+    sol_red_opt_ = (sol_curr.profit() == optimum());
 
     DBG(std::cout << "b " << b_ << std::endl;)
     for (ItemIdx i=0; i<=b_; ++i) {
@@ -459,6 +460,7 @@ bool Instance::reduce2(const Solution& sol_curr, bool verbose)
 {
     DBG(std::cout << "REDUCE2... LB " << sol_curr.profit() << std::endl;)
     assert(sort_type() == "eff");
+    sol_red_opt_ = (sol_curr.profit() == optimum());
 
     std::vector<Item> not_fixed;
     std::vector<Item> fixed_1;
@@ -629,9 +631,13 @@ Profit Instance::optimum() const
 
 bool Instance::check_opt(Profit p) const
 {
-    return (optimum() == 0
-            || item_number() != total_item_number()
-            || p == optimum());
+    if (optimum() != 0
+            && !sol_red_opt_
+            && p != optimum()) {
+        std::cout << "p " << p << " != OPT " << optimum() << std::endl;
+        return false;
+    }
+    return true;
 }
 
 bool Instance::check_sopt(const Solution& sol) const
@@ -641,7 +647,7 @@ bool Instance::check_sopt(const Solution& sol) const
         return false;
     }
     if (optimum() != 0
-                && item_number() == total_item_number()
+                && !sol_red_opt_
                 && sol.profit() != optimum()) {
         std::cout << "p(S) " << sol.profit() << " != OPT " << optimum() << std::endl;
         return false;

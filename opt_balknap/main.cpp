@@ -14,8 +14,7 @@ int main(int argc, char *argv[])
     std::string cert_file   = "";
     std::string algorithm   = "sopt_1";
     std::string reduction   = "";
-    std::string lower_bound = "none";
-    std::string upper_bound = "none";
+    std::string upper_bound = "dembo";
     po::options_description desc("Allowed options");
     desc.add_options()
         ("help,h", "produce help message")
@@ -24,7 +23,6 @@ int main(int argc, char *argv[])
         ("cert-file,c",   po::value<std::string>(&cert_file),              "set certificate output file")
         ("algorithm,a",   po::value<std::string>(&algorithm),              "set algorithm")
         ("reduction,r",   po::value<std::string>(&reduction),              "choose variable reduction")
-        ("lower-bound,l", po::value<std::string>(&lower_bound),            "set lower bound")
         ("upper-bound,u", po::value<std::string>(&upper_bound),            "set upper bound")
         ("verbose,v",                                                      "enable verbosity")
         ;
@@ -77,16 +75,16 @@ int main(int argc, char *argv[])
         if (algorithm == "opt") {
             opt = std::max(
                     sol_best.profit(),
-                    opt_balknap(instance, sol_best.profit(), &info));
+                    opt_balknap(instance, sol_best.profit(), upper_bound, &info));
         } else if (algorithm == "sopt") {
-            sol_best.update(sopt_balknap(instance, sol_best, &info));
+            sol_best.update(sopt_balknap(instance, sol_best.profit(), upper_bound, &info));
             opt = sol_best.profit();
         } else if (algorithm == "opt_list") {
             opt = std::max(
                     sol_best.profit(),
                     opt_balknap_list(instance, sol_best.profit(), upper_bound, &info));
         } else if (algorithm == "sopt_list") {
-            sol_best.update(sopt_balknap_list(instance, sol_best, upper_bound, &info));
+            sol_best.update(sopt_balknap_list(instance, sol_best.profit(), upper_bound, &info));
             opt = sol_best.profit();
         } else {
             assert(false);
