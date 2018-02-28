@@ -7,8 +7,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
 
-Profit ub_dantzig(const Instance& instance,
-        boost::property_tree::ptree* pt = NULL, bool verbose = false);
+Profit ub_dantzig(const Instance& instance, Info* info = NULL);
 
 ////////////////////////////////////////////////////////////////////////////////
 

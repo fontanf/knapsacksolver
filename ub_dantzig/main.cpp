@@ -1,50 +1,55 @@
 #include "dantzig.hpp"
 
-#include <iostream>
-
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/ini_parser.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/program_options.hpp>
-
 int main(int argc, char *argv[])
 {
-	// Parse program options
-	std::string input_data  = "";
-	std::string output_file = "";
-	std::string cert_file   = "";
-	std::string algorithm   = "";
-	boost::program_options::options_description desc("Allowed options");
-	desc.add_options()
-		("help,h", "produce help message")
-		("input-data,i",  boost::program_options::value<std::string>(&input_data)->required(), "set input data (required)")
-		("output-file,o", boost::program_options::value<std::string>(&output_file),            "set output file")
-		("cert-file,c",   boost::program_options::value<std::string>(&cert_file),              "set certificate output file")
-		("verbose,v",                                                                          "enable verbosity")
-		;
-	boost::program_options::variables_map vm;
-	boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
-	if (vm.count("help")) {
-		std::cout << desc << std::endl;;
-		return 1;
-	}
-	try {
-		boost::program_options::notify(vm);
-	} catch (boost::program_options::required_option e) {
-		std::cout << desc << std::endl;;
-		return 1;
-	}
-	bool verbose = vm.count("verbose");
+    namespace po = boost::program_options;
 
-	Instance instance(input_data);
-	Instance instance_sorted = Instance::sort_by_efficiency(instance);
-	boost::property_tree::ptree pt;
-	ub_dantzig(instance_sorted, &pt, verbose);
+    // Parse program options
+    std::string input_data  = "";
+    std::string output_file = "";
+    std::string cert_file   = "";
+    std::string algorithm   = "";
+    po::options_description desc("Allowed options");
+    desc.add_options()
+        ("help,h", "produce help message")
+        ("input-data,i",  po::value<std::string>(&input_data)->required(), "set input data (required)")
+        ("output-file,o", po::value<std::string>(&output_file),            "set output file")
+        ("cert-file,c",   po::value<std::string>(&cert_file),              "set certificate output file")
+        ("algorithm,a",   po::value<std::string>(&algorithm),              "set algorithm")
+        ("verbose,v",                                                      "enable verbosity")
+        ;
+    po::variables_map vm;
+    po::store(po::parse_command_line(argc, argv, desc), vm);
+    if (vm.count("help")) {
+        std::cout << desc << std::endl;;
+        return 1;
+    }
+    try {
+        po::notify(vm);
+    } catch (po::required_option e) {
+        std::cout << desc << std::endl;;
+        return 1;
+    }
 
-	// Write output file
-	if (output_file != "")
-		write_ini(output_file, pt);
+    Instance instance(input_data);
+    Solution sol_best(instance);
+    Info info;
+    info.verbose(vm.count("verbose"));
 
-	return 0;
+    instance.sort_partially();
+    Profit ub = ub_dantzig(instance, &info);
+
+    double t = info.elapsed_time();
+    info.pt.put("Solution.Time", t);
+    info.pt.put("Solution.UB", ub);
+    if (Info::verbose(&info)) {
+        std::cout << "---" << std::endl;
+        std::cout << "UB " << ub << std::endl;
+        std::cout << "GAP " << ub - instance.optimum() << std::endl;
+        std::cout << "TIME " << t << std::endl;
+    }
+
+    info.write_ini(output_file); // Write output file
+    sol_best.write_cert(cert_file); // Write certificate file
+    return 0;
 }
