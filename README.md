@@ -34,9 +34,7 @@ Table of Contents
 
 ## Reductions
 
-*(See "Knapsack Problem",
-5.1.3 Variable Reduction
-- Kellerer et al., 2004)*
+*(See "Knapsack Problem", 5.1.3 Variable Reduction - Kellerer et al., 2004)*
 
 The second reduction eliminates more items but is slower and require a complete
 sorting of the items.
@@ -49,9 +47,7 @@ sorting of the items.
 
 ### O(n) Greedy algorithms
 
-*(See "Knapsack Problem",
-2.5 Approximation Algorithms,
-5.1.2 Lower Bounds for (KP) - Kellerer et al., 2004)*
+*(See "Knapsack Problem", 2.5 Approximation Algorithms, 5.1.2 Lower Bounds for (KP) - Kellerer et al., 2004)*
 
 The *Max Greedy* algorithm correspond to packing the item with the largest
 weight first and then filling the remaining capacity with the greedy algorithm.
