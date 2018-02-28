@@ -453,7 +453,7 @@ bool Instance::reduce1(const Solution& sol_curr, bool verbose)
     }
 
     DBG(std::cout << "REDUCE1... END" << std::endl;)
-    return (capacity() <= 0);
+    return (item_number() == 0 || capacity() <= 0);
 }
 
 bool Instance::reduce2(const Solution& sol_curr, bool verbose)
@@ -580,7 +580,7 @@ bool Instance::reduce2(const Solution& sol_curr, bool verbose)
             << std::endl;
     }
     DBG(std::cout << "REDUCE2... END" << std::endl;)
-    return (capacity() <= 0);
+    return (item_number() == 0 || capacity() <= 0);
 }
 
 #undef DBG

@@ -50,9 +50,11 @@ int main(int argc, char *argv[])
     if (reduction == "2" || upper_bound != "none") {
         instance.sort();
         sol_best = sol_bestgreedynlogn(instance);
+        opt = sol_best.profit();
     } else {
         instance.sort_partially();
         sol_best = sol_bestgreedy(instance);
+        opt = sol_best.profit();
     }
     Profit ub = ub_surrogate(instance, sol_best.profit()).ub;
     if (Info::verbose(&info)) {
@@ -60,6 +62,7 @@ int main(int argc, char *argv[])
             <<  "LB " << sol_best.profit() << " GAP " << instance.optimum() - sol_best.profit()
             << " UB " << ub << " GAP " << ub - instance.optimum() << std::endl;
     }
+    optimal = (sol_best.profit() == ub);
 
     // Variable reduction
     if (!optimal) {

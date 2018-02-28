@@ -18,7 +18,7 @@ Weight max_weight(const Instance& instance)
     for (ItemPos i=0; i<instance.item_number(); ++i)
         if (instance.item(i).w > w_max)
             w_max = instance.item(i).w;
-    DBG(std::cout << "w_max " << w_max << std::endl;)
+    DBG(std::cout << "wmax " << w_max << std::endl;)
     return w_max;
 }
 
@@ -55,9 +55,8 @@ Profit opt_balknap(const Instance& instance,
         z = lb - p0;
 
     DBG(std::cout << "n " << n << " c " << c << std::endl;)
-    DBG(std::cout << "b " << b << " pb " << pb << " wb " << wb << std::endl;)
-    DBG(std::cout << "p_bar " << p_bar << " w_bar " << w_bar << std::endl;)
-    DBG(std::cout << "z " << z << " u " << u << std::endl;)
+    DBG(std::cout << "b " << instance.item(b) << std::endl;)
+    DBG(std::cout << "pbar " << p_bar << " wbar " << w_bar << std::endl;)
 
     if (Info::verbose(info))
         std::cout
@@ -252,10 +251,8 @@ Solution sopt_balknap(const Instance& instance,
         z = lb - p0;
 
     DBG(std::cout << "n " << n << " c " << c << std::endl;)
-    DBG(std::cout << "b " << b << " pb " << pb << " wb " << wb << std::endl;)
-    DBG(std::cout << "p_bar " << p_bar << " w_bar " << w_bar << std::endl;)
-    DBG(std::cout << "z " << z << " u " << u << std::endl;)
-
+    DBG(std::cout << "b " << instance.item(b) << std::endl;)
+    DBG(std::cout << "pbar " << p_bar << " wbar " << w_bar << std::endl;)
     if (Info::verbose(info))
         std::cout
             <<  "LB " << z
@@ -390,14 +387,16 @@ Solution sopt_balknap(const Instance& instance,
             }
         }
     }
+    opt += p0;
     DBG(std::cout << "OPT " << opt << std::endl;)
     if (opt <= z)
         return Solution(instance);
+    instance.check_opt(opt);
 
     // Retrieve optimal solution
-    DBG(std::cout << "Retrieve optimal solution..." << std::endl;)
+    DBG(std::cout << "RETRIEVE SOL..." << std::endl;)
     Solution sol = sol_break(instance);
-    DBG(std::cout << "Profit curr " << sol_curr.profit() << std::endl;)
+    DBG(std::cout << "p(S) " << sol.profit() << std::endl;)
 
     StateIdx idx = idx_opt;
     ItemPos  k   = idx / rl2;
@@ -411,7 +410,7 @@ Solution sopt_balknap(const Instance& instance,
     Profit pi = p + z + 1 - x;
     DBG(std::cout << "t " << t << " wt " << instance.weight(t) << " pt " << instance.profit(t) << " mu " << mu << " pi " << pi << std::endl;)
 
-    while (!(sol.profit() == opt + p0 && sol.remaining_capacity() >= 0)) {
+    while (!(sol.profit() == opt && sol.remaining_capacity() >= 0)) {
         StateIdx idx_next = pred[idx];
         ItemPos  k_next   = idx_next / rl2;
         ItemPos  t_next   = k_next + b - 1;
@@ -426,13 +425,13 @@ Solution sopt_balknap(const Instance& instance,
 
         if (k_next < k && pi_next < pi) {
             sol.set(t, true);
-            DBG(std::cout << "Add " << t << " profit " << sol_curr.profit() << std::endl;)
+            DBG(std::cout << "ADD " << t << " p(S) " << sol_curr.profit() << std::endl;)
             assert(mu_next == mu - instance.item(t).w);
             assert(pi_next == pi - instance.item(t).p);
         }
         if (k_next == k) {
             sol.set(s[idx], false);
-            DBG(std::cout << "Remove " << s[idx] << " profit " << sol_curr.profit() << std::endl;)
+            DBG(std::cout << "REMOVE " << s[idx] << " p(S) " << sol_curr.profit() << std::endl;)
         }
 
         idx = idx_next;
@@ -514,10 +513,8 @@ Profit opt_balknap_list(const Instance& instance, Profit lb,
         z = lb - p0;
 
     DBG(std::cout << "n " << n << " c " << c << std::endl;)
-    DBG(std::cout << "b " << b << " pb " << pb << " wb " << wb << std::endl;)
-    DBG(std::cout << "p_bar " << p_bar << " w_bar " << w_bar << std::endl;)
-    DBG(std::cout << "z " << z << " u " << u << std::endl;)
-
+    DBG(std::cout << "b " << instance.item(b) << std::endl;)
+    DBG(std::cout << "pbar " << p_bar << " wbar " << w_bar << std::endl;)
     if (Info::verbose(info))
         std::cout
             <<  "LB " << z
@@ -531,7 +528,7 @@ Profit opt_balknap_list(const Instance& instance, Profit lb,
     std::map<State1, StateValue1, State1> map;
 
     // Initialization
-    map.insert({{w_bar,p_bar},{b,b}}); // s(w_bar,p_bar) = b
+    map.insert({{w_bar,p_bar},{b,0}}); // s(w_bar,p_bar) = b
 
     DBG(for (auto s = map.begin(); s != map.end(); ++s)
         std::cout << *s << " ";
@@ -579,6 +576,8 @@ Profit opt_balknap_list(const Instance& instance, Profit lb,
             }
 
             hint = map.insert(hint, {{mu_, pi_}, {s->second.a, 0}});
+            if (hint->second.a < s->second.a)
+                hint->second.a    = s->second.a;
             hint--;
         }
 
@@ -723,10 +722,8 @@ Solution sopt_balknap_list(const Instance& instance,
         z = lb - p0;
 
     DBG(std::cout << "n " << n << " c " << c << std::endl;)
-    DBG(std::cout << "b " << b << " pb " << pb << " wb " << wb << std::endl;)
-    DBG(std::cout << "p_bar " << p_bar << " w_bar " << w_bar << std::endl;)
-    DBG(std::cout << "z " << z << " u " << u << std::endl;)
-
+    DBG(std::cout << "b " << instance.item(b) << std::endl;)
+    DBG(std::cout << "pbar " << p_bar << " wbar " << w_bar << std::endl;)
     if (Info::verbose(info))
         std::cout
             <<  "LB " << z
@@ -750,6 +747,7 @@ Solution sopt_balknap_list(const Instance& instance,
     //}
     //std::cout << "------------------------" << std::endl;)
 
+    DBG(std::cout << "RECURSION..." << std::endl;)
     for (ItemPos t=b; t<n; ++t) { // Recursion
         DBG(std::cout << "t " << t << " " << instance.item(t) << std::endl;)
         Weight wt = instance.item(t).w;
@@ -761,15 +759,6 @@ Solution sopt_balknap_list(const Instance& instance,
             maps[k].insert({
                     {s->first.mu, s->first.pi, t},
                     {s->second.a, s->second.a, s}});
-
-        //DBG(std::cout << "-------- Memory --------" << std::endl;
-        //for (ItemPos kk = 0; kk <= k; ++kk) {
-        //std::cout << "t " << kk + b - 1 << ": " << std::flush;
-        //for (auto s = maps[kk].begin(); s != maps[kk].end(); ++s)
-        //std::cout << s << " ";
-        //std::cout << std::endl;
-        //}
-        //std::cout << "------------------------" << std::endl;)
 
         // Add item t
         auto s = maps[k].upper_bound({c+1,0,0});
@@ -815,15 +804,6 @@ Solution sopt_balknap_list(const Instance& instance,
             }
             hint--;
         }
-
-        //DBG(std::cout << "-------- Memory --------" << std::endl;
-        //for (ItemPos kk = 0; kk <= k; ++kk) {
-        //std::cout << "t " << kk + b - 1 << ": " << std::flush;
-        //for (auto s = maps[kk].begin(); s != maps[kk].end(); ++s)
-        //std::cout << s << " ";
-        //std::cout << std::endl;
-        //}
-        //std::cout << "------------------------" << std::endl;)
 
         // Remove previously added items
         for (auto s = --(maps[k].end()); s->first.mu > c; --s) {
@@ -895,12 +875,13 @@ Solution sopt_balknap_list(const Instance& instance,
     if (opt == z)
         return Solution(instance);
     opt += p0;
+    assert(instance.check_opt(opt));
 
     // Retrieve optimal solution
     DBG(std::cout << "RETRIEVE SOL..." << std::endl;)
     Solution sol = sol_break(instance);
     DBG(std::cout << "p(S) " << sol.profit() << std::endl;)
-    DBG(std::cout << "w_bar " << w_bar << " p_bar " << p_bar << " b " << b << std::endl;)
+    DBG(std::cout << "wbar " << w_bar << " pbar " << p_bar << " b " << instance.item(b) << std::endl;)
     DBG(auto s_tmp = s;
         while (s_tmp != s_tmp->second.pred) {
         std::cout << *s_tmp << std::endl;
@@ -909,7 +890,7 @@ Solution sopt_balknap_list(const Instance& instance,
 
     ItemPos t = n-1;
     ItemPos a = s->second.a;
-    while (!(sol.profit() == opt + p0 && sol.remaining_capacity() >= 0)) {
+    while (!(sol.profit() == opt && sol.remaining_capacity() >= 0)) {
         auto s_next = s->second.pred;
         DBG(std::cout << "s " << *s << " s_next " << *s_next << std::endl;)
 
