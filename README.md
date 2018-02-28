@@ -105,14 +105,14 @@ select which lower bound to use.
 
 ## Balanced Dynamic Programming
 
-*(See "Knapsack Problem", 5.3.1 - Kellerer et al., 2004)*
+*(See "Knapsack Problem", 5.3.1 Balanced Dynamic Programming - Kellerer et al., 2004)*
 
-- Only optimal value, partial sorting, Dembo and Hammer UB, `opt_balknap/main -a opt`
-- Optimal solution, partial sorting, Dembo and Hammer UB, `opt_balknap/main -a sopt`
-- With lists (maps), only optimal value, partial sorting, Dembo and Hammer UB, `opt_balknap/main -a opt_list_partsorted`
-- With lists (maps), only optimal value, complete sorting, Dantzig UB, `opt_balknap/main -a opt_list_sorted`
-- With lists (maps), optimal solution, partial sorting, Dembo and Hammer UB, `opt_balknap/main -a sopt_list_partsorted`
-- With lists (maps), optimal solution, complete sorting, Dantzig UB, `opt_balknap/main -a sopt_list_sorted`
+Options `-u` can be set to `dembo`, `trivial` or `dantzig`.
+
+- With tables, Only optimal value, partial sorting, `opt_balknap/main -a opt`
+- With tables, Optimal solution, `opt_balknap/main -a sopt`
+- With lists (maps), only optimal value, `opt_balknap/main -a opt_list`
+- With lists (maps), optimal solution, `opt_balknap/main -a sopt_list`
 
 ## Primal Branch-and-bound
 
