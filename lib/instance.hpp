@@ -207,7 +207,7 @@ private:
     std::string sort_type_ = "";
     std::vector<Item> items_;
 
-    Solution* sol_opt_;
+    Solution* sol_opt_ = NULL;
     Solution* sol_red_ = NULL;
     ItemPos b_ = -1;
     Weight r_;

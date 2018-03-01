@@ -6,7 +6,6 @@
 Instance::Instance(ItemIdx n, Weight c, std::vector<Item> items):
     name_(""), format_(""), n_(n), c_(c), c_orig_(c), items_(items)
 {
-    sol_opt_ = new Solution(*this);
     sol_red_ = new Solution(*this);
 }
 
@@ -120,7 +119,8 @@ Instance::Instance(const Instance& ins)
     sort_type_ = ins.sort_type();
     items_ = ins.items_;
 
-    sol_opt_ = new Solution(*ins.optimal_solution());
+    if (ins.optimal_solution() != NULL)
+        sol_opt_ = new Solution(*ins.optimal_solution());
     sol_red_ = new Solution(*ins.reduced_solution());
     b_ = ins.break_item();
     r_ = ins.break_capacity();
@@ -139,7 +139,8 @@ bool Instance::check()
 
 Instance::~Instance()
 {
-    delete sol_opt_;
+    if (sol_opt_ != NULL)
+        delete sol_opt_;
     delete sol_red_;
 }
 
@@ -364,6 +365,11 @@ void Instance::surrogate(Weight multiplier, ItemIdx bound)
         }
     }
     c_ += multiplier * bound;
+    c_orig_ += multiplier * bound;
+    if (sol_opt_ != NULL) {
+        delete sol_opt_;
+        sol_opt_ = NULL;
+    }
     sort_type_ = "";
     sort_partially();
     DBG(std::cout << "SURROGATE... END" << std::endl;)
@@ -494,7 +500,7 @@ bool Instance::reduce2(const Solution& sol_curr, bool verbose)
         }
         if (ub <= sol_curr.profit()) {
             DBG(std::cout << " 1";)
-            assert(optimum() == -1
+            assert(optimal_solution() == NULL
                     || optimum() == sol_curr.profit()
                     || optimal_solution()->contains(i));
             sol_red_->set(i, true);
@@ -541,7 +547,7 @@ bool Instance::reduce2(const Solution& sol_curr, bool verbose)
 
         if (ub <= sol_curr.profit()) {
             DBG(std::cout << " 0" << std::flush;)
-            assert(optimum() == -1
+            assert(optimal_solution() == NULL
                     || optimum() == sol_curr.profit()
                     || !optimal_solution()->contains(i));
             fixed_0.push_back(item(i));
@@ -624,6 +630,8 @@ Weight Instance::gcd() const
 
 Profit Instance::optimum() const
 {
+    if (optimal_solution() == NULL)
+        return 0;
     return optimal_solution()->profit();
 }
 
@@ -631,7 +639,7 @@ Profit Instance::optimum() const
 
 bool Instance::check_opt(Profit p) const
 {
-    if (optimum() != 0
+    if (optimal_solution() != NULL
             && !sol_red_opt_
             && p != optimum()) {
         std::cout << "p " << p << " != OPT " << optimum() << std::endl;
@@ -646,7 +654,7 @@ bool Instance::check_sopt(const Solution& sol) const
         std::cout << "w(S) " << sol.weight() << " > c " << total_capacity() << std::endl;
         return false;
     }
-    if (optimum() != 0
+    if (optimal_solution() != NULL
                 && !sol_red_opt_
                 && sol.profit() != optimum()) {
         std::cout << "p(S) " << sol.profit() << " != OPT " << optimum() << std::endl;
@@ -658,7 +666,7 @@ bool Instance::check_sopt(const Solution& sol) const
 
 bool Instance::check_ub(Profit p) const
 {
-    if (optimum() != 0
+    if (optimal_solution() != NULL
             && item_number() == total_item_number()
             && p < optimum()) {
         std::cout << "u " << p << " < OPT " << optimum() << std::endl;
@@ -669,7 +677,7 @@ bool Instance::check_ub(Profit p) const
 
 bool Instance::check_lb(Profit p) const
 {
-    return (optimum() == 0
+    return (optimal_solution() == NULL
             || item_number() != total_item_number()
             || p <= optimum());
 }
@@ -680,7 +688,7 @@ bool Instance::check_sol(const Solution& sol) const
         std::cout << "w(S) " << sol.weight() << " > c " << total_capacity() << std::endl;
         return false;
     }
-    if (optimum() != 0
+    if (optimal_solution() != NULL
                 && item_number() == total_item_number()
                 && sol.profit() > optimum()) {
         std::cout << "p(S) " << sol.profit() << " > OPT " << optimum() << std::endl;
