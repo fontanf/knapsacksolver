@@ -183,6 +183,14 @@ public:
     bool check_lb(Profit p) const;
     bool check_sol(const Solution& sol) const;
 
+    /**
+     * return "LB XXXX GAP XXXX" if optimal_solution() != NULL,
+     *        "LB XXXX" otherwise.
+     */
+    std::string print_lb(Profit lb) const;
+    std::string print_ub(Profit ub) const;
+    std::string print_opt(Profit opt) const;
+
 private:
 
     void read_standard(boost::filesystem::path filename);

@@ -119,9 +119,13 @@ Instance::Instance(const Instance& ins)
     sort_type_ = ins.sort_type();
     items_ = ins.items_;
 
-    if (ins.optimal_solution() != NULL)
-        sol_opt_ = new Solution(*ins.optimal_solution());
-    sol_red_ = new Solution(*ins.reduced_solution());
+    if (ins.optimal_solution() != NULL) {
+        sol_opt_ = new Solution(*this);
+        *sol_opt_ = *ins.optimal_solution();
+    }
+    sol_red_ = new Solution(*this);
+    *sol_red_ = *ins.reduced_solution();
+    sol_red_opt_ = ins.sol_red_opt_;
     b_ = ins.break_item();
     r_ = ins.break_capacity();
     psum_ = ins.break_profit();
@@ -452,7 +456,7 @@ bool Instance::reduce1(const Solution& sol_curr, bool verbose)
 
     if (verbose) {
         std::cout
-            << "REDUCTION LB " << sol_curr.profit() << " GAP " << optimum() - sol_curr.profit() << " - "
+            << "REDUCTION: " << print_lb(sol_curr.profit()) << " - "
             << "N " << item_number() << " / " << total_item_number() << " (" << (double)item_number() / (double)total_item_number() << ") - "
             << "C " << capacity()    << " / " << total_capacity()    << " (" << (double)capacity()    / (double)total_capacity()    << ")"
             << std::endl;
@@ -580,9 +584,9 @@ bool Instance::reduce2(const Solution& sol_curr, bool verbose)
 
     if (verbose) {
         std::cout
-            << "REDUCTION LB " << sol_curr.profit() << " GAP " << optimum() - sol_curr.profit() << " - "
-            << "N " << item_number() << " / " << total_item_number() << " (" << (double)item_number() / (double)total_item_number() << ") - "
-            << "C " << capacity()    << " / " << total_capacity()    << " (" << (double)capacity()    / (double)total_capacity()    << ")"
+            << "REDUCTION: " << print_lb(sol_curr.profit()) << " - "
+            << "N " << item_number() << "/" << total_item_number() << " (" << (double)item_number() / (double)total_item_number() << ") - "
+            << "C " << (double)capacity()    / (double)total_capacity()
             << std::endl;
     }
     DBG(std::cout << "REDUCE2... END" << std::endl;)
@@ -699,6 +703,29 @@ bool Instance::check_sol(const Solution& sol) const
 
 ////////////////////////////////////////////////////////////////////////////////
 
+std::string Instance::print_lb(Profit lb) const
+{
+    return (optimal_solution() == NULL)?
+        "LB " + std::to_string(lb):
+        "LB " + std::to_string(lb) + " GAP " + std::to_string(optimum() - lb);
+}
+
+std::string Instance::print_ub(Profit ub) const
+{
+    return (optimal_solution() == NULL)?
+        "UB " + std::to_string(ub):
+        "UB " + std::to_string(ub) + " GAP " + std::to_string(ub - optimum());
+}
+
+std::string Instance::print_opt(Profit opt) const
+{
+    return (optimal_solution() != NULL && optimum() != opt)?
+        "OPT " + std::to_string(opt) + " ERROR!":
+        "OPT " + std::to_string(opt);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 std::ostream& operator<<(std::ostream& os, const Item& it)
 {
     os << "(" << it.i << " " << it.w << " " << it.p << " " << (double)it.p/(double)it.w << ")";
@@ -712,9 +739,14 @@ std::ostream& operator<<(std::ostream& os, const Instance& instance)
         << " c "   << instance.capacity()
         << " opt " << instance.optimum()
         << std::endl;
-    os << "b " << instance.break_item() << " wsum " << instance.break_weight() << " psum " << instance.break_profit() << std::endl;
-    for (ItemIdx i=0; i<instance.total_item_number(); ++i)
-        os << i << ": " << instance.item(i) << " " << instance.optimal_solution()->contains(i) << std::endl;
+    if (instance.sort_type() == "eff" || instance.sort_type() == "peff")
+        os << "b " << instance.break_item() << " wsum " << instance.break_weight() << " psum " << instance.break_profit() << std::endl;
+    for (ItemIdx i=0; i<instance.total_item_number(); ++i) {
+        os << i << ": " << instance.item(i) << std::flush;
+        if (instance.optimal_solution() != NULL)
+            os << " " << instance.optimal_solution()->contains(i);
+        os << std::endl;
+    }
     return os;
 }
 

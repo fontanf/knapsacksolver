@@ -10,10 +10,25 @@ Solution::Solution(const Solution& solution):
 Solution& Solution::operator=(const Solution& solution)
 {
     if (this != &solution) {
-        k_ = solution.item_number();
-        p_ = solution.profit();
-        w_ = solution.weight();
-        x_ = solution.data();
+        if (&this->instance() == &solution.instance()) {
+            k_ = solution.item_number();
+            p_ = solution.profit();
+            w_ = solution.weight();
+            x_ = solution.data();
+        } else {
+            // Used to convert a solution of a surrogate instance to a
+            // solution of its original instance.
+            p_ = 0;
+            w_ = 0;
+            k_ = solution.item_number();
+            x_ = solution.data();
+            for (ItemPos i=0; i<instance().total_item_number(); ++i) {
+                if (contains(i)) {
+                    p_ += instance().item(i).p;
+                    w_ += instance().item(i).w;
+                }
+            }
+        }
     }
     return *this;
 }
