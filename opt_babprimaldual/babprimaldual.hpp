@@ -53,8 +53,7 @@ struct BabPDData
         lb = sol_best.profit();
         if (Info::verbose(info))
             std::cout
-                <<  "LB "   << sol_best.profit()
-                << " GAP "  << instance.optimum() - sol_best.profit()
+                << instance.print_lb(sol_best.profit())
                 << " NODE " << std::scientific << (double)nodes << std::defaultfloat
                 << " TIME " << info->elapsed_time()
                 << std::endl;

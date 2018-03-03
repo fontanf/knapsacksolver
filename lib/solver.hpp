@@ -15,7 +15,7 @@ public:
     Profit run(
             Instance& instance,
             Solution& sol_best,
-            const std::map< std::string, std::string>& param,
+            std::map< std::string, std::string>& param,
             Info* info);
 
 protected:
@@ -24,7 +24,7 @@ protected:
             Instance& instance,
             Solution& sol_best,
             Profit ub,
-            const std::map<std::string, std::string>& param,
+            std::map<std::string, std::string>& param,
             Info* info) = 0;
 
 private:

@@ -7,7 +7,7 @@
 Profit Solver::run(
         Instance& instance,
         Solution& sol_best,
-        const std::map< std::string, std::string>& param,
+        std::map< std::string, std::string>& param,
         Info* info)
 {
     bool optimal = false;
@@ -36,6 +36,7 @@ Profit Solver::run(
     optimal = (sol_best.profit() == surout.ub);
 
     if (!optimal && surrogate) {
+        param.erase(param.find("surrogate"));
         if (Info::verbose(info))
             std::cout << "SOLVE SURROGATE INSTANCE..." << std::endl;
         Instance ins_sur(instance);
