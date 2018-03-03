@@ -7,6 +7,20 @@ cc_library(
 )
 
 cc_library(
+        name = "cppsolver",
+        hdrs = ["solver.hpp"],
+        srcs = ["solver.cpp"],
+        visibility = ["//visibility:public"],
+        deps = [
+                ":cpp", 
+                "//ub_dantzig:libdantzig",
+                "//ub_surrogate:libsurrogate",
+                "//lb_greedy:libgreedy",
+                "//lb_greedynlogn:libgreedynlogn",
+        ],
+)
+
+cc_library(
         name = "hpp",
         hdrs = ["instance.hpp", "solution.hpp"],
         visibility = ["//visibility:public"],
