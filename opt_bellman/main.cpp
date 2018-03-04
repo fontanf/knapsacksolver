@@ -35,7 +35,7 @@ private:
         } else if (algorithm == "sopt_rec") {
             sol_best.update(sopt_bellman_rec(instance, info));
         } else if (algorithm == "opt_list") {
-            return std::max( sol_best.profit(), opt_bellman_list(instance, sol_best.profit(), lower_bound, upper_bound, info));
+            return std::max(sol_best.profit(), opt_bellman_list(instance, sol_best.profit(), lower_bound, upper_bound, info));
         } else if (algorithm == "sopt_list_rec") {
             sol_best.update(sopt_bellman_rec_list(instance, sol_best, lower_bound, upper_bound, info));
         } else {
@@ -70,6 +70,7 @@ int main(int argc, char *argv[])
         ("lower-bound,l", po::value<std::string>(&lower_bound),            "set lower bound")
         ("upper-bound,u", po::value<std::string>(&upper_bound),            "set upper bound")
         ("verbose,v",                                                      "enable verbosity")
+        ("surrogate,s",                                                    "solve surrogate instance")
         ;
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);

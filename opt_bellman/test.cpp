@@ -16,6 +16,12 @@ TEST(BellmanRecursion, SimpleInstances)
     test(p.string() + " -v -a sopt_rec",      "sopt");
     test(p.string() + " -v -a opt_list",       "opt");
     test(p.string() + " -v -a sopt_list_rec", "sopt");
+    test(p.string() + " -v -a opt_list      -l none   -u 0",  "opt");
+    test(p.string() + " -v -a sopt_list_rec -l none   -u 0", "sopt");
+    test(p.string() + " -v -a opt_list      -l none   -u trivial",  "opt");
+    test(p.string() + " -v -a sopt_list_rec -l none   -u trivial", "sopt");
+    test(p.string() + " -v -a opt_list      -l none   -u dantzig",  "opt");
+    test(p.string() + " -v -a sopt_list_rec -l none   -u dantzig", "sopt");
     test(p.string() + " -v -a opt_list      -l greedy -u dantzig",  "opt");
     test(p.string() + " -v -a sopt_list_rec -l greedy -u dantzig", "sopt");
 }
