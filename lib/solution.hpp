@@ -20,11 +20,25 @@ public:
     inline ItemIdx item_number()       const { return k_; }
     const std::vector<int>& data()     const { return x_; }
 
+    /**
+     * Add/remove an item to/from the solution.
+     * If the item is/isn't already in the solution, nothing happens.
+     * Weight, Profit and Item number of the solution are updated.
+     * WARNING: the input correspond to the position of the item in the
+     * instance, not its ID!
+     */
     void set(ItemPos i, int b);
     int contains(ItemPos i) const;
 
+    /**
+     * Replace the current solution by "sol" if it is better.
+     */
     bool update(const Solution& sol);
 
+    /**
+     * Write the solution in the input file.
+     * One item per line. 1 if in, 0 if out.
+     */
     void write_cert(std::string file);
 
 private:
