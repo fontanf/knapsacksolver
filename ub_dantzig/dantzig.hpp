@@ -34,8 +34,8 @@ Profit ub_dantzig_from(const Instance& instance, ItemIdx j, const Solution& sol_
 Profit ub_dantzig_from(const Instance& instance, ItemIdx j, Profit p, Weight r);
 Profit ub_dantzig_from_rev(const Instance& instance, ItemIdx j, const Solution& sol_curr);
 Profit ub_dantzig_from_rev(const Instance& instance, ItemIdx j, Profit p, Weight r);
-Profit ub_dantzig_except(const Instance& instance,
-        ItemIdx n1, ItemIdx i1, ItemIdx i2, ItemIdx n2, Weight c);
+Profit ub_dantzig_from_to(const Instance& instance, ItemIdx i, ItemIdx l, Profit p, Weight r);
+Profit ub_dantzig_skip(const Instance& instance, ItemIdx f, ItemIdx l, Profit p, Weight r);
 
 /**
  * Dantzig upper bound but consider wether or not to pack to break item.

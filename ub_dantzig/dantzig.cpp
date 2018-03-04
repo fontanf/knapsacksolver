@@ -28,7 +28,9 @@ Profit ub_dantzig(const Instance& instance, Info* info)
 
 Profit ub_trivial_from(const Instance& instance, ItemIdx j, const Solution& sol_curr)
 {
-    return ub_trivial_from(instance, j, sol_curr.profit(), sol_curr.remaining_capacity());
+    Profit u = ub_trivial_from(instance, j, sol_curr.profit(), sol_curr.remaining_capacity());
+    assert(j > 0 || instance.check_ub(u));
+    return u;
 }
 
 Profit ub_trivial_from(const Instance& instance, ItemIdx j, Profit p, Weight r)
@@ -36,7 +38,6 @@ Profit ub_trivial_from(const Instance& instance, ItemIdx j, Profit p, Weight r)
     Profit u = p;
     if (j < instance.item_number())
         u += (r * instance.item(j).p) / instance.item(j).w;
-    assert(j > 0 || instance.check_ub(u));
     return u;
 }
 
@@ -172,29 +173,43 @@ Profit ub_dantzig_2_from(const Instance& instance, ItemIdx j, const Solution& so
 #define DBG(x)
 //#define DBG(x) x
 
-Profit ub_dantzig_except(const Instance& instance,
-        ItemIdx n1, ItemIdx i1, ItemIdx i2, ItemIdx n2, Weight c)
+Profit ub_dantzig_from_to(const Instance& instance,
+        ItemIdx i, ItemIdx l, Profit p, Weight r)
 {
     assert(instance.sort_type() == "eff");
-    DBG(std::cout << "ub_dantzig_except " << n1 << " " << i1 << " " << i2 << " " << n2 << " " << c << std::endl;)
-    ItemIdx i = n1;
-    if (i == i1)
-        i = i2+1;
-    Profit  p = 0;
-    Weight remaining_capacity = c;
-    for (; i<=n2; i++) {
+    DBG(std::cout << "DANTZIGFROMTO... " << i << " " << l << " " << r << std::endl;)
+    for (; i<=l; i++) {
         DBG(std::cout << "i " << i << std::endl;)
-        Weight wi = instance.item(i).w;
-        if (wi > remaining_capacity)
+        if (instance.item(i).w > r)
             break;
+        r -= instance.item(i).w;
         p += instance.item(i).p;
-        remaining_capacity -= wi;
-        if (i == i1-1)
-            i = i2;
     }
-    if (i != instance.item_number() && remaining_capacity > 0)
-        p += (instance.item(i).p * remaining_capacity) / instance.item(i).w;
+    if (i != l+1 && r > 0)
+        p += (instance.item(i).p * r) / instance.item(i).w;
     DBG(std::cout << "p " << p << std::endl;)
+    DBG(std::cout << "DANTZIGFROMTO... END" << std::endl;)
+    return p;
+}
+
+Profit ub_dantzig_skip(const Instance& instance,
+        ItemIdx f, ItemIdx l, Profit p, Weight r)
+{
+    assert(instance.sort_type() == "eff");
+    DBG(std::cout << "DANTZIGFROMTO... " << i << " " << l << " " << r << std::endl;)
+    ItemPos i = 0;
+    for (;;i++) {
+        if (i == f)
+            i = l+1;
+        if (i == instance.item_number() || instance.item(i).w > r)
+            break;
+        r -= instance.item(i).w;
+        p += instance.item(i).p;
+    }
+    if (i != instance.item_number() && r > 0)
+        p += (instance.item(i).p * r) / instance.item(i).w;
+    DBG(std::cout << "p " << p << std::endl;)
+    DBG(std::cout << "DANTZIGFROMTO... END" << std::endl;)
     return p;
 }
 
