@@ -1,8 +1,51 @@
 #include "bellman.hpp"
 
-#include "../lb_greedy/greedy.hpp"
-#include "../lb_greedynlogn/greedynlogn.hpp"
-#include "../ub_surrogate/surrogate.hpp"
+#include "../lib/solver.hpp"
+
+class SolverBellman: public Solver
+{
+
+private:
+
+    Profit run_algo(
+            Instance& instance,
+            Solution& sol_best,
+            Profit ub,
+            std::map< std::string, std::string>& param,
+            Info* info) override
+    {
+        (void)ub;
+        std::string algorithm   = param.find("algorithm")->second;
+        std::string lower_bound = param.find("lower_bound")->second;
+        std::string upper_bound = param.find("upper_bound")->second;
+        if (algorithm == "opt") {
+            return std::max(sol_best.profit(), opt_bellman(instance, info));
+        } else if (algorithm == "sopt_1") {
+            sol_best.update(sopt_bellman_1(instance, info));
+        } else if (algorithm == "sopt_1it") {
+            sol_best.update(sopt_bellman_1_it(instance, info));
+        } else if (algorithm == "sopt_1rec") {
+            sol_best.update(sopt_bellman_1_rec(instance, info));
+        } else if (algorithm == "sopt_1stack") {
+            sol_best.update(sopt_bellman_1_stack(instance, info));
+        } else if (algorithm == "sopt_1map") {
+            sol_best.update(sopt_bellman_1_map(instance, info));
+        } else if (algorithm == "sopt_2") {
+            sol_best.update(sopt_bellman_2(instance, info));
+        } else if (algorithm == "sopt_rec") {
+            sol_best.update(sopt_bellman_rec(instance, info));
+        } else if (algorithm == "opt_list") {
+            return std::max( sol_best.profit(), opt_bellman_list(instance, sol_best.profit(), lower_bound, upper_bound, info));
+        } else if (algorithm == "sopt_list_rec") {
+            sol_best.update(sopt_bellman_rec_list(instance, sol_best, lower_bound, upper_bound, info));
+        } else {
+            std::cerr << "Unknown or missing algorithm" << std::endl;
+            assert(false);
+            return 1;
+        }
+        return sol_best.profit();
+    }
+};
 
 int main(int argc, char *argv[])
 {
@@ -40,89 +83,31 @@ int main(int argc, char *argv[])
         std::cout << desc << std::endl;;
         return 1;
     }
+    std::map<std::string, std::string> param;
+    param["algorithm"]   = algorithm;
+    param["upper_bound"] = upper_bound;
+    param["lower_bound"] = lower_bound;
+    param["reduction"]   = reduction;
+    if ((vm.count("surrogate")))
+        param["surrogate"] = "";
 
     Instance instance(input_data);
-    Solution sol_best(instance);
-    Profit opt;
+    Solution sol(instance);
     Info info;
     info.verbose(vm.count("verbose"));
-    bool optimal = false;
 
-    // Variable reduction
-    if (reduction == "2" || upper_bound != "none") {
-        instance.sort();
-        sol_best = sol_bestgreedynlogn(instance);
-    } else {
-        instance.sort_partially();
-        sol_best = sol_bestgreedy(instance);
-    }
-    Profit ub = ub_surrogate(instance, sol_best.profit()).ub;
-    if (Info::verbose(&info)) {
-        std::cout
-            <<  "LB " << sol_best.profit() << " GAP " << instance.optimum() - sol_best.profit()
-            << " UB " << ub << " GAP " << ub - instance.optimum() << std::endl;
-    }
-
-    // Variable reduction
-    if (!optimal) {
-        if (reduction == "1") {
-            optimal = instance.reduce1(sol_best, Info::verbose(&info));
-        } else if (reduction == "2") {
-            optimal = instance.reduce2(sol_best, Info::verbose(&info));
-        }
-    }
-
-    // Bellman
-    if (!optimal) {
-        if (algorithm == "opt") {
-            opt = std::max(
-                    sol_best.profit(),
-                    opt_bellman(instance, &info));
-        } else if (algorithm == "sopt_1") {
-            sol_best.update(sopt_bellman_1(instance, &info));
-            opt = sol_best.profit();
-        } else if (algorithm == "sopt_1it") {
-            sol_best.update(sopt_bellman_1_it(instance, &info));
-            opt = sol_best.profit();
-        } else if (algorithm == "sopt_1rec") {
-            sol_best.update(sopt_bellman_1_rec(instance, &info));
-            opt = sol_best.profit();
-        } else if (algorithm == "sopt_1stack") {
-            sol_best.update(sopt_bellman_1_stack(instance, &info));
-            opt = sol_best.profit();
-        } else if (algorithm == "sopt_1map") {
-            sol_best.update(sopt_bellman_1_map(instance, &info));
-            opt = sol_best.profit();
-        } else if (algorithm == "sopt_2") {
-            sol_best.update(sopt_bellman_2(instance, &info));
-            opt = sol_best.profit();
-        } else if (algorithm == "sopt_rec") {
-            sol_best.update(sopt_bellman_rec(instance, &info));
-            opt = sol_best.profit();
-        } else if (algorithm == "opt_list") {
-            opt = std::max(
-                    sol_best.profit(),
-                    opt_bellman_list(instance, sol_best.profit(), lower_bound, upper_bound, &info));
-        } else if (algorithm == "sopt_list_rec") {
-            sol_best.update(sopt_bellman_rec_list(instance, sol_best, lower_bound, upper_bound, &info));
-            opt = sol_best.profit();
-        } else {
-            std::cerr << "Unknown or missing algorithm" << std::endl;
-            assert(false);
-            return 1;
-        }
-    }
+    Profit opt = SolverBellman().run(instance, sol, param, &info);
 
     double t = info.elapsed_time();
     info.pt.put("Solution.OPT", opt);
     info.pt.put("Solution.Time", t);
     if (Info::verbose(&info)) {
-        std::cout << "OPT " << opt << std::endl;
-        std::cout << "EXP " << instance.optimum() << std::endl;
-        std::cout << "Time " << t << std::endl;
+        std::cout << "---" << std::endl;
+        std::cout << instance.print_opt(sol.profit()) << std::endl;
+        std::cout << "TIME " << t << std::endl;
     }
 
     info.write_ini(output_file); // Write output file
-    sol_best.write_cert(cert_file); // Write certificate file
+    sol.write_cert(cert_file); // Write certificate file
     return 0;
 }

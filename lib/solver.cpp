@@ -10,7 +10,6 @@ Profit Solver::run(
         std::map< std::string, std::string>& param,
         Info* info)
 {
-    bool optimal = false;
     Profit ub;
     std::string reduction   = param.find("reduction")->second;
     std::string upper_bound = param.find("upper_bound")->second;
@@ -18,7 +17,9 @@ Profit Solver::run(
 
     if (Info::verbose(info))
         std::cout << "INITIAL BOUNDS..." << std::flush;
-    if (reduction == "2" || upper_bound == "dantzig") {
+    if (reduction == "2"
+            || upper_bound == "dantzig"
+            || upper_bound == "trivial") {
         instance.sort();
         sol_best = sol_bestgreedynlogn(instance);
     } else {
@@ -33,9 +34,10 @@ Profit Solver::run(
             << " " << instance.print_ub(ub)
             << std::endl;
     }
-    optimal = (sol_best.profit() == surout.ub);
+    if (sol_best.profit() == surout.ub)
+        return sol_best.profit();
 
-    if (!optimal && surrogate) {
+    if (surrogate) {
         param.erase(param.find("surrogate"));
         if (Info::verbose(info))
             std::cout << "SOLVE SURROGATE INSTANCE..." << std::endl;
@@ -54,22 +56,20 @@ Profit Solver::run(
                 << " CARD " << sol_sur.item_number() << " K " << surout.bound << std::endl;
         if (sol_sur.item_number() == surout.bound) {
             sol_best = sol_sur;
-            optimal = true;
+            return sol_best.profit();
         }
     }
 
     // Variable reduction
-    if (!optimal) {
-        if (reduction == "1") {
-            optimal = instance.reduce1(sol_best, Info::verbose(info));
-        } else if (reduction == "2") {
-            optimal = instance.reduce2(sol_best, Info::verbose(info));
-        }
+    bool optimal = false;
+    if (reduction == "1") {
+        optimal = instance.reduce1(sol_best, Info::verbose(info));
+    } else if (reduction == "2") {
+        optimal = instance.reduce2(sol_best, Info::verbose(info));
     }
+    if (optimal)
+        return sol_best.profit();
 
     // Run main algorithm
-    if (!optimal)
-        run_algo(instance, sol_best, ub, param, info);
-
-    return sol_best.profit();
+    return run_algo(instance, sol_best, ub, param, info);
 }

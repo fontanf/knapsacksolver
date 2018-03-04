@@ -20,7 +20,7 @@ cc_binary(
                 "-lboost_filesystem",
                 "-lboost_program_options"
         ],
-        deps = ["//lib:cpp", ":libbellman"],
+        deps = ["//lib:cpp", "//lib:cppsolver", ":libbellman"],
 )
 
 cc_test(
