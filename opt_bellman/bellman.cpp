@@ -518,8 +518,8 @@ Solution sopt_bellman_rec(const Instance& instance, Info* info)
 
 /******************************************************************************/
 
-#define DBG(x)
-//#define DBG(x) x
+//#define DBG(x)
+#define DBG(x) x
 
 struct State
 {
@@ -582,7 +582,7 @@ Profit upper_bound(const Instance& instance,
 
 /**
  * Return the list of undominated states.
- * opt == true iff lb == OPT - 1
+ * opt == true => lb == OPT
  */
 std::vector<State> opts_bellman_list(const Instance& instance,
         ItemPos n1, ItemPos n2, Weight c,
@@ -613,6 +613,7 @@ std::vector<State> opts_bellman_list(const Instance& instance,
                     } else {
                         if (ub_type == "none") {
                             l.push_back(*it);
+                            DBG(std::cout << " OK" << std::endl;)
                         } else {
                             if (!opt)
                                 update_lower_bound(instance, lb_type, lb, *it, i+1, n1, info);
@@ -640,16 +641,18 @@ std::vector<State> opts_bellman_list(const Instance& instance,
                 if (s1.p > l.back().p) {
                     if (s1.w == l.back().w) {
                         l.back() = s1;
+                        DBG(std::cout << " OK" << std::endl;)
                     } else {
                         if (ub_type == "none") {
                             l.push_back(s1);
+                            DBG(std::cout << " OK" << std::endl;)
                         } else {
                             if (!opt)
                                 update_lower_bound(instance, lb_type, lb, s1, i+1, n1, info);
                             Profit ub = upper_bound(instance, ub_type, s1, i+1, n1);
                             DBG(std::cout << " UB " << ub;)
                             if (lb <= ub) {
-                                l.push_back({l0.back().w + wi, l0.back().p + pi});
+                                l.push_back(s1);
                                 DBG(std::cout << " OK" << std::endl;)
                             } else {
                                 DBG(std::cout << " X" << std::endl;)
@@ -672,15 +675,16 @@ Profit opt_bellman_list(const Instance& instance, Profit lb, std::string lb_type
 {
     Weight  c = instance.capacity();
     ItemPos n = instance.item_number();
+    Profit p0 = instance.reduced_solution()->profit();
 
     if (n == 0)
         return instance.reduced_solution()->profit();
 
-    lb -= instance.reduced_solution()->profit();
-    std::vector<State> l0 = opts_bellman_list(instance, 0, n-1, c, lb, false, lb_type, ub_type, info);
-    Profit opt = (l0.size() > 0)? l0.front().p: lb;
-    assert(instance.check_opt(instance.reduced_solution()->profit() + opt));
-    return instance.reduced_solution()->profit() + opt;
+    lb -= p0;
+    auto l0 = opts_bellman_list(instance, 0, n-1, c, lb, false, lb_type, ub_type, info);
+    Profit opt = p0 + std::max(lb, l0.front().p);
+    assert(instance.check_opt(opt));
+    return opt;
 }
 
 #undef DBG
@@ -712,9 +716,8 @@ void sopt_bellman_rec_list_rec(const Instance& instance,
         if (l1.size() > 0) {
             ItemPos i2 = 0;
             for (Weight i1=l1.size(); i1-->0;) {
-                while (l1[i1].w + l2[i2].w > c) {
+                while (l1[i1].w + l2[i2].w > c)
                     i2++;
-                }
                 assert(i2 < (Weight)l2.size());
                 Profit z = l1[i1].p + l2[i2].p;
                 if (z > z_max) {
