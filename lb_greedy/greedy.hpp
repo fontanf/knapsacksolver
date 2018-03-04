@@ -41,13 +41,16 @@ Solution sol_bestgreedy(const Instance& ins, Info* info = NULL);
 /**
  * Greedy algorithm with items n1..n2
  */
+Profit lb_greedy_from(const Instance& instance,
+        ItemPos i, Profit p, Weight r);
 Profit lb_greedy_from_to(const Instance& instance,
-        ItemIdx n1, ItemIdx n2, Weight c);
+        ItemPos i, ItemPos l, Profit p, Weight r);
+Profit lb_greedy_skip(const Instance& instance,
+        ItemPos f, ItemPos l, Profit p, Weight r);
 
 /**
  * Greedy algorithm with items first..i1-1,i2+1..last
  */
-Profit lb_greedy_except(const Instance& instance,
-        ItemIdx first, ItemIdx i1, ItemIdx i2, ItemIdx last, Weight c);
+Profit lb_greedy_except(const Instance& instance, ItemIdx i1, ItemIdx i2, Weight c);
 
 #endif /* end of include guard: GREEDY_HPP_D4Y7KHIE */

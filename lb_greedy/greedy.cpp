@@ -157,37 +157,36 @@ Solution sol_bestgreedy(const Instance& ins, Info* info)
 
 /******************************************************************************/
 
-Profit lb_greedy_from_to(const Instance& instance, ItemIdx n1, ItemIdx n2, Weight c)
+Profit lb_greedy_from(const Instance& instance,
+        ItemPos i, Profit p, Weight r)
 {
-    Weight r = c;
-    Profit p = 0;
-    for (ItemIdx i=n1; i<=n2; ++i) {
-        Profit pi = instance.item(i).p;
-        Weight wi = instance.item(i).w;
-        if (wi > r)
+    return lb_greedy_from_to(instance, i, instance.item_number()-1, p, r);
+}
+
+Profit lb_greedy_from_to(const Instance& instance,
+        ItemPos i, ItemPos l, Profit p, Weight r)
+{
+    for (; i<=l; ++i) {
+        if (instance.item(i).w > r)
             continue;
-        r -= wi;
-        p += pi;
+        r -= instance.item(i).w;
+        p += instance.item(i).p;
     }
     return p;
 }
 
-Profit lb_greedy_except(const Instance& instance,
-        ItemIdx first, ItemIdx i1, ItemIdx i2, ItemIdx last, Weight c)
+Profit lb_greedy_skip(const Instance& instance,
+        ItemPos f, ItemPos l, Profit p, Weight r)
 {
-    ItemIdx i = first;
-    if (i == i1)
-        i = i2+1;
-    Profit p = 0;
-    Weight r = c;
-    for (; i<=last; i++) {
-        Weight wi = instance.item(i).w;
-        if (wi <= r) {
-            p += instance.item(i).p;
-            r -= wi;
-        }
-        if (i == i1-1)
-            i = i2;
+    for (ItemPos i=0; ; ++i) {
+        if (i == f)
+            i = l+1;
+        if (i == instance.item_number())
+            break;
+        if (instance.item(i).w > r)
+            continue;
+        r -= instance.item(i).w;
+        p += instance.item(i).p;
     }
     return p;
 }
