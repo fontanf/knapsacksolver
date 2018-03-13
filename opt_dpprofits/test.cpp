@@ -2,11 +2,11 @@
 
 TEST(DPProfits, SimpleInstances)
 {
-	boost::filesystem::path p = boost::filesystem::current_path();
-	p /= boost::filesystem::path("opt_dpprofits");
-	p /= boost::filesystem::path("main");
+    boost::filesystem::path p = boost::filesystem::current_path();
+    p /= boost::filesystem::path("opt_dpprofits");
+    p /= boost::filesystem::path("main");
 
-	test(p.string() + " -a sopt", "sopt");
-	test(p.string() + " -a opt",   "opt");
+    test(p.string() + " -m array -r none", "opt");
+    test(p.string() + " -m array -r all", "sopt");
 }
 

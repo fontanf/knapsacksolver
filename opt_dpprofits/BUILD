@@ -1,7 +1,7 @@
 cc_library(
         name = "libdpprofits",
-        hdrs = ["dpprofits.hpp"],
-        srcs = ["dpprofits.cpp"],
+        hdrs = ["dpprofits_array.hpp", "dpprofits_list.hpp"],
+        srcs = ["dpprofits_array.cpp", "dpprofits_list.cpp"],
         visibility = ["//visibility:public"],
         deps = ["//lib:cpp"],
 )
@@ -17,9 +17,6 @@ cc_binary(
         deps = [
                 "//lib:cpp",
                 ":libdpprofits",
-                "//ub_surrogate:libsurrogate",
-                "//ub_dantzig:libdantzig",
-                "//lb_greedy:libgreedy",
         ],
 )
 

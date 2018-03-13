@@ -1,34 +1,24 @@
-#include "dpprofits.hpp"
-#include "../ub_dantzig/dantzig.hpp"
-#include "../ub_surrogate/surrogate.hpp"
-#include "../lb_greedy/greedy.hpp"
-
-#include <iostream>
-
-#include <boost/program_options.hpp>
-
-#define DBG(x)
-//#define DBG(x) x
+#include "dpprofits_array.hpp"
+#include "dpprofits_list.hpp"
 
 int main(int argc, char *argv[])
 {
     namespace po = boost::program_options;
 
     // Parse program options
-    std::string input_data  = "";
     std::string output_file = "";
-    std::string cert_file   = "";
-    std::string algorithm   = "";
-    std::string reduction   = "";
+    std::string cert_file = "";
+    std::string memory = "array";
+    std::string retrieve = "all";
     po::options_description desc("Allowed options");
     desc.add_options()
         ("help,h", "produce help message")
-        ("input-data,i",  po::value<std::string>(&input_data)->required(), "set input data (required)")
-        ("output-file,o", po::value<std::string>(&output_file),            "set output file")
-        ("cert-file,c",   po::value<std::string>(&cert_file),              "set certificate output file")
-        ("algorithm,a",   po::value<std::string>(&algorithm),              "set algorithm")
-        ("reduction,r",   po::value<std::string>(&reduction),              "set reduction")
-        ("verbose,v",                                                                          "enable verbosity")
+        ("input-data,i", po::value<std::string>()->required(), "set input data (required)")
+        ("output-file,o", po::value<std::string>(&output_file), "set output file")
+        ("cert-file,c", po::value<std::string>(&cert_file), "set certificate output file")
+        ("memory,m", po::value<std::string>(&memory), "set algorithm")
+        ("retrieve,r", po::value<std::string>(&retrieve), "set algorithm")
+        ("verbose,v",  "enable verbosity")
         ;
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -42,63 +32,60 @@ int main(int argc, char *argv[])
         std::cout << desc << std::endl;;
         return 1;
     }
-    bool verbose = vm.count("verbose");
 
-    Instance instance(input_data);
-    Solution sol_best(instance);
-    Profit opt;
+    Instance instance(vm["input-data"].as<std::string>());
+    Solution sopt(instance);
+    Profit opt = -1;
     Info info;
-    info.verbose(verbose);
-
-    // Variable reduction
-    bool optimal = false;
-    if (reduction == "") {
-        instance.sort_partially();
-        sol_best = sol_bestgreedy(instance);
-    } else if (reduction == "1") {
-        instance.sort_partially();
-        sol_best = sol_bestgreedy(instance);
-        optimal = instance.reduce1(sol_best, verbose);
-    } else if (reduction == "2") {
-        instance.sort();
-        sol_best = sol_bestgreedy(instance);
-        optimal = instance.reduce2(sol_best, verbose);
-    }
+    info.verbose(vm.count("verbose"));
 
     // DPProfits
-    if (!optimal) {
-        Profit ub = ub_surrogate(instance, sol_best.profit()).ub;
-        if (verbose) {
-            std::cout << "LB " << sol_best.profit() << " GAP " << instance.optimum() - sol_best.profit() << std::endl;
-            std::cout << "UB " << ub << " GAP " << ub - instance.optimum() << std::endl;
-        }
-        if (sol_best.profit() == ub) {
-            opt = sol_best.profit();
-        } else if (algorithm == "opt") {
-            opt = std::max(
-                    sol_best.profit(),
-                    opt_dpprofits(instance, ub, &info));
-        } else if (algorithm == "sopt") {
-            sol_best.update(sopt_dpprofits_1(instance, ub, &info));
-            opt = sol_best.profit();
+    if (memory == "array") {
+        if (retrieve == "none") {
+            opt = opt_dpprofits_array(instance, &info);
+        } else if (retrieve == "all") {
+            sopt = sopt_dpprofits_array_all(instance, &info);
+        } else if (retrieve == "one") {
+            sopt = sopt_dpprofits_array_one(instance, &info);
+        } else if (retrieve == "part") {
+            sopt = sopt_dpprofits_array_part(instance, 64, &info);
+        } else if (retrieve == "rec") {
+            sopt = sopt_dpprofits_array_rec(instance, &info);
         } else {
-            std::cerr << "Unknown or missing algorithm" << std::endl;
             assert(false);
             return 1;
         }
+    } else if (memory == "list") {
+        if (retrieve == "none") {
+            opt = opt_dpprofits_list(instance, &info);
+        } else if (retrieve == "full") {
+            sopt = sopt_dpprofits_list_all(instance, &info);
+        } else if (retrieve == "one") {
+            sopt = sopt_dpprofits_list_one(instance, &info);
+        } else if (retrieve == "part") {
+            sopt = sopt_dpprofits_list_part(instance, 64, &info);
+        } else if (retrieve == "rec") {
+            sopt = sopt_dpprofits_list_rec(instance, &info);
+        } else {
+            assert(false);
+            return 1;
+        }
+    } else {
+        assert(false);
+        return 1;
     }
 
     double t = info.elapsed_time();
-    info.pt.put("Solution.Time", t);
+    opt = std::max(opt, sopt.profit());
     info.pt.put("Solution.OPT", opt);
-    if (verbose) {
+    info.pt.put("Solution.Time", t);
+    if (Info::verbose(&info)) {
         std::cout << "---" << std::endl;
-        std::cout << "OPT " << opt << std::endl;
-        std::cout << "EXP " << instance.optimum() << std::endl;
-        std::cout << "Time " << t << std::endl;
+        std::cout << instance.print_opt(sopt.profit()) << std::endl;
+        std::cout << "TIME " << t << std::endl;
     }
 
     info.write_ini(output_file); // Write output file
-    sol_best.write_cert(cert_file); // Write certificate file
+    sopt.write_cert(cert_file); // Write certificate file
     return 0;
 }
