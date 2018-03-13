@@ -52,6 +52,8 @@ void Instance::read_standard(boost::filesystem::path filepath)
     for (ItemPos i=0; i<n_; ++i) {
         file >> id >> p >> w >> x;
         items_[i] = {id,w,p};
+        if (p * i_emax_.w > i_emax_.p * w) // Compute most efficient item
+            i_emax_ = {id,w,p};
         if (x == 1)
             sol_opt_->set(id, true);
     }
@@ -103,6 +105,8 @@ void Instance::read_pisinger(boost::filesystem::path filepath)
         items_[i] = {i,w,p};
         if (x == 1)
             sol_opt_->set(i, true);
+        if (p * i_emax_.w > i_emax_.p * w) // Compute most efficient item
+            i_emax_ = {id,w,p};
     }
 
     file.close();

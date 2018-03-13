@@ -164,6 +164,8 @@ public:
     Weight  break_weight()   const { return wsum_; }
     Weight  break_capacity() const { return r_; }
 
+    const Item& most_efficient_item() const { return i_emax_; }
+
     const Item& isum(ItemPos i) const { assert(sort_type_ == "eff"); return isum_[i]; }
     ItemPos ub_item(Item item) const;
 
@@ -218,6 +220,7 @@ private:
     Solution* sol_opt_ = NULL;
     Solution* sol_red_ = NULL;
     ItemPos b_ = -1;
+    Item i_emax_ = {-1, 0, -1}; // Most efficient item;
     Weight r_;
     Profit psum_ = 0;
     Weight wsum_ = 0;
