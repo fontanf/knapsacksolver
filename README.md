@@ -35,8 +35,6 @@ bazel-bin/lb_greedy/main -i ...
 
 ### O(n) Greedy algorithms
 
-*(See "Knapsack Problem", 2.5 Approximation Algorithms, 5.1.2 Lower Bounds for (KP) - Kellerer et al., 2004)*
-
 The *Max Greedy* algorithm correspond to packing the item with the largest weight first and then filling the remaining capacity with the greedy algorithm. Thus, if used with Greedy, the algorithm has a relative performance guarantee of 1/2.
 
 The *Best Greedy* algorithm runs all the other greedy algorithms and keeps the best solution found.
@@ -56,8 +54,6 @@ Those Greedy are similar to the one described in "A fast algorithm for strongly 
 - Best Greedy `lb_greedynlogn/main -a best`
 
 ## Upper bounds
-
-*(See "Knapsack Problem", 5.1.1 Upper Bounds for (KP) - Kellerer et al., 2004)*
 
 - Dantzig Upper bound `ub_dantzig/main`
 - Surrogate relaxation `ub_surrogate/main`
