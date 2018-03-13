@@ -84,34 +84,71 @@ Solution sopt_bellman_array_one(const Instance& ins, Info* info)
     Weight  c = ins.capacity();
     Solution solution(ins);
 
+    if (n == 0)
+        return solution;
+
     std::vector<Profit> values(c+1); // Initialize memory table
     ItemPos iter = 0;
-    for (;;) {
-        DBG(std::cout << n << " " << std::flush;)
+    Profit opt = -1;
+    Profit opt_local = -1;
+    while (solution.profit() != opt) {
+        DBG(std::cout << "N " << n << " OPT " << opt_local << std::flush;)
         iter++;
+        std::pair<ItemPos, Weight> idx_opt = {n, c};
         ItemPos last_item = -1;
+
+        // Initialization
         for (Weight w=c; w>=0; w--)
             values[w] = 0;
+
+        // Recursion
         for (ItemPos i=0; i<n; ++i) {
             Weight wi = ins.item(i).w;
             Profit pi = ins.item(i).p;
+
+            // For w == c
             if (c >= wi && values[c-wi] + pi > values[c]) {
                 values[c] = values[c-wi] + pi;
                 last_item = i;
+                if (values[c] == opt_local) {
+                    DBG(std::cout << " OPT REACHED " << i << std::flush;)
+                    idx_opt = {i,c};
+                    goto end;
+                }
             }
-            for (Weight w=c; w>=0; w--)
-                if (w >= wi && values[w-wi] + pi > values[w])
+
+            // For other values of w
+            for (Weight w=c; w>=0; w--) {
+                if (w >= wi && values[w-wi] + pi > values[w]) {
                     values[w] = values[w-wi] + pi;
+                    if (values[w] == opt_local) {
+                        DBG(std::cout << " OPT REACHED " << i << std::flush;)
+                        idx_opt = {i,w};
+                        goto end;
+                    }
+                }
+            }
+
+        }
+end:
+
+        // If first iteration, memorize optimal value
+        if (n == ins.item_number()) {
+            opt = values[c];
+            DBG(std::cout << " OPT " << opt << std::flush;)
+            opt_local = values[c];
         }
 
-        if (last_item == -1)
-            break;
+        DBG(std::cout << " LAST ITEM " << last_item << std::flush;)
 
+        // Update solution and instance
+        DBG(std::cout << " ADD" << last_item << std::flush;)
         solution.set(last_item, true);
         c -= ins.item(last_item).w;
+        opt_local -= ins.item(last_item).p;
         n = last_item;
+        DBG(std::cout << " P " << solution.profit() << std::endl;)
     }
-    DBG(std::cout << std::endl;)
 
     if (info != NULL) {
         info->pt.put("Solution.Iterations", iter);
