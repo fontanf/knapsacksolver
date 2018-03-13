@@ -1,5 +1,7 @@
 #include "solution.hpp"
 
+#include "binary_solution.hpp"
+
 Solution::Solution(const Instance& instance): instance_(instance),
     x_(std::vector<int>(instance.total_item_number(), 0)) { }
 
@@ -65,6 +67,12 @@ bool Solution::update(const Solution& sol)
         return false;
     *this = sol;
     return true;
+}
+
+void Solution::update_from_binary(const BSolFactory& bsolf, BSol bsol)
+{
+    for (ItemPos i=bsolf.x1(); i<=bsolf.x2(); ++i)
+        set(i, bsolf.contains(bsol, i));
 }
 
 void Solution::write_cert(std::string file)

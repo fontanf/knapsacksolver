@@ -24,8 +24,11 @@ public:
         }
     }
 
+    BSolFactory(ItemPos b, ItemPos n): BSolFactory(64, b, n) {  }
+
     ItemPos x1() const { return x1_; }
     ItemPos x2() const { return x2_; }
+    ItemPos size() const { return x2_ - x1_ + 1; }
 
     BSol bsol_break() const
     {
@@ -41,26 +44,27 @@ public:
         return ((s >> (i-x1_)) & 1UL);
     }
 
-    void add(BSol& s, ItemPos i) const
+    BSol add(const BSol& s, ItemPos i) const
     {
-        if (x1_ <= i && i <= x2_) {
-            assert(!contains(s,i));
-            s |= (1UL << (i-x1_));
-        }
+        if (i < x1_ || x2_ < i)
+            return s;
+        assert(!contains(s,i));
+        return (s | (1UL << (i-x1_)));
     }
 
-    void remove(BSol& s, ItemPos i) const
+    BSol remove(const BSol& s, ItemPos i) const
     {
-        if (x1_ <= i && i <= x2_) {
-            assert(contains(s,i));
-            s &= (~(1UL << (i-x1_)));
-        }
+        if (i < x1_ || x2_ < i)
+            return s;
+        assert(contains(s,i));
+        return (s & (~(1UL << (i-x1_))));
     }
 
-    void toggle(BSol& s, ItemPos i) const
+    BSol toggle(BSol& s, ItemPos i) const
     {
-        if (x1_ <= i && i <= x2_)
-            s ^= (1UL << (i-x1_));
+        if (i < x1_ || x2_ < i)
+            return s;
+        return (s ^ (1UL << (i-x1_)));
     }
 
     std::string print(BSol& s) const

@@ -35,6 +35,8 @@ public:
      */
     bool update(const Solution& sol);
 
+    void update_from_binary(const BSolFactory& bsolf, BSol bsol);
+
     /**
      * Write the solution in the input file.
      * One item per line. 1 if in, 0 if out.
