@@ -24,7 +24,7 @@ bazel-bin/lb_greedy/main -i ...
 
 * For Dynamic programming algorithms, option `-m` selects the type of memory used. Possible values are (if implemented) `array` or `list`. Lists are slower but eliminate dominated states and allow the use of Upper bounds.
 
-* For Dynamic programming algorithms, option `-r` selects the methods used to retrieve the optimal solution. Possible values (if implemented) are
+* For Dynamic programming algorithms, option `-r` selects the method used to retrieve the optimal solution. Possible values (if implemented) are
   - `none`: no solution retrieved, only the optimal value is returned
   - `all`: keep all states in memory and backtrack
   - `one`: keep only the last states in memory, retrieve the last item added and run the algorithm again to retrieve the complete optimal solution
@@ -64,7 +64,7 @@ Those Greedy are similar to the one described in "A fast algorithm for strongly 
 
 ## Exact algorithm without pre-processing or sorting
 
-For those algorithm, if required, the Upper bound used is neccessarly `U0`.
+For those algorithms, if required, the Upper bound used is neccessarly `U0`.
 
 - Dynamic programming with Bellman recursion `opt_bellman/main -m array -r all`
 - Dynamic programming by Profits `opt_dpprofits/main -m array -r all`
@@ -72,23 +72,9 @@ For those algorithm, if required, the Upper bound used is neccessarly `U0`.
 
 ## Exact algorithms with partial or complete sorting as pre-processing
 
-### Balanced Dynamic programming
-
-*(See "Knapsack Problem", 5.3.1 Balanced Dynamic Programming - Kellerer et al., 2004)*
-
-```
-opt_balknap/main -m list -u t -r part
-```
-
-Since the list implementation require a map, its asymptotical complexity is slightly greater than the one with an array. On the other hand, better Upper bounds can be used. Therefore, both are implemented.
-
-Options `-u` can be set to
-- b: partial sorting, Dembo Upper bound (with break item)
-- t: complete sorting, better Upper Bound
-
-### Primal-dual Dynamic programming (`minknap`, `combo`)
-
-### Primal-dual Branch-and-bound (`expknap`)
-
-*(See "Knapsack Problem", 5.1.4 Branch-and-Bound Implementations - Kellerer et al., 2004)*
+- Balanced Dynamic programming `opt_balknap/main -m list -u t -r part` Since the list implementation require a map, its asymptotical complexity is slightly greater than the one with an array. On the other hand, better Upper bounds can be used. Therefore, both are implemented. Furthermore, options `-u` can be set to
+  - b: partial sorting, Dembo Upper bound (with break item)
+  - t: complete sorting, better Upper Bound
+- Primal-dual Dynamic programming (`minknap`, `combo`)
+- Primal-dual Branch-and-bound (`expknap`)
 
