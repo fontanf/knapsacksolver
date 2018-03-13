@@ -129,9 +129,10 @@ Solution sopt_bellman_list_one(const Instance& ins, Info* info)
 
 /******************************************************************************/
 
-Solution sopt_bellman_list_part(const Instance& ins, Info* info)
+Solution sopt_bellman_list_part(const Instance& ins, ItemPos k, Info* info)
 {
     (void)info;
+    (void)k;
     assert(false); // TODO
     return Solution(ins);
 }

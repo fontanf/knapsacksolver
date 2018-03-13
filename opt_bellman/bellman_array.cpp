@@ -1,5 +1,7 @@
 #include "bellman_array.hpp"
 
+#include "../lib/binary_solution.hpp"
+
 #define INDEX(i,w) (i+1)*(c+1) + (w)
 
 void opts_bellman_array(const Instance& ins, std::vector<Profit>& values,
@@ -75,8 +77,8 @@ Solution sopt_bellman_array_all(const Instance& ins, Info* info)
 
 /******************************************************************************/
 
-#define DBG(x)
-//#define DBG(x) x
+//#define DBG(x)
+#define DBG(x) x
 
 Solution sopt_bellman_array_one(const Instance& ins, Info* info)
 {
@@ -94,12 +96,10 @@ Solution sopt_bellman_array_one(const Instance& ins, Info* info)
     while (solution.profit() != opt) {
         DBG(std::cout << "N " << n << " OPT " << opt_local << std::flush;)
         iter++;
-        std::pair<ItemPos, Weight> idx_opt = {n, c};
         ItemPos last_item = -1;
 
         // Initialization
-        for (Weight w=c; w>=0; w--)
-            values[w] = 0;
+        std::fill(values.begin(), values.end(), 0);
 
         // Recursion
         for (ItemPos i=0; i<n; ++i) {
@@ -112,18 +112,17 @@ Solution sopt_bellman_array_one(const Instance& ins, Info* info)
                 last_item = i;
                 if (values[c] == opt_local) {
                     DBG(std::cout << " OPT REACHED " << i << std::flush;)
-                    idx_opt = {i,c};
                     goto end;
                 }
             }
 
             // For other values of w
-            for (Weight w=c; w>=0; w--) {
+            for (Weight w=c-1; w>=0; w--) {
                 if (w >= wi && values[w-wi] + pi > values[w]) {
                     values[w] = values[w-wi] + pi;
                     if (values[w] == opt_local) {
                         DBG(std::cout << " OPT REACHED " << i << std::flush;)
-                        idx_opt = {i,w};
+                        last_item = i;
                         goto end;
                     }
                 }
@@ -135,8 +134,8 @@ end:
         // If first iteration, memorize optimal value
         if (n == ins.item_number()) {
             opt = values[c];
+            opt_local = opt;
             DBG(std::cout << " OPT " << opt << std::flush;)
-            opt_local = values[c];
         }
 
         DBG(std::cout << " LAST ITEM " << last_item << std::flush;)
@@ -161,12 +160,80 @@ end:
 
 /******************************************************************************/
 
-Solution sopt_bellman_array_part(const Instance& ins, Info* info)
+#define DBG(x)
+//#define DBG(x) x
+
+Solution sopt_bellman_array_part(const Instance& ins, ItemPos k, Info* info)
 {
-    (void)info;
-    assert(false); // TODO
-    return Solution(ins);
+    assert(0 <= k && k <= 64);
+    ItemPos n = ins.item_number();
+    Weight  c = ins.capacity();
+    Solution sol(ins);
+
+    if (n == 0)
+        return sol;
+
+    std::vector<Profit> values(c+1); // Initialize memory table
+    std::vector<BSol>   bisols(c+1);
+    ItemPos iter = 0;
+    Profit opt = -1;
+    Profit opt_local = -1;
+    while (sol.profit() != opt) {
+        BSolFactory bsolf(k, n-1, n);
+        DBG(std::cout << "N " << n << " OPT " << opt_local << std::flush;)
+        iter++;
+        Weight w_opt = c;
+
+        // Initialization
+        std::fill(values.begin(), values.end(), 0);
+        std::fill(bisols.begin(), bisols.end(), 0);
+
+        // Recursion
+        for (ItemPos i=0; i<n; ++i) {
+            Weight wi = ins.item(i).w;
+            Profit pi = ins.item(i).p;
+
+            // For other values of w
+            for (Weight w=c; w>=0; w--) {
+                if (w >= wi && values[w-wi] + pi > values[w]) {
+                    values[w] = values[w-wi] + pi;
+                    bisols[w] = bsolf.add(bisols[w-wi], i);
+                    if (values[w] == opt_local) {
+                        DBG(std::cout << " OPT REACHED " << i << std::flush;)
+                        w_opt = w;
+                        goto end;
+                    }
+                }
+            }
+
+        }
+end:
+
+        // If first iteration, memorize optimal value
+        if (n == ins.item_number()) {
+            opt = values[w_opt];
+            opt_local = opt;
+            DBG(std::cout << " OPT " << opt << std::flush;)
+        }
+
+        DBG(std::cout << " PARTSOL " << bsolf.print(bisols[w_opt]) << std::flush;)
+
+        // Update solution and instance
+        sol.update_from_binary(bsolf, bisols[w_opt]);
+        n -= bsolf.size();
+        c = ins.capacity() - sol.weight();
+        opt_local = opt - sol.profit();
+        DBG(std::cout << " P " << sol.profit() << std::endl;)
+    }
+
+    if (info != NULL) {
+        info->pt.put("Solution.Iterations", iter);
+    }
+    assert(ins.check_sopt(sol));
+    return sol;
 }
+
+#undef DBG
 
 /******************************************************************************/
 

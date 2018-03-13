@@ -9,7 +9,7 @@ TEST(BellmanRecursion, SimpleInstances)
     test(p.string() + " -m array -r none",  "opt");
     test(p.string() + " -m array -r all",  "sopt");
     test(p.string() + " -m array -r one",  "sopt");
-    //test(p.string() + " -m array -r part", "sopt");
+    test(p.string() + " -m array -r part", "sopt");
     test(p.string() + " -m array -r rec",  "sopt");
     test(p.string() + " -m list -r none",  "opt");
     //test(p.string() + " -m list -r all",  "sopt");

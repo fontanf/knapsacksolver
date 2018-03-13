@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
         } else if (retrieve == "one") {
             sopt = sopt_bellman_array_one(instance, &info);
         } else if (retrieve == "part") {
-            sopt = sopt_bellman_array_part(instance, &info);
+            sopt = sopt_bellman_array_part(instance, 64, &info);
         } else if (retrieve == "rec") {
             sopt = sopt_bellman_array_rec(instance, &info);
         } else {
@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
         } else if (retrieve == "one") {
             sopt = sopt_bellman_list_one(instance, &info);
         } else if (retrieve == "part") {
-            sopt = sopt_bellman_list_part(instance, &info);
+            sopt = sopt_bellman_list_part(instance, 64, &info);
         } else if (retrieve == "rec") {
             sopt = sopt_bellman_list_rec(instance, &info);
         } else {
