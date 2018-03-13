@@ -22,6 +22,14 @@ bazel-bin/lb_greedy/main -i ...
 
 * On the other hand, the Primal-Dual algorithms require to find the split item at the beginning.
 
+* For Dynamic programming algorithms, option `-m` selects the type of memory used. Possible values are (if implemented) `array` or `list`. Lists are slower but eliminate dominated states and allow the use of Upper bounds.
+
+* For Dynamic programming algorithms, option `-r` selects the methods used to retrieve the optimal solution. Possible values (if implemented) are
+  - `none`: no solution retrieved, only the optimal value is returned
+  - `all`: keep all states in memory and backtrack
+  - `one`: keep only the last states in memory, retrieve the last item added and run the algorithm again to retrieve the complete optimal solution
+  - `part`: keep a partial solution in each state and run the algorithm again while the global solution is not complete
+  - `rec`: use the recursive scheme
 
 ## Lower bounds
 
@@ -56,40 +64,11 @@ Those Greedy are similar to the one described in "A fast algorithm for strongly 
 
 ## Exact algorithm without pre-processing or sorting
 
-### Dynamic programming with Bellman recursion
+For those algorithm, if required, the Upper bound used is neccessarly `U0`.
 
-```
-opt_bellman/main -m array -r all
-```
-
-The Bellman recursion is implemented both with array and list as memory. Use option `-m array` of `-m list` to select which one to use (default `array`).
-
-Option `-r` selects the methods used to retrieve the optimal solution. Possible
-values are
-- `none`: no solution retrieved, only the optimal value is returned
-- `all`: keep all states in memory and backtrack
-- `one`: keep only the last states in memory, retrieve the last item added and
-run the algorithm again to retrieve the complete optimal solution
-- `part`: keep a partial solution in each state and run the algorithm again
-while the global solution is not complete
-- `rec`: use the recursive scheme
-
-Using Dynamic programming with lists allow using bound. Since the items are not
-sorted, the `U0` bound is used.
-
-### Dynamic programming by Profits
-
-```
-opt_dpprofits/main -m array -r all
-```
-
-### Primal Branch-and-bound
-
-*(See "Knapsack Problem", 2.4 Branch-and-Bound - Kellerer et al., 2004)*
-
-```
-opt_bab/main
-```
+- Dynamic programming with Bellman recursion `opt_bellman/main -m array -r all`
+- Dynamic programming by Profits `opt_dpprofits/main -m array -r all`
+- Primal Branch-and-bound `opt_bab/main`
 
 ## Exact algorithms with partial or complete sorting as pre-processing
 
