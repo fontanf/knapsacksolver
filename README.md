@@ -16,31 +16,11 @@ Execute:
 bazel-bin/lb_greedy/main -i ...
 ```
 
-Table of Contents
-=================
+## Notes
 
-  * [Variable reductions](#variable-reductions)
-  * [Lower bounds](#lower-bounds)
-     * [O(n) Greedy algorithms](#on-greedy-algorithms)
-     * [O(n log n) Greedy algorithms](#on-log-n-greedy-algorithms)
-  * [Upper bounds](#upper-bounds)
-  * [DP with Bellman recursion](#dp-with-bellman-recursion)
-     * [With arrays](#with-arrays)
-     * [With lists](#with-lists)
-  * [DP by profits](#dp-by-profits)
-  * [Balanced Dynamic Programming](#balanced-dynamic-programming)
-  * [Primal Branch-and-bound](#primal-branch-and-bound)
-  * [Primal-Dual Branch-and-bound](#primal-dual-branch-and-bound)
+* If the split item is searched at the beginning, then the Bellman algorithms are more or less dominated by the Primal-dual Dynamic programming algorithms, as well as the Primal Branch-and-bound is more or less dominated by the Primal-dual Branch-and-bound. Therefore, as soon as a pre-processing step requires at leat a partial sorting, it is more consistent to use those algorithms. This explains why variable reductions, initial lower bound or better upper bounds are not implemented for the Bellman Dynamic Programming algoorithms, the Dynamic Programming by Profits algorithms or the Primal Branch-and-bound algorithm.
 
-## Variable reductions
-
-*(See "Knapsack Problem", 5.1.3 Variable Reduction - Kellerer et al., 2004)*
-
-The second reduction eliminates more items but is slower and require a complete
-sorting of the items.
-
-- Option `-r 1`: Partial sorting, Trivial upper bound
-- Option `-r 2`: Complete sorting, Dantzig upper bound
+* On the other hand, the Primal-Dual algorithms require to find the split item at the beginning.
 
 
 ## Lower bounds
@@ -49,13 +29,9 @@ sorting of the items.
 
 *(See "Knapsack Problem", 2.5 Approximation Algorithms, 5.1.2 Lower Bounds for (KP) - Kellerer et al., 2004)*
 
-The *Max Greedy* algorithm correspond to packing the item with the largest
-weight first and then filling the remaining capacity with the greedy algorithm.
-Thus, if used with Greedy, the algorithm has a relative performance guarantee of
-1/2.
+The *Max Greedy* algorithm correspond to packing the item with the largest weight first and then filling the remaining capacity with the greedy algorithm. Thus, if used with Greedy, the algorithm has a relative performance guarantee of 1/2.
 
-The *Best Greedy* algorithm runs all the other greedy algorithms and keeps the
-best solution found.
+The *Best Greedy* algorithm runs all the other greedy algorithms and keeps the best solution found.
 
 - Greedy `lb_greedy/main`
 - Max Greedy `lb_greedy/main -a max`
@@ -65,8 +41,7 @@ best solution found.
 
 ### O(n log n) Greedy algorithms
 
-Those Greedy are similar to the one described in "A fast algorithm for strongly
-correlated knapsack problems" (Pisinger, 1998).
+Those Greedy are similar to the one described in "A fast algorithm for strongly correlated knapsack problems" (Pisinger, 1998).
 
 - Forward Greedy `lb_greedynlogn/main -a for`
 - Backward Greedy `lb_greedynlogn/main -a back`
@@ -76,15 +51,18 @@ correlated knapsack problems" (Pisinger, 1998).
 
 *(See "Knapsack Problem", 5.1.1 Upper Bounds for (KP) - Kellerer et al., 2004)*
 
-- Dantzig Upper Bound `ub_dantzig/main`
+- Dantzig Upper bound `ub_dantzig/main`
 - Surrogate relaxation `ub_surrogate/main`
 
 ## Exact algorithm without pre-processing or sorting
 
 ### Dynamic programming with Bellman recursion
 
-The Bellman recursion is implemented both with array and list as memory. Use
-option `-m array` of `-m list` to select which one to use (default `array`).
+```
+opt_bellman/main -m array -r all
+```
+
+The Bellman recursion is implemented both with array and list as memory. Use option `-m array` of `-m list` to select which one to use (default `array`).
 
 Option `-r` selects the methods used to retrieve the optimal solution. Possible
 values are
@@ -99,22 +77,19 @@ while the global solution is not complete
 Using Dynamic programming with lists allow using bound. Since the items are not
 sorted, the `U0` bound is used.
 
-### Dynamic programming by profits
+### Dynamic programming by Profits
 
-*(See "Knapsack Problem", 2.3 - Kellerer et al., 2004)*
-
-- Only optimal value, `opt_dpreaching/main -a opt`
-- Optimal solution, `opt_bellman/main -a sopt`
+```
+opt_dpprofits/main -m array -r all
+```
 
 ### Primal Branch-and-bound
 
 *(See "Knapsack Problem", 2.4 Branch-and-Bound - Kellerer et al., 2004)*
 
-Use option `-u` (possible values: `trivial`, `dantzig` or `dantzig_2`) to select
-which upper bound is used.
-
-- Implementation with a recursive function (default) `opt_bab/main -a rec`
-- Implementation with a stack simulating a recusrive function `opt_bab/main -a stack`
+```
+opt_bab/main
+```
 
 ## Exact algorithms with partial or complete sorting as pre-processing
 
@@ -122,20 +97,19 @@ which upper bound is used.
 
 *(See "Knapsack Problem", 5.3.1 Balanced Dynamic Programming - Kellerer et al., 2004)*
 
-Use option `-u` (possible values: `dembo`, `trivial` or `dantzig`) to select which upper bound is used.
+```
+opt_balknap/main -m list -u t -r part
+```
 
-- With tables, Only optimal value, `opt_balknap/main -a opt`
-- With tables, Optimal solution, `opt_balknap/main -a sopt`
-- With lists (maps), only optimal value, `opt_balknap/main -a opt_list`
-- With lists (maps), optimal solution, `opt_balknap/main -a sopt_list`
+Since the list implementation require a map, its asymptotical complexity is slightly greater than the one with an array. On the other hand, better Upper bounds can be used. Therefore, both are implemented.
+
+Options `-u` can be set to
+- b: partial sorting, Dembo Upper bound (with break item)
+- t: complete sorting, better Upper Bound
 
 ### Primal-dual Dynamic programming (`minknap`, `combo`)
 
 ### Primal-dual Branch-and-bound (`expknap`)
 
 *(See "Knapsack Problem", 5.1.4 Branch-and-Bound Implementations - Kellerer et al., 2004)*
-
-Use option `-u` (possible values: `trivial` or `dantzig`) to select which upper bound is used.
-
-- `opt_babprimaldual/main`
 
