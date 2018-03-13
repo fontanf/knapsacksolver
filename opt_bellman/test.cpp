@@ -6,23 +6,15 @@ TEST(BellmanRecursion, SimpleInstances)
     p /= boost::filesystem::path("opt_bellman");
     p /= boost::filesystem::path("main");
 
-    test(p.string() + " -a opt",            "opt");
-    test(p.string() + " -a sopt_1",        "sopt");
-    test(p.string() + " -a sopt_1it",      "sopt");
-    test(p.string() + " -a sopt_1map",     "sopt");
-    test(p.string() + " -a sopt_1rec",     "sopt");
-    test(p.string() + " -a sopt_1stack",   "sopt");
-    test(p.string() + " -a sopt_2",        "sopt");
-    test(p.string() + " -a sopt_rec",      "sopt");
-    test(p.string() + " -a opt_list",       "opt");
-    test(p.string() + " -a sopt_list_rec", "sopt");
-    test(p.string() + " -a opt_list      -l none   -u 0",  "opt");
-    test(p.string() + " -a sopt_list_rec -l none   -u 0", "sopt");
-    test(p.string() + " -a opt_list      -l none   -u trivial",  "opt");
-    test(p.string() + " -a sopt_list_rec -l none   -u trivial", "sopt");
-    test(p.string() + " -a opt_list      -l none   -u dantzig",  "opt");
-    test(p.string() + " -a sopt_list_rec -l none   -u dantzig", "sopt");
-    test(p.string() + " -a opt_list      -l greedy -u dantzig",  "opt");
-    test(p.string() + " -a sopt_list_rec -l greedy -u dantzig", "sopt");
+    test(p.string() + " -m array -r none",  "opt");
+    test(p.string() + " -m array -r all",  "sopt");
+    test(p.string() + " -m array -r one",  "sopt");
+    //test(p.string() + " -m array -r part", "sopt");
+    test(p.string() + " -m array -r rec",  "sopt");
+    test(p.string() + " -m list -r none",  "opt");
+    //test(p.string() + " -m list -r all",  "sopt");
+    //test(p.string() + " -m list -r one",  "sopt");
+    //test(p.string() + " -m list -r part", "sopt");
+    test(p.string() + " -m list -r rec",  "sopt");
 }
 

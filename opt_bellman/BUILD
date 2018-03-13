@@ -1,14 +1,10 @@
 cc_library(
         name = "libbellman",
-        hdrs = ["bellman.hpp"],
-        srcs = ["bellman.cpp"],
+        hdrs = ["bellman_array.hpp", "bellman_list.hpp"],
+        srcs = ["bellman_array.cpp", "bellman_list.cpp"],
         visibility = ["//visibility:public"],
         deps = [
                 "//lib:cpp",
-                "//ub_dantzig:libdantzig",
-                "//ub_surrogate:libsurrogate",
-                "//lb_greedy:libgreedy",
-                "//lb_greedynlogn:libgreedynlogn",
         ],
 )
 
@@ -20,7 +16,7 @@ cc_binary(
                 "-lboost_filesystem",
                 "-lboost_program_options"
         ],
-        deps = ["//lib:cpp", "//lib:cppsolver", ":libbellman"],
+        deps = ["//lib:cpp", ":libbellman"],
 )
 
 cc_test(
