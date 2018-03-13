@@ -1,3 +1,5 @@
+WORK IN PROGRESS
+
 # Knapsack
 
 Implementations of classical algorithms for the Knapsack Problem. Most algorithms are detailed in the "Knapsack Problem" book (Kellerer et al., 2004).
@@ -77,39 +79,46 @@ correlated knapsack problems" (Pisinger, 1998).
 - Dantzig Upper Bound `ub_dantzig/main`
 - Surrogate relaxation `ub_surrogate/main`
 
-## DP with Bellman recursion
+## Exact algorithm without pre-processing or sorting
 
-### With arrays
+### Dynamic programming with Bellman recursion
 
-*(See "Knapsack Problem", 2.3, 3.3 - Kellerer et al., 2004)*
+The Bellman recursion is implemented both with array and list as memory. Use
+option `-m array` of `-m list` to select which one to use (default `array`).
 
-- Only optimal value, Time O(nc), Space O(c) `opt_bellman/main -a opt`
-- Version 1, Time O(nc), Space O(nc) `opt_bellman/main -a sopt_1`
-  - Iterative implementation (default) `opt_bellman/main -a sopt_1it`
-  - Implementation with a recursive function `opt_bellman/main -a sopt_1rec`
-  - Implementation with a stack simulating a recursive function `opt_bellman/main -a sopt_1stack`
-  - Recursive implementation using a map as memory `opt_bellman/main -a sopt_1map`
-- Version 2, Time O(n2c), Space O(c+n) `opt_bellman/main -a sopt_2`
-- Recursive scheme Time O(nc), Space O(n+c) `opt_bellman/main -a sopt_rec`
+Option `-r` selects the methods used to retrieve the optimal solution. Possible
+values are
+- `none`: no solution retrieved, only the optimal value is returned
+- `all`: keep all states in memory and backtrack
+- `one`: keep only the last states in memory, retrieve the last item added and
+run the algorithm again to retrieve the complete optimal solution
+- `part`: keep a partial solution in each state and run the algorithm again
+while the global solution is not complete
+- `rec`: use the recursive scheme
 
-### With lists
+Using Dynamic programming with lists allow using bound. Since the items are not
+sorted, the `U0` bound is used.
 
-*(See "Knapsack Problem", 3.4, 3.5 - Kellerer et al., 2004)*
-
-Use option `-u` (possible values: `trivial` or `dantzig`) to combine Dynamic Programming with upper bounds.
-In this case, use option `-l` (possible values: `none` or `greedy`) to select lower bound.
-
-- Only optimal value `opt_bellman/main -a opt_list`
-- Recursive scheme `opt_bellman/main -a sopt_list_rec`
-
-## DP by profits
+### Dynamic programming by profits
 
 *(See "Knapsack Problem", 2.3 - Kellerer et al., 2004)*
 
 - Only optimal value, `opt_dpreaching/main -a opt`
 - Optimal solution, `opt_bellman/main -a sopt`
 
-## Balanced Dynamic Programming
+### Primal Branch-and-bound
+
+*(See "Knapsack Problem", 2.4 Branch-and-Bound - Kellerer et al., 2004)*
+
+Use option `-u` (possible values: `trivial`, `dantzig` or `dantzig_2`) to select
+which upper bound is used.
+
+- Implementation with a recursive function (default) `opt_bab/main -a rec`
+- Implementation with a stack simulating a recusrive function `opt_bab/main -a stack`
+
+## Exact algorithms with partial or complete sorting as pre-processing
+
+### Balanced Dynamic programming
 
 *(See "Knapsack Problem", 5.3.1 Balanced Dynamic Programming - Kellerer et al., 2004)*
 
@@ -120,17 +129,9 @@ Use option `-u` (possible values: `dembo`, `trivial` or `dantzig`) to select whi
 - With lists (maps), only optimal value, `opt_balknap/main -a opt_list`
 - With lists (maps), optimal solution, `opt_balknap/main -a sopt_list`
 
-## Primal Branch-and-bound
+### Primal-dual Dynamic programming (`minknap`, `combo`)
 
-*(See "Knapsack Problem", 2.4 Branch-and-Bound - Kellerer et al., 2004)*
-
-Use option `-u` (possible values: `trivial`, `dantzig` or `dantzig_2`) to select
-which upper bound is used.
-
-- Implementation with a recursive function (default) `opt_bab/main -a rec`
-- Implementation with a stack simulating a recusrive function `opt_bab/main -a stack`
-
-## Primal-Dual Branch-and-bound
+### Primal-dual Branch-and-bound (`expknap`)
 
 *(See "Knapsack Problem", 5.1.4 Branch-and-Bound Implementations - Kellerer et al., 2004)*
 
