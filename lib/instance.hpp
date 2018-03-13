@@ -23,6 +23,8 @@ typedef int_fast64_t ItemPos;
 typedef int_fast64_t StateIdx;
 
 class Solution;
+typedef int64_t BSol;
+class BSolFactory;
 
 struct Info
 {
