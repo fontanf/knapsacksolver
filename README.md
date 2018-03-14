@@ -68,6 +68,8 @@ For those algorithms, if required, the Upper bound used is neccessarly `U0`.
 
 ## Exact algorithms with partial or complete sorting as pre-processing
 
+Primal-dual Dynamic programming and Primal-dual Branch-and-bound allow to sort and reduce items 'by need' instead. This makes them more efficient on small or easy instances compared to other algorithms of the litterature which sort and reduce items in a pre-processing step. Balanced Dynamic programming may require only the partial sorting, however better bounds can be used if items are fully sorted.
+
 - Balanced Dynamic programming `opt_balknap/main -m list -u t -r part` Since the list implementation require a map, its asymptotical complexity is slightly greater than the one with an array. On the other hand, better Upper bounds can be used. Therefore, both are implemented. Furthermore, options `-u` can be set to
   - b: partial sorting, Dembo Upper bound (with break item)
   - t: complete sorting, better Upper Bound
