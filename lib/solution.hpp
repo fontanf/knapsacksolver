@@ -43,6 +43,8 @@ public:
      */
     void write_cert(std::string file);
 
+    std::string print_bin() const;
+
 private:
 
     const Instance& instance_;

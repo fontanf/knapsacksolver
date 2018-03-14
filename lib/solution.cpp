@@ -93,3 +93,11 @@ std::ostream& operator<<(std::ostream& os, const Solution& solution)
     return os;
 }
 
+std::string Solution::print_bin() const
+{
+    std::string s = "";
+    for (ItemPos i=0; i<instance().total_item_number(); ++i)
+        s += std::to_string(contains(i));
+    return s;
+
+}
