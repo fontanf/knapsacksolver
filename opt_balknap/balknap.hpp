@@ -1,35 +1,30 @@
-#ifndef BALKNAP_HPP_UHNG2R08
-#define BALKNAP_HPP_UHNG2R08
+#pragma once
 
 #include "../lib/instance.hpp"
 #include "../lib/solution.hpp"
 
-/**
- * Time  O(n*wmax*pmax)
- * Space O(wmax*pmax)
- */
-Profit opt_balknap(const Instance& instance,
-        Profit lb, std::string ub_type, Info* info = NULL);
+struct BalknapParams
+{
+    std::string upper_bound = "b";
+    StateIdx gcd = -1;
+    StateIdx greedy = 0;
+    StateIdx greedynlogn = -1;
+    StateIdx lb_pairing = -1;
+    StateIdx surrogate = -1;
+    StateIdx solve_sur = -1;
+};
 
-/**
- * Time  O(n*wmax*pmax)
- * Space O(n*wmax*pmax)
- */
-Solution sopt_balknap(const Instance& instance,
-        Profit lb, std::string ub_type, Info* info = NULL);
+Profit opt_balknap_array(const Instance& instance,
+        BalknapParams p, Info* info = NULL);
+Solution sopt_balknap_array_all(const Instance& instance,
+        BalknapParams p, Info* info = NULL);
+Solution sopt_balknap_array_part(const Instance& instance,
+        BalknapParams p, ItemPos k, Info* info = NULL);
 
-/**
- * Time  O(n*wmax*pmax*log(wmax*pmax))
- * Space O(wmax*pmax)
- */
 Profit opt_balknap_list(const Instance& instance,
-        Profit lb, std::string ub_type, Info* info = NULL);
+        BalknapParams p, Info* info = NULL);
+Solution sopt_balknap_list_all(const Instance& instance,
+        BalknapParams p, Info* info = NULL);
+Solution sopt_balknap_list_part(const Instance& instance,
+        BalknapParams p, ItemPos k, Info* info = NULL);
 
-/**
- * Time  O(n*wmax*pmax*log(wmax*pmax))
- * Space O(n*wmax*pmax)
- */
-Solution sopt_balknap_list(const Instance& instance,
-        Profit lb, std::string ub_type, Info* info = NULL);
-
-#endif /* end of include guard: BALKNAP_HPP_UHNG2R08 */
