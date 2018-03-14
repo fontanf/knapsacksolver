@@ -86,7 +86,7 @@ public:
      * Manual constructor.
      * This constructor should only be used for tests.
      */
-    Instance(ItemIdx n, Weight c, std::vector<Item> items);
+    Instance(std::vector<Item> items, Weight c);
 
     /**
      * Create instance from file.
@@ -111,6 +111,7 @@ public:
      * (Pisinger, 1997).
      */
     void sort_partially();
+    bool break_item_found() const { return (b_ != -1); }
 
     /**
      * Apply variable reduction. See "Knapsack Problem", Chap 3.2:
@@ -126,13 +127,12 @@ public:
      * not be optimal: the optimal solution of the original instance is the best
      * one from sol_curr and the optimal solution of the reduced instance.
      */
-    bool reduce1(const Solution& sol_curr, bool verbose = false);
-    bool reduce2(const Solution& sol_curr, bool verbose = false);
+    bool reduce1(Profit lb, bool verbose = false);
+    bool reduce2(Profit lb, bool verbose = false);
 
     const Solution* reduced_solution() const { return sol_red_; }
     const Solution* optimal_solution() const { return sol_opt_; }
     Profit optimum() const;
-    void reset();
 
     /**
      * Create an instance with capacitiy and weights divided, keeping the
@@ -155,7 +155,9 @@ public:
     inline std::string format() const { return format_; }
     std::string sort_type()     const { return sort_type_; }
 
-    inline ItemIdx item_number() const { return n_; }
+    inline ItemIdx item_number() const { return l_-f_+1; }
+    inline ItemPos first_item()  const { return f_; }
+    inline ItemPos last_item()   const { return l_; }
     inline Weight  capacity()    const { return c_; }
     inline ItemIdx total_item_number() const { return items_.size(); }
     inline Weight  total_capacity()    const { return c_orig_; }
@@ -166,7 +168,9 @@ public:
     Weight  break_weight()   const { return wsum_; }
     Weight  break_capacity() const { return r_; }
 
-    const Item& most_efficient_item() const { return i_emax_; }
+    const Item& max_weight_item()     const { return i_wmax_; }
+    const Item& max_profit_item()     const { return i_pmax_; }
+    const Item& max_efficiency_item() const { return i_emax_; }
 
     const Item& isum(ItemPos i) const { assert(sort_type_ == "eff"); return isum_[i]; }
     ItemPos ub_item(Item item) const;
@@ -213,16 +217,19 @@ private:
     std::string name_;
     std::string format_;
 
-    ItemIdx n_;
+    ItemPos f_;
+    ItemPos l_;
     Weight  c_;
     Weight  c_orig_;
     std::string sort_type_ = "";
     std::vector<Item> items_;
 
-    Solution* sol_opt_ = NULL;
-    Solution* sol_red_ = NULL;
-    ItemPos b_ = -1;
-    Item i_emax_ = {-1, 0, -1}; // Most efficient item;
+    Solution* sol_opt_ = NULL; // Optimal solution
+    Solution* sol_red_ = NULL; // Reduced solution
+    ItemPos b_ = -1; // Break item
+    Item i_wmax_ = {-1, -1, -1}; // Max weight item
+    Item i_pmax_ = {-1, -1, -1}; // Max profit item
+    Item i_emax_ = {-1, 0, -1};  // Max efficiency item;
     Weight r_;
     Profit psum_ = 0;
     Weight wsum_ = 0;

@@ -5,12 +5,11 @@ int main(int argc, char *argv[])
 {
     namespace po = boost::program_options;
 
+    // Parse program options
     std::string output_file = "";
     std::string cert_file = "";
     std::string memory = "array";
     std::string retrieve = "all";
-
-    // Parse program options
     po::options_description desc("Allowed options");
     desc.add_options()
         ("help,h", "produce help message")
@@ -58,7 +57,7 @@ int main(int argc, char *argv[])
     } else if (memory == "list") {
         if (retrieve == "none") {
             opt = opt_bellman_list(instance, &info);
-        } else if (retrieve == "full") {
+        } else if (retrieve == "all") {
             sopt = sopt_bellman_list_all(instance, &info);
         } else if (retrieve == "one") {
             sopt = sopt_bellman_list_one(instance, &info);
@@ -81,7 +80,7 @@ int main(int argc, char *argv[])
     info.pt.put("Solution.Time", t);
     if (Info::verbose(&info)) {
         std::cout << "---" << std::endl;
-        std::cout << instance.print_opt(sopt.profit()) << std::endl;
+        std::cout << instance.print_opt(opt) << std::endl;
         std::cout << "TIME " << t << std::endl;
     }
 

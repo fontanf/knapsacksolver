@@ -1,5 +1,7 @@
 #include "bellman_list.hpp"
 
+#include "../ub_dembo/dembo.hpp"
+
 #define DBG(x)
 //#define DBG(x) x
 
@@ -34,7 +36,6 @@ std::vector<State> opts_bellman_list(const Instance& ins,
     if (c == 0)
         return {{0, 0}};
 
-    const Item& i0 = ins.most_efficient_item();
     DBG(std::cout << "IO " << i0 << std::endl;)
     Profit lb = 0;
     std::vector<State> l0{{0, 0}};
@@ -70,7 +71,7 @@ std::vector<State> opts_bellman_list(const Instance& ins,
                         l.back() = s1;
                         DBG(std::cout << " OK" << std::endl;)
                     } else {
-                        Profit ub = s1.p + ((c - s1.w) * i0.p / i0.w);
+                        Profit ub = ub_0(ins, i+1, s1.p, c-s1.w);
                         DBG(std::cout << " UB " << ub;)
                         if (ub >= lb) {
                             if (s1.p > lb) // Update lower bound

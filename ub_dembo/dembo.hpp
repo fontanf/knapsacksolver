@@ -34,7 +34,7 @@ inline Profit ub_0(const Instance& ins, ItemIdx j, const Solution& sol_curr)
 inline Profit ub_0(const Instance& ins, ItemIdx j, Profit p, Weight r)
 {
     if (j < ins.item_number())
-        p += (r * ins.most_efficient_item().p) / ins.most_efficient_item().w;
+        p += (r * ins.max_efficiency_item().p) / ins.max_efficiency_item().w;
     return p;
 }
 
@@ -46,7 +46,7 @@ inline Profit ub_0_rev(const Instance& ins, ItemIdx j, const Solution& sol_curr)
 inline Profit ub_0_rev(const Instance& ins, ItemIdx j, Profit p, Weight r)
 {
     if (j >= 0)
-        p += (r * ins.most_efficient_item().p + 1) / ins.most_efficient_item().w - 1;
+        p += (r * ins.max_efficiency_item().p + 1) / ins.max_efficiency_item().w - 1;
     return p;
 }
 

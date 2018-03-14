@@ -10,12 +10,12 @@
 
 TEST(Instance, Sort)
 {
-    Instance instance(5, 100,{
+    Instance instance({
             {0, 10, 10},
             {1, 10, 15},
             {2, 10, 5},
             {3, 10, 12},
-            {4, 10, 20}});
+            {4, 10, 20}}, 100);
     instance.sort();
 
     EXPECT_EQ(instance.item(4).p, 5);
@@ -33,7 +33,7 @@ TEST(Instance, Sort)
 
 TEST(Instance, SortPartially)
 {
-    Instance instance(9, 4, {// break item b = 3 (1, 3)
+    Instance instance({ // break item b = 3 (1, 3)
             {0, 1, 1},
             {1, 2, 1},
             {2, 3, 1},
@@ -42,14 +42,14 @@ TEST(Instance, SortPartially)
             {5, 6, 1},
             {6, 7, 1},
             {7, 8, 1},
-            {8, 9, 1}});
+            {8, 9, 1}}, 4);
     instance.sort_partially();
     EXPECT_EQ(instance.item(instance.break_item()).i, 2);
 }
 
 TEST(Instance, SortPartially2)
 {
-    Instance instance(9, 6, {// break item b = 3 (1, 3)
+    Instance instance({ // break item b = 3 (1, 3)
             {0, 1, 1},
             {1, 9, 1},
             {2, 2, 1},
@@ -58,7 +58,7 @@ TEST(Instance, SortPartially2)
             {5, 7, 1},
             {6, 4, 1},
             {7, 5, 1},
-            {8, 6, 1}});
+            {8, 6, 1}}, 6);
     instance.sort_partially();
     EXPECT_EQ(instance.item(instance.break_item()).i, 6);
 }
@@ -80,8 +80,8 @@ TEST(Instance, SortPartially3)
         std::cout << "n " << n << " c " << c << std::endl;
         std::random_shuffle(w.begin(), w.end());
 
-        Instance instance_eff(n, c, items);
-        Instance instance_peff(n, c, items);
+        Instance instance_eff(items, c);
+        Instance instance_peff(items, c);
         instance_eff.sort();
         instance_peff.sort_partially();
         EXPECT_EQ(
@@ -121,13 +121,13 @@ TEST(Instance, ReductionSmallCoeff)
                 Instance instance(ii->path().string());
                 instance.sort_partially();
                 Solution sol = sol_bestgreedy(instance);
-                instance.reduce1(sol, true);
+                instance.reduce1(sol.profit(), true);
             }
             {
                 Instance instance(ii->path().string());
                 instance.sort();
                 Solution sol = sol_bestgreedy(instance);
-                instance.reduce2(sol, true);
+                instance.reduce2(sol.profit(), true);
             }
         }
     }
@@ -155,13 +155,13 @@ TEST(Instance, ReductionLargeCoeff)
                 Instance instance(ii->path().string());
                 instance.sort_partially();
                 Solution sol = sol_bestgreedy(instance);
-                instance.reduce1(sol);
+                instance.reduce1(sol.profit());
             }
             {
                 Instance instance(ii->path().string());
                 instance.sort();
                 Solution sol = sol_bestgreedy(instance);
-                instance.reduce2(sol);
+                instance.reduce2(sol.profit());
             }
         }
     }
@@ -189,13 +189,13 @@ TEST(Instance, ReductionHardInstances)
                 Instance instance(ii->path().string());
                 instance.sort_partially();
                 Solution sol = sol_bestgreedy(instance);
-                instance.reduce1(sol);
+                instance.reduce1(sol.profit());
             }
             {
                 Instance instance(ii->path().string());
                 instance.sort();
                 Solution sol = sol_bestgreedy(instance);
-                instance.reduce2(sol);
+                instance.reduce2(sol.profit());
             }
         }
     }

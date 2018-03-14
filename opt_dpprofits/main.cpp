@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
     info.pt.put("Solution.Time", t);
     if (Info::verbose(&info)) {
         std::cout << "---" << std::endl;
-        std::cout << instance.print_opt(sopt.profit()) << std::endl;
+        std::cout << instance.print_opt(opt) << std::endl;
         std::cout << "TIME " << t << std::endl;
     }
 

@@ -5,6 +5,7 @@ cc_library(
         visibility = ["//visibility:public"],
         deps = [
                 "//lib:cpp",
+                "//ub_dembo:libdembo",
         ],
 )
 
