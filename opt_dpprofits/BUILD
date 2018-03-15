@@ -3,7 +3,10 @@ cc_library(
         hdrs = ["dpprofits_array.hpp", "dpprofits_list.hpp"],
         srcs = ["dpprofits_array.cpp", "dpprofits_list.cpp"],
         visibility = ["//visibility:public"],
-        deps = ["//lib:cpp"],
+        deps = [
+                "//lib:cpp",
+                "//ub_dembo:libdembo",
+        ],
 )
 
 cc_binary(

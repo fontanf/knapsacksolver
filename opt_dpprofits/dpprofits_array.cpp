@@ -1,5 +1,7 @@
 #include "dpprofits_array.hpp"
 
+#include "../ub_dembo/dembo.hpp"
+
 #define DBG(x)
 //#define DBG(x) x
 
@@ -16,7 +18,7 @@ Profit opt_dpprofits_array(const Instance& ins, Info* info)
         return 0;
 
     // Initialize memory table
-    Profit ub = (ins.capacity() * ins.most_efficient_item().p) / ins.most_efficient_item().w;
+    Profit ub = ub_0(ins, 0, 0, ins.capacity());
     std::vector<Weight> values(ub+1,c+1);
 
     // Compute optimal value
@@ -55,7 +57,7 @@ Solution sopt_dpprofits_array_all(const Instance& ins, Info* info)
         return Solution(ins);
 
     // Initialize memory table
-    Profit ub = (ins.capacity() * ins.most_efficient_item().p) / ins.most_efficient_item().w;
+    Profit ub = ub_0(ins, 0, 0, ins.capacity());
     StateIdx values_size = (n+1)*(ub+1);
     std::vector<Weight> values(values_size);
 
