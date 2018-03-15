@@ -1,12 +1,13 @@
 cc_library(
         name = "libbalknap",
         hdrs = ["balknap.hpp"],
-        srcs = ["balknap.cpp"],
+        srcs = ["balknap_array.cpp", "balknap_list.cpp"],
         visibility = ["//visibility:public"],
         deps = [
                 "//lib:cpp",
                 "//lb_greedy:libgreedy",
                 "//lb_greedynlogn:libgreedynlogn",
+                "//ub_dembo:libdembo",
                 "//ub_surrogate:libsurrogate",
         ],
 )
@@ -21,7 +22,7 @@ cc_binary(
         ],
         deps = [
                 "//lib:cpp",
-                ":libbalknap"
+                ":libbalknap",
         ],
 )
 

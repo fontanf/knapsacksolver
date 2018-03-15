@@ -6,6 +6,7 @@
 struct BalknapParams
 {
     std::string upper_bound = "b";
+    std::string reduction   = "1";
     StateIdx gcd = -1;
     StateIdx greedy = 0;
     StateIdx greedynlogn = -1;
@@ -14,17 +15,15 @@ struct BalknapParams
     StateIdx solve_sur = -1;
 };
 
-Profit opt_balknap_array(const Instance& instance,
-        BalknapParams p, Info* info = NULL);
-Solution sopt_balknap_array_all(const Instance& instance,
-        BalknapParams p, Info* info = NULL);
-Solution sopt_balknap_array_part(const Instance& instance,
-        BalknapParams p, ItemPos k, Info* info = NULL);
+Profit opt_balknap_array(Instance& ins, BalknapParams p, Info* info = NULL);
+Solution sopt_balknap_array_all(
+        Instance& ins, BalknapParams p, Info* info = NULL);
+Solution sopt_balknap_array_part(
+        Instance& ins, BalknapParams p, ItemPos k, Info* info = NULL);
 
-Profit opt_balknap_list(const Instance& instance,
-        BalknapParams p, Info* info = NULL);
-Solution sopt_balknap_list_all(const Instance& instance,
-        BalknapParams p, Info* info = NULL);
-Solution sopt_balknap_list_part(const Instance& instance,
+Profit opt_balknap_list(Instance& ins, BalknapParams p, Info* info = NULL);
+Solution sopt_balknap_list_all(
+        Instance& ins, BalknapParams p, Info* info = NULL);
+Solution sopt_balknap_list_part(Instance& ins,
         BalknapParams p, ItemPos k, Info* info = NULL);
 
