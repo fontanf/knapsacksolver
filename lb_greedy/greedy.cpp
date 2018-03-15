@@ -5,7 +5,8 @@
 
 Solution sol_break(const Instance& ins, Info* info)
 {
-    assert(ins.sort_type() == "eff" || ins.sort_type() == "peff");
+    (void)info;
+    assert(ins.break_item_found());
 
     Solution sol = *ins.reduced_solution();
     for (ItemPos i=0; i<ins.item_number(); ++i) {
@@ -20,7 +21,8 @@ Solution sol_break(const Instance& ins, Info* info)
 
 Solution sol_greedy(const Instance& ins, Info* info)
 {
-    assert(ins.sort_type() == "eff" || ins.sort_type() == "peff");
+    (void)info;
+    assert(ins.break_item_found());
     DBG(std::cout << "GREEDY..." << std::endl;)
 
     Solution sol = *ins.reduced_solution();
@@ -37,8 +39,9 @@ Solution sol_greedy(const Instance& ins, Info* info)
 
 Solution sol_greedymax(const Instance& ins, Info* info)
 {
+    (void)info;
+    assert(ins.break_item_found());
     DBG(std::cout << "GREEDYMAX..." << std::endl;)
-    assert(ins.sort_type() == "eff" || ins.sort_type() == "peff");
     assert(ins.item_number() > 0);
 
     ItemPos imax = 0;
@@ -61,8 +64,9 @@ Solution sol_greedymax(const Instance& ins, Info* info)
 
 Solution sol_forwardgreedy(const Instance& ins, Info* info)
 {
+    (void)info;
+    assert(ins.break_item_found());
     DBG(std::cout << "GREEDYFW..." << std::endl;)
-    assert(ins.sort_type() == "eff" || ins.sort_type() == "peff");
     assert(ins.item_number() > 0);
 
     Solution sol = *ins.reduced_solution();
@@ -99,8 +103,9 @@ Solution sol_forwardgreedy(const Instance& ins, Info* info)
 
 Solution sol_backwardgreedy(const Instance& ins, Info* info)
 {
+    (void)info;
+    assert(ins.break_item_found());
     DBG(std::cout << "GREEDYBW..." << std::endl;)
-    assert(ins.sort_type() == "eff" || ins.sort_type() == "peff");
     assert(ins.item_number() > 0);
 
     Solution sol = *ins.reduced_solution();

@@ -3,20 +3,21 @@
 #define DBG(x)
 //#define DBG(x) x
 
-Profit ub_dantzig(const Instance& instance, Info* info)
+Profit ub_dantzig(const Instance& ins, Info* info)
 {
     DBG(std::cout << "UBDANTZIG..." << std::endl;)
-    assert(instance.sort_type() == "eff" || instance.sort_type() == "peff");
+    (void)info;
+    assert(ins.break_item_found());
 
-    ItemPos b = instance.break_item();
-    Weight  r = instance.break_capacity();
-    Profit  p = instance.reduced_solution()->profit() + instance.break_profit();
+    ItemPos b = ins.break_item();
+    Weight  r = ins.break_capacity();
+    Profit  p = ins.reduced_solution()->profit() + ins.break_profit();
     DBG(std::cout << "b " << b << " r " << r << std::endl;)
-    if (b != instance.item_number() && r > 0)
-        p += (instance.item(b).p * r) / instance.item(b).w;
+    if (b != ins.item_number() && r > 0)
+        p += (ins.item(b).p * r) / ins.item(b).w;
 
     DBG(std::cout << "UB " << p << std::endl;)
-    assert(instance.check_ub(p));
+    assert(ins.check_ub(p));
     DBG(std::cout << "UBDANTZIG... END" << std::endl;)
     return p;
 }
@@ -26,32 +27,32 @@ Profit ub_dantzig(const Instance& instance, Info* info)
 #define DBG(x)
 //#define DBG(x) x
 
-Profit ub_trivial_from(const Instance& instance, ItemIdx j, const Solution& sol_curr)
+Profit ub_trivial_from(const Instance& ins, ItemIdx j, const Solution& sol_curr)
 {
-    Profit u = ub_trivial_from(instance, j, sol_curr.profit(), sol_curr.remaining_capacity());
-    assert(j > 0 || instance.check_ub(u));
+    Profit u = ub_trivial_from(ins, j, sol_curr.profit(), sol_curr.remaining_capacity());
+    assert(j > 0 || ins.check_ub(u));
     return u;
 }
 
-Profit ub_trivial_from(const Instance& instance, ItemIdx j, Profit p, Weight r)
+Profit ub_trivial_from(const Instance& ins, ItemIdx j, Profit p, Weight r)
 {
     Profit u = p;
-    if (j < instance.item_number())
-        u += (r * instance.item(j).p) / instance.item(j).w;
+    if (j < ins.item_number())
+        u += (r * ins.item(j).p) / ins.item(j).w;
     return u;
 }
 
-Profit ub_trivial_from_rev(const Instance& instance, ItemIdx j, const Solution& sol_curr)
+Profit ub_trivial_from_rev(const Instance& ins, ItemIdx j, const Solution& sol_curr)
 {
-    return ub_trivial_from_rev(instance, j, sol_curr.profit(), sol_curr.remaining_capacity());
+    return ub_trivial_from_rev(ins, j, sol_curr.profit(), sol_curr.remaining_capacity());
 }
 
-Profit ub_trivial_from_rev(const Instance& instance, ItemIdx j, Profit p, Weight r)
+Profit ub_trivial_from_rev(const Instance& ins, ItemIdx j, Profit p, Weight r)
 {
     DBG(std::cout << "UBTRIVIALFROMREV... j " << j << std::endl;)
     Profit u = p;
     if (j >= 0)
-        u += (r * instance.item(j).p + 1) / instance.item(j).w - 1;
+        u += (r * ins.item(j).p + 1) / ins.item(j).w - 1;
     DBG(std::cout << "UBTRIVIALFROMREV... END" << std::endl;)
     return u;
 }
@@ -61,59 +62,59 @@ Profit ub_trivial_from_rev(const Instance& instance, ItemIdx j, Profit p, Weight
 #define DBG(x)
 //#define DBG(x) x
 
-Profit ub_dantzig_from(const Instance& instance, ItemIdx j, const Solution& sol_curr)
+Profit ub_dantzig_from(const Instance& ins, ItemIdx j, const Solution& sol_curr)
 {
-    return ub_dantzig_from(instance, j, sol_curr.profit(), sol_curr.remaining_capacity());
+    return ub_dantzig_from(ins, j, sol_curr.profit(), sol_curr.remaining_capacity());
 }
 
-Profit ub_dantzig_from(const Instance& instance, ItemIdx j, Profit p, Weight r)
+Profit ub_dantzig_from(const Instance& ins, ItemIdx j, Profit p, Weight r)
 {
     DBG(std::cout << "UBDANTZIGFROM... j " << j << " r " << sol_curr.remaining_capacity() << std::endl;)
-    assert(instance.sort_type() == "eff");
+    assert(ins.sorted());
     Profit  u = p;
     ItemPos b;
 
     //Weight r = sol_curr.remaining_capacity();
-    //Item ubitem = {0, instance.isum(j).w + r, 0};
-    //b  = instance.ub_item(ubitem);
-    //u  = instance.isum(b).p - instance.isum(j).p;
-    //r += instance.isum(j).w - instance.isum(b).w;
-    //DBG(std::cout << "ubitem " << instance.isum(b) << std::endl;)
+    //Item ubitem = {0, ins.isum(j).w + r, 0};
+    //b  = ins.ub_item(ubitem);
+    //u  = ins.isum(b).p - ins.isum(j).p;
+    //r += ins.isum(j).w - ins.isum(b).w;
+    //DBG(std::cout << "ubitem " << ins.isum(b) << std::endl;)
     //DBG(std::cout << "u " << u << " b " << b << " r " << r << std::endl;)
 
-    for (b=j; b<instance.item_number(); b++) {
-        if (instance.item(b).w > r)
+    for (b=j; b<ins.item_number(); b++) {
+        if (ins.item(b).w > r)
             break;
-        u += instance.item(b).p;
-        r -= instance.item(b).w;
+        u += ins.item(b).p;
+        r -= ins.item(b).w;
     }
     DBG(std::cout << "u " << u << " b " << b << " r " << r << std::endl;)
 
-    if (b != instance.item_number() && r > 0)
-        u += (instance.item(b).p * r) / instance.item(b).w;
-    assert(j > 0 || instance.check_ub(u));
+    if (b != ins.item_number() && r > 0)
+        u += (ins.item(b).p * r) / ins.item(b).w;
+    assert(j > 0 || ins.check_ub(u));
     DBG(std::cout << "UBDANTZIGFROM... END" << std::endl;)
     return u;
 }
 
-Profit ub_dantzig_from_rev(const Instance& instance, ItemIdx j, const Solution& sol_curr)
+Profit ub_dantzig_from_rev(const Instance& ins, ItemIdx j, const Solution& sol_curr)
 {
-    return ub_dantzig_from_rev(instance, j, sol_curr.profit(), sol_curr.remaining_capacity());
+    return ub_dantzig_from_rev(ins, j, sol_curr.profit(), sol_curr.remaining_capacity());
 }
 
-Profit ub_dantzig_from_rev(const Instance& instance, ItemIdx j, Profit p, Weight r)
+Profit ub_dantzig_from_rev(const Instance& ins, ItemIdx j, Profit p, Weight r)
 {
-    assert(instance.sort_type() == "eff");
+    assert(ins.sorted());
     assert(r < 0);
     ItemIdx i = j;
     for (; i>=0; i--) {
-        if (instance.item(i).w + r > 0)
+        if (ins.item(i).w + r > 0)
             break;
-        p -= instance.item(i).p;
-        r += instance.item(i).w;
+        p -= ins.item(i).p;
+        r += ins.item(i).w;
     }
     if (i != -1 && r < 0)
-        p += (instance.item(i).p * r + 1) / instance.item(i).w - 1;
+        p += (ins.item(i).p * r + 1) / ins.item(i).w - 1;
     return p;
 }
 
@@ -122,38 +123,38 @@ Profit ub_dantzig_from_rev(const Instance& instance, ItemIdx j, Profit p, Weight
 #define DBG(x)
 //#define DBG(x) x
 
-Profit ub_dantzig_2_from(const Instance& instance, ItemIdx j, const Solution& sol_curr)
+Profit ub_dantzig_2_from(const Instance& ins, ItemIdx j, const Solution& sol_curr)
 {
     DBG(std::cout << "UBDANTZIGFROM2... j " << j << " r " << sol_curr.remaining_capacity() << std::endl;)
-    assert(instance.sort_type() == "eff");
+    assert(ins.sorted());
     Profit  u = sol_curr.profit();
     Weight  r = sol_curr.remaining_capacity();
     ItemPos b;
 
-    for (b=j; b<instance.item_number(); b++) {
-        if (instance.item(b).w > r)
+    for (b=j; b<ins.item_number(); b++) {
+        if (ins.item(b).w > r)
             break;
-        u += instance.item(b).p;
-        r -= instance.item(b).w;
+        u += ins.item(b).p;
+        r -= ins.item(b).w;
     }
     DBG(std::cout << "u " << u << " b " << b << " r " << r << std::endl;)
 
-    if (r == 0 || b == instance.item_number())
+    if (r == 0 || b == ins.item_number())
         return u;
 
-    Profit pb = instance.item(b).p;
-    Profit wb = instance.item(b).w;
-    if (b > 0 && b < instance.item_number()-1) {
+    Profit pb = ins.item(b).p;
+    Profit wb = ins.item(b).w;
+    if (b > 0 && b < ins.item_number()-1) {
         DBG(std::cout << 0 << std::endl;)
-        Item bm1 = instance.item(b-1);
-        Item bp1 = instance.item(b+1);
+        Item bm1 = ins.item(b-1);
+        Item bp1 = ins.item(b+1);
         Profit ub1 = u +      ( r       * bp1.p    ) / bp1.w;
         Profit ub2 = u + pb + ((r - wb) * bm1.p + 1) / bm1.w - 1;
         u = (ub1 > ub2)? ub1: ub2;
         DBG(std::cout << "UB1 " << ub1 << " UB2 " << ub2 << " UB " << u << std::endl;)
     } else if (b > 0) {
         DBG(std::cout << 1 << std::endl;)
-        Item bm1 = instance.item(b-1);
+        Item bm1 = ins.item(b-1);
         Profit ub1 = u;
         Profit ub2 = u + pb + ((r - wb) * bm1.p + 1) / bm1.w - 1;
         u = (ub1 > ub2)? ub1: ub2;
@@ -162,8 +163,8 @@ Profit ub_dantzig_2_from(const Instance& instance, ItemIdx j, const Solution& so
         DBG(std::cout << 2 << std::endl;)
         u += (r * pb) / wb;
     }
-    assert(u <= ub_dantzig_from(instance, j, sol_curr));
-    assert(j > 0 || instance.check_ub(u));
+    assert(u <= ub_dantzig_from(ins, j, sol_curr));
+    assert(j > 0 || ins.check_ub(u));
     DBG(std::cout << "UBDANTZIGFROM2... END" << std::endl;)
     return u;
 }
@@ -173,41 +174,41 @@ Profit ub_dantzig_2_from(const Instance& instance, ItemIdx j, const Solution& so
 #define DBG(x)
 //#define DBG(x) x
 
-Profit ub_dantzig_from_to(const Instance& instance,
+Profit ub_dantzig_from_to(const Instance& ins,
         ItemIdx i, ItemIdx l, Profit p, Weight r)
 {
-    assert(instance.sort_type() == "eff");
+    assert(ins.sorted());
     DBG(std::cout << "DANTZIGFROMTO... " << i << " " << l << " " << r << std::endl;)
     for (; i<=l; i++) {
         DBG(std::cout << "i " << i << std::endl;)
-        if (instance.item(i).w > r)
+        if (ins.item(i).w > r)
             break;
-        r -= instance.item(i).w;
-        p += instance.item(i).p;
+        r -= ins.item(i).w;
+        p += ins.item(i).p;
     }
     if (i != l+1 && r > 0)
-        p += (instance.item(i).p * r) / instance.item(i).w;
+        p += (ins.item(i).p * r) / ins.item(i).w;
     DBG(std::cout << "p " << p << std::endl;)
     DBG(std::cout << "DANTZIGFROMTO... END" << std::endl;)
     return p;
 }
 
-Profit ub_dantzig_skip(const Instance& instance,
+Profit ub_dantzig_skip(const Instance& ins,
         ItemIdx f, ItemIdx l, Profit p, Weight r)
 {
-    assert(instance.sort_type() == "eff");
+    assert(ins.sorted());
     DBG(std::cout << "DANTZIGFROMTO... " << i << " " << l << " " << r << std::endl;)
     ItemPos i = 0;
     for (;;i++) {
         if (i == f)
             i = l+1;
-        if (i == instance.item_number() || instance.item(i).w > r)
+        if (i == ins.item_number() || ins.item(i).w > r)
             break;
-        r -= instance.item(i).w;
-        p += instance.item(i).p;
+        r -= ins.item(i).w;
+        p += ins.item(i).p;
     }
-    if (i != instance.item_number() && r > 0)
-        p += (instance.item(i).p * r) / instance.item(i).w;
+    if (i != ins.item_number() && r > 0)
+        p += (ins.item(i).p * r) / ins.item(i).w;
     DBG(std::cout << "p " << p << std::endl;)
     DBG(std::cout << "DANTZIGFROMTO... END" << std::endl;)
     return p;

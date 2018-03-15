@@ -15,8 +15,8 @@ ItemIdx max_card(const Instance& ins)
     std::vector<ItemIdx> index(ins.item_number());
     std::iota(index.begin(), index.end(), 0);
     ItemIdx kp1 = 0;
-    ItemIdx f = 0;
-    ItemIdx l = ins.item_number() - 1;
+    ItemIdx f = ins.first_item();
+    ItemIdx l = ins.last_item();
     Weight  w = 0;
     Weight  c = ins.capacity();
     while (f < l) {
@@ -66,8 +66,8 @@ ItemIdx min_card(const Instance& ins, Profit lb)
 
     std::vector<ItemIdx> index(ins.item_number());
     std::iota(index.begin(), index.end(), 0);
-    ItemIdx f = 0;
-    ItemIdx l = ins.item_number() - 1;
+    ItemIdx f = ins.first_item();
+    ItemIdx l = ins.last_item();
     ItemIdx km1 = 0;
     Profit p = 0;
     while (f < l) {
@@ -210,8 +210,7 @@ SurrogateOut ub_surrogate(const Instance& instance, Profit lb, Info* info)
 {
     DBG(std::cout << "SURROGATERELAX..." << std::endl;)
     Instance ins(instance);
-    ins.reset();
-    ins.sort_partially();
+    assert(ins.break_item_found());
 
     SurrogateOut out(info);
 
