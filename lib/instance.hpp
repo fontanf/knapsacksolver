@@ -73,6 +73,18 @@ struct Item
     Profit  p = -1;
 };
 
+struct Interval
+{
+    ItemPos f;
+    ItemPos l;
+};
+
+struct SortData {
+    Interval ir;
+    Interval il;
+    Weight   w = 0;
+};
+
 class Instance
 {
 
@@ -102,6 +114,7 @@ public:
      * Sort items according to non-increasing profit-to-weight ratio.
      */
     void sort();
+    bool sorted() const { return sorted_; }
 
     /**
      * Sort items partially according to non-increasing profit-to-weight
@@ -132,6 +145,7 @@ public:
 
     const Solution* reduced_solution() const { return sol_red_; }
     const Solution* optimal_solution() const { return sol_opt_; }
+    const Solution* break_solution()   const { return sol_break_; }
     Profit optimum() const;
 
     /**
@@ -153,7 +167,6 @@ public:
 
     inline std::string name()   const { return name_; }
     inline std::string format() const { return format_; }
-    std::string sort_type()     const { return sort_type_; }
 
     inline ItemIdx item_number() const { return l_-f_+1; }
     inline ItemPos first_item()  const { return f_; }
@@ -163,16 +176,16 @@ public:
     inline Weight  total_capacity()    const { return c_orig_; }
     inline const Item& item(ItemIdx i) const { assert(i >= 0 && i < total_item_number()); return items_[i]; }
 
-    ItemPos break_item()     const { assert(b_ >= 0 && b_ <= item_number()); return b_; }
-    Profit  break_profit()   const { return psum_; };
-    Weight  break_weight()   const { return wsum_; }
-    Weight  break_capacity() const { return r_; }
+    ItemPos break_item()     const { assert(b_ >= first_item() && b_ <= last_item() + 1); return b_; }
+    Profit  break_profit()   const;
+    Weight  break_weight()   const;
+    Weight  break_capacity() const;
 
     const Item& max_weight_item()     const { return i_wmax_; }
     const Item& max_profit_item()     const { return i_pmax_; }
     const Item& max_efficiency_item() const { return i_emax_; }
 
-    const Item& isum(ItemPos i) const { assert(sort_type_ == "eff"); return isum_[i]; }
+    const Item& isum(ItemPos i) const { assert(sorted()); return isum_[i]; }
     ItemPos ub_item(Item item) const;
 
     /**
@@ -204,6 +217,7 @@ private:
     void read_standard(boost::filesystem::path filename);
     void read_pisinger(boost::filesystem::path filename);
 
+    ItemPos partition(ItemPos f, ItemPos l);
     bool check();
     inline void swap(ItemPos i, ItemPos j) { Item tmp = items_[i]; items_[i] = items_[j]; items_[j] = tmp; };
     void swap(ItemPos i1, ItemPos i2, ItemPos i3, ItemPos i4);
@@ -221,18 +235,18 @@ private:
     ItemPos l_;
     Weight  c_;
     Weight  c_orig_;
-    std::string sort_type_ = "";
+    bool sorted_ = false;
+    std::vector<Interval> int_right_;
+    std::vector<Interval> int_left_;
     std::vector<Item> items_;
 
-    Solution* sol_opt_ = NULL; // Optimal solution
-    Solution* sol_red_ = NULL; // Reduced solution
+    Solution* sol_opt_   = NULL; // Optimal solution
+    Solution* sol_red_   = NULL; // Reduced solution
+    Solution* sol_break_ = NULL; // Break solution
     ItemPos b_ = -1; // Break item
     Item i_wmax_ = {-1, -1, -1}; // Max weight item
     Item i_pmax_ = {-1, -1, -1}; // Max profit item
     Item i_emax_ = {-1, 0, -1};  // Max efficiency item;
-    Weight r_;
-    Profit psum_ = 0;
-    Weight wsum_ = 0;
     std::vector<Item> isum_;
     bool sol_red_opt_ = false;
 };
