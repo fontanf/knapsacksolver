@@ -42,6 +42,12 @@ int Solution::contains(ItemPos i) const
     return x_[instance().item(i).i];
 }
 
+int Solution::contains_idx(ItemIdx i) const
+{
+    assert(i >= 0 && i < instance().total_item_number());
+    return x_[i];
+}
+
 void Solution::set(ItemPos i, int b)
 {
     assert(b == 0 || b == 1);
@@ -59,6 +65,14 @@ void Solution::set(ItemPos i, int b)
         k_--;
     }
     x_[instance().item(i).i] = b;
+}
+
+void Solution::clear()
+{
+    k_ = 0;
+    p_ = 0;
+    w_ = 0;
+    std::fill(x_.begin(), x_.end(), 0);
 }
 
 bool Solution::update(const Solution& sol)

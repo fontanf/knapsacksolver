@@ -110,6 +110,11 @@ public:
      */
     Instance(const Instance& ins);
 
+    /**
+     * Copy instance without reduced items
+     */
+    Instance(const Instance& ins, std::vector<Interval> v);
+
     /*
      * Sort items according to non-increasing profit-to-weight ratio.
      */
@@ -223,6 +228,7 @@ private:
     void swap(ItemPos i1, ItemPos i2, ItemPos i3, ItemPos i4);
     void update_isum();
     void compute_break_item();
+    void compute_max_items();
     /*
      * Remove items which weight is greater than the updated capacity
      */
@@ -245,6 +251,7 @@ private:
     Solution* sol_break_ = NULL; // Break solution
     ItemPos b_ = -1; // Break item
     Item i_wmax_ = {-1, -1, -1}; // Max weight item
+    Item i_wmin_ = {-1, c_+1, -1}; // Min weight item
     Item i_pmax_ = {-1, -1, -1}; // Max profit item
     Item i_emax_ = {-1, 0, -1};  // Max efficiency item;
     std::vector<Item> isum_;

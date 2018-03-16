@@ -34,6 +34,7 @@ Instance::Instance(boost::filesystem::path filepath)
     }
 
     sol_red_ = new Solution(*this);
+    compute_max_items();
     assert(check());
 }
 
@@ -54,13 +55,6 @@ void Instance::read_standard(boost::filesystem::path filepath)
     for (ItemPos i=0; i<item_number(); ++i) {
         file >> id >> p >> w >> x;
         items_[i] = {id,w,p};
-        // Update max profit, weight and efficiency items
-        if (p * i_emax_.w > i_emax_.p * w)
-            i_emax_ = {id,w,p};
-        if (p > i_pmax_.p)
-            i_pmax_ = {id,w,p};
-        if (w > i_wmax_.w)
-            i_wmax_ = {id,w,p};
         // Update Optimal solution
         if (x == 1)
             sol_opt_->set(id, true);
@@ -113,13 +107,6 @@ void Instance::read_pisinger(boost::filesystem::path filepath)
         std::getline(file, line);
         std::istringstream(line) >> x;
         items_[i] = {i,w,p};
-        // Update max profit, weight and efficiency items
-        if (p * i_emax_.w > i_emax_.p * w)
-            i_emax_ = {id,w,p};
-        if (p > i_pmax_.p)
-            i_pmax_ = {id,w,p};
-        if (w > i_wmax_.w)
-            i_wmax_ = {id,w,p};
         // Update Optimal solution
         if (x == 1)
             sol_opt_->set(i, true);
@@ -137,6 +124,8 @@ Instance::Instance(const Instance& ins)
     c_orig_ = ins.total_capacity();
     sorted_ = ins.sorted();
     items_ = ins.items_;
+    f_ = ins.first_item();
+    l_ = ins.last_item();
 
     if (ins.optimal_solution() != NULL) {
         sol_opt_ = new Solution(*this);
@@ -151,6 +140,29 @@ Instance::Instance(const Instance& ins)
     sol_red_opt_ = ins.sol_red_opt_;
     b_ = ins.break_item();
     isum_ = ins.isum_;
+}
+
+Instance::Instance(const Instance& ins, std::vector<Interval> v)
+{
+    name_ = ins.name();
+    format_ = ins.format();
+
+    c_ = ins.capacity();
+    c_orig_ = ins.total_capacity();
+    sorted_ = ins.sorted();
+    for (Interval inter: v)
+        for (ItemPos j=inter.f; j<=inter.l; ++j)
+            items_.push_back(ins.item(j));
+    f_ = 0;
+    l_ = items_.size() - 1;
+
+    if (ins.optimal_solution() != NULL)
+        sol_opt_ = new Solution(*this);
+    sol_red_ = new Solution(*this);
+    sol_break_ = new Solution(*this);
+    sol_red_opt_ = ins.sol_red_opt_;
+    for (ItemPos i=f_; i<=l_; ++i)
+        sol_opt_->set(i, ins.optimal_solution()->contains_idx(item(i).i));
 }
 
 bool Instance::check()
@@ -200,7 +212,7 @@ void Instance::sort()
         return;
     sorted_ = true;
     if (item_number() > 1)
-        std::sort(items_.begin(), items_.begin() + item_number(),
+        std::sort(items_.begin()+first_item(), items_.begin()+last_item()+1,
                 [](const Item& i1, const Item& i2) {
                 return i1.p * i2.w > i2.p * i1.w;});
 
@@ -247,6 +259,26 @@ ItemPos Instance::ub_item(Item item) const
 #define DBG(x)
 //#define DBG(x) x
 
+void Instance::compute_max_items()
+{
+    i_wmax_ = {-1, -1, -1}; // Max weight item
+    i_wmin_ = {-1, c_+1, -1}; // Min weight item
+    i_pmax_ = {-1, -1, -1}; // Max profit item
+    i_emax_ = {-1, 0, -1};  // Max efficiency item;
+
+    for (ItemPos i = f_; i<=l_; ++i) {
+        Profit p = item(i).p;
+        Weight w = item(i).w;
+        ItemIdx id = item(i).i;
+        if (p * i_emax_.w > i_emax_.p * w)
+            i_emax_ = {id,w,p};
+        if (p > i_pmax_.p)
+            i_pmax_ = {id,w,p};
+        if (w > i_wmax_.w)
+            i_wmax_ = {id,w,p};
+    }
+}
+
 void Instance::compute_break_item()
 {
     DBG(std::cout << "COMPUTEBREAKITEM..." << std::endl;)
@@ -256,7 +288,7 @@ void Instance::compute_break_item()
         *sol_break_ = *reduced_solution();
     }
     for (b_=first_item(); b_<=last_item(); ++b_) {
-        //std::cout << "I " << b_ << " " << item(b_) << std::endl;
+        DBG(std::cout << "I " << b_ << " " << item(b_) << std::endl;)
         if (item(b_).w > sol_break_->remaining_capacity())
             break;
         sol_break_->set(b_, true);
@@ -322,12 +354,20 @@ void Instance::sort_partially()
     if (break_item_found())
         return;
 
+    int_right_.clear();
+    int_left_.clear();
     if (item_number() > 1) {
         // Quick sort like algorithm
         ItemPos f = first_item();
         ItemPos l = last_item();
         Weight c = capacity();
         while (f < l) {
+            if (l - f < 128) {
+                std::sort(items_.begin()+f, items_.begin()+l+1,
+                        [](const Item& i1, const Item& i2) {
+                        return i1.p * i2.w > i2.p * i1.w;});
+                break;
+            }
             //std::cout << "F " << f << " L " << l << std::flush;
             ItemPos j = partition(f, l);
             //std::cout << " J " << j << std::flush;
@@ -338,11 +378,11 @@ void Instance::sort_partially()
             if (w + item(j).w <= c) {
                 //std::cout << " =>" << std::endl;
                 c -= (w + item(j).w);
-                int_right_.push_back({f, std::max(f, j-1)});
+                int_right_.push_back({f, j});
                 f = j+1;
             } else if (w > c) {
                 //std::cout << " <=" << std::endl;
-                int_left_.push_back({std::min(l, j+1), l});
+                int_left_.push_back({j, l});
                 l = j-1;
             } else {
                 //std::cout << " =" << std::endl;
@@ -352,6 +392,15 @@ void Instance::sort_partially()
             }
         }
     }
+
+    DBG(std::cout << "RIGHT" << std::flush;
+    for (auto i: int_right_)
+        std::cout << " [" << i.f << "," << i.l << "]" << std::flush;
+    std::cout << std::endl;
+    std::cout << "LEFT" << std::flush;
+    for (auto i: int_left_)
+        std::cout << " [" << i.l << "," << i.f << "]" << std::flush;
+    std::cout << std::endl;)
 
     compute_break_item();
     DBG(std::cout << "PARTSORT... END" << std::endl;)
@@ -365,23 +414,32 @@ void Instance::sort_partially()
 void Instance::surrogate(Weight multiplier, ItemIdx bound)
 {
     DBG(std::cout << "SURROGATE..." << std::endl;)
-    ItemIdx k = 0;
-    for (ItemIdx i=first_item(); i<=last_item(); ++i) {
+    sol_red_->clear();
+    sol_break_->clear();
+    f_ = 0;
+    l_ = total_item_number() - 1;
+    for (ItemIdx i=f_; i<=l_;) {
+        if (items_[i].w <= 0)
+            c_ += items_[i].w;
         items_[i].w += multiplier;
-        if (item(i).w <= 0) {
-            swap(k, i);
-            ++k;
+        if (items_[i].w <= 0) {
+            sol_red_->set(i, true);
+            c_ -= items_[i].w;
+            swap(i, l_);
+            --l_;
+        } else {
+            ++i;
         }
     }
     c_ += multiplier * bound;
-    c_orig_ += multiplier * bound;
-    if (sol_opt_ != NULL) {
-        delete sol_opt_;
-        sol_opt_ = NULL;
-    }
+    c_orig_ = c_;
+    compute_max_items();
+
     sorted_ = false;
-    b_ = -1;
+    b_      = -1;
     sort_partially();
+    //std::cout << "SOLBRK " << sol_break_->print_bin() << std::endl;
+    //std::cout << "R " << break_solution()->remaining_capacity() << std::endl;
     DBG(std::cout << "SURROGATE... END" << std::endl;)
 }
 

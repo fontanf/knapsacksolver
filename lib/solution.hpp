@@ -29,6 +29,8 @@ public:
      */
     void set(ItemPos i, int b);
     int contains(ItemPos i) const;
+    int contains_idx(ItemIdx i) const;
+    void clear();
 
     /**
      * Replace the current solution by "sol" if it is better.
