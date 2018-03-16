@@ -49,11 +49,11 @@ ItemIdx max_card(const Instance& ins)
     kp1 = f;
     ItemIdx k = kp1 - 1;
 
-    DBG(std::cout << "kmax " << k+1 << std::endl;
+    DBG(std::cout << "KMAX " << k+1 << std::endl;
     Weight ww = 0;
     for (ItemIdx i=0; i<=k; ++i)
         ww += ins.item(index[i]).w;
-    std::cout << "ww " << ww << " <= c " << c << " < ww+wk+1 " << ww + ins.item(index[k+1]).w << std::endl;
+    std::cout << "WW " << ww << " <= C " << c << " < WW+WK+1 " << ww + ins.item(index[k+1]).w << std::endl;
     assert(ww <= c && ww + ins.item(index[k+1]).w > c);)
 
     return k+1;
@@ -101,11 +101,11 @@ ItemIdx min_card(const Instance& ins, Profit lb)
         km1 = f;
     ItemIdx k = km1 + 1;
 
-    DBG(std::cout << "kmin " << k+1 << std::endl;
+    DBG(std::cout << "KMIN " << k+1 << std::endl;
     Weight pp = 0;
     for (ItemIdx i=0; i<k; ++i)
         pp += ins.item(index[i]).p;
-    std::cout << "pp " << pp << " <= z " << lb << " < pp+pk " << pp + ins.item(index[k]).p << std::endl;
+    std::cout << "PP " << pp << " <= Z " << lb << " < PP+PK " << pp + ins.item(index[k]).p << std::endl;
     assert(pp <= lb && pp + ins.item(index[k]).p > lb);)
 
     return k+1;
@@ -135,17 +135,14 @@ void ub_surrogate_solve(Instance& ins, ItemIdx k,
 
     while (s1 <= s2) {
         s = (s1 + s2) / 2;
-        DBG(std::cout
-                << "s1 " << s1 << " s " << s << " s2 " << s2
-                << std::endl;)
 
         // Avoid INT overflow
         if (s_min == 0 && s != 0) {
             if (INT_FAST64_MAX / s < k
                     || ins.capacity() > INT_FAST64_MAX - s * k
-                    || INT_FAST64_MAX / ins.item_number() < wmax+s
+                    || INT_FAST64_MAX / ins.total_item_number() < wmax+s
                     || wmax + s > wlim) {
-                DBG(std::cout << "s2 " << s2 << " => " << s-1 << std::endl;)
+                DBG(std::cout << "S2 " << s2 << " => " << s-1 << std::endl;)
                 s2 = s - 1;
                 continue;
             } else {
@@ -155,9 +152,9 @@ void ub_surrogate_solve(Instance& ins, ItemIdx k,
         if (s_max == 0 && s != 0) {
             wabs = (wmax+s > -wmin+s)? wmax+s: wmin+s;
             if (INT_FAST64_MAX / -s < k
-                    || INT_FAST64_MAX / ins.item_number() < wabs
+                    || INT_FAST64_MAX / ins.total_item_number() < wabs
                     || wabs > wlim) {
-                DBG(std::cout << "s1 " << s1 << " => " << s+1 << std::endl;)
+                DBG(std::cout << "S1 " << s1 << " => " << s+1 << std::endl;)
                 s1 = s + 1;
                 continue;
             } else {
@@ -167,24 +164,27 @@ void ub_surrogate_solve(Instance& ins, ItemIdx k,
         }
 
         ins.surrogate(s-s_prec, k);
-        Profit  p = ins.break_profit();
+        Profit  p = ins.break_solution()->profit();
         ItemPos b = ins.break_item();
         if (ins.break_capacity() > 0 && ins.break_item() != ins.item_number())
             p += (ins.item(b).p * ins.break_capacity()) / ins.item(b).w;
+        ItemPos g = ins.reduced_solution()->item_number() + b;
 
         DBG(std::cout
-                << "s1 " << s1 << " s " << s << " s2 " << s2
-                << " g "   << b
-                << " ub "  << p
+                << "S1 " << s1 << " S " << s << " S2 " << s2
+                << " G "   << g
+                << " B "   << ins.break_item()
+                << " N "   << ins.item_number()
+                << " UB "  << p
                 << " GAP " << p - ins.optimum()
                 << std::endl;)
         if (b != ins.item_number())
             DBG(std::cout
-                    << "pbar " << ins.break_profit()
-                    << " r " << ins.break_capacity()
-                    << " pb " << ins.item(b).p
-                    << " wb " << ins.item(b).w
-                    << " c " << ins.capacity()
+                    << "PBAR " << ins.break_solution()->profit()
+                    << " R " << ins.break_capacity()
+                    << " PB " << ins.item(b).p
+                    << " WB " << ins.item(b).w
+                    << " C " << ins.capacity()
                     << std::endl;)
         assert(s_min < 0 || ins.capacity() > 0);
 
@@ -193,10 +193,10 @@ void ub_surrogate_solve(Instance& ins, ItemIdx k,
             out.multiplier = s;
         }
 
-        if (b == k && ins.break_capacity() == 0)
+        if (g == k && ins.break_capacity() == 0)
             break;
 
-        if ((s_min == 0 && b >= k) || (s_max == 0 && b >= k)) {
+        if ((s_min == 0 && g >= k) || (s_max == 0 && g >= k)) {
             s1 = s + 1;
         } else {
             s2 = s - 1;
@@ -209,8 +209,8 @@ void ub_surrogate_solve(Instance& ins, ItemIdx k,
 SurrogateOut ub_surrogate(const Instance& instance, Profit lb, Info* info)
 {
     DBG(std::cout << "SURROGATERELAX..." << std::endl;)
-    Instance ins(instance);
-    assert(ins.break_item_found());
+    Instance ins(instance, {{instance.first_item(), instance.last_item()}});
+    ins.sort_partially();
 
     SurrogateOut out(info);
 
@@ -224,22 +224,16 @@ SurrogateOut ub_surrogate(const Instance& instance, Profit lb, Info* info)
     // Compte s_min and s_max
     // s_min and s_max should ideally be (-)pmax*wmax, but this may cause
     // overflow
-    Weight wmax = ins.item(0).w;
-    Profit pmax = ins.item(0).p;
-    for (ItemPos i=1; i<ins.item_number(); ++i) {
-        if (ins.item(i).w > wmax)
-            wmax = ins.item(i).w;
-        if (ins.item(i).p > pmax)
-            pmax = ins.item(i).p;
-    }
+    Weight wmax = ins.max_weight_item().w;
+    Profit pmax = ins.max_profit_item().p;
     Weight s_max = (INT_FAST64_MAX / pmax > wmax)?  pmax*wmax:  INT_FAST64_MAX;
     Weight s_min = (INT_FAST64_MAX / pmax > wmax)? -pmax*wmax: -INT_FAST64_MAX;
 
     DBG(std::cout
-            <<  "z "     << lb
-            << " GAP "   << ins.optimum() - lb
-            << " b "     << ins.break_item()
-            << " s_max " << s_max
+            <<  "Z "    << lb
+            << " GAP "  << ins.optimum() - lb
+            << " B "    << ins.break_item()
+            << " SMAX " << s_max
             << std::endl;)
 
     if (max_card(ins) == ins.break_item()) {
@@ -251,8 +245,7 @@ SurrogateOut ub_surrogate(const Instance& instance, Profit lb, Info* info)
     } else if (min_card(ins, lb) == ins.break_item() + 1) {
         ub_surrogate_solve(ins, ins.break_item() + 1, s_min, 0, out);
         if (out.ub < lb) {
-            assert(ins.optimal_solution()->profit() == 0
-                    || lb == ins.optimal_solution()->profit());
+            assert(ins.optimal_solution() == NULL || lb == ins.optimal_solution()->profit());
             out.ub = lb;
         }
         if (info != NULL)
@@ -264,7 +257,7 @@ SurrogateOut ub_surrogate(const Instance& instance, Profit lb, Info* info)
         out2.ub = out.ub;
         ub_surrogate_solve(ins, ins.break_item(), 0, s_max, out);
         ub_surrogate_solve(ins, ins.break_item() + 1, s_min, 0, out2);
-        DBG(std::cout << "Compute UB..." << std::endl;)
+        DBG(std::cout << "COMPUTE UB..." << std::endl;)
         if (out2.ub > out.ub) {
             out.ub         = out2.ub;
             out.multiplier = out2.multiplier;

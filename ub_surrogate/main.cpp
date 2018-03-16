@@ -34,20 +34,20 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    Instance instance(input_data);
+    Instance ins(input_data);
     Info info;
     info.verbose(vm.count("verbose"));
 
-    instance.sort_partially();
-    Solution sol = sol_bestgreedy(instance);
-    Profit ub = ub_surrogate(instance, sol.profit(), &info).ub;
+    ins.sort_partially();
+    Solution sol = sol_bestgreedy(ins);
+    Profit ub = ub_surrogate(ins, sol.profit(), &info).ub;
 
     double t = info.elapsed_time();
     info.pt.put("UB.Time", t);
     info.pt.put("UB.Value", ub);
     if (Info::verbose(&info)) {
         std::cout << "UB " << ub << std::endl;
-        std::cout << "GAP " << ub - instance.optimum() << std::endl;
+        std::cout << "GAP " << ub - ins.optimum() << std::endl;
         std::cout << "TIME " << t << std::endl;
     }
 
