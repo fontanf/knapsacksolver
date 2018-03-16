@@ -206,10 +206,11 @@ void ub_surrogate_solve(Instance& ins, ItemIdx k,
     ins.surrogate(-s, k);
 }
 
-SurrogateOut ub_surrogate(const Instance& instance, Profit lb, Info* info)
+SurrogateOut ub_surrogate(const Instance& instance, std::vector<Interval> v,
+        Profit lb, Info* info)
 {
     DBG(std::cout << "SURROGATERELAX..." << std::endl;)
-    Instance ins(instance, {{instance.first_item(), instance.last_item()}});
+    Instance ins(instance, v);
     ins.sort_partially();
 
     SurrogateOut out(info);

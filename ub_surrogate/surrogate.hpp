@@ -1,5 +1,4 @@
-#ifndef MARTELLO_HPP_YNPESKFM
-#define MARTELLO_HPP_YNPESKFM
+#pragma once
 
 #include "../lib/instance.hpp"
 #include "../lib/solution.hpp"
@@ -17,6 +16,6 @@ struct SurrogateOut
     Weight multiplier = 0;
 };
 
-SurrogateOut ub_surrogate(const Instance& instance, Profit lb, Info* info = NULL);
+SurrogateOut ub_surrogate(const Instance& instance, std::vector<Interval> v,
+        Profit lb, Info* info = NULL);
 
-#endif /* end of include guard: MARTELLO_HPP_YNPESKFM */

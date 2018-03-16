@@ -3,7 +3,10 @@ cc_library(
         hdrs = ["surrogate.hpp"],
         srcs = ["surrogate.cpp"],
         visibility = ["//visibility:public"],
-        deps = ["//lib:hpp", "//ub_dantzig:libdantzig"],
+        deps = [
+                "//lib:hpp",
+                "//ub_dantzig:libdantzig"
+        ],
 )
 
 cc_binary(
@@ -13,6 +16,7 @@ cc_binary(
                 ":libsurrogate",
                 "//lib:cpp",
                 "//lb_greedy:libgreedy",
+                "//lb_greedynlogn:libgreedynlogn",
         ],
         linkopts = [
                 "-lboost_system",

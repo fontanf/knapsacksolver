@@ -1,25 +1,22 @@
 #include "surrogate.hpp"
 
 #include "../lb_greedy/greedy.hpp"
-
-#include <boost/program_options.hpp>
+#include "../lb_greedynlogn/greedynlogn.hpp"
 
 int main(int argc, char *argv[])
 {
     namespace po = boost::program_options;
 
     // Parse program options
-    std::string input_data  = "";
     std::string output_file = "";
-    std::string cert_file   = "";
-    std::string algorithm   = "";
+    std::string cert_file = "";
     po::options_description desc("Allowed options");
     desc.add_options()
         ("help,h", "produce help message")
-        ("input-data,i",  po::value<std::string>(&input_data)->required(), "set input data (required)")
-        ("output-file,o", po::value<std::string>(&output_file),            "set output file")
-        ("cert-file,c",   po::value<std::string>(&cert_file),              "set certificate output file")
-        ("verbose,v",                                                                          "enable verbosity")
+        ("input-data,i", po::value<std::string>()->required(), "set input data (required)")
+        ("output-file,o", po::value<std::string>(&output_file), "set output file")
+        ("cert-file,c", po::value<std::string>(&cert_file), "set certificate output file")
+        ("verbose,v",  "enable verbosity")
         ;
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -34,20 +31,19 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    Instance ins(input_data);
+    Instance instance(vm["input-data"].as<std::string>());
     Info info;
     info.verbose(vm.count("verbose"));
-
-    ins.sort_partially();
-    Solution sol = sol_bestgreedy(ins);
-    Profit ub = ub_surrogate(ins, sol.profit(), &info).ub;
+    instance.sort_partially();
+    Solution sol = sol_bestgreedynlogn(instance);
+    Profit ub = ub_surrogate(instance, {{instance.first_item(), instance.last_item()}}, sol.profit(), &info).ub;
 
     double t = info.elapsed_time();
     info.pt.put("UB.Time", t);
     info.pt.put("UB.Value", ub);
     if (Info::verbose(&info)) {
-        std::cout << "UB " << ub << std::endl;
-        std::cout << "GAP " << ub - ins.optimum() << std::endl;
+        std::cout << "---" << std::endl;
+        std::cout << instance.print_ub(ub) << std::endl;
         std::cout << "TIME " << t << std::endl;
     }
 
