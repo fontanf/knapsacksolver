@@ -58,8 +58,8 @@ Profit opt_balknap_array(Instance& ins, BalknapParams p, Info* info)
     Profit u     = ins.break_profit() + r * pb / wb;
 
     DBG(std::cout << "N " << n << " C " << c << std::endl;)
-    DBG(std::cout << "F " << f << " L " << l << std::endl;)
-    DBG(std::cout << "B " << ins.item(b) << std::endl;)
+    DBG(std::cout << " F " << f << " L " << l << std::endl;)
+    DBG(std::cout << " B " << ins.item(b) << std::endl;)
     DBG(std::cout << "PBAR " << p_bar << " WBAR " << w_bar << std::endl;)
 
     if (Info::verbose(info))
@@ -273,8 +273,8 @@ Solution sopt_balknap_array_all(Instance& ins,
 
     DBG(std::cout
             << "N " << n << " C " << c
-            << "F " << f << " L " << l
-            << "B " << ins.item(b) << std::endl
+            << " F " << f << " L " << l
+            << " B " << ins.item(b) << std::endl
             << "WMAX " << w_max << " PBAR " << p_bar << " WBAR " << w_bar << std::endl;)
 
     if (Info::verbose(info))

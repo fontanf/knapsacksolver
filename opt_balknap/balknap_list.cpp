@@ -8,69 +8,28 @@
 
 #include <map>
 
-Profit opt_balknap_list(Instance& ins,
-        BalknapParams p, Info* info)
-{
-    (void)info;
-    (void)p;
-    (void)ins;
-    assert(false); // TODO
-    return 0;
-}
-
-Solution sopt_balknap_list_all(Instance& ins,
-        BalknapParams p, Info* info)
-{
-    (void)info;
-    (void)p;
-    assert(false); // TODO
-    return Solution(ins);
-}
-
-Solution sopt_balknap_list_part(Instance& ins,
-        BalknapParams p, ItemPos k, Info* info)
-{
-    (void)info;
-    (void)p;
-    (void)k;
-    assert(false); // TODO
-    return Solution(ins);
-}
-
-/*
-
 #define DBG(x)
 //#define DBG(x) x
 
-void sopt_balknap_list_part_update_bounds(Instance ins, Solution& sol, Profit& ub, SurrogateOut& so,
+void opt_balknap_list_update_bounds(Instance ins,
+        Profit& lb, Profit& ub, SurrogateOut& so,
         BalknapParams& p, StateIdx it, ItemPos k, Info* info)
 {
-    if (p.gcd == it)
-        ins.gcd();
     if (p.greedy == it) {
-        bool b = sol.update(sol_bestgreedy(ins));
+        lb = std::max(lb, sol_bestgreedy(ins).profit());
         if (Info::verbose(info))
-            std::cout
-                << "RUN GREEDY... "
-                << ((b)? ins.print_lb(sol.profit()): "NO IMPROVEMENT")
-                << std::endl;
+            std::cout << "RUN GREEDY... " << ins.print_lb(lb) << std::endl;
     }
     if (p.greedynlogn == it) {
-        bool b = sol.update(sol_bestgreedynlogn(ins));
+        lb = std::max(lb, sol_bestgreedynlogn(ins).profit());
         if (Info::verbose(info))
-            std::cout
-                << "RUN GREEDYNLOGN... "
-                << ((b)? ins.print_lb(sol.profit()): "NO IMPROVEMENT")
-                << std::endl;
+            std::cout << "RUN GREEDYNLOGN... " << ins.print_lb(lb) << std::endl;
     }
     if (p.surrogate == it) {
-        so = ub_surrogate(ins, sol.profit());
-        if (Info::verbose(info))
-            std::cout
-                << "RUN SURROGATE RELAXATION... "
-                << ((so.ub > ub)? ins.print_ub(so.ub): "NO IMPROVEMENT")
-                << std::endl;
+        so = ub_surrogate(ins, {{ins.first_item(), ins.last_item()}}, lb, info);
         ub = (so.ub > ub)? so.ub: ub;
+        if (Info::verbose(info))
+            std::cout << "RUN SURROGATE RELAXATION... " << ins.print_ub(ub) << std::endl;
     }
     if (p.solve_sur == it) {
         p.solve_sur = -1;
@@ -78,15 +37,15 @@ void sopt_balknap_list_part_update_bounds(Instance ins, Solution& sol, Profit& u
         ins.surrogate(so.multiplier, so.bound);
         Solution sol_sur = sopt_balknap_list_part(ins_sur, p, k, NULL);
         if (sol_sur.item_number() == so.bound)
-            sol = sol_sur;
+            lb = sol_sur.profit();
     }
 }
 
-struct State1
+struct State
 {
     Weight mu;
     Profit pi;
-    bool operator()(const State1& s1, const State1& s2)
+    bool operator()(const State& s1, const State& s2)
     {
         if (s1.mu != s2.mu)
             return s1.mu < s2.mu;
@@ -96,78 +55,123 @@ struct State1
     }
 };
 
-struct StateValue1
+struct StateValue
 {
     ItemPos a;
     ItemPos a_prec;
 };
 
-std::ostream& operator<<(std::ostream& os, const std::pair<State1, StateValue1>& s)
+std::ostream& operator<<(std::ostream& os, const std::pair<State, StateValue>& s)
 {
     os << "(mu " << s.first.mu << " pi " << s.first.pi << " a " << s.second.a << " ap " << s.second.a_prec << ")";
     return os;
 }
 
-Profit opt_balknap_list(const Instance& instance, Profit lb,
-        std::string ub_type, Info* info)
+Profit opt_balknap_list(
+        Instance& ins, BalknapParams params, Info* info)
 {
     DBG(std::cout << "BALKNAPLISTOPT..." << std::endl;)
-    DBG(std::cout << instance << std::endl;)
-    assert(instance.sort_type() == "eff" || instance.sort_type() == "peff");
+    DBG(std::cout << ins << std::endl;)
 
-    Weight  c = instance.capacity();
-    ItemPos n = instance.item_number();
-    Profit p0 = instance.reduced_solution()->profit();
-    ItemPos b = instance.break_item();
+    DBG(std::cout << "SORTING..." << std::endl;)
+    if (params.upper_bound == "b") {
+        ins.sort_partially();
+    } else if (params.upper_bound == "t") {
+        ins.sort();
+    } else {
+        assert(false);
+    }
+    ItemPos b = ins.break_item();
+    if (b == ins.last_item()+1) // all items are in the break solution
+        return ins.break_profit();
+
+    DBG(std::cout << "LB..." << std::endl;)
+    Profit lb = 0;
+    if (params.greedynlogn == 0) {
+        lb = sol_bestgreedynlogn(ins).profit();
+    } else if (params.greedy == 0) {
+        lb = sol_bestgreedy(ins).profit();
+    } else {
+        lb = ins.break_profit();
+    }
+
+    DBG(std::cout << "REDUCTION..." << std::endl;)
+    if (params.reduction == "1") {
+        if (ins.reduce1(lb, Info::verbose(info)))
+            return lb;
+    } else {
+        if (ins.reduce2(lb, Info::verbose(info)))
+            return lb;
+    }
+    Weight  c = ins.total_capacity();
+    ItemPos f = ins.first_item();
+    ItemPos l = ins.last_item();
+    ItemPos n = ins.item_number();
+    Profit p0 = ins.reduced_solution()->profit();
 
     // Trivial cases
     if (n == 0) {
         return p0;
     } else if (n == 1) {
-        return p0 + instance.item(0).p;
-    } else if (b == n) { // all items are in the break solution
-        return p0 + instance.break_profit();
+        return p0 + ins.item(f).p;
     }
 
-    Profit pb    = instance.item(b).p;
-    Weight wb    = instance.item(b).w;
-    Profit p_bar = instance.break_profit();
-    Weight w_bar = instance.break_weight();
-    Weight r     = instance.break_capacity();
-    Profit z     = p_bar;
-    Profit u     = p_bar + r * pb / wb;
-    if (z < lb - p0)
-        z = lb - p0;
+    Weight w_bar = ins.break_solution()->weight();
+    Profit p_bar = ins.break_solution()->profit();
+    Profit u     = ub_dantzig(ins);
 
-    DBG(std::cout << "n " << n << " c " << c << std::endl;)
-    DBG(std::cout << "b " << instance.item(b) << std::endl;)
-    DBG(std::cout << "pbar " << p_bar << " wbar " << w_bar << std::endl;)
+    DBG(std::cout
+            << "N " << n << " C " << c
+            << " F " << f << " L " << l
+            << " B " << ins.item(b) << std::endl
+            << "PBAR " << p_bar << " WBAR " << w_bar << std::endl;)
     if (Info::verbose(info))
         std::cout
-            <<  "LB " << z
+            <<  "LB " << lb
             << " UB " << u
-            << " GAP " << u - z << std::endl;
+            << " GAP " << u - lb << std::endl;
 
-    if (z == u) // If UB == LB, then stop
-        return z;
+    if (lb == u) // If UB == LB, then stop
+        return lb;
 
     // Create memory table
-    std::map<State1, StateValue1, State1> map;
+    std::map<State, StateValue, State> map;
 
     // Initialization
-    map.insert({{w_bar,p_bar},{b,0}}); // s(w_bar,p_bar) = b
+    map.insert({{w_bar,p_bar},{b,f}}); // s(w_bar,p_bar) = b
 
     DBG(for (auto s = map.begin(); s != map.end(); ++s)
         std::cout << *s << " ";
-        std::cout << std::endl;)
+    std::cout << std::endl;)
 
     DBG(std::cout << "RECURSION..." << std::endl;)
-    for (ItemPos t=b; t<n; ++t) { // Recursion
-        DBG(std::cout << "t " << t << " " << instance.item(t) << std::endl;)
-        Weight wt = instance.item(t).w;
-        Profit pt = instance.item(t).p;
+    for (ItemPos t=b; t<=l; ++t) {
+        DBG(std::cout << "MAP " << map.size() << std::flush;)
+        DBG(std::cout << " T " << t << " " << ins.item(t) << std::endl;)
+        Weight wt = ins.item(t).w;
+        Profit pt = ins.item(t).p;
+
+        // Bounding
+        if (params.upper_bound == "t") {
+            DBG(std::cout << "BOUNDING..." << std::endl;)
+            for (auto s = map.begin(); s != map.end();) {
+                Profit pi = s->first.pi;
+                Weight mu = s->first.mu;
+                Profit ub = (mu <= c)?
+                    ub_dembo(ins, t, pi, c-mu):
+                    ub_dembo_rev(ins, s->second.a, pi, c-mu);
+                if (ub < lb) {
+                    map.erase(s++);
+                } else {
+                    s++;
+                }
+            }
+        }
+        if (map.size() == 0)
+            break;
 
         // Add item t
+        DBG(std::cout << "ADD..." << std::endl;)
         auto s = map.upper_bound({c+1,0});
         auto hint = s;
         hint--;
@@ -176,76 +180,78 @@ Profit opt_balknap_list(const Instance& instance, Profit lb,
             Weight mu_ = s->first.mu + wt;
             Weight pi_ = s->first.pi + pt;
 
+            // Update LB
+            if (mu_ <= c && pi_ > lb) {
+                lb = pi_;
+            }
+
             // Bounding
             Profit ub = 0;
-            if (ub_type == "dembo") {
+            if (params.upper_bound == "b") {
                 ub = (mu_ <= c)?
-                    ub_trivial_from(instance, b, pi_, c-mu_):
-                    ub_trivial_from_rev(instance, b, pi_, c-mu_);
-            } else if (ub_type == "trivial") {
+                    ub_dembo(ins, b, pi_, c-mu_):
+                    ub_dembo_rev(ins, b, pi_, c-mu_);
+            } else if (params.upper_bound == "t") {
                 ub = (mu_ <= c)?
-                    ub_trivial_from(instance, t, pi_, c-mu_):
-                    ub_trivial_from_rev(instance, s->second.a-1, pi_, c-mu_);
-            } else if (ub_type == "dantzig"){
-                assert(instance.sort_type() == "eff");
-                ub = (mu_ <= c)?
-                    ub_dantzig_from(instance, t, pi_, c-mu_):
-                    ub_dantzig_from_rev(instance, s->second.a-1, pi_, c-mu_);
+                    ub_dembo(ins, t+1, pi_, c-mu_):
+                    ub_dembo_rev(ins, s->second.a-1, pi_, c-mu_);
             } else {
                     assert(false);
             }
-            DBG(std::cout << "LB " << z << " UBTMP " << ub << " UB " << u << " ";)
-            if (ub <= z || ub > u) {
+            DBG(std::cout << "LB " << lb << " UBTMP " << ub << " UB " << u << " ";)
+            if (ub <= lb) {
                 DBG(std::cout << "X" << std::endl;)
                 continue;
             } else {
                 DBG(std::cout << "OK" << std::endl;)
             }
 
-            hint = map.insert(hint, {{mu_, pi_}, {s->second.a, 0}});
+            hint = map.insert(hint, {{mu_, pi_}, {s->second.a, f}});
             if (hint->second.a < s->second.a)
                 hint->second.a    = s->second.a;
             hint--;
         }
 
         // Remove previously added items
-        for (auto s = map.rbegin(); s->first.mu > c; ++s) {
+        DBG(std::cout << "REMOVE..." << std::endl;)
+        for (auto s = map.rbegin(); s != map.rend() && s->first.mu > c; ++s) {
             if (s->first.mu > c + wt)
                 continue;
             DBG(std::cout << " - STATE " << *s << std::endl;)
 
             for (ItemPos j = s->second.a_prec; j < s->second.a; ++j) {
-                DBG(std::cout << "  j " << j << " " << instance.item(j);)
-                Weight mu_ = s->first.mu - instance.item(j).w;
-                Profit pi_ = s->first.pi - instance.item(j).p;
+                DBG(std::cout << "  J " << j << " " << ins.item(j);)
+                Weight mu_ = s->first.mu - ins.item(j).w;
+                Profit pi_ = s->first.pi - ins.item(j).p;
+                DBG(std::cout << " " << mu_ << " " << pi_ << std::flush;)
+
+                // Update LB
+                if (mu_ <= c && pi_ > lb) {
+                    lb = pi_;
+                }
 
                 // Bounding
                 Profit ub = 0;
-                if (ub_type == "dembo") {
+                if (params.upper_bound == "b") {
                     ub = (mu_ <= c)?
-                        ub_trivial_from(instance, b, pi_, c-mu_):
-                        ub_trivial_from_rev(instance, b, pi_, c-mu_);
-                } else if (ub_type == "trivial") {
+                        ub_dembo(ins, b, pi_, c-mu_):
+                        ub_dembo_rev(ins, b, pi_, c-mu_);
+                } else if (params.upper_bound == "t") {
                     ub = (mu_ <= c)?
-                        ub_trivial_from(instance, t+1, pi_, c-mu_):
-                        ub_trivial_from_rev(instance, j-1, pi_, c-mu_);
-                } else if (ub_type == "dantzig"){
-                    assert(instance.sort_type() == "eff");
-                    ub = (mu_ <= c)?
-                        ub_dantzig_from(instance, t+1, pi_, c-mu_):
-                        ub_dantzig_from_rev(instance, j-1, pi_, c-mu_);
+                        ub_dembo(ins, t+1, pi_, c-mu_):
+                        ub_dembo_rev(ins, j-1, pi_, c-mu_);
                 } else {
                     assert(false);
                 }
-                DBG(std::cout << " LB " << z << " UBTMP " << ub << " UB " << u;)
-                if (ub <= z || ub > u) {
+                DBG(std::cout << " LB " << lb << " UBTMP " << ub << " UB " << u;)
+                if (ub <= lb) {
                     DBG(std::cout << " X" << std::endl;)
                     continue;
                 } else {
                     DBG(std::cout << " OK" << std::endl;)
                 }
 
-                auto res = map.insert({{mu_,pi_},{j, 0}});
+                auto res = map.insert({{mu_,pi_},{j, f}});
                 if (!res.second)
                     if (res.first->second.a < j)
                         res.first->second.a = j;
@@ -259,20 +265,35 @@ Profit opt_balknap_list(const Instance& instance, Profit lb,
         std::cout << std::endl;)
     }
 
-    // Get optimal value
-    Profit opt = z;
-    for (auto& s: map)
-        if (s.first.mu <= c && s.first.pi > opt)
-            opt = s.first.pi;
-    opt += p0;
-    assert(instance.check_opt(opt));
+    assert(ins.check_opt(lb));
     DBG(std::cout << "BALKNAPLISTOPT... END" << std::endl;)
-    return opt;
+    return lb;
 }
+
+/******************************************************************************/
 
 #undef DBG
 
-*/
+
+Solution sopt_balknap_list_all(
+        Instance& ins, BalknapParams params, Info* info)
+{
+    (void)info;
+    (void)params;
+    assert(false); // TODO
+    return Solution(ins);
+}
+
+Solution sopt_balknap_list_part(
+        Instance& ins, BalknapParams params, ItemPos k, Info* info)
+{
+    (void)info;
+    (void)params;
+    (void)k;
+    assert(false); // TODO
+    return Solution(ins);
+}
+
 
 /******************************************************************************/
 
@@ -405,12 +426,12 @@ Solution sopt_balknap_list(const Instance& instance,
             Profit ub = 0;
             if (ub_type == "dembo") {
                 ub = (mu_ <= c)?
-                    ub_trivial_from(instance, b, pi_, c-mu_):
-                    ub_trivial_from_rev(instance, b, pi_, c-mu_);
+                    ub_dembo(instance, b, pi_, c-mu_):
+                    ub_dembo_rev(instance, b, pi_, c-mu_);
             } else if (ub_type == "trivial") {
                 ub = (mu_ <= c)?
-                    ub_trivial_from(instance, t, pi_, c-mu_):
-                    ub_trivial_from_rev(instance, s->second.a-1, pi_, c-mu_);
+                    ub_dembo(instance, t, pi_, c-mu_):
+                    ub_dembo_rev(instance, s->second.a-1, pi_, c-mu_);
             } else if (ub_type == "dantzig"){
                 assert(instance.sort_type() == "eff");
                 ub = (mu_ <= c)?
@@ -451,12 +472,12 @@ Solution sopt_balknap_list(const Instance& instance,
                 Profit ub = 0;
                 if (ub_type == "dembo") {
                     ub = (mu_ <= c)?
-                        ub_trivial_from(instance, b, pi_, c-mu_):
-                        ub_trivial_from_rev(instance, b, pi_, c-mu_);
+                        ub_dembo(instance, b, pi_, c-mu_):
+                        ub_dembo_rev(instance, b, pi_, c-mu_);
                 } else if (ub_type == "trivial") {
                     ub = (mu_ <= c)?
-                        ub_trivial_from(instance, t+1, pi_, c-mu_):
-                        ub_trivial_from_rev(instance, j-1, pi_, c-mu_);
+                        ub_dembo(instance, t+1, pi_, c-mu_):
+                        ub_dembo_rev(instance, j-1, pi_, c-mu_);
                 } else if (ub_type == "dantzig"){
                     assert(instance.sort_type() == "eff");
                     ub = (mu_ <= c)?
