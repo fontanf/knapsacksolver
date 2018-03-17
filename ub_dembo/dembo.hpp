@@ -33,7 +33,7 @@ inline Profit ub_0(const Instance& ins, ItemIdx j, const Solution& sol_curr)
 
 inline Profit ub_0(const Instance& ins, ItemIdx j, Profit p, Weight r)
 {
-    if (j < ins.item_number())
+    if (j <= ins.last_item())
         p += (r * ins.max_efficiency_item().p) / ins.max_efficiency_item().w;
     return p;
 }
@@ -45,8 +45,11 @@ inline Profit ub_0_rev(const Instance& ins, ItemIdx j, const Solution& sol_curr)
 
 inline Profit ub_0_rev(const Instance& ins, ItemIdx j, Profit p, Weight r)
 {
-    if (j >= 0)
+    if (j >= ins.first_item()) {
         p += (r * ins.max_efficiency_item().p + 1) / ins.max_efficiency_item().w - 1;
+    } else {
+        p = 0;
+    }
     return p;
 }
 
@@ -60,7 +63,7 @@ inline Profit ub_dembo(const Instance& ins, ItemIdx j, const Solution& sol_curr)
 
 inline Profit ub_dembo(const Instance& ins, ItemIdx j, Profit p, Weight r)
 {
-    if (j < ins.item_number())
+    if (j <= ins.last_item())
         p += (r * ins.item(j).p) / ins.item(j).w;
     return p;
 }
@@ -73,8 +76,11 @@ inline Profit ub_dembo_rev(const Instance& ins, ItemIdx j, const Solution& sol_c
 inline Profit ub_dembo_rev(const Instance& ins, ItemIdx j, Profit p, Weight r)
 {
     DBG(std::cout << "UBTRIVIALFROMREV... j " << j << std::endl;)
-    if (j >= 0)
+    if (j >= ins.first_item()) {
         p += (r * ins.item(j).p + 1) / ins.item(j).w - 1;
+    } else {
+        p = 0;
+    }
     DBG(std::cout << "UBTRIVIALFROMREV... END" << std::endl;)
     return p;
 }
