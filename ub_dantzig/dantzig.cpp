@@ -27,41 +27,6 @@ Profit ub_dantzig(const Instance& ins, Info* info)
 #define DBG(x)
 //#define DBG(x) x
 
-Profit ub_trivial_from(const Instance& ins, ItemIdx j, const Solution& sol_curr)
-{
-    Profit u = ub_trivial_from(ins, j, sol_curr.profit(), sol_curr.remaining_capacity());
-    assert(j > 0 || ins.check_ub(u));
-    return u;
-}
-
-Profit ub_trivial_from(const Instance& ins, ItemIdx j, Profit p, Weight r)
-{
-    Profit u = p;
-    if (j < ins.item_number())
-        u += (r * ins.item(j).p) / ins.item(j).w;
-    return u;
-}
-
-Profit ub_trivial_from_rev(const Instance& ins, ItemIdx j, const Solution& sol_curr)
-{
-    return ub_trivial_from_rev(ins, j, sol_curr.profit(), sol_curr.remaining_capacity());
-}
-
-Profit ub_trivial_from_rev(const Instance& ins, ItemIdx j, Profit p, Weight r)
-{
-    DBG(std::cout << "UBTRIVIALFROMREV... j " << j << std::endl;)
-    Profit u = p;
-    if (j >= 0)
-        u += (r * ins.item(j).p + 1) / ins.item(j).w - 1;
-    DBG(std::cout << "UBTRIVIALFROMREV... END" << std::endl;)
-    return u;
-}
-
-#undef DBG
-
-#define DBG(x)
-//#define DBG(x) x
-
 Profit ub_dantzig_from(const Instance& ins, ItemIdx j, const Solution& sol_curr)
 {
     return ub_dantzig_from(ins, j, sol_curr.profit(), sol_curr.remaining_capacity());
