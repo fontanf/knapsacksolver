@@ -7,7 +7,7 @@ TEST(Balknap, SimpleInstances)
     p /= boost::filesystem::path("main");
 
     test(p.string() + " -v -m array -r none", "opt");
-    //test(p.string() + " -v -m array -r all", "sopt");
+    test(p.string() + " -v -m array -r all", "sopt");
     //test(p.string() + " -v -m array -r part", "sopt");
     //test(p.string() + " -v -m list -r none -u b", "opt");
     //test(p.string() + " -v -m list -r all -u b", "sopt");

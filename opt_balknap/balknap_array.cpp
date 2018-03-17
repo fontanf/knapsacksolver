@@ -17,34 +17,22 @@ Profit opt_balknap_array(Instance& ins, BalknapParams p, Info* info)
     DBG(std::cout << "BALKNAPOPT..." << std::endl;)
     DBG(std::cout << ins << std::endl;)
 
-    DBG(std::cout << "SORTING..." << std::endl;)
-    if (p.upper_bound == "b") {
-        ins.sort_partially();
-    } else if (p.upper_bound == "t") {
-        ins.sort();
-    } else {
-        assert(false);
-    }
+    ins.sort_partially();
     ItemPos b = ins.break_item();
     if (b == ins.last_item()+1) // all items are in the break solution
         return ins.break_profit();
 
     DBG(std::cout << "LB..." << std::endl;)
     Profit lb = 0;
-    if (p.greedynlogn == 0) {
-        lb = sol_bestgreedynlogn(ins).profit();
-    } else if (p.greedy == 0) {
+    if (p.greedy == 0) {
         lb = sol_bestgreedy(ins).profit();
     } else {
-        lb = ins.break_profit();
+        lb = ins.break_solution()->profit();
     }
 
     DBG(std::cout << "REDUCTION..." << std::endl;)
     if (p.reduction == "1") {
         if (ins.reduce1(lb, Info::verbose(info)))
-            return lb;
-    } else {
-        if (ins.reduce2(lb, Info::verbose(info)))
             return lb;
     }
     Weight  c = ins.capacity();
@@ -69,9 +57,10 @@ Profit opt_balknap_array(Instance& ins, BalknapParams p, Info* info)
     Profit z     = lb - p0;
     Profit u     = ins.break_profit() + r * pb / wb;
 
-    DBG(std::cout << "n " << n << " c " << c << std::endl;)
-    DBG(std::cout << "b " << ins.item(b) << std::endl;)
-    DBG(std::cout << "pbar " << p_bar << " wbar " << w_bar << std::endl;)
+    DBG(std::cout << "N " << n << " C " << c << std::endl;)
+    DBG(std::cout << "F " << f << " L " << l << std::endl;)
+    DBG(std::cout << "B " << ins.item(b) << std::endl;)
+    DBG(std::cout << "PBAR " << p_bar << " WBAR " << w_bar << std::endl;)
 
     if (Info::verbose(info))
         std::cout
@@ -86,9 +75,9 @@ Profit opt_balknap_array(Instance& ins, BalknapParams p, Info* info)
     DBG(std::cout << "CREATE TABLE..." << std::endl;)
     Profit rl1 = u - z;
     StateIdx rl2 = rl1 * 2 * w_max;
-    DBG(std::cout << "rl1 " << rl1 << " rl2 " << rl2 << std::endl;)
+    DBG(std::cout << "RL1 " << rl1 << " RL2 " << rl2 << std::endl;)
     if (Info::verbose(info))
-        std::cout << "Memory " << (double)((rl2 * 2) * sizeof(ItemPos)) / 1000000000 << std::endl;
+        std::cout << "MEMORY " << (double)((rl2 * 2) * sizeof(ItemPos)) / 1000000000 << std::endl;
     std::vector<ItemPos> s0(rl2);
     std::vector<ItemPos> s1(rl2);
 
@@ -235,45 +224,59 @@ Profit opt_balknap_array(Instance& ins, BalknapParams p, Info* info)
 //#define DBG(x) x
 
 Solution sopt_balknap_array_all(Instance& ins,
-        BalknapParams p, Info* info)
+        BalknapParams params, Info* info)
 {
-    (void)info;
-    (void)p;
-    assert(false); // TODO
-    return Solution(ins);
-    /*
     DBG(std::cout << "BALKNAPSOL..." << std::endl;);
+    DBG(std::cout << ins << std::endl;)
 
+    ins.sort_partially();
+    ItemPos b = ins.break_item();
+    if (b == ins.last_item()+1) // all items are in the break solution
+        return *ins.break_solution();
+
+    DBG(std::cout << "LB..." << std::endl;)
+    Solution sol(ins);
+    if (params.greedy == 0) {
+        sol = sol_bestgreedy(ins);
+    } else {
+        sol = *ins.break_solution();
+    }
+
+    DBG(std::cout << "REDUCTION..." << std::endl;)
+    if (params.reduction == "1") {
+        if (ins.reduce1(sol.profit(), Info::verbose(info)))
+            return sol;
+    }
     Weight  c = ins.capacity();
+    ItemPos f = ins.first_item();
+    ItemPos l = ins.last_item();
     ItemPos n = ins.item_number();
     Profit p0 = ins.reduced_solution()->profit();
-    ItemPos b = ins.break_item();
 
     // Trivial cases
     if (n == 0) {
         return *ins.reduced_solution();
     } else if (n == 1) {
         Solution sol = *ins.reduced_solution();
-        sol.set(0, true);
+        sol.set(ins.first_item(), true);
         return sol;
-    } else if (b == n) { // all items are in the break solution
-        return sol_break(ins);
     }
 
-    Weight w_max = max_weight(ins);
-    Profit pb    = ins.item(b).p;
-    Weight wb    = ins.item(b).w;
-    Profit p_bar = ins.break_profit();
+    Weight w_max = ins.max_weight_item().w;
     Weight w_bar = ins.break_weight();
+    Profit p_bar = ins.break_profit();
+    Weight wb    = ins.item(b).w;
+    Profit pb    = ins.item(b).p;
     Weight r     = ins.break_capacity();
-    Profit z     = p_bar;
-    Profit u     = p_bar + r * pb / wb;
-    if (z < lb - p0)
-        z = lb - p0;
+    Profit z     = sol.profit() - ins.reduced_solution()->profit();
+    Profit u     = ins.break_profit() + r * pb / wb;
 
-    DBG(std::cout << "n " << n << " c " << c << std::endl;)
-    DBG(std::cout << "b " << ins.item(b) << std::endl;)
-    DBG(std::cout << "pbar " << p_bar << " wbar " << w_bar << std::endl;)
+    DBG(std::cout
+            << "N " << n << " C " << c
+            << "F " << f << " L " << l
+            << "B " << ins.item(b) << std::endl
+            << "WMAX " << w_max << " PBAR " << p_bar << " WBAR " << w_bar << std::endl;)
+
     if (Info::verbose(info))
         std::cout
             <<  "LB " << z
@@ -281,17 +284,17 @@ Solution sopt_balknap_array_all(Instance& ins,
             << " GAP " << u - z << std::endl;
 
     if (z == u) // If UB == LB, then stop
-        return Solution(ins);
+        return sol;
 
     // Create memory table
     DBG(std::cout << "CREATE TABLE..." << std::endl;)
     Profit rl1 = u - z;
     StateIdx rl2 = rl1 * 2 * w_max;
-    DBG(std::cout << "rl1 " << rl1 << " rl2 " << rl2 << std::endl;)
+    DBG(std::cout << "RL1 " << rl1 << " RL2 " << rl2 << std::endl;)
     if (Info::verbose(info))
-        std::cout << "Memory " << (double)(((n-b+2) * rl2 * 2) * sizeof(ItemPos)) / 1000000000 << std::endl;
-    std::vector<ItemPos> s   ((n-b+2)*rl2);
-    std::vector<ItemPos> pred((n-b+2)*rl2);
+        std::cout << "MEMORY " << (double)(((l-b+2) * rl2 * 2) * sizeof(ItemPos)) / 1000000000 << std::endl;
+    std::vector<ItemPos> s   ((l-b+2)*rl2);
+    std::vector<ItemPos> pred((l-b+2)*rl2);
 
     // Initialization
     DBG(std::cout << "INITIALIZATION..." << std::endl;)
@@ -301,7 +304,7 @@ Solution sopt_balknap_array_all(Instance& ins,
         x = (x >= 0)? x: x-1;
         for (Profit pi=z+1-x; pi<=u-x; ++pi) {
             Profit p = pi + x - z - 1;
-            s[IDX2(0,w,p)] = -1;
+            s[IDX2(0,w,p)] = f-1;
         }
     }
     for (Weight mu=c+1; mu<=c+w_max; ++mu) { // s(mu,pi) = 1 for mu > c
@@ -311,7 +314,7 @@ Solution sopt_balknap_array_all(Instance& ins,
             x -= 1;
         for (Profit pi=z+1-x; pi<=u-x; ++pi) {
             Profit p = pi + x - z - 1;
-            s[IDX2(0,w,p)] = 0;
+            s[IDX2(0,w,p)] = f;
         }
     }
     Profit w_tmp = w_bar + w_max - 1 - c; // s(w_bar,p_bar) = b
@@ -320,8 +323,8 @@ Solution sopt_balknap_array_all(Instance& ins,
     s[IDX2(0,w_tmp,p_tmp)] = b;
 
     DBG(std::cout << "RECURSION..." << std::endl;)
-    for (ItemPos t=b; t<n; ++t) { // Recursion
-        DBG(std::cout << "t " << t << " " << ins.item(t) << std::endl;)
+    for (ItemPos t=b; t<=l; ++t) { // Recursion
+        DBG(std::cout << "T " << t << " " << ins.item(t) << std::endl;)
         ItemPos k = t - b + 1;
         Weight wt = ins.item(t).w;
         Profit pt = ins.item(t).p;
@@ -402,22 +405,21 @@ Solution sopt_balknap_array_all(Instance& ins,
             x -= 1;
         for (Profit pi=z+1-x; pi<=u-x; ++pi) {
             Profit p = pi + x - z - 1;
-            if (s[IDX2(n-b,w,p)] >= 0 && pi > opt) {
+            if (s[IDX2(l-b+1,w,p)] >= f && pi > opt) {
                 opt = pi;
-                idx_opt = IDX2(n-b,w,p);
+                idx_opt = IDX2(l-b+1,w,p);
             }
         }
     }
     opt += p0;
     DBG(std::cout << "OPT " << opt << std::endl;)
-    if (opt <= z)
-        return Solution(ins);
-    ins.check_opt(opt);
+    if (opt <= sol.profit())
+        return sol;
+    assert(ins.check_opt(opt));
 
     // Retrieve optimal solution
     DBG(std::cout << "RETRIEVE SOL..." << std::endl;)
-    Solution sol = sol_break(ins);
-    DBG(std::cout << "p(S) " << sol.profit() << std::endl;)
+    sol = *ins.break_solution();
 
     StateIdx idx = idx_opt;
     ItemPos  k   = idx / rl2;
@@ -429,9 +431,10 @@ Solution sopt_balknap_array_all(Instance& ins,
     if (c < mu)
         x -= 1;
     Profit pi = p + z + 1 - x;
-    DBG(std::cout << "t " << t << " wt " << ins.weight(t) << " pt " << ins.profit(t) << " mu " << mu << " pi " << pi << std::endl;)
+    DBG(std::cout << "A " << s[k] << " T " << t << " WT " << ins.item(t).w << " PT " << ins.item(t).p << " MU " << mu << " PI " << pi << std::endl;)
 
     while (!(sol.profit() == opt && sol.remaining_capacity() >= 0)) {
+        DBG(std::cout << "P(S) " << sol.profit() << std::endl;)
         StateIdx idx_next = pred[idx];
         ItemPos  k_next   = idx_next / rl2;
         ItemPos  t_next   = k_next + b - 1;
@@ -442,17 +445,17 @@ Solution sopt_balknap_array_all(Instance& ins,
         if (c < mu_next)
             x_next -= 1;
         Profit pi_next = p_next + z + 1 - x_next;
-        //DBG(std::cout << "t " << t_next << " wt " << ins.weight(t_next) << " pt " << ins.profit(t_next) << " mu " << mu_next << " pi " << pi_next << std::endl;)
+        DBG(std::cout << "A" << s[k_next] << " T " << t_next << " WT " << ins.item(t_next).w << " PT " << ins.item(t_next).p << " MU " << mu_next << " PI " << pi_next << std::endl;)
 
         if (k_next < k && pi_next < pi) {
             sol.set(t, true);
-            DBG(std::cout << "ADD " << t << " p(S) " << sol_curr.profit() << std::endl;)
+            DBG(std::cout << "ADD " << t << " P(S) " << sol.profit() << std::endl;)
             assert(mu_next == mu - ins.item(t).w);
             assert(pi_next == pi - ins.item(t).p);
         }
         if (k_next == k) {
             sol.set(s[idx], false);
-            DBG(std::cout << "REMOVE " << s[idx] << " p(S) " << sol_curr.profit() << std::endl;)
+            DBG(std::cout << "REMOVE " << s[idx] << " P(S) " << sol.profit() << std::endl;)
         }
 
         idx = idx_next;
@@ -467,8 +470,11 @@ Solution sopt_balknap_array_all(Instance& ins,
     assert(ins.check_sopt(sol));
     DBG(std::cout << "BALKNAPSOL... END" << std::endl;)
     return sol;
-    */
 }
+
+#undef DBG
+
+/******************************************************************************/
 
 Solution sopt_balknap_array_part(Instance& ins,
         BalknapParams p, ItemPos k, Info* info)
@@ -480,5 +486,4 @@ Solution sopt_balknap_array_part(Instance& ins,
     return Solution(ins);
 }
 
-#undef DBG
 
