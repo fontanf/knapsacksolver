@@ -24,17 +24,15 @@ Profit opt_balknap_array(Instance& ins, BalknapParams p, Info* info)
 
     DBG(std::cout << "LB..." << std::endl;)
     Profit lb = 0;
-    if (p.greedy == 0) {
+    if (p.lb_greedy == 0) {
         lb = sol_bestgreedy(ins).profit();
     } else {
         lb = ins.break_solution()->profit();
     }
 
     DBG(std::cout << "REDUCTION..." << std::endl;)
-    if (p.reduction == "1") {
-        if (ins.reduce1(lb, Info::verbose(info)))
-            return lb;
-    }
+    if (ins.reduce1(lb, Info::verbose(info)))
+        return lb;
     Weight  c = ins.capacity();
     ItemPos f = ins.first_item();
     ItemPos l = ins.last_item();
@@ -236,17 +234,15 @@ Solution sopt_balknap_array_all(Instance& ins,
 
     DBG(std::cout << "LB..." << std::endl;)
     Solution sol(ins);
-    if (params.greedy == 0) {
+    if (params.lb_greedy == 0) {
         sol = sol_bestgreedy(ins);
     } else {
         sol = *ins.break_solution();
     }
 
     DBG(std::cout << "REDUCTION..." << std::endl;)
-    if (params.reduction == "1") {
-        if (ins.reduce1(sol.profit(), Info::verbose(info)))
-            return sol;
-    }
+    if (ins.reduce1(sol.profit(), Info::verbose(info)))
+        return sol;
     Weight  c = ins.capacity();
     ItemPos f = ins.first_item();
     ItemPos l = ins.last_item();

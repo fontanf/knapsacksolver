@@ -20,6 +20,10 @@ int main(int argc, char *argv[])
         ("memory,m", po::value<std::string>(&memory), "set algorithm")
         ("retrieve,r", po::value<std::string>(&retrieve), "set algorithm")
         ("upper-bound,u", po::value<std::string>(&p.upper_bound), "set upper bound")
+        ("greedynlogn,g", po::value<StateIdx>(&p.lb_greedynlogn), "")
+        ("pairing,p", po::value<StateIdx>(&p.lb_pairing), "")
+        ("surrogate,s", po::value<StateIdx>(&p.ub_surrogate), "")
+        ("solve-sur,s", po::value<StateIdx>(&p.solve_sur), "")
         ("verbose,v",  "enable verbosity")
         ;
     po::variables_map vm;

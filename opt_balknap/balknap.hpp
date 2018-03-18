@@ -6,12 +6,10 @@
 struct BalknapParams
 {
     std::string upper_bound = "b";
-    std::string reduction   = "1";
-    StateIdx gcd = -1;
-    StateIdx greedy = 0;
-    StateIdx greedynlogn = -1;
+    StateIdx lb_greedy = 0;
+    StateIdx lb_greedynlogn = -1;
     StateIdx lb_pairing = -1;
-    StateIdx surrogate = -1;
+    StateIdx ub_surrogate = -1;
     StateIdx solve_sur = -1;
 };
 
