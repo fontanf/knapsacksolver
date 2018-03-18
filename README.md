@@ -39,24 +39,24 @@ The *Max Greedy* algorithm correspond to packing the item with the largest weigh
 
 The *Best Greedy* algorithm runs all the other greedy algorithms and keeps the best solution found.
 
-- Greedy `lb_greedy/main` :white_check_mark:
-- Max Greedy `lb_greedy/main -a max` :white_check_mark:
-- Forward Greedy `lb_greedy/main -a for` :white_check_mark:
-- Backward Greedy `lb_greedy/main -a back` :white_check_mark:
-- Best Greedy `lb_greedy/main -a best` :white_check_mark:
+- Greedy `lb_greedy/main` :heavy_check_mark:
+- Max Greedy `lb_greedy/main -a max` :heavy_check_mark:
+- Forward Greedy `lb_greedy/main -a for` :heavy_check_mark:
+- Backward Greedy `lb_greedy/main -a back` :heavy_check_mark:
+- Best Greedy `lb_greedy/main -a best` :heavy_check_mark:
 
 ### O(n log n) Greedy algorithms
 
 Those Greedy are similar to the one described in "A fast algorithm for strongly correlated knapsack problems" (Pisinger, 1998).
 
-- Forward Greedy `lb_greedynlogn/main -a for` :white_check_mark:
-- Backward Greedy `lb_greedynlogn/main -a back` :white_check_mark:
-- Best Greedy `lb_greedynlogn/main -a best` :white_check_mark:
+- Forward Greedy `lb_greedynlogn/main -a for` :heavy_check_mark:
+- Backward Greedy `lb_greedynlogn/main -a back` :heavy_check_mark:
+- Best Greedy `lb_greedynlogn/main -a best` :heavy_check_mark:
 
 ## Upper bounds
 
-- Dantzig Upper bound `ub_dantzig/main` :white_check_mark:
-- Surrogate relaxation `ub_surrogate/main` :white_check_mark:
+- Dantzig Upper bound `ub_dantzig/main` :heavy_check_mark:
+- Surrogate relaxation `ub_surrogate/main` :heavy_check_mark:
 
 ## Exact algorithm without pre-processing or sorting
 
