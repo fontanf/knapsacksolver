@@ -58,7 +58,9 @@ Those Greedy are similar to the one described in "A fast algorithm for strongly 
 - Dantzig Upper bound `ub_dantzig/main` :heavy_check_mark:
 - Surrogate relaxation `ub_surrogate/main` :heavy_check_mark:
 
-## Exact algorithm without pre-processing or sorting
+## Exact algorithms
+
+### Exact algorithms without pre-processing or sorting
 
 For those algorithms, if required, the Upper bound used is neccessarly `U0`.
 
@@ -86,7 +88,7 @@ For those algorithms, if required, the Upper bound used is neccessarly `U0`.
   - `-m list -r rec` :x:
 - Primal Branch-and-bound `opt_bab/main` :heavy_check_mark:
 
-## Exact algorithms with partial or complete sorting as pre-processing
+### Exact algorithms with partial or complete sorting as pre-processing
 
 Primal-dual Dynamic programming and Primal-dual Branch-and-bound allow to sort and reduce items 'by need' instead. This makes them more efficient on small or easy instances compared to other algorithms of the litterature which sort and reduce items in a pre-processing step. Balanced Dynamic programming may require only the partial sorting, however better bounds can be used if items are fully sorted.
 
