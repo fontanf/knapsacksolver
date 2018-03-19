@@ -129,6 +129,10 @@ public:
      * (Pisinger, 1997).
      */
     void sort_partially();
+    void sort_right(Profit lb);
+    void sort_left(Profit lb);
+    ItemPos int_right_size() const { return int_right_.size(); }
+    ItemPos int_left_size() const { return int_left_.size(); }
     bool break_item_found() const { return (b_ != -1); }
 
     /**
@@ -176,6 +180,8 @@ public:
     inline ItemIdx item_number() const { return l_-f_+1; }
     inline ItemPos first_item()  const { return f_; }
     inline ItemPos last_item()   const { return l_; }
+    inline ItemPos first_sorted_item() const { return s_; }
+    inline ItemPos last_sorted_item()  const { return t_; }
     inline Weight  capacity()    const { return c_; }
     inline ItemIdx total_item_number() const { return items_.size(); }
     inline Weight  total_capacity()    const { return c_orig_; }
@@ -239,6 +245,8 @@ private:
 
     ItemPos f_;
     ItemPos l_;
+    ItemPos s_;
+    ItemPos t_;
     Weight  c_;
     Weight  c_orig_;
     bool sorted_ = false;
@@ -259,6 +267,7 @@ private:
 };
 
 std::ostream& operator<<(std::ostream &os, const Item& item);
+std::ostream& operator<<(std::ostream &os, const Interval& interval);
 std::ostream& operator<<(std::ostream &os, const Instance& instance);
 
 #endif /* end of include guard: PARSER_HPP_CWOQFZGE */

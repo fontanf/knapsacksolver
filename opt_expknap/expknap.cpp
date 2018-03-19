@@ -12,7 +12,7 @@ Solution sopt_expknap(Instance& ins, Info* info)
     if (ins.item_number() == 0)
         return Solution(ins);
 
-    ins.sort();
+    ins.sort_partially();
     if (ins.break_item() == ins.last_item()+1)
         return *ins.break_solution();
 
@@ -31,6 +31,11 @@ Solution sopt_expknap(Instance& ins, Info* info)
                 << " R " << sol_curr.remaining_capacity()
                 << " P " << sol_curr.profit()
                 << std::flush;)
+
+        if (ins.int_right_size() > 0 && b+1 > ins.last_sorted_item())
+            ins.sort_right(sol_best.profit());
+        if (ins.int_left_size() > 0 && a-1 < ins.first_sorted_item())
+            ins.sort_left(sol_best.profit());
 
         // Leaf test
         if ((sol_curr.remaining_capacity() >= 0 && b == ins.last_item() + 1)

@@ -293,6 +293,8 @@ void Instance::compute_break_item()
             break;
         sol_break_->set(b_, true);
     }
+    s_ = b_;
+    t_ = b_;
     DBG(std::cout << "b " << b_ << " wsum " << sol_break_->weight() << " psum " << sol_break_->profit() << std::endl;)
     DBG(std::cout << "COMPUTEBREAKITEM... END" << std::endl;)
 }
@@ -366,6 +368,16 @@ void Instance::sort_partially()
                 std::sort(items_.begin()+f, items_.begin()+l+1,
                         [](const Item& i1, const Item& i2) {
                         return i1.p * i2.w > i2.p * i1.w;});
+                ItemPos b = f;
+                for (; b<=l; ++b) {
+                    if (c < item(b).w)
+                        break;
+                    c -= item(b).w;
+                }
+                if (f <= b-1)
+                    int_left_.push_back({f, b-1});
+                if (b+1 <= l)
+                    int_right_.push_back({b+1, l});
                 break;
             }
             //std::cout << "F " << f << " L " << l << std::flush;
@@ -378,32 +390,103 @@ void Instance::sort_partially()
             if (w + item(j).w <= c) {
                 //std::cout << " =>" << std::endl;
                 c -= (w + item(j).w);
-                int_right_.push_back({f, j});
+                if (f < j)
+                    int_left_.push_back({f, j});
                 f = j+1;
             } else if (w > c) {
                 //std::cout << " <=" << std::endl;
-                int_left_.push_back({j, l});
+                if (j <= l)
+                    int_right_.push_back({j, l});
                 l = j-1;
             } else {
                 //std::cout << " =" << std::endl;
-                int_right_.push_back({f, std::max(f, j-1)});
-                int_left_.push_back({std::min(l, j+1), l});
+                if (f <= j-1)
+                    int_left_.push_back({f, j-1});
+                if (j+1 <= l)
+                    int_right_.push_back({j+1, l});
                 break;
             }
         }
     }
 
-    DBG(std::cout << "RIGHT" << std::flush;
-    for (auto i: int_right_)
+    DBG(std::cout << "LEFT" << std::flush;
+    for (auto i: int_left_)
         std::cout << " [" << i.f << "," << i.l << "]" << std::flush;
     std::cout << std::endl;
-    std::cout << "LEFT" << std::flush;
-    for (auto i: int_left_)
+    std::cout << "RIGHT" << std::flush;
+    for (auto i: int_right_)
         std::cout << " [" << i.l << "," << i.f << "]" << std::flush;
     std::cout << std::endl;)
 
     compute_break_item();
     DBG(std::cout << "PARTSORT... END" << std::endl;)
+}
+
+#undef DBG
+
+#define DBG(x)
+//#define DBG(x) x
+
+void Instance::sort_right(Profit lb)
+{
+    DBG(std::cout << "SORTRIGHT..." << std::endl;)
+    DBG(std::cout << *this << std::endl;)
+    ItemPos k = -1;
+    do {
+        Interval in = int_right_.back();
+        int_right_.pop_back();
+        k = t_;
+        for (ItemPos i=in.f; i<=in.l; ++i) {
+            Profit ub = reduced_solution()->profit() + break_profit() + item(i).p
+                + ((break_capacity() - item(i).w) * item(b_).p) / item(b_).w;
+            if (ub > lb) {
+                k++;
+                swap(k, i);
+            } else {
+                DBG(std::cout << "REDUCE " << item(i) << std::endl;)
+            }
+        }
+        std::sort(items_.begin()+t_+1, items_.begin()+k+1,
+                [](const Item& i1, const Item& i2) {
+                return i1.p * i2.w > i2.p * i1.w;});
+    } while (k == t_ && int_right_.size() > 0);
+    t_ = k;
+    DBG(std::cout << *this << std::endl;)
+    DBG(std::cout << "SORTRIGHT... END" << std::endl;)
+}
+
+void Instance::sort_left(Profit lb)
+{
+    DBG(std::cout << "SORTLEFT..." << std::endl;)
+    DBG(std::cout << *this << std::endl;)
+    ItemPos k = -1;
+    do {
+        Interval in = int_left_.back();
+        DBG(std::cout << in << std::endl;)
+        int_left_.pop_back();
+        k = s_;
+        DBG(std::cout << "K " << k << std::endl;)
+        for (ItemPos i=in.l; i>=in.f; --i) {
+            DBG(std::cout << "I " << i << std::flush;)
+            Profit ub = reduced_solution()->profit() + break_profit() - item(i).p
+                + ((break_capacity() + item(i).w) * item(b_).p) / item(b_).w;
+            DBG(std::cout << " LB " << lb << " UB " << ub << std::flush;)
+            if (ub > lb) {
+                k--;
+                DBG(std::cout << "K " << k << std::endl;)
+                swap(k, i);
+            } else {
+                sol_red_->set(i, true);
+                DBG(std::cout << "REDUCE " << item(i) << std::endl;)
+            }
+        }
+        std::sort(items_.begin()+k, items_.begin()+s_,
+                [](const Item& i1, const Item& i2) {
+                return i1.p * i2.w > i2.p * i1.w;});
+    } while (k == s_ && int_left_.size() > 0);
+    s_ = k;
+    DBG(std::cout << *this << std::endl;)
+    DBG(std::cout << "SORTLEFT... END" << std::endl;)
 }
 
 #undef DBG
@@ -754,19 +837,37 @@ std::ostream& operator<<(std::ostream& os, const Item& it)
     return os;
 }
 
+std::ostream& operator<<(std::ostream& os, const Interval& interval)
+{
+    os << "[" << interval.f << "," << interval.l << "]";
+    return os;
+}
+
 std::ostream& operator<<(std::ostream& os, const Instance& instance)
 {
     os
         <<  "n "   << instance.item_number()
         << " c "   << instance.capacity()
-        << " opt " << instance.optimum()
+        << " opt " << instance.optimum() << std::endl
+        << "F " << instance.first_item()
+        << " S " << instance.first_sorted_item()
+        << " T " << instance.last_sorted_item()
+        << " L " << instance.last_item()
         << std::endl;
     if (instance.break_item_found())
         os << "b " << instance.break_item() << " wsum " << instance.break_weight() << " psum " << instance.break_profit() << std::endl;
-    for (ItemIdx i=0; i<instance.total_item_number(); ++i) {
+    for (ItemPos i=0; i<instance.total_item_number(); ++i) {
         os << i << ": " << instance.item(i) << std::flush;
         if (instance.optimal_solution() != NULL)
             os << " " << instance.optimal_solution()->contains(i);
+        if (i == instance.first_item())
+            os << " F";
+        if (i == instance.last_item())
+            os << " L";
+        if (i == instance.first_sorted_item())
+            os << " S";
+        if (i == instance.last_sorted_item())
+            os << " T";
         os << std::endl;
     }
     return os;
