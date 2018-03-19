@@ -1,18 +1,21 @@
 cc_library(
-        name = "libbabprimaldual",
-        hdrs = ["babprimaldual.hpp"],
-        srcs = ["babprimaldual.cpp"],
+        name = "libexpknap",
+        hdrs = ["expknap.hpp"],
+        srcs = ["expknap.cpp"],
         visibility = ["//visibility:public"],
         deps = [
                 "//lib:cpp",
-                "//lib:cppsolver",
+                "//lb_greedy:libgreedy",
+                "//lb_greedynlogn:libgreedynlogn",
+                "//ub_dembo:libdembo",
+                "//ub_surrogate:libsurrogate",
         ],
 )
 
 cc_binary(
         name = "main",
         srcs = ["main.cpp"],
-        deps = [":libbabprimaldual", "//lib:cpp"],
+        deps = [":libexpknap", "//lib:cpp"],
         linkopts = [
                 "-lboost_system",
                 "-lboost_filesystem",

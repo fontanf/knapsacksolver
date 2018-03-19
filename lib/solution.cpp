@@ -77,7 +77,7 @@ void Solution::clear()
 
 bool Solution::update(const Solution& sol)
 {
-    if (sol.profit() <= profit())
+    if (sol.profit() <= profit() || sol.remaining_capacity() < 0)
         return false;
     *this = sol;
     return true;
