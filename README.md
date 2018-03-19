@@ -77,9 +77,9 @@ For those algorithms, if required, the Upper bound used is neccessarly `U0`.
 Primal-dual Dynamic programming and Primal-dual Branch-and-bound allow to sort and reduce items 'by need' instead. This makes them more efficient on small or easy instances compared to other algorithms of the litterature which sort and reduce items in a pre-processing step. Balanced Dynamic programming may require only the partial sorting, however better bounds can be used if items are fully sorted.
 
 - Balanced Dynamic programming `opt_balknap/main -m list -u t -r part` Since the list implementation requires a map, its asymptotical complexity is slightly greater than the one with an array. On the other hand, better Upper bounds can be used. Therefore, both are implemented and with the list implementation, options `-u` can be set to `b` (partial sorting, Dembo Upper bound with break item) or `t` (complete sorting, better Upper Bound)
-  - `-m array`: `-r none` :heavy_check_mark: - `-r all` :heavy_check_mark: - `-r part` :x:
+  - `-m array`: `-r none` :heavy_check_mark: `-r all` :heavy_check_mark: `-r part` :x:
   - `-m list`: `-r none` :heavy_check_mark: `-r all` :heavy_check_mark: `-r part` :x:
 - Primal-dual Dynamic programming (`minknap`, `combo`)
   - `-m list -r part` :x:
-- Primal-dual Branch-and-bound (`expknap`) :x:
+- Primal-dual Branch-and-bound (`expknap`) `opt_expknap/main` :heavy_check_mark:
 
