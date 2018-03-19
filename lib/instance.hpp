@@ -129,6 +129,7 @@ public:
      * (Pisinger, 1997).
      */
     void sort_partially();
+    void set_first_last_item();
     void sort_right(Profit lb);
     void sort_left(Profit lb);
     ItemPos int_right_size() const { return int_right_.size(); }
@@ -180,12 +181,10 @@ public:
     inline ItemIdx item_number() const { return l_-f_+1; }
     inline ItemPos first_item()  const { return f_; }
     inline ItemPos last_item()   const { return l_; }
-    inline ItemPos first_sorted_item() const { return s_; }
-    inline ItemPos last_sorted_item()  const { return t_; }
-    inline Weight  capacity()    const { return c_; }
     inline ItemIdx total_item_number() const { return items_.size(); }
     inline Weight  total_capacity()    const { return c_orig_; }
     inline const Item& item(ItemIdx i) const { assert(i >= 0 && i < total_item_number()); return items_[i]; }
+    Weight capacity() const;
 
     ItemPos break_item()     const { assert(b_ >= first_item() && b_ <= last_item() + 1); return b_; }
     Profit  break_profit()   const;
@@ -245,9 +244,6 @@ private:
 
     ItemPos f_;
     ItemPos l_;
-    ItemPos s_;
-    ItemPos t_;
-    Weight  c_;
     Weight  c_orig_;
     bool sorted_ = false;
     std::vector<Interval> int_right_;
@@ -259,7 +255,7 @@ private:
     Solution* sol_break_ = NULL; // Break solution
     ItemPos b_ = -1; // Break item
     Item i_wmax_ = {-1, -1, -1}; // Max weight item
-    Item i_wmin_ = {-1, c_+1, -1}; // Min weight item
+    Item i_wmin_ = {-1, c_orig_+1, -1}; // Min weight item
     Item i_pmax_ = {-1, -1, -1}; // Max profit item
     Item i_emax_ = {-1, 0, -1};  // Max efficiency item;
     std::vector<Item> isum_;
