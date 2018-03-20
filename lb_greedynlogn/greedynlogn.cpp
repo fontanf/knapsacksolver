@@ -29,7 +29,7 @@ bool best_exchange(Solution& sol, Info* info)
 
     std::vector<Item> taken;
     std::vector<Item> left;
-    for (ItemPos i=0; i<ins.item_number(); ++i)
+    for (ItemPos i=0; i<ins.total_item_number(); ++i)
     {
         Item item = ins.item(i);
         item.i = i;
@@ -87,11 +87,11 @@ bool best_exchange(Solution& sol, Info* info)
 
 Solution sol_forwardgreedynlogn(const Instance& ins, Info* info)
 {
-    if (ins.break_item() == ins.item_number()
+    if (ins.break_item() == ins.total_item_number()
             || ins.break_item() == 0)
         return Solution(ins);
     DBG(std::cout << "FORWARDGREEDY..." << std::endl;)
-    Solution sol = sol_break(ins);
+    Solution sol = *ins.break_solution();
     if (Info::verbose(info))
         std::cout
             <<  "LB "  << sol.profit()
@@ -112,7 +112,7 @@ bool best_exchangeback(Solution& sol, Info* info)
 
     std::vector<Item> taken;
     std::vector<Item> left;
-    for (ItemPos i=0; i<ins.item_number(); ++i)
+    for (ItemPos i=0; i<ins.total_item_number(); ++i)
     {
         Item item = ins.item(i);
         item.i = i;
@@ -173,11 +173,11 @@ bool best_exchangeback(Solution& sol, Info* info)
 
 Solution sol_backwardgreedynlogn(const Instance& ins, Info* info)
 {
-    if (ins.break_item() == ins.item_number()
+    if (ins.break_item() == ins.total_item_number()
             || ins.break_item() == 0)
         return Solution(ins);
     DBG(std::cout << "BACKWARDGREEDYBEST..." << std::endl;)
-    Solution sol = sol_break(ins);
+    Solution sol = *ins.break_solution();
     Solution sol0 = sol;
     if (Info::verbose(info))
         std::cout
@@ -197,7 +197,7 @@ Solution sol_bestgreedynlogn(const Instance& ins, Info* info)
     DBG(std::cout << "GREEDYBESTPLUS..." << std::endl;)
     Solution sol = sol_greedy(ins);
     std::string best = "Greedy";
-    if (ins.item_number() == 0)
+    if (ins.total_item_number() == 0)
         return sol;
     if (sol.update(sol_greedymax(ins)))
         best = "Max";
