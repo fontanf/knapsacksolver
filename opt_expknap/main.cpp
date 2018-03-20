@@ -7,12 +7,15 @@ int main(int argc, char *argv[])
     // Parse program options
     std::string output_file = "";
     std::string cert_file = "";
+    ExpknapParams p;
     po::options_description desc("Allowed options");
     desc.add_options()
         ("help,h", "produce help message")
         ("input-data,i", po::value<std::string>()->required(), "set input data (required)")
         ("output-file,o", po::value<std::string>(&output_file), "set output file")
         ("cert-file,c", po::value<std::string>(&cert_file), "set certificate output file")
+        ("greedynlogn,g", po::value<StateIdx>(&p.lb_greedynlogn), "")
+        ("surrogate,s", po::value<StateIdx>(&p.ub_surrogate), "")
         ("verbose,v",  "enable verbosity")
         ;
     po::variables_map vm;
@@ -33,7 +36,7 @@ int main(int argc, char *argv[])
     info.verbose(vm.count("verbose"));
 
     // Expknap
-    Solution sopt = sopt_expknap(instance, &info);
+    Solution sopt = sopt_expknap(instance, p, &info);
 
     double t = info.elapsed_time();
     info.pt.put("Solution.OPT", sopt.profit());
