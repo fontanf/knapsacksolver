@@ -12,18 +12,6 @@
 void update_bounds(const Instance& ins, Solution& sol_best, Profit& ub,
         ExpknapParams& params, StateIdx nodes, Info* info)
 {
-    (void)info;
-    if (params.lb_greedynlogn == nodes) {
-        if (Info::verbose(info))
-            std::cout << "GREEDYNLOGN..." << std::flush;
-        if (sol_best.update(sol_bestgreedynlogn(ins))) {
-            if (Info::verbose(info))
-                std::cout << " " << ins.print_lb(sol_best.profit()) << std::endl;
-        } else {
-            if (Info::verbose(info))
-                std::cout << " NO IMPROVEMENT" << std::endl;
-        }
-    }
     if (params.ub_surrogate == nodes) {
         if (Info::verbose(info))
             std::cout << "SURROGATE..." << std::flush;
@@ -32,6 +20,17 @@ void update_bounds(const Instance& ins, Solution& sol_best, Profit& ub,
             ub = so.ub;
             if (Info::verbose(info))
                 std::cout << " " << ins.print_ub(ub) << std::endl;
+        } else {
+            if (Info::verbose(info))
+                std::cout << " NO IMPROVEMENT" << std::endl;
+        }
+    }
+    if (params.lb_greedynlogn == nodes) {
+        if (Info::verbose(info))
+            std::cout << "GREEDYNLOGN..." << std::flush;
+        if (sol_best.update(sol_bestgreedynlogn(ins))) {
+            if (Info::verbose(info))
+                std::cout << " " << ins.print_lb(sol_best.profit()) << std::endl;
         } else {
             if (Info::verbose(info))
                 std::cout << " NO IMPROVEMENT" << std::endl;
@@ -160,8 +159,15 @@ Solution sopt_expknap(Instance& ins, ExpknapParams& params, Info* info)
             << ins.print_ub(ub) << std::endl;
     ItemPos b = ins.break_item();
     ins.set_first_last_item();
+
     StateIdx nodes = 0;
-    sopt_expknap_rec(ins, sol_curr, sol_best, ub, b-1, b, params, nodes, info);
+    update_bounds(ins, sol_best, ub, params, nodes, info); // Update bounds
+    if (sol_best.profit() != ub) // If UB reached, then stop
+        sopt_expknap_rec(ins, sol_curr, sol_best, ub, b-1, b, params, nodes, info);
+
+    if (Info::verbose(info))
+        std::cout << "NODES " << std::scientific << (double)nodes << std::endl;
+    assert(ins.check_sopt(sol_best));
     return sol_best;
 }
 
