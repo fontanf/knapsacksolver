@@ -25,7 +25,7 @@ Profit opt_balknap_array(Instance& ins, BalknapParams p, Info* info)
     DBG(std::cout << "LB..." << std::endl;)
     Profit lb = 0;
     if (p.lb_greedy == 0) {
-        lb = sol_bestgreedy(ins).profit();
+        lb = sol_greedy(ins).profit();
     } else {
         lb = ins.break_solution()->profit();
     }
@@ -40,7 +40,7 @@ Profit opt_balknap_array(Instance& ins, BalknapParams p, Info* info)
     Profit p0 = ins.reduced_solution()->profit();
 
     // Trivial cases
-    if (n == 0) {
+    if (n == 0 || c == 0) {
         return p0;
     } else if (n == 1) {
         return p0 + ins.item(f).p;
@@ -235,7 +235,7 @@ Solution sopt_balknap_array_all(Instance& ins,
     DBG(std::cout << "LB..." << std::endl;)
     Solution sol(ins);
     if (params.lb_greedy == 0) {
-        sol = sol_bestgreedy(ins);
+        sol = sol_greedy(ins);
     } else {
         sol = *ins.break_solution();
     }
@@ -250,7 +250,7 @@ Solution sopt_balknap_array_all(Instance& ins,
     Profit p0 = ins.reduced_solution()->profit();
 
     // Trivial cases
-    if (n == 0) {
+    if (n == 0 || c == 0) {
         return *ins.reduced_solution();
     } else if (n == 1) {
         Solution sol = *ins.reduced_solution();

@@ -54,15 +54,16 @@ Profit opt_balknap_list(
     if (ins.break_item() == ins.last_item()+1) // all items are in the break solution
         return ins.break_profit();
 
-    DBG(std::cout << "LB..." << std::endl;)
+    DBG(std::cout << "LB..." << std::flush;)
     Profit lb = 0;
     if (params.lb_greedynlogn == 0) {
         lb = sol_bestgreedynlogn(ins).profit();
     } else if (params.lb_greedy == 0) {
-        lb = sol_bestgreedy(ins).profit();
+        lb = sol_greedy(ins).profit();
     } else {
         lb = ins.break_profit();
     }
+    DBG(std::cout << " " << ins.print_lb(lb) << std::endl;)
 
     DBG(std::cout << "REDUCTION..." << std::endl;)
     if (params.upper_bound == "b") {
@@ -74,7 +75,6 @@ Profit opt_balknap_list(
     } else {
         assert(false);
     }
-    ItemPos b = ins.break_item();
     Weight  c = ins.total_capacity();
     ItemPos f = ins.first_item();
     ItemPos l = ins.last_item();
@@ -82,12 +82,15 @@ Profit opt_balknap_list(
     Profit p0 = ins.reduced_solution()->profit();
 
     // Trivial cases
-    if (n == 0) {
+    if (n == 0 || c == 0) {
         return p0;
     } else if (n == 1) {
         return p0 + ins.item(f).p;
+    } else if (ins.break_item() == ins.last_item()+1) {
+        return ins.break_solution()->profit();
     }
 
+    ItemPos b    = ins.break_item();
     Weight w_bar = ins.break_solution()->weight();
     Profit p_bar = ins.break_solution()->profit();
     Profit u     = ub_dantzig(ins);
@@ -357,7 +360,7 @@ Solution sopt_balknap_list_all(
     if (params.lb_greedynlogn == 0) {
         sol = sol_bestgreedynlogn(ins);
     } else if (params.lb_greedy == 0) {
-        sol = sol_bestgreedy(ins);
+        sol = sol_greedy(ins);
     } else {
         sol = *ins.break_solution();
     }
@@ -375,19 +378,21 @@ Solution sopt_balknap_list_all(
     Weight  c = ins.total_capacity();
     ItemPos f = ins.first_item();
     ItemPos l = ins.last_item();
-    ItemPos b = ins.break_item();
     ItemPos n = ins.item_number();
     Profit lb = sol.profit();
 
     // Trivial cases
-    if (n == 0) {
+    if (n == 0 || c == 0) {
         return *ins.reduced_solution();
     } else if (n == 1) {
         Solution so = *ins.reduced_solution();
         so.set(f, true);
         return so;
+    } else if (ins.break_item() == ins.last_item()+1) {
+        return *ins.break_solution();
     }
 
+    ItemPos b    = ins.break_item();
     Weight w_bar = ins.break_solution()->weight();
     Profit p_bar = ins.break_solution()->profit();
     Profit u     = ub_dantzig(ins);
