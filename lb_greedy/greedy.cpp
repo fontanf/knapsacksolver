@@ -3,195 +3,59 @@
 #define DBG(x)
 //#define DBG(x) x
 
-Solution sol_break(const Instance& ins, Info* info)
-{
-    (void)info;
-    assert(ins.break_item_found());
-
-    Solution sol = *ins.reduced_solution();
-    for (ItemPos i=0; i<ins.item_number(); ++i) {
-        if (sol.weight() + ins.item(i).w > ins.total_capacity())
-            break;
-        sol.set(i, true);
-    }
-
-    assert(ins.check_sol(sol));
-    return sol;
-}
-
 Solution sol_greedy(const Instance& ins, Info* info)
 {
-    (void)info;
-    assert(ins.break_item_found());
-    DBG(std::cout << "GREEDY..." << std::endl;)
-
-    Solution sol = *ins.reduced_solution();
-    for (ItemPos i=0; i<ins.item_number(); ++i) {
-        if (sol.weight() + ins.item(i).w > ins.total_capacity())
-            continue;
-        sol.set(i, true);
-    }
-
-    assert(ins.check_sol(sol));
-    DBG(std::cout << "GREEDY... END" << std::endl;)
-    return sol;
-}
-
-Solution sol_greedymax(const Instance& ins, Info* info)
-{
-    (void)info;
-    assert(ins.break_item_found());
-    DBG(std::cout << "GREEDYMAX..." << std::endl;)
-    assert(ins.item_number() > 0);
-
-    ItemPos imax = 0;
-    for (ItemPos i=1; i<ins.item_number(); ++i)
-        if (ins.item(i).p > ins.item(imax).p)
-            imax = i;
-    Solution sol = *ins.reduced_solution();
-    sol.set(imax, true);
-    for (ItemPos i=0; i<ins.item_number(); ++i) {
-        if (i == imax)
-            continue;
-        if (sol.weight() + ins.item(i).w > ins.total_capacity())
-            continue;
-        sol.set(i, true);
-    }
-    assert(ins.check_sol(sol));
-    DBG(std::cout << "GREEDYMAX... END" << std::endl;)
-    return sol;
-}
-
-Solution sol_forwardgreedy(const Instance& ins, Info* info)
-{
-    (void)info;
-    assert(ins.break_item_found());
-    DBG(std::cout << "GREEDYFW..." << std::endl;)
-    assert(ins.item_number() > 0);
-
-    Solution sol = *ins.reduced_solution();
-    ItemPos b = -1;
-    for (ItemPos i=0; i<ins.item_number(); ++i) {
-        if (sol.weight() + ins.item(i).w > ins.total_capacity()) {
-            b = i;
-            break;
-        }
-        sol.set(i, true);
-    }
-    if (b == -1)
-        return sol;
-
-    ItemPos imax = -1;
-    for (ItemPos i=b+1; i<ins.item_number(); ++i)
-        if ((imax == -1 && sol.weight() + ins.item(i).w <= ins.total_capacity())
-                || (imax != -1 && sol.weight() + ins.item(i).w <= ins.total_capacity() && ins.item(i).p > ins.item(imax).p))
-            imax = i;
-    if (imax == -1)
-        return sol;
-    sol.set(imax, true);
-
-    for (ItemPos i=b+1; i<ins.item_number(); ++i) {
-        if (sol.weight() + ins.item(i).w > ins.total_capacity())
-            continue;
-        sol.set(i, true);
-    }
-
-    assert(ins.check_sol(sol));
-    DBG(std::cout << "GREEDYFW... END" << std::endl;)
-    return sol;
-}
-
-Solution sol_backwardgreedy(const Instance& ins, Info* info)
-{
-    (void)info;
-    assert(ins.break_item_found());
-    DBG(std::cout << "GREEDYBW..." << std::endl;)
-    assert(ins.item_number() > 0);
-
-    Solution sol = *ins.reduced_solution();
-    ItemPos b = -1;
-    for (ItemPos i=0; i<ins.item_number(); ++i) {
-        sol.set(i, true);
-        if (sol.weight() > ins.total_capacity()) {
-            b = i;
-            break;
-        }
-    }
-    if (b == -1)
-        return sol;
-
-    ItemPos imax = -1;
-    for (ItemPos i=0; i<=b; ++i)
-        if ((imax == -1 && sol.weight() - ins.item(i).w <= ins.total_capacity())
-                || (imax != -1 && sol.weight() - ins.item(i).w <= ins.total_capacity() && ins.item(i).p < ins.item(imax).p))
-            imax = i;
-    assert(imax != -1);
-    sol.set(imax, false);
-
-    for (ItemPos i=b+1; i<ins.item_number(); ++i) {
-        if (sol.weight() + ins.item(i).w > ins.total_capacity())
-            continue;
-        sol.set(i, true);
-    }
-
-    assert(ins.check_sol(sol));
-    DBG(std::cout << "GREEDYBW... END" << std::endl;)
-    return sol;
-}
-
-Solution sol_bestgreedy(const Instance& ins, Info* info)
-{
     DBG(std::cout << "GREEDYBEST..." << std::endl;)
-    Solution sol = sol_greedy(ins);
-    std::string best = "Greedy";
-    if (ins.item_number() == 0)
-        return sol;
-    if (sol.update(sol_greedymax(ins)))
-        best = "Max";
-    if (sol.update(sol_forwardgreedy(ins)))
-        best = "Forward";
-    if (sol.update(sol_backwardgreedy(ins)))
-        best = "Backward";
+    assert(ins.break_item_found());
+
+    Solution sol = *ins.break_solution();
+    std::string best_algo = "Break";
+    ItemPos b = ins.break_item();
+
+    if (b < ins.last_item()) {
+        Profit  p = 0;
+        ItemPos j = -1;
+
+        DBG(std::cout << "BACKWARD GREEDY" << std::endl;)
+        Weight rb = sol.remaining_capacity() - ins.item(b).w;
+        for (ItemPos i=ins.first_item(); i<=b; ++i) {
+            if (rb + ins.item(i).w >= 0 && ins.item(b).p - ins.item(i).p > p) {
+                p = ins.item(b).p - ins.item(i).p;
+                j = i;
+            }
+        }
+
+        DBG(std::cout << "FORWARD GREEDY" << std::endl;)
+        Weight rf = sol.remaining_capacity();
+        for (ItemPos i=b+1; i<=ins.last_item(); ++i) {
+            if (ins.item(i).w <= rf && ins.item(i).p > p) {
+                p = ins.item(i).p;
+                j = i;
+            }
+        }
+
+        DBG(std::cout << "B " << b << " J " << j << std::endl;)
+        if (j == -1) {
+            best_algo = "Break";
+        } else if (j <= b) {
+            best_algo = "Backward";
+            sol.set(b, true);
+            sol.set(j, false);
+        } else {
+            best_algo = "Forward";
+            sol.set(j, true);
+        }
+    }
+
     if (Info::verbose(info))
-        std::cout << "ALG " << best << std::endl;
-    DBG(std::cout << "GREEDYBEST... END" << std::endl;)
+        std::cout << "ALGO " << best_algo << std::endl;
+    if (info != NULL)
+        info->pt.put("Solution.Algo", best_algo);
+
+    ins.check_sol(sol);
+    DBG(std::cout << "GREEDY... END" << std::endl;)
     return sol;
 }
 
 #undef DBG
 
-/******************************************************************************/
-
-Profit lb_greedy_from(const Instance& instance,
-        ItemPos i, Profit p, Weight r)
-{
-    return lb_greedy_from_to(instance, i, instance.item_number()-1, p, r);
-}
-
-Profit lb_greedy_from_to(const Instance& instance,
-        ItemPos i, ItemPos l, Profit p, Weight r)
-{
-    for (; i<=l; ++i) {
-        if (instance.item(i).w > r)
-            continue;
-        r -= instance.item(i).w;
-        p += instance.item(i).p;
-    }
-    return p;
-}
-
-Profit lb_greedy_skip(const Instance& instance,
-        ItemPos f, ItemPos l, Profit p, Weight r)
-{
-    for (ItemPos i=0; ; ++i) {
-        if (i == f)
-            i = l+1;
-        if (i == instance.item_number())
-            break;
-        if (instance.item(i).w > r)
-            continue;
-        r -= instance.item(i).w;
-        p += instance.item(i).p;
-    }
-    return p;
-}

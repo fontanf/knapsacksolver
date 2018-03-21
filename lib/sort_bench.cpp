@@ -12,8 +12,8 @@ int main(int argc, char *argv[])
         items[i] = {i, i, 1};
     std::random_shuffle(items.begin(), items.end());
 
-    Instance instance_eff(n, c, items);
-    Instance instance_peff(n, c, items);
+    Instance instance_eff(items, c);
+    Instance instance_peff(items, c);
 
     std::cout << "Conmplete sorting" << std::endl;
     instance_eff.sort();

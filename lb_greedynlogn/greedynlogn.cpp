@@ -199,12 +199,6 @@ Solution sol_bestgreedynlogn(const Instance& ins, Info* info)
     std::string best = "Greedy";
     if (ins.total_item_number() == 0)
         return sol;
-    if (sol.update(sol_greedymax(ins)))
-        best = "Max";
-    if (sol.update(sol_forwardgreedy(ins)))
-        best = "Forward";
-    if (sol.update(sol_backwardgreedy(ins)))
-        best = "Backward";
     if (sol.update(sol_forwardgreedynlogn(ins)))
         best = "ForwardBest";
     if (sol.update(sol_backwardgreedynlogn(ins)))

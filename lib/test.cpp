@@ -120,13 +120,13 @@ TEST(Instance, ReductionSmallCoeff)
             {
                 Instance instance(ii->path().string());
                 instance.sort_partially();
-                Solution sol = sol_bestgreedy(instance);
+                Solution sol = sol_greedy(instance);
                 instance.reduce1(sol.profit(), true);
             }
             {
                 Instance instance(ii->path().string());
                 instance.sort();
-                Solution sol = sol_bestgreedy(instance);
+                Solution sol = sol_greedy(instance);
                 instance.reduce2(sol.profit(), true);
             }
         }
@@ -154,13 +154,13 @@ TEST(Instance, ReductionLargeCoeff)
             {
                 Instance instance(ii->path().string());
                 instance.sort_partially();
-                Solution sol = sol_bestgreedy(instance);
+                Solution sol = sol_greedy(instance);
                 instance.reduce1(sol.profit());
             }
             {
                 Instance instance(ii->path().string());
                 instance.sort();
-                Solution sol = sol_bestgreedy(instance);
+                Solution sol = sol_greedy(instance);
                 instance.reduce2(sol.profit());
             }
         }
@@ -188,13 +188,13 @@ TEST(Instance, ReductionHardInstances)
             {
                 Instance instance(ii->path().string());
                 instance.sort_partially();
-                Solution sol = sol_bestgreedy(instance);
+                Solution sol = sol_greedy(instance);
                 instance.reduce1(sol.profit());
             }
             {
                 Instance instance(ii->path().string());
                 instance.sort();
-                Solution sol = sol_bestgreedy(instance);
+                Solution sol = sol_greedy(instance);
                 instance.reduce2(sol.profit());
             }
         }

@@ -1,7 +1,5 @@
 #include "greedy.hpp"
 
-#include <boost/program_options.hpp>
-
 int main(int argc, char *argv[])
 {
     namespace po = boost::program_options;
@@ -10,14 +8,12 @@ int main(int argc, char *argv[])
     std::string input_data  = "";
     std::string output_file = "";
     std::string cert_file   = "";
-    std::string algorithm   = "";
     po::options_description desc("Allowed options");
     desc.add_options()
         ("help,h", "produce help message")
         ("input-data,i",  po::value<std::string>(&input_data)->required(), "set input data (required)")
         ("output-file,o", po::value<std::string>(&output_file),            "set output file")
         ("cert-file,c",   po::value<std::string>(&cert_file),              "set certificate output file")
-        ("algorithm,a",   po::value<std::string>(&algorithm),              "set algorithm")
         ("verbose,v",                                                      "enable verbosity")
         ;
     po::variables_map vm;
@@ -34,35 +30,24 @@ int main(int argc, char *argv[])
     }
 
     Instance instance(input_data);
-    Solution sol_best(instance);
+    Solution sol(instance);
     Info info;
     info.verbose(vm.count("verbose"));
 
     instance.sort_partially();
 
-    if (algorithm == "") {
-        sol_best = sol_greedy(instance, &info);
-    } else if (algorithm == "max") {
-        sol_best = sol_greedymax(instance, &info);
-    } else if (algorithm == "for") {
-        sol_best = sol_forwardgreedy(instance, &info);
-    } else if (algorithm == "back") {
-        sol_best = sol_backwardgreedy(instance, &info);
-    } else if (algorithm == "best") {
-        sol_best = sol_bestgreedy(instance, &info);
-    }
+    sol = sol_greedy(instance, &info);
 
     double t = info.elapsed_time();
     info.pt.put("Solution.Time", t);
-    info.pt.put("Solution.OPT", sol_best.profit());
+    info.pt.put("Solution.OPT", sol.profit());
     if (Info::verbose(&info)) {
         std::cout << "---" << std::endl;
-        std::cout << "OPT " << sol_best.profit() << std::endl;
-        std::cout << "GAP " << instance.optimum() - sol_best.profit() << std::endl;
+        std::cout << instance.print_lb(sol.profit()) << std::endl;
         std::cout << "TIME " << t << std::endl;
     }
 
     info.write_ini(output_file); // Write output file
-    sol_best.write_cert(cert_file); // Write certificate file
+    sol.write_cert(cert_file); // Write certificate file
     return 0;
 }
