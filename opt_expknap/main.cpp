@@ -16,6 +16,7 @@ int main(int argc, char *argv[])
         ("cert-file,c", po::value<std::string>(&cert_file), "set certificate output file")
         ("greedynlogn,g", po::value<StateIdx>(&p.lb_greedynlogn), "")
         ("surrogate,s", po::value<StateIdx>(&p.ub_surrogate), "")
+        ("solve-sur,k", po::value<StateIdx>(&p.solve_sur), "")
         ("verbose,v",  "enable verbosity")
         ;
     po::variables_map vm;

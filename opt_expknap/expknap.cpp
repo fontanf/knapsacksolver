@@ -9,13 +9,15 @@
 #define DBG(x)
 //#define DBG(x) x
 
-void update_bounds(const Instance& ins, Solution& sol_best, Profit& ub,
+void update_bounds(const Instance& ins, Solution& sol_best, Profit& ub, SurrogateOut& so,
         ExpknapParams& params, StateIdx nodes, Info* info)
 {
     if (params.ub_surrogate == nodes) {
         if (Info::verbose(info))
             std::cout << "SURROGATE..." << std::flush;
-        auto so = ub_surrogate(ins, {{0, ins.total_item_number()-1}}, sol_best.profit());
+        so = ub_surrogate(ins, sol_best.profit());
+        if (Info::verbose(info))
+            std::cout << " K " << so.bound << " S " << so.multiplier << std::flush;
         if (ub > so.ub) {
             ub = so.ub;
             if (Info::verbose(info))
@@ -25,6 +27,34 @@ void update_bounds(const Instance& ins, Solution& sol_best, Profit& ub,
                 std::cout << " NO IMPROVEMENT" << std::endl;
         }
     }
+
+    if (params.solve_sur == nodes) {
+        if (sol_best.profit() == ub)
+            return;
+        if (Info::verbose(info))
+            std::cout << "SOLVE SURROGATE..." << std::endl;
+        assert(params.ub_surrogate >= 0 && params.ub_surrogate <= params.solve_sur);
+        Instance ins_sur(ins);
+        ins_sur.surrogate(so.multiplier, so.bound);
+        params.ub_surrogate = -1;
+        params.solve_sur = -1;
+        Solution sol_sur = sopt_expknap(ins_sur, params, info);
+        if (ub > sol_sur.profit()) {
+            ub = sol_sur.profit();
+            if (Info::verbose(info))
+                std::cout << "END SOLVE SURROGATE " << ins.print_ub(ub) << std::flush;
+        }
+        if (Info::verbose(info))
+            std::cout << " K " << sol_sur.item_number() << "/" << so.bound << std::flush;
+        if (sol_sur.item_number() == so.bound) {
+            sol_best = sol_sur;
+            if (Info::verbose(info))
+                std::cout << " " << ins.print_lb(sol_best.profit()) << std::flush;
+        }
+        if (Info::verbose(info))
+            std::cout << std::endl;
+    }
+
     if (params.lb_greedynlogn == nodes) {
         if (Info::verbose(info))
             std::cout << "GREEDYNLOGN..." << std::flush;
@@ -39,7 +69,7 @@ void update_bounds(const Instance& ins, Solution& sol_best, Profit& ub,
 }
 
 bool sopt_expknap_rec(Instance& ins,
-        Solution& sol_curr, Solution& sol_best, Profit& u,
+        Solution& sol_curr, Solution& sol_best, Profit& u, SurrogateOut& so,
         ItemPos s, ItemPos t,
         ExpknapParams& params, StateIdx& nodes, Info* info)
 {
@@ -59,7 +89,7 @@ bool sopt_expknap_rec(Instance& ins,
     })
 
     nodes++; // Increment node number
-    update_bounds(ins, sol_best, u, params, nodes, info); // Update bounds
+    update_bounds(ins, sol_best, u, so, params, nodes, info); // Update bounds
 
     bool improved = false;
     if (sol_curr.remaining_capacity() >= 0) {
@@ -96,7 +126,7 @@ bool sopt_expknap_rec(Instance& ins,
 
             // Recursive call
             sol_curr.set(t, true); // Add item t
-            if (sopt_expknap_rec(ins, sol_curr, sol_best, u, s, t+1, params, nodes, info))
+            if (sopt_expknap_rec(ins, sol_curr, sol_best, u, so, s, t+1, params, nodes, info))
                 improved = true;
             sol_curr.set(t, false); // Remove item t
         }
@@ -131,7 +161,7 @@ bool sopt_expknap_rec(Instance& ins,
 
             // Recursive call
             sol_curr.set(s, false); // Remove item s
-            if (sopt_expknap_rec(ins, sol_curr, sol_best, u, s-1, t, params, nodes, info))
+            if (sopt_expknap_rec(ins, sol_curr, sol_best, u, so, s-1, t, params, nodes, info))
                 improved = true;
             sol_curr.set(s, true); // Add item s
         }
@@ -151,7 +181,7 @@ Solution sopt_expknap(Instance& ins, ExpknapParams& params, Info* info)
         return *ins.break_solution();
 
     Solution sol_curr = *ins.break_solution();
-    Solution sol_best = sol_bestgreedy(ins);
+    Solution sol_best = sol_greedy(ins);
     Profit ub = ub_dantzig(ins);
     if (Info::verbose(info))
         std::cout
@@ -160,10 +190,11 @@ Solution sopt_expknap(Instance& ins, ExpknapParams& params, Info* info)
     ItemPos b = ins.break_item();
     ins.set_first_last_item();
 
+    SurrogateOut so(info);
     StateIdx nodes = 0;
-    update_bounds(ins, sol_best, ub, params, nodes, info); // Update bounds
+    update_bounds(ins, sol_best, ub, so, params, nodes, info); // Update bounds
     if (sol_best.profit() != ub) // If UB reached, then stop
-        sopt_expknap_rec(ins, sol_curr, sol_best, ub, b-1, b, params, nodes, info);
+        sopt_expknap_rec(ins, sol_curr, sol_best, ub, so, b-1, b, params, nodes, info);
 
     if (Info::verbose(info))
         std::cout << "NODES " << std::scientific << (double)nodes << std::endl;
