@@ -139,28 +139,6 @@ Instance::Instance(const Instance& ins)
     isum_ = ins.isum_;
 }
 
-Instance::Instance(const Instance& ins, std::vector<Interval> v)
-{
-    name_ = ins.name();
-    format_ = ins.format();
-
-    c_orig_ = ins.total_capacity();
-    sorted_ = ins.sorted();
-    for (Interval inter: v)
-        for (ItemPos j=inter.f; j<=inter.l; ++j)
-            items_.push_back(ins.item(j));
-    f_ = 0;
-    l_ = items_.size() - 1;
-
-    if (ins.optimal_solution() != NULL)
-        sol_opt_ = new Solution(*this);
-    sol_red_ = new Solution(*this);
-    sol_break_ = new Solution(*this);
-    sol_red_opt_ = ins.sol_red_opt_;
-    for (ItemPos i=f_; i<=l_; ++i)
-        sol_opt_->set(i, ins.optimal_solution()->contains_idx(item(i).i));
-}
-
 bool Instance::check()
 {
     for (ItemPos i=0; i<item_number(); ++i)
@@ -564,6 +542,10 @@ void Instance::surrogate(Weight multiplier, ItemIdx bound)
     DBG(std::cout << "SURROGATE..." << std::endl;)
     sol_red_->clear();
     sol_break_->clear();
+    if (sol_opt_ != NULL) {
+        delete sol_opt_;
+        sol_opt_ = NULL;
+    }
     f_ = 0;
     l_ = total_item_number() - 1;
     for (ItemIdx i=f_; i<=l_;) {

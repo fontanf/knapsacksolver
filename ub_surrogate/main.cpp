@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
     info.verbose(vm.count("verbose"));
     instance.sort_partially();
     Solution sol = sol_bestgreedynlogn(instance);
-    Profit ub = ub_surrogate(instance, {{instance.first_item(), instance.last_item()}}, sol.profit(), &info).ub;
+    Profit ub = ub_surrogate(instance, sol.profit(), &info).ub;
 
     double t = info.elapsed_time();
     info.pt.put("UB.Time", t);
