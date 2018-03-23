@@ -111,6 +111,7 @@ std::string Solution::print_bin() const
 {
     std::string s = "";
     for (ItemPos i=0; i<instance().total_item_number(); ++i)
+    //for (ItemPos i=instance().total_item_number()-1; i>=0; --i)
         s += std::to_string(contains(i));
     return s;
 

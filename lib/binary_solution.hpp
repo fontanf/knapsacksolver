@@ -7,24 +7,24 @@ class BSolFactory
 
 public:
 
-    BSolFactory(ItemPos size, ItemPos b, ItemPos n): size_(size), b_(b), n_(n)
+    BSolFactory(ItemPos size, ItemPos b, ItemPos f, ItemPos l): size_(size), b_(b), f_(f), l_(l)
     {
-        if (n < size) {
-            x1_ = 0;
-            x2_ = n-1;
-        } else if (b <= size/2) {
-            x1_ = 0;
-            x2_ = size-1;
-        } else if (n-b <= size/2) {
-            x1_ = n-size;
-            x2_ = n-1;
+        if (l-f+1 < size) {
+            x1_ = f;
+            x2_ = l;
+        } else if ((b-f+1) <= size/2) {
+            x1_ = f;
+            x2_ = f+size-1;
+        } else if ((l-b+1) <= size/2) {
+            x1_ = l-size+1;
+            x2_ = l;
         } else {
             x1_ = b-size/2;
             x2_ = x1_+size-1;
         }
     }
 
-    BSolFactory(ItemPos b, ItemPos n): BSolFactory(64, b, n) {  }
+    BSolFactory(ItemPos b, ItemPos f, ItemPos l): BSolFactory(64, b, f, l) {  }
 
     ItemPos x1() const { return x1_; }
     ItemPos x2() const { return x2_; }
@@ -79,7 +79,8 @@ private:
 
     ItemPos size_;
     ItemPos b_;
-    ItemPos n_;
+    ItemPos f_;
+    ItemPos l_;
     ItemPos x1_;
     ItemPos x2_;
 

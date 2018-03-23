@@ -159,6 +159,17 @@ public:
     Profit optimum() const;
 
     /**
+     * Reduce item f..j-1, and add them to the reduced solution
+     */
+    void set_first_item(ItemPos j);
+    /**
+     * Reduce items j+1..l (there are not added in the reduced solution)
+     */
+    void set_last_item(ItemPos j);
+
+    void fix(BSolFactory bsolf, BSol bsol);
+
+    /**
      * Create an instance with capacitiy and weights divided, keeping the
      * floor (resp. the ceiling).
      */
