@@ -1,5 +1,6 @@
 #include "balknap.hpp"
 
+#include "../lib/binary_solution.hpp"
 #include "../lb_greedy/greedy.hpp"
 #include "../lb_greedynlogn/greedynlogn.hpp"
 #include "../ub_dembo/dembo.hpp"
@@ -7,6 +8,7 @@
 #include "../ub_surrogate/surrogate.hpp"
 
 #include <map>
+#include <bitset>
 
 #define DBG(x)
 //#define DBG(x) x
@@ -245,55 +247,321 @@ Profit opt_balknap_list(
     return lb;
 }
 
-/******************************************************************************/
-
 #undef DBG
 
 /******************************************************************************/
 
+#define DBG(x)
+//#define DBG(x) x
+
+struct StatePart
+{
+    Weight mu;
+    Profit pi;
+    bool operator()(const StatePart& s1, const StatePart& s2)
+    {
+        if (s1.mu != s2.mu)
+            return s1.mu < s2.mu;
+        if (s1.pi != s2.pi)
+            return s1.pi < s2.pi;
+        return false;
+    }
+};
+
+struct StateValuePart
+{
+    ItemPos a;
+    ItemPos a_prec;
+    BSol sol;
+};
+
+std::ostream& operator<<(std::ostream& os, const std::pair<StatePart, StateValuePart>& s)
+{
+    os
+        << "(" << s.first.mu
+        << " " << s.first.pi
+        << " " << s.second.a
+        << " " << s.second.a_prec
+        //<< " s " << std::bitset<16>(s.second.sol)
+        << ")";
+    return os;
+}
+
 Solution sopt_balknap_list_part(
-        Instance& ins, BalknapParams params, ItemPos k, Info* info)
+        Instance& ins, BalknapParams params, ItemPos k, Info* info, Profit o)
 {
-    (void)info;
-    (void)params;
-    (void)k;
-    assert(false); // TODO
-    return Solution(ins);
+    DBG(std::cout << "BALKNAPLISTPART... OPT " << o << std::endl;)
+    DBG(std::cout << ins << std::endl;)
+
+    if (Info::verbose(info))
+        std::cout << "F " << ins.first_item()
+            << " L " << ins.last_item()
+            << " N " << ins.item_number()
+            << std::endl;
+
+    DBG(std::cout << "SORTING..." << std::endl;)
+    if (params.upper_bound == "b") {
+        ins.sort_partially();
+    } else if (params.upper_bound == "t") {
+        ins.sort();
+    } else {
+        assert(false);
+    }
+    if (ins.break_item() == ins.last_item()+1) // all items are in the break solution
+        return *ins.break_solution();
+
+    DBG(std::cout << "LB..." << std::flush;)
+    Solution sol(ins);
+    if (params.lb_greedynlogn == 0) {
+        sol = sol_bestgreedynlogn(ins);
+    } else if (params.lb_greedy == 0) {
+        sol = sol_greedy(ins);
+    } else {
+        sol = *ins.break_solution();
+    }
+    DBG(std::cout << " " << ins.print_lb(sol.profit()) << std::endl;)
+
+    DBG(std::cout << "REDUCTION..." << std::endl;)
+    Profit lb = (o != -1 && o > sol.profit())? o-1: sol.profit();
+    if (params.upper_bound == "b") {
+        if (ins.reduce1(lb, Info::verbose(info)))
+            return sol;
+    } else if (params.upper_bound == "t") {
+        if (ins.reduce2(lb, Info::verbose(info))) {
+            DBG(std::cout << "LB OPTIMAL" << std::endl;)
+            return sol;
+        }
+    } else {
+        assert(false);
+    }
+    Weight  c = ins.total_capacity();
+    ItemPos f = ins.first_item();
+    ItemPos l = ins.last_item();
+    ItemPos n = ins.item_number();
+
+    // Trivial cases
+    if (n == 0 || c == 0) {
+        DBG(std::cout << "EMPTY INSTANCE" << std::endl;)
+        return (ins.reduced_solution()->profit() > sol.profit())?
+            *ins.reduced_solution(): sol;
+    } else if (n == 1) {
+        DBG(std::cout << "1 ITEM INSTANCE" << std::endl;)
+        Solution sol1 = *ins.reduced_solution();
+        sol1.set(f, true);
+        return (sol1.profit() > sol.profit())? sol1: sol;
+    } else if (ins.break_item() == ins.last_item()+1) {
+        DBG(std::cout << "NO BREAK ITEM" << std::endl;)
+        return (ins.break_solution()->profit() > sol.profit())?
+            *ins.break_solution(): sol;
+    }
+
+    ItemPos b    = ins.break_item();
+    Weight w_bar = ins.break_solution()->weight();
+    Profit p_bar = ins.break_solution()->profit();
+    Profit u = (o != -1)? o: ub_dantzig(ins);
+
+    DBG(std::cout
+            << "N " << n << " C " << c
+            << " F " << f << " L " << l
+            << " B " << ins.item(b) << std::endl
+            << "PBAR " << p_bar << " WBAR " << w_bar << std::endl;)
+    if (Info::verbose(info))
+        std::cout
+            <<  "LB " << sol.profit()
+            << " UB " << u
+            << " GAP " << u - sol.profit() << std::endl;
+
+    if (sol.profit() == u) // If UB == LB, then stop
+        return sol;
+
+    // Create memory table
+    std::map<StatePart, StateValuePart, StatePart> map;
+
+    // Initialization
+    BSolFactory bsolf(k, b, f, l);
+    DBG(std::cout << "X1 " << bsolf.x1() << " X2 " << bsolf.x2() << std::endl;)
+    BSol bsol_init = 0;
+    for (ItemPos j=f; j<b; ++j)
+        bsol_init = bsolf.add(bsol_init, j);
+    map.insert({{w_bar,p_bar},{b,f,bsol_init}}); // s(w_bar,p_bar) = b
+
+    DBG(for (auto s = map.begin(); s != map.end(); ++s)
+        std::cout << *s << " ";
+    std::cout << std::endl;)
+
+    std::pair<StatePart, StateValuePart> best_state = {map.begin()->first, map.begin()->second};
+    ItemPos last_item = b-1;
+    // Update LB
+    if (best_state.first.pi > lb) {
+        lb = best_state.first.pi;
+        last_item = b;
+        DBG(std::cout << " BESTLB " << lb << std::flush;)
+            if (lb == u)
+                goto end;
+    }
+
+    DBG(std::cout << "RECURSION..." << std::endl;)
+    for (ItemPos t=b; t<=l; ++t) {
+        DBG(std::cout << "MAP " << map.size() << std::flush;)
+        DBG(std::cout << " T " << t << " " << ins.item(t) << std::endl;)
+        Weight wt = ins.item(t).w;
+        Profit pt = ins.item(t).p;
+
+        // Bounding
+        if (params.upper_bound == "t") {
+            DBG(std::cout << "BOUNDING..." << std::endl;)
+            for (auto s = map.begin(); s != map.end();) {
+                Profit pi = s->first.pi;
+                Weight mu = s->first.mu;
+                Profit ub = (mu <= c)?
+                    ub_dembo(ins, t, pi, c-mu):
+                    ub_dembo_rev(ins, s->second.a, pi, c-mu);
+                if (ub < lb) {
+                    map.erase(s++);
+                } else {
+                    s++;
+                }
+            }
+        }
+        if (map.size() == 0)
+            break;
+
+        // Add item t
+        DBG(std::cout << "ADD..." << std::endl;)
+        auto s = map.upper_bound({c+1,0});
+        auto hint = s;
+        hint--;
+        while (s != map.begin() && (--s)->first.mu <= c) {
+            DBG(std::cout << " + STATE " << *s << " ";)
+            Weight mu_ = s->first.mu + wt;
+            Weight pi_ = s->first.pi + pt;
+            DBG(std::cout << " " << mu_ << " " << pi_ << std::flush;)
+
+            // Bounding
+            Profit ub = 0;
+            if (params.upper_bound == "b") {
+                ub = (mu_ <= c)?
+                    ub_dembo(ins, b, pi_, c-mu_):
+                    ub_dembo_rev(ins, b, pi_, c-mu_);
+            } else if (params.upper_bound == "t") {
+                ub = (mu_ <= c)?
+                    ub_dembo(ins, t+1, pi_, c-mu_):
+                    ub_dembo_rev(ins, s->second.a-1, pi_, c-mu_);
+            } else {
+                    assert(false);
+            }
+            DBG(std::cout << "LB " << lb << " UBTMP " << ub << " UB " << u << " ";)
+            if (ub <= lb) {
+                DBG(std::cout << "X" << std::endl;)
+                continue;
+            } else {
+                DBG(std::cout << "OK" << std::flush;)
+            }
+
+            hint = map.insert(hint, {{mu_, pi_}, {s->second.a, f, bsolf.add(s->second.sol, t)}});
+            if (hint->second.a < s->second.a) {
+                hint->second.a    = s->second.a;
+                hint->second.sol  = bsolf.add(s->second.sol, t);
+            }
+
+            // Update LB
+            if (mu_ <= c && pi_ > lb) {
+                lb = pi_;
+                best_state = {hint->first, hint->second};
+                last_item = t;
+                DBG(std::cout << " BESTLB " << lb << std::flush;)
+                if (lb == u)
+                    goto end;
+            }
+            hint--;
+            DBG(std::cout << std::endl;)
+        }
+
+        // Remove previously added items
+        DBG(std::cout << "REMOVE..." << std::endl;)
+        for (auto s = map.rbegin(); s != map.rend() && s->first.mu > c; ++s) {
+            if (s->first.mu > c + wt)
+                continue;
+            DBG(std::cout << " - STATE " << *s << std::endl;)
+
+            for (ItemPos j = s->second.a_prec; j < s->second.a; ++j) {
+                DBG(std::cout << "  J " << j << " " << ins.item(j);)
+                Weight mu_ = s->first.mu - ins.item(j).w;
+                Profit pi_ = s->first.pi - ins.item(j).p;
+                DBG(std::cout << " " << mu_ << " " << pi_ << std::flush;)
+
+                // Bounding
+                Profit ub = 0;
+                if (params.upper_bound == "b") {
+                    ub = (mu_ <= c)?
+                        ub_dembo(ins, b, pi_, c-mu_):
+                        ub_dembo_rev(ins, b, pi_, c-mu_);
+                } else if (params.upper_bound == "t") {
+                    ub = (mu_ <= c)?
+                        ub_dembo(ins, t+1, pi_, c-mu_):
+                        ub_dembo_rev(ins, j-1, pi_, c-mu_);
+                } else {
+                    assert(false);
+                }
+                DBG(std::cout << " LB " << lb << " UBTMP " << ub << " UB " << u;)
+                if (ub <= lb) {
+                    DBG(std::cout << " X" << std::endl;)
+                    continue;
+                } else {
+                    DBG(std::cout << " OK" << std::flush;)
+                }
+
+                auto res = map.insert({{mu_,pi_},
+                        {j, f, bsolf.remove(s->second.sol, j)}});
+                if (!res.second) {
+                    if (res.first->second.a < j) {
+                        res.first->second.a = j;
+                        res.first->second.sol = bsolf.remove(s->second.sol, j);
+                    }
+                }
+
+                // Update LB
+                if (mu_ <= c && pi_ > lb) {
+                    lb = pi_;
+                    best_state = {res.first->first, res.first->second};
+                    last_item = t;
+                    DBG(std::cout << " BESTLB " << lb << std::flush;)
+                    if (lb == u)
+                        goto end;
+                }
+                DBG(std::cout << std::endl;)
+            }
+            s->second.a_prec = s->second.a;
+        }
+        DBG(std::cout << std::endl;)
+
+        DBG(for (auto s = map.begin(); s != map.end(); ++s)
+            std::cout << *s << " ";
+        std::cout << std::endl;)
+    }
+end:
+
+    if (best_state.first.pi < sol.profit())
+        return sol;
+
+    DBG(std::cout << "BEST STATE " << best_state << std::endl;)
+    assert(ins.check_opt(lb));
+    DBG(std::cout << "SET FIRST ITEM " << best_state.second.a << std::endl;)
+    ins.set_first_item(best_state.second.a);
+    DBG(std::cout << "SET LAST ITEM " << last_item << std::endl;)
+    ins.set_last_item(last_item);
+
+    DBG(std::cout << "BSOL " << std::bitset<64>(best_state.second.sol) << std::endl;)
+    DBG(std::cout << "SOPT " << ins.optimal_solution()->print_bin() << std::endl;)
+    DBG(std::cout << ins << std::endl;)
+    DBG(std::cout << "FIX " << bsolf.x1() << " TO " << bsolf.x2() << std::endl;)
+    ins.fix(bsolf, best_state.second.sol);
+    DBG(std::cout << ins << std::endl;)
+    DBG(std::cout << "BALKNAPLISTPART... END" << std::endl;)
+    return sopt_balknap_list_part(ins, params, k, info, best_state.first.pi);
 }
 
-/*
-
-void sopt_balknap_part_update_bounds(Instance ins,
-        Profit& lb, Profit& ub, SurrogateOut& so,
-        BalknapParams& p, StateIdx it, Info* info)
-{
-    if (p.lb_greedy == it) {
-        lb = std::max(lb, sol_bestgreedy(ins).profit());
-        if (Info::verbose(info))
-            std::cout << "RUN GREEDY... " << ins.print_lb(lb) << std::endl;
-    }
-    if (p.lb_greedynlogn == it) {
-        lb = std::max(lb, sol_bestgreedynlogn(ins).profit());
-        if (Info::verbose(info))
-            std::cout << "RUN GREEDYNLOGN... " << ins.print_lb(lb) << std::endl;
-    }
-    if (p.ub_surrogate == it) {
-        so = ub_surrogate(ins, {{ins.first_item(), ins.last_item()}}, lb, info);
-        ub = (so.ub > ub)? so.ub: ub;
-        if (Info::verbose(info))
-            std::cout << "RUN SURROGATE RELAXATION... " << ins.print_ub(ub) << std::endl;
-    }
-    if (p.solve_sur == it) {
-        p.solve_sur = -1;
-        Instance ins_sur(ins);
-        ins.surrogate(so.multiplier, so.bound);
-        Profit opt_sur = sol_sur = opt_balknap_list(ins_sur, p, NULL);
-        if (sol_sur.item_number() == so.bound)
-            lb = sol_sur.profit();
-    }
-}
-
-*/
+#undef DBG
 
 /******************************************************************************/
 

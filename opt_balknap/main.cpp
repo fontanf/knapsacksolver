@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
         ("greedynlogn,g", po::value<StateIdx>(&p.lb_greedynlogn), "")
         ("pairing,p", po::value<StateIdx>(&p.lb_pairing), "")
         ("surrogate,s", po::value<StateIdx>(&p.ub_surrogate), "")
-        ("solve-sur,s", po::value<StateIdx>(&p.solve_sur), "")
+        ("solve-sur,k", po::value<StateIdx>(&p.solve_sur), "")
         ("verbose,v",  "enable verbosity")
         ;
     po::variables_map vm;
