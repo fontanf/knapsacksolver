@@ -69,7 +69,7 @@ Furthermore, some `combo` improvements may here be used with the other algorithm
 Algorithms:
 - Balanced Dynamic programming `opt_balknap/main -m list -u t -r part` Since the list implementation requires a map, its asymptotical complexity is slightly greater than the one with an array. On the other hand, better Upper bounds can be used. Therefore, both are implemented and with the list implementation, options `-u` can be set to `b` (partial sorting, Dembo Upper bound with break item) or `t` (complete sorting, better Upper Bound)
   - `-m array`: `-r none` :heavy_check_mark: `-r all` :heavy_check_mark: `-r part` :x:
-  - `-m list`: `-r none` :heavy_check_mark: `-r all` :heavy_check_mark: `-r part` :x:
+  - `-m list`: `-r none` :heavy_check_mark: `-r all` :heavy_check_mark: `-r part` :heavy_check_mark:
 - Primal-dual Dynamic programming (`minknap`, `combo`)
   - `-m list -r part` :x:
 - Primal-dual Branch-and-bound (`expknap`) `opt_expknap/main` :heavy_check_mark: (with options `-n` :x: `-g` :heavy_check_mark: `-s`  :heavy_check_mark:`-k` :heavy_check_mark:)
