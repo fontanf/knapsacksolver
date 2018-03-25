@@ -31,7 +31,8 @@ Profit opt_balknap_array(Instance& ins, BalknapParams p, Info* info)
     }
 
     DBG(std::cout << "REDUCTION..." << std::endl;)
-    if (ins.reduce1(lb, Info::verbose(info)))
+    ins.reduce1(lb, Info::verbose(info));
+    if (ins.capacity() < 0)
         return lb;
     Weight  c = ins.capacity();
     ItemPos f = ins.first_item();
@@ -41,9 +42,11 @@ Profit opt_balknap_array(Instance& ins, BalknapParams p, Info* info)
 
     // Trivial cases
     if (n == 0 || c == 0) {
-        return p0;
+        return std::max(lb, p0);
     } else if (n == 1) {
-        return p0 + ins.item(f).p;
+        return std::max(lb, p0 + ins.item(f).p);
+    } else if (ins.break_item() == ins.last_item()+1) {
+        return std::max(lb, ins.break_solution()->profit());
     }
 
     Weight w_max = ins.max_weight_item().w;
@@ -110,7 +113,6 @@ Profit opt_balknap_array(Instance& ins, BalknapParams p, Info* info)
         Weight wt = ins.item(t).w;
         Profit pt = ins.item(t).p;
         DBG(std::cout << "t " << t << " " << ins.item(t) << std::endl;)
-        std::cout << "t " << t << " " << ins.item(t) << std::endl;
 
         // Copy previous iteration table
         for (Weight mu=c-w_max+1; mu<=c+w_max; ++mu) {
@@ -241,7 +243,8 @@ Solution sopt_balknap_array_all(Instance& ins,
     }
 
     DBG(std::cout << "REDUCTION..." << std::endl;)
-    if (ins.reduce1(sol.profit(), Info::verbose(info)))
+    ins.reduce1(sol.profit(), Info::verbose(info));
+    if (ins.capacity() < 0)
         return sol;
     Weight  c = ins.capacity();
     ItemPos f = ins.first_item();
@@ -251,11 +254,18 @@ Solution sopt_balknap_array_all(Instance& ins,
 
     // Trivial cases
     if (n == 0 || c == 0) {
-        return *ins.reduced_solution();
+        DBG(std::cout << "EMPTY INSTANCE" << std::endl;)
+        return (ins.reduced_solution()->profit() > sol.profit())?
+            *ins.reduced_solution(): sol;
     } else if (n == 1) {
-        Solution sol = *ins.reduced_solution();
-        sol.set(ins.first_item(), true);
-        return sol;
+        DBG(std::cout << "1 ITEM INSTANCE" << std::endl;)
+        Solution sol1 = *ins.reduced_solution();
+        sol1.set(f, true);
+        return (sol1.profit() > sol.profit())? sol1: sol;
+    } else if (ins.break_item() == ins.last_item()+1) {
+        DBG(std::cout << "NO BREAK ITEM" << std::endl;)
+        return (ins.break_solution()->profit() > sol.profit())?
+            *ins.break_solution(): sol;
     }
 
     Weight w_max = ins.max_weight_item().w;

@@ -143,15 +143,17 @@ public:
      * sorting of the items.
      * The second one uses Dantzig UB and requires a complete sorting of the
      * items.
-     * Fixed items are moved at the end of the item vector and the item number
-     * and the capacity are updated. The solution with fixed variables is
-     * returned by the method reduced_solution().
-     * If true is returned, then sol_curr is optimal, else, sol_curr may or may
-     * not be optimal: the optimal solution of the original instance is the best
-     * one from sol_curr and the optimal solution of the reduced instance.
+     * Fixed items are moved at the beginning or at the end of the item vector
+     * and the item number and the capacity are updated.
+     * Note that the break item may change.
+     * The solution with fixed variables is returned by the method
+     * reduced_solution().
+     * After a variable reduction, if the capacity of the instance is negative,
+     * then the lower bound is optimal. Otherwise, the optimal value is the max
+     * between the lower bound and the optimal value of the reduced solution.
      */
-    bool reduce1(Profit lb, bool verbose = false);
-    bool reduce2(Profit lb, bool verbose = false);
+    void reduce1(Profit lb, bool verbose = false);
+    void reduce2(Profit lb, bool verbose = false);
 
     const Solution* reduced_solution() const { return sol_red_; }
     const Solution* optimal_solution() const { return sol_opt_; }

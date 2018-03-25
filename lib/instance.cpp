@@ -577,7 +577,7 @@ void Instance::surrogate(Weight multiplier, ItemIdx bound)
 #define DBG(x)
 //#define DBG(x) x
 
-bool Instance::reduce1(Profit lb, bool verbose)
+void Instance::reduce1(Profit lb, bool verbose)
 {
     DBG(std::cout << "REDUCE1... LB " << lb << std::endl;)
     assert(break_item_found());
@@ -598,7 +598,7 @@ bool Instance::reduce1(Profit lb, bool verbose)
                 swap(i, f_);
             f_++;
             if (capacity() < 0)
-                return true;
+                return;
         } else {
             DBG(std::cout << " ?";)
         }
@@ -635,10 +635,9 @@ bool Instance::reduce1(Profit lb, bool verbose)
     }
 
     DBG(std::cout << "REDUCE1... END" << std::endl;)
-    return (capacity() < 0);
 }
 
-bool Instance::reduce2(Profit lb, bool verbose)
+void Instance::reduce2(Profit lb, bool verbose)
 {
     DBG(std::cout << "REDUCE2... LB " << lb << std::endl;)
     assert(sorted());
@@ -675,7 +674,7 @@ bool Instance::reduce2(Profit lb, bool verbose)
             sol_red_->set(i, true);
             fixed_1.push_back(item(i));
             if (capacity() < 0)
-                return true;
+                return;
         } else {
             DBG(std::cout << " ?" << std::flush;)
             if (i != b_)
@@ -749,7 +748,6 @@ bool Instance::reduce2(Profit lb, bool verbose)
             << std::endl;
     }
     DBG(std::cout << "REDUCE2... END" << std::endl;)
-    return (capacity() < 0);
 }
 
 #undef DBG

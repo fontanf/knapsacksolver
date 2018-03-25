@@ -69,10 +69,12 @@ Profit opt_balknap_list(
 
     DBG(std::cout << "REDUCTION..." << std::endl;)
     if (params.upper_bound == "b") {
-        if (ins.reduce1(lb, Info::verbose(info)))
+        ins.reduce1(lb, Info::verbose(info));
+        if (ins.capacity() < 0)
             return lb;
     } else if (params.upper_bound == "t") {
-        if (ins.reduce2(lb, Info::verbose(info)))
+        ins.reduce2(lb, Info::verbose(info));
+        if (ins.capacity() < 0)
             return lb;
     } else {
         assert(false);
@@ -85,11 +87,11 @@ Profit opt_balknap_list(
 
     // Trivial cases
     if (n == 0 || c == 0) {
-        return p0;
+        return std::max(lb, p0);
     } else if (n == 1) {
-        return p0 + ins.item(f).p;
+        return std::max(lb, p0 + ins.item(f).p);
     } else if (ins.break_item() == ins.last_item()+1) {
-        return ins.break_solution()->profit();
+        return std::max(lb, ins.break_solution()->profit());
     }
 
     ItemPos b    = ins.break_item();
@@ -299,6 +301,7 @@ Solution sopt_balknap_list_part(
             << " N " << ins.item_number()
             << std::endl;
 
+    // Sorting
     DBG(std::cout << "SORTING..." << std::endl;)
     if (params.upper_bound == "b") {
         ins.sort_partially();
@@ -307,9 +310,11 @@ Solution sopt_balknap_list_part(
     } else {
         assert(false);
     }
-    if (ins.break_item() == ins.last_item()+1) // all items are in the break solution
+    // If all items fit in the knapsack then return break solution
+    if (ins.break_item() == ins.last_item()+1)
         return *ins.break_solution();
 
+    // Compute initial lower bound
     DBG(std::cout << "LB..." << std::flush;)
     Solution sol(ins);
     if (params.lb_greedynlogn == 0) {
@@ -321,16 +326,22 @@ Solution sopt_balknap_list_part(
     }
     DBG(std::cout << " " << ins.print_lb(sol.profit()) << std::endl;)
 
+    // Variable reduction
     DBG(std::cout << "REDUCTION..." << std::endl;)
+    // If we already know the optimal value, we can use opt-1 as lower bound
+    // for the reduction.
     Profit lb = (o != -1 && o > sol.profit())? o-1: sol.profit();
     if (params.upper_bound == "b") {
-        if (ins.reduce1(lb, Info::verbose(info)))
+        ins.reduce1(lb, Info::verbose(info));
+        // If the capacity is negative, then it means that sol was the optimal
+        // solution. Note that this is not possible if opt-1 has been used as
+        // lower bound for the reduction.
+        if (ins.capacity() < 0)
             return sol;
     } else if (params.upper_bound == "t") {
-        if (ins.reduce2(lb, Info::verbose(info))) {
-            DBG(std::cout << "LB OPTIMAL" << std::endl;)
+        ins.reduce2(lb, Info::verbose(info));
+        if (ins.capacity() < 0)
             return sol;
-        }
     } else {
         assert(false);
     }
@@ -340,6 +351,8 @@ Solution sopt_balknap_list_part(
     ItemPos n = ins.item_number();
 
     // Trivial cases
+    // Return the best solution between the solution of the trivial instance and
+    // the solution used for the reduction.
     if (n == 0 || c == 0) {
         DBG(std::cout << "EMPTY INSTANCE" << std::endl;)
         return (ins.reduced_solution()->profit() > sol.profit())?
@@ -359,37 +372,41 @@ Solution sopt_balknap_list_part(
     Weight w_bar = ins.break_solution()->weight();
     Profit p_bar = ins.break_solution()->profit();
     Profit u = (o != -1)? o: ub_dantzig(ins);
+    if (sol.profit() == u) // If UB == LB, then stop
+        return sol;
 
     DBG(std::cout
             << "N " << n << " C " << c
             << " F " << f << " L " << l
             << " B " << ins.item(b) << std::endl
             << "PBAR " << p_bar << " WBAR " << w_bar << std::endl;)
+
     if (Info::verbose(info))
         std::cout
             <<  "LB " << sol.profit()
             << " UB " << u
             << " GAP " << u - sol.profit() << std::endl;
 
-    if (sol.profit() == u) // If UB == LB, then stop
-        return sol;
-
     // Create memory table
     std::map<StatePart, StateValuePart, StatePart> map;
 
     // Initialization
+    // Create first partial solution centered on the break item.
     BSolFactory bsolf(k, b, f, l);
     DBG(std::cout << "X1 " << bsolf.x1() << " X2 " << bsolf.x2() << std::endl;)
     BSol bsol_init = 0;
     for (ItemPos j=f; j<b; ++j)
         bsol_init = bsolf.add(bsol_init, j);
-    map.insert({{w_bar,p_bar},{b,f,bsol_init}}); // s(w_bar,p_bar) = b
+    // s(w_bar,p_bar) = b
+    map.insert({{w_bar,p_bar},{b,f,bsol_init}});
 
     DBG(for (auto s = map.begin(); s != map.end(); ++s)
         std::cout << *s << " ";
     std::cout << std::endl;)
 
+    // Best state. Note that it is not a pointer
     std::pair<StatePart, StateValuePart> best_state = {map.begin()->first, map.begin()->second};
+    // Also keep last added item to improve the variable reduction at the end.
     ItemPos last_item = b-1;
     // Update LB
     if (best_state.first.pi > lb) {
@@ -400,17 +417,24 @@ Solution sopt_balknap_list_part(
                 goto end;
     }
 
+    // Recursion
     DBG(std::cout << "RECURSION..." << std::endl;)
     for (ItemPos t=b; t<=l; ++t) {
+        std::cout << "T " << t << " MAP " << map.size() << std::endl;
         DBG(std::cout << "MAP " << map.size() << std::flush;)
         DBG(std::cout << " T " << t << " " << ins.item(t) << std::endl;)
         Weight wt = ins.item(t).w;
         Profit pt = ins.item(t).p;
 
         // Bounding
+        // If the upper bound with the break item is used, then the upper bound
+        // is not smeller after each iteration. Thus we don't need to compute
+        // it.
+        // On the other hand, if the other upper bound is used, then it will
+        // be lower for feasible states.
         if (params.upper_bound == "t") {
             DBG(std::cout << "BOUNDING..." << std::endl;)
-            for (auto s = map.begin(); s != map.end();) {
+            for (auto s = map.begin(); s != map.end() && s->first.mu <= c;) {
                 Profit pi = s->first.pi;
                 Weight mu = s->first.mu;
                 Profit ub = (mu <= c)?
@@ -423,6 +447,7 @@ Solution sopt_balknap_list_part(
                 }
             }
         }
+        // If there is no more states, the stop
         if (map.size() == 0)
             break;
 
@@ -541,22 +566,26 @@ Solution sopt_balknap_list_part(
     }
 end:
 
+    // If we didn't improve sol, then it means that sol was optimal
     if (best_state.first.pi < sol.profit())
         return sol;
 
-    DBG(std::cout << "BEST STATE " << best_state << std::endl;)
-    assert(ins.check_opt(lb));
-    DBG(std::cout << "SET FIRST ITEM " << best_state.second.a << std::endl;)
-    ins.set_first_item(best_state.second.a);
-    DBG(std::cout << "SET LAST ITEM " << last_item << std::endl;)
-    ins.set_last_item(last_item);
-
+    // Reduce instance to items from best_state.second.a to last_item and remove
+    // the items from the partial solution from the instance.
+    // Then run the algorithm again.
+    DBG(std::cout << "BEST STATE " << best_state
+            << " FIRST ITEM " << best_state.second.a
+            << " LAST ITEM " << last_item << std::endl;)
     DBG(std::cout << "BSOL " << std::bitset<64>(best_state.second.sol) << std::endl;)
     DBG(std::cout << "SOPT " << ins.optimal_solution()->print_bin() << std::endl;)
-    DBG(std::cout << ins << std::endl;)
     DBG(std::cout << "FIX " << bsolf.x1() << " TO " << bsolf.x2() << std::endl;)
+    assert(ins.check_opt(lb));
+    ins.set_first_item(best_state.second.a);
+    ins.set_last_item(last_item);
+    DBG(std::cout << ins << std::endl;)
     ins.fix(bsolf, best_state.second.sol);
     DBG(std::cout << ins << std::endl;)
+
     DBG(std::cout << "BALKNAPLISTPART... END" << std::endl;)
     return sopt_balknap_list_part(ins, params, k, info, best_state.first.pi);
 }
@@ -635,10 +664,15 @@ Solution sopt_balknap_list_all(
 
     DBG(std::cout << "REDUCTION..." << std::endl;)
     if (params.upper_bound == "b") {
-        if (ins.reduce1(sol.profit(), Info::verbose(info)))
+        ins.reduce1(sol.profit(), Info::verbose(info));
+        // If the capacity is negative, then it means that sol was the optimal
+        // solution. Note that this is not possible if opt-1 has been used as
+        // lower bound for the reduction.
+        if (ins.capacity() < 0)
             return sol;
     } else if (params.upper_bound == "t") {
-        if (ins.reduce2(sol.profit(), Info::verbose(info)))
+        ins.reduce2(sol.profit(), Info::verbose(info));
+        if (ins.capacity() < 0)
             return sol;
     } else {
         assert(false);
@@ -651,33 +685,38 @@ Solution sopt_balknap_list_all(
 
     // Trivial cases
     if (n == 0 || c == 0) {
-        return *ins.reduced_solution();
+        DBG(std::cout << "EMPTY INSTANCE" << std::endl;)
+        return (ins.reduced_solution()->profit() > sol.profit())?
+            *ins.reduced_solution(): sol;
     } else if (n == 1) {
-        Solution so = *ins.reduced_solution();
-        so.set(f, true);
-        return so;
+        DBG(std::cout << "1 ITEM INSTANCE" << std::endl;)
+        Solution sol1 = *ins.reduced_solution();
+        sol1.set(f, true);
+        return (sol1.profit() > sol.profit())? sol1: sol;
     } else if (ins.break_item() == ins.last_item()+1) {
-        return *ins.break_solution();
+        DBG(std::cout << "NO BREAK ITEM" << std::endl;)
+        return (ins.break_solution()->profit() > sol.profit())?
+            *ins.break_solution(): sol;
     }
 
     ItemPos b    = ins.break_item();
     Weight w_bar = ins.break_solution()->weight();
     Profit p_bar = ins.break_solution()->profit();
     Profit u     = ub_dantzig(ins);
+    if (sol.profit() == u) // If UB == LB, then stop
+        return sol;
 
     DBG(std::cout
             << "N " << n << " C " << c
             << " F " << f << " L " << l
             << " B " << ins.item(b) << std::endl
             << "PBAR " << p_bar << " WBAR " << w_bar << std::endl;)
+
     if (Info::verbose(info))
         std::cout
             <<  "LB " << sol.profit()
             << " UB " << u
             << " GAP " << u - sol.profit() << std::endl;
-
-    if (sol.profit() == u) // If UB == LB, then stop
-        return sol;
 
     // Create memory table
     std::vector<std::map<StateAll, StateValueAll, StateAll>> maps(l-b+2);
