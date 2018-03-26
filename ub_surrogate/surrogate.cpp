@@ -114,11 +114,11 @@ ItemIdx min_card(const Instance& ins, Profit lb)
         }
     }
 
-    ItemPos k = ins.reduced_solution()->item_number();
+    ItemPos k = -1;
     Profit z = 0;
-    for (ItemPos j=ins.first_item(); j<ins.last_item(); ++j) {
-        if (z + ins.item(index[j]).p > z) {
-            k = j;
+    for (ItemPos j=ins.first_item(); j<=ins.last_item(); ++j) {
+        if (z + ins.item(index[j]).p > lb) {
+            k = j+1;
             break;
         }
         z += ins.item(index[j]).p;
