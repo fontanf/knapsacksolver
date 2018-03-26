@@ -138,6 +138,7 @@ Instance::Instance(const Instance& ins)
     sol_red_opt_ = ins.sol_red_opt_;
     b_ = ins.break_item();
     isum_ = ins.isum_;
+    compute_max_items();
 }
 
 bool Instance::check()
@@ -277,7 +278,7 @@ void Instance::compute_break_item()
             break;
         sol_break_->set(b_, true);
     }
-    DBG(std::cout << "b " << b_ << " wsum " << sol_break_->weight() << " psum " << sol_break_->profit() << std::endl;)
+    DBG(std::cout << "B " << b_ << " WSUM " << sol_break_->weight() << " psum " << sol_break_->profit() << std::endl;)
     DBG(std::cout << "COMPUTEBREAKITEM... END" << std::endl;)
 }
 
@@ -392,8 +393,7 @@ void Instance::sort_partially()
         ItemPos l = last_item();
         Weight c = capacity();
         while (f < l) {
-            //if (l - f < 128) {
-            if (l - f < 8) {
+            if (l - f < 128) {
                 std::sort(items_.begin()+f, items_.begin()+l+1,
                         [](const Item& i1, const Item& i2) {
                         return i1.p * i2.w > i2.p * i1.w;});
@@ -538,25 +538,25 @@ void Instance::sort_left(Profit lb)
 #define DBG(x)
 //#define DBG(x) x
 
-void Instance::surrogate(Weight multiplier, ItemIdx bound)
+void Instance::surrogate(Weight multiplier, ItemIdx bound, ItemPos first)
 {
-    DBG(std::cout << "SURROGATE..." << std::endl;)
-    sol_red_->clear();
+    DBG(std::cout << "SURROGATE... K " << bound << " S " << multiplier << " F " << first << std::endl;)
     sol_break_->clear();
     if (sol_opt_ != NULL) {
         delete sol_opt_;
         sol_opt_ = NULL;
     }
-    f_ = 0;
-    l_ = total_item_number() - 1;
-    for (ItemIdx i=f_; i<=l_;) {
+    f_ = first;
+    l_ = last_item();
+    for (ItemIdx i=f_; i<=l_; ++i)
+        sol_red_->set(i, false);
+    bound -= sol_red_->item_number();
+    for (ItemIdx i=f_; i<=l_; ++i) {
         items_[i].w += multiplier;
         if (items_[i].w <= 0) {
             sol_red_->set(i, true);
-            swap(i, l_);
-            --l_;
-        } else {
-            ++i;
+            swap(i, f_);
+            f_++;
         }
     }
     c_orig_ += multiplier * bound;
@@ -565,8 +565,6 @@ void Instance::surrogate(Weight multiplier, ItemIdx bound)
     sorted_ = false;
     b_      = -1;
     sort_partially();
-    //std::cout << "SOLBRK " << sol_break_->print_bin() << std::endl;
-    //std::cout << "R " << break_solution()->remaining_capacity() << std::endl;
     DBG(std::cout << "SURROGATE... END" << std::endl;)
 }
 

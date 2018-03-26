@@ -179,7 +179,7 @@ public:
     void divide_weights_ceil(Weight divisor);
     void divide_profits_floor(Profit divisor);
     void divide_profits_ceil(Profit divisor);
-    void surrogate(Weight multiplier, ItemIdx bound);
+    void surrogate(Weight multiplier, ItemIdx bound, ItemPos first);
 
     ~Instance();
 

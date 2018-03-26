@@ -12,7 +12,7 @@ struct SurrogateOut
     Info* info;
     bool verbose;
     Profit ub = 0;
-    ItemIdx bound = 0;
+    ItemIdx bound = -1;
     Weight multiplier = 0;
 };
 

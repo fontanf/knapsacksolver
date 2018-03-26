@@ -9,17 +9,24 @@
 
 ItemIdx max_card(const Instance& ins)
 {
+    DBG(std::cout << "MAXCARD..." << std::endl;)
     if (ins.item_number() == 1)
         return 1;
 
-    std::vector<ItemIdx> index(ins.item_number());
+    std::vector<ItemIdx> index(ins.total_item_number());
     std::iota(index.begin(), index.end(), 0);
-    ItemIdx kp1 = 0;
     ItemIdx f = ins.first_item();
     ItemIdx l = ins.last_item();
     Weight  w = 0;
     Weight  c = ins.capacity();
     while (f < l) {
+        if (l - f < 128) {
+            std::sort(index.begin()+f, index.begin()+l+1,
+                    [&ins](ItemPos i1, ItemPos i2) {
+                    return ins.item(i1).w <= ins.item(i2).w;});
+            break;
+        }
+
         ItemIdx pivot = f + 1 + rand() % (l - f); // Select pivot
 
         iter_swap(index.begin() + pivot, index.begin() + l);
@@ -37,40 +44,50 @@ ItemIdx max_card(const Instance& ins)
             w_curr += ins.item(index[i]).w;
 
         if (w_curr + ins.item(index[j]).w <= c) {
-            f = j;
+            f = j+1;
             w = w_curr;
         } else if (w_curr > c) {
             l = j-1;
         } else {
-            f = j;
             break;
         }
     }
-    kp1 = f;
-    ItemIdx k = kp1 - 1;
 
-    DBG(std::cout << "KMAX " << k+1 << std::endl;
-    Weight ww = 0;
-    for (ItemIdx i=0; i<=k; ++i)
-        ww += ins.item(index[i]).w;
-    std::cout << "WW " << ww << " <= C " << c << " < WW+WK+1 " << ww + ins.item(index[k+1]).w << std::endl;
-    assert(ww <= c && ww + ins.item(index[k+1]).w > c);)
+    ItemPos k = ins.reduced_solution()->item_number();
+    Weight r = ins.capacity();
+    for (ItemPos j=ins.first_item(); j<=ins.last_item(); ++j) {
+        if (r < ins.item(index[j]).w) {
+            k = j;
+            break;
+        }
+        r -= ins.item(index[j]).w;
+    }
 
-    return k+1;
+    DBG(std::cout << "K " << k << std::endl;)
+    DBG(std::cout << "MAXCARD... END" << std::endl;)
+    return k;
 }
 
 ItemIdx min_card(const Instance& ins, Profit lb)
 {
+    DBG(std::cout << "MINCARD..." << std::endl;)
+    lb -= ins.reduced_solution()->profit();
     if (ins.item_number() <= 1)
         return (ins.item(1).p <= lb)? 1: 0;
 
-    std::vector<ItemIdx> index(ins.item_number());
+    std::vector<ItemIdx> index(ins.total_item_number());
     std::iota(index.begin(), index.end(), 0);
     ItemIdx f = ins.first_item();
     ItemIdx l = ins.last_item();
-    ItemIdx km1 = 0;
     Profit p = 0;
     while (f < l) {
+        if (l - f < 128) {
+            std::sort(index.begin()+f, index.begin()+l+1,
+                    [&ins](ItemPos i1, ItemPos i2) {
+                    return ins.item(i1).p >= ins.item(i2).p;});
+            break;
+        }
+
         ItemIdx pivot = f + 1 + rand() % (l - f); // Select pivot
 
         iter_swap(index.begin() + pivot, index.begin() + l);
@@ -90,39 +107,41 @@ ItemIdx min_card(const Instance& ins, Profit lb)
         if (p_curr > lb) {
             l = j-1;
         } else if (p_curr + ins.item(index[j]).p <= lb) {
-            f = j;
+            f = j+1;
             p = p_curr;
         } else {
-            km1 = j-1;
             break;
         }
     }
-    if (km1 == 0)
-        km1 = f;
-    ItemIdx k = km1 + 1;
 
-    DBG(std::cout << "KMIN " << k+1 << std::endl;
-    Weight pp = 0;
-    for (ItemIdx i=0; i<k; ++i)
-        pp += ins.item(index[i]).p;
-    std::cout << "PP " << pp << " <= Z " << lb << " < PP+PK " << pp + ins.item(index[k]).p << std::endl;
-    assert(pp <= lb && pp + ins.item(index[k]).p > lb);)
+    ItemPos k = ins.reduced_solution()->item_number();
+    Profit z = 0;
+    for (ItemPos j=ins.first_item(); j<ins.last_item(); ++j) {
+        if (z + ins.item(index[j]).p > z) {
+            k = j;
+            break;
+        }
+        z += ins.item(index[j]).p;
+    }
 
-    return k+1;
+    DBG(std::cout << "K " << k << std::endl;)
+    DBG(std::cout << "MINCARD... END" << std::endl;)
+    return k;
 }
 
 void ub_surrogate_solve(Instance& ins, ItemIdx k,
         Weight s_min, Weight s_max, SurrogateOut& out)
 {
     out.bound = k;
+    ItemPos first = ins.first_item();
     Weight  s_prec = 0;
     Weight  s = 0;
     Weight s1 = s_min;
     Weight s2 = s_max;
-    Weight wmax = ins.item(0).w;
-    Weight wmin = ins.item(0).w;
-    Profit pmax = ins.item(0).p;
-    for (ItemPos i=1; i<ins.item_number(); ++i) {
+    Weight wmax = ins.item(ins.first_item()).w;
+    Weight wmin = ins.item(ins.first_item()).w;
+    Profit pmax = ins.item(ins.first_item()).p;
+    for (ItemPos i=ins.first_item()+1; i<=ins.last_item(); ++i) {
         if (ins.item(i).w > wmax)
             wmax = ins.item(i).w;
         if (ins.item(i).w < wmin)
@@ -139,7 +158,7 @@ void ub_surrogate_solve(Instance& ins, ItemIdx k,
         // Avoid INT overflow
         if (s_min == 0 && s != 0) {
             if (INT_FAST64_MAX / s < k
-                    || ins.capacity() > INT_FAST64_MAX - s * k
+                    || ins.total_capacity() > INT_FAST64_MAX - s * k
                     || INT_FAST64_MAX / ins.total_item_number() < wmax+s
                     || wmax + s > wlim) {
                 DBG(std::cout << "S2 " << s2 << " => " << s-1 << std::endl;)
@@ -163,22 +182,18 @@ void ub_surrogate_solve(Instance& ins, ItemIdx k,
             }
         }
 
-        ins.surrogate(s-s_prec, k);
-        Profit  p = ins.break_solution()->profit();
+        ins.surrogate(s-s_prec, k, first);
+        Profit p = ub_dantzig(ins);
         ItemPos b = ins.break_item();
-        if (ins.break_capacity() > 0 && ins.break_item() != ins.item_number())
-            p += (ins.item(b).p * ins.break_capacity()) / ins.item(b).w;
-        ItemPos g = ins.reduced_solution()->item_number() + b;
 
         DBG(std::cout
                 << "S1 " << s1 << " S " << s << " S2 " << s2
-                << " G "   << g
                 << " B "   << ins.break_item()
                 << " N "   << ins.item_number()
                 << " UB "  << p
                 << " GAP " << p - ins.optimum()
                 << std::endl;)
-        if (b != ins.item_number())
+        if (b <= ins.last_item())
             DBG(std::cout
                     << "PBAR " << ins.break_solution()->profit()
                     << " R " << ins.break_capacity()
@@ -193,17 +208,18 @@ void ub_surrogate_solve(Instance& ins, ItemIdx k,
             out.multiplier = s;
         }
 
-        if (g == k && ins.break_capacity() == 0)
+        if (b == k && ins.break_capacity() == 0)
             break;
 
-        if ((s_min == 0 && g >= k) || (s_max == 0 && g >= k)) {
+        if ((s_min == 0 && b >= k) || (s_max == 0 && b >= k)) {
             s1 = s + 1;
         } else {
             s2 = s - 1;
         }
         s_prec = s;
     }
-    ins.surrogate(-s, k);
+    ins.surrogate(-s, k, first);
+    assert(ins.first_item() == first);
 }
 
 SurrogateOut ub_surrogate(const Instance& instance, Profit lb, Info* info)
@@ -230,8 +246,7 @@ SurrogateOut ub_surrogate(const Instance& instance, Profit lb, Info* info)
     Weight s_min = (INT_FAST64_MAX / pmax > wmax)? -pmax*wmax: -INT_FAST64_MAX;
 
     DBG(std::cout
-            <<  "Z "    << lb
-            << " GAP "  << ins.optimum() - lb
+            << "LB " << ins.print_lb(lb)
             << " B "    << ins.break_item()
             << " SMAX " << s_max
             << std::endl;)
