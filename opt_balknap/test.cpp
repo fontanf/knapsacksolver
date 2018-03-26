@@ -15,5 +15,7 @@ TEST(Balknap, SimpleInstances)
     test(p.string() + " -v -m list -r none -u t", "opt");
     test(p.string() + " -v -m list -r all -u t", "sopt");
     test(p.string() + " -v -m list -r part -u t", "sopt");
+    test(p.string() + " -v -m list -r part -u b -s 0", "sopt");
+    test(p.string() + " -v -m list -r part -u t -s 0", "sopt");
 }
 

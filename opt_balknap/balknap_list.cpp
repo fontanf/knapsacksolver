@@ -289,6 +289,70 @@ std::ostream& operator<<(std::ostream& os, const std::pair<StatePart, StateValue
     return os;
 }
 
+void update_bounds(const Instance& ins, Solution& sol_best, Profit& lb,
+        Profit& ub, SurrogateOut& so,
+        BalknapParams& params, ItemPos k, StateIdx nodes, Info* info)
+{
+    if (0 <= params.ub_surrogate && params.ub_surrogate <= nodes) {
+        params.ub_surrogate = -1;
+        if (Info::verbose(info))
+            std::cout << "SURROGATE..." << std::flush;
+        so = ub_surrogate(ins, sol_best.profit());
+        if (Info::verbose(info))
+            std::cout << " K " << so.bound << " S " << so.multiplier << std::flush;
+        if (ub > so.ub) {
+            ub = so.ub;
+            if (Info::verbose(info))
+                std::cout << " " << ins.print_ub(ub) << std::endl;
+        } else {
+            if (Info::verbose(info))
+                std::cout << " NO IMPROVEMENT" << std::endl;
+        }
+    }
+
+    if (0 <= params.solve_sur && params.solve_sur <= nodes) {
+        params.solve_sur = -1;
+        if (sol_best.profit() == ub)
+            return;
+        if (Info::verbose(info))
+            std::cout << "SOLVE SURROGATE..." << std::endl;
+        assert(so.bound != -1);
+        Instance ins_sur(ins);
+        ins_sur.surrogate(so.multiplier, so.bound, ins_sur.first_item());
+        Solution sol_sur = sopt_balknap_list_part(ins_sur, params, k, info, -1);
+        if (ub > sol_sur.profit()) {
+            ub = sol_sur.profit();
+            if (Info::verbose(info))
+                std::cout << "END SOLVE SURROGATE " << ins.print_ub(ub) << std::flush;
+        }
+        if (Info::verbose(info))
+            std::cout << " K " << sol_sur.item_number() << "/" << so.bound << std::flush;
+        if (sol_sur.item_number() == so.bound) {
+            sol_best = sol_sur;
+            lb = sol_best.profit();
+            if (Info::verbose(info))
+                std::cout << " " << ins.print_lb(sol_best.profit()) << std::flush;
+        }
+        if (Info::verbose(info))
+            std::cout << std::endl;
+    }
+
+    if (0 <= params.lb_greedynlogn && params.lb_greedynlogn <= nodes) {
+        params.lb_greedynlogn = -1;
+        if (Info::verbose(info))
+            std::cout << "GREEDYNLOGN..." << std::flush;
+        if (sol_best.update(sol_bestgreedynlogn(ins))) {
+            if (sol_best.profit() > lb)
+                lb = sol_best.profit();
+            if (Info::verbose(info))
+                std::cout << " " << ins.print_lb(sol_best.profit()) << std::endl;
+        } else {
+            if (Info::verbose(info))
+                std::cout << " NO IMPROVEMENT" << std::endl;
+        }
+    }
+}
+
 Solution sopt_balknap_list_part(
         Instance& ins, BalknapParams params, ItemPos k, Info* info, Profit o)
 {
@@ -318,8 +382,10 @@ Solution sopt_balknap_list_part(
     DBG(std::cout << "LB..." << std::flush;)
     Solution sol(ins);
     if (params.lb_greedynlogn == 0) {
+        params.lb_greedynlogn = -1;
         sol = sol_bestgreedynlogn(ins);
     } else if (params.lb_greedy == 0) {
+        params.lb_greedy = -1;
         sol = sol_greedy(ins);
     } else {
         sol = *ins.break_solution();
@@ -372,6 +438,7 @@ Solution sopt_balknap_list_part(
     Weight w_bar = ins.break_solution()->weight();
     Profit p_bar = ins.break_solution()->profit();
     Profit u = (o != -1)? o: ub_dantzig(ins);
+    SurrogateOut so(info);
     if (sol.profit() == u) // If UB == LB, then stop
         return sol;
 
@@ -420,11 +487,15 @@ Solution sopt_balknap_list_part(
     // Recursion
     DBG(std::cout << "RECURSION..." << std::endl;)
     for (ItemPos t=b; t<=l; ++t) {
-        std::cout << "T " << t << " MAP " << map.size() << std::endl;
+        //std::cout << "T " << t << " MAP " << map.size() << std::endl;
         DBG(std::cout << "MAP " << map.size() << std::flush;)
         DBG(std::cout << " T " << t << " " << ins.item(t) << std::endl;)
         Weight wt = ins.item(t).w;
         Profit pt = ins.item(t).p;
+
+        update_bounds(ins, sol, lb, u, so, params, k, map.size(), info);
+        if (lb == u)
+            goto end;
 
         // Bounding
         // If the upper bound with the break item is used, then the upper bound
