@@ -129,11 +129,12 @@ public:
      * (Pisinger, 1997).
      */
     void sort_partially();
-    void set_first_last_item();
     void sort_right(Profit lb);
     void sort_left(Profit lb);
     ItemPos int_right_size() const { return int_right_.size(); }
-    ItemPos int_left_size() const { return int_left_.size(); }
+    ItemPos int_left_size()  const { return int_left_.size();  }
+    ItemPos first_sorted_item() const { return s_; }
+    ItemPos last_sorted_item()  const { return t_; }
     bool break_item_found() const { return (b_ != -1); }
 
     /**
@@ -180,6 +181,7 @@ public:
     void divide_profits_floor(Profit divisor);
     void divide_profits_ceil(Profit divisor);
     void surrogate(Weight multiplier, ItemIdx bound, ItemPos first);
+    void surrogate(Weight multiplier, ItemIdx bound);
 
     ~Instance();
 
@@ -257,6 +259,8 @@ private:
 
     ItemPos f_;
     ItemPos l_;
+    ItemPos s_;
+    ItemPos t_;
     Weight  c_orig_;
     bool sorted_ = false;
     std::vector<Interval> int_right_;

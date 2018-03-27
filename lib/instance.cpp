@@ -448,13 +448,9 @@ void Instance::sort_partially()
     std::cout << std::endl;)
 
     compute_break_item();
+    s_ = b_;
+    t_ = b_;
     DBG(std::cout << "PARTSORT... END" << std::endl;)
-}
-
-void Instance::set_first_last_item()
-{
-    f_ = break_item();
-    l_ = break_item();
 }
 
 #undef DBG
@@ -470,14 +466,14 @@ void Instance::sort_right(Profit lb)
     Interval in = int_right_.back();
     //std::cout << "SORT " << in << std::endl;
     int_right_.pop_back();
-    ItemPos k = l_;
+    ItemPos k = t_;
     for (ItemPos i=in.f; i<=in.l; ++i) {
         DBG(std::cout << "I " << i << std::flush;)
             Profit ub = break_solution()->profit() + item(i).p
             + ((break_capacity() - item(i).w) * item(b_).p) / item(b_).w;
         DBG(std::cout << " LB " << lb << " UB " << ub << std::flush;)
         if ((item(i).w <= capacity() && ub > lb)
-                || (k == l_ && i == in.l)) {
+                || (k == t_ && i == in.l)) {
             k++;
             DBG(std::cout << " K " << k << std::endl;)
             swap(k, i);
@@ -488,10 +484,10 @@ void Instance::sort_right(Profit lb)
             DBG(std::cout << " REDUCE " << item(i) << std::endl;)
         }
     }
-    std::sort(items_.begin()+l_+1, items_.begin()+k+1,
+    std::sort(items_.begin()+t_+1, items_.begin()+k+1,
             [](const Item& i1, const Item& i2) {
             return i1.p * i2.w > i2.p * i1.w;});
-    l_ = k;
+    t_ = k;
     DBG(std::cout << *this << std::endl;)
     DBG(std::cout << "SORTRIGHT... END" << std::endl;)
 }
@@ -505,7 +501,7 @@ void Instance::sort_left(Profit lb)
     DBG(std::cout << in << std::endl;)
     //std::cout << "SORT " << in << std::endl;
     int_left_.pop_back();
-    ItemPos k = f_;
+    ItemPos k = s_;
     DBG(std::cout << "K " << k << std::endl;)
     for (ItemPos i=in.l; i>=in.f; --i) {
         DBG(std::cout << "I " << i << std::flush;)
@@ -513,7 +509,7 @@ void Instance::sort_left(Profit lb)
             + ((break_capacity() + item(i).w) * item(b_).p) / item(b_).w;
         DBG(std::cout << " LB " << lb << " UB " << ub << std::flush;)
         if ((item(i).w <= capacity() && ub > lb)
-                || (i == in.f && k == f_)) {
+                || (i == in.f && k == s_)) {
             k--;
             DBG(std::cout << " K " << k << std::endl;)
             swap(k, i);
@@ -525,10 +521,10 @@ void Instance::sort_left(Profit lb)
             DBG(std::cout << " REDUCE " << item(i) << " C " << capacity() << std::endl;)
         }
     }
-    std::sort(items_.begin()+k, items_.begin()+f_,
+    std::sort(items_.begin()+k, items_.begin()+s_,
             [](const Item& i1, const Item& i2) {
             return i1.p * i2.w > i2.p * i1.w;});
-    f_ = k;
+    s_ = k;
     DBG(std::cout << *this << std::endl;)
     DBG(std::cout << "SORTLEFT... END" << std::endl;)
 }
@@ -537,6 +533,11 @@ void Instance::sort_left(Profit lb)
 
 #define DBG(x)
 //#define DBG(x) x
+
+void Instance::surrogate(Weight multiplier, ItemIdx bound)
+{
+    surrogate(multiplier, bound, first_item());
+}
 
 void Instance::surrogate(Weight multiplier, ItemIdx bound, ItemPos first)
 {

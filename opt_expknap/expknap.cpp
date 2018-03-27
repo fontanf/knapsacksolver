@@ -74,10 +74,10 @@ bool sopt_expknap_rec(Instance& ins,
         ExpknapParams& params, StateIdx& nodes, Info* info)
 {
     DBG(std::cout
-        << "F " << ins.first_item()
+        << "F " << ins.first_sorted_item()
         << " S " << s
         << " T " << t
-        << " L " << ins.last_item()
+        << " L " << ins.last_sorted_item()
         << std::endl;)
 
     DBG(bool opt_branch = true;
@@ -104,7 +104,7 @@ bool sopt_expknap_rec(Instance& ins,
                 return false;
 
             // Expand
-            if (ins.int_right_size() > 0 && t > ins.last_item())
+            if (ins.int_right_size() > 0 && t > ins.last_sorted_item())
                 ins.sort_right(sol_best.profit());
 
             // Bounding test
@@ -137,7 +137,7 @@ bool sopt_expknap_rec(Instance& ins,
                 return false;
 
             // Expand
-            if (ins.int_left_size() > 0 && s < ins.first_item())
+            if (ins.int_left_size() > 0 && s < ins.first_sorted_item())
                 ins.sort_left(sol_best.profit());
 
             // Bounding test
@@ -188,7 +188,6 @@ Solution sopt_expknap(Instance& ins, ExpknapParams& params, Info* info)
             << ins.print_lb(sol_best.profit()) << " "
             << ins.print_ub(ub) << std::endl;
     ItemPos b = ins.break_item();
-    ins.set_first_last_item();
 
     SurrogateOut so(info);
     StateIdx nodes = 0;
