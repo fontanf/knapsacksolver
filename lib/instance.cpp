@@ -488,6 +488,8 @@ void Instance::sort_right(Profit lb)
             [](const Item& i1, const Item& i2) {
             return i1.p * i2.w > i2.p * i1.w;});
     t_ = k;
+    if (int_right_.size() == 0)
+        l_ = t_;
     DBG(std::cout << *this << std::endl;)
     DBG(std::cout << "SORTRIGHT... END" << std::endl;)
 }
@@ -525,6 +527,8 @@ void Instance::sort_left(Profit lb)
             [](const Item& i1, const Item& i2) {
             return i1.p * i2.w > i2.p * i1.w;});
     s_ = k;
+    if (int_left_.size() == 0)
+        f_ = s_;
     DBG(std::cout << *this << std::endl;)
     DBG(std::cout << "SORTLEFT... END" << std::endl;)
 }

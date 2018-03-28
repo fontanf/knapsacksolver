@@ -1,7 +1,7 @@
 cc_library(
         name = "libminknap",
         hdrs = ["minknap.hpp"],
-        srcs = ["minknap.cpp"],
+        srcs = ["minknap.cpp", "minknap_part.cpp"],
         visibility = ["//visibility:public"],
         deps = [
                 "//lib:cpp",
