@@ -14,5 +14,5 @@ struct MinknapParams
 
 Profit opt_minknap_list(Instance& ins, MinknapParams params, Info* info = NULL);
 Solution sopt_minknap_list_part(Instance& ins,
-        MinknapParams params, ItemPos k, Info* info = NULL, Profit ub = -1);
+        MinknapParams params, ItemPos k, Info* info = NULL, Profit o = -1);
 

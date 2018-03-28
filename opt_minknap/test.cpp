@@ -7,6 +7,6 @@ TEST(Balknap, SimpleInstances)
     p /= boost::filesystem::path("main");
 
     test(p.string() + " -v -r none", "opt");
-    //test(p.string() + " -v -r part", "sopt");
+    test(p.string() + " -v -r part", "sopt");
 }
 
