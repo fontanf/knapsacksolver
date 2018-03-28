@@ -40,23 +40,10 @@ Profit opt_bellman_list(const Instance& ins, Info* info)
         Weight wi = ins.item(i).w;
         Profit pi = ins.item(i).p;
         std::vector<State> l{{0, 0}};
-        std::vector<State>::iterator it = l0.begin();
+        std::vector<State>::iterator it  = l0.begin();
         std::vector<State>::iterator it1 = l0.begin();
         while (it != l0.end() || it1 != l0.end()) {
-            if (it != l0.end() && it->w <= it1->w + wi) {
-                DBG(std::cout << "STATE " << *it;)
-                if (it->p > l.back().p) {
-                    if (it->w == l.back().w) {
-                        l.back() = *it;
-                    } else {
-                        l.push_back(*it);
-                    }
-                    DBG(std::cout << " OK" << std::endl;)
-                } else {
-                    DBG(std::cout << " X" << std::endl;)
-                }
-                ++it;
-            } else {
+            if (it == l0.end() || it->w > it1->w + wi) {
                 State s1{it1->w+wi, it1->p+pi};
                 DBG(std::cout << "STATE " << *it1 << " => " << s1;)
                 if (s1.w > c) {
@@ -83,6 +70,20 @@ Profit opt_bellman_list(const Instance& ins, Info* info)
                     DBG(std::cout << " X" << std::endl;)
                 }
                 it1++;
+            } else {
+                assert(it != l0.end());
+                DBG(std::cout << "STATE " << *it;)
+                if (it->p > l.back().p) {
+                    if (it->w == l.back().w) {
+                        l.back() = *it;
+                    } else {
+                        l.push_back(*it);
+                    }
+                    DBG(std::cout << " OK" << std::endl;)
+                } else {
+                    DBG(std::cout << " X" << std::endl;)
+                }
+                ++it;
             }
         }
         l0 = std::move(l);
@@ -147,20 +148,7 @@ std::vector<State> opts_bellman_list(const Instance& ins,
         std::vector<State>::iterator it = l0.begin();
         std::vector<State>::iterator it1 = l0.begin();
         while (it != l0.end() || it1 != l0.end()) {
-            if (it != l0.end() && it->w <= it1->w + wi) {
-                DBG(std::cout << "STATE " << *it;)
-                if (it->p > l.back().p) {
-                    if (it->w == l.back().w) {
-                        l.back() = *it;
-                    } else {
-                        l.push_back(*it);
-                    }
-                    DBG(std::cout << " OK" << std::endl;)
-                } else {
-                    DBG(std::cout << " X" << std::endl;)
-                }
-                ++it;
-            } else {
+            if (it == l0.end() || it->w > it1->w + wi) {
                 State s1{it1->w+wi, it1->p+pi};
                 DBG(std::cout << "STATE " << *it1 << " => " << s1;)
                 if (s1.w > c) {
@@ -187,6 +175,19 @@ std::vector<State> opts_bellman_list(const Instance& ins,
                     DBG(std::cout << " X" << std::endl;)
                 }
                 it1++;
+            } else {
+                DBG(std::cout << "STATE " << *it;)
+                if (it->p > l.back().p) {
+                    if (it->w == l.back().w) {
+                        l.back() = *it;
+                    } else {
+                        l.push_back(*it);
+                    }
+                    DBG(std::cout << " OK" << std::endl;)
+                } else {
+                    DBG(std::cout << " X" << std::endl;)
+                }
+                ++it;
             }
         }
         l0 = std::move(l);
