@@ -73,8 +73,7 @@ Algorithms:
   - `-m list -r all` :heavy_check_mark:
   - `-m list -r part` :heavy_check_mark: (with options `-n` :x: `-g` :heavy_check_mark: `-p` :x: `-s` :heavy_check_mark: `-k` :heavy_check_mark:)
 - Primal-dual Dynamic programming (only with list) (`minknap`, `combo`)
-  - `-r none` :x: (with options `-n` :x: `-g` :x: `-p` :x: `-s` :x: `-k` :x:)
-  - `-r part` :x: (with options `-n` :x: `-g` :x: `-p` :x: `-s` :x: `-k` :x:)
-
+  - `-r none` :heavy_check_mark: (with options `-n` :x: `-g` :x: `-p` :x: `-s` :x: `-k` :x:)
+  - `-r part` :heavy_check_mark: (with options `-n` :x: `-g` :x: `-p` :x: `-s` :x: `-k` :x:)
 - Primal-dual Branch-and-bound (`expknap`) `opt_expknap/main` :heavy_check_mark: (with options `-n` :x: `-g` :heavy_check_mark: `-s`  :heavy_check_mark: `-k` :heavy_check_mark:)
 
