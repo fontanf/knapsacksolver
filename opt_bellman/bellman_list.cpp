@@ -24,29 +24,26 @@ std::ostream& operator<<(std::ostream& os, std::vector<State>& l)
     return os;
 }
 
-std::vector<State> opts_bellman_list(const Instance& ins,
-        ItemPos n1, ItemPos n2, Weight c, Info* info = NULL)
+Profit opt_bellman_list(const Instance& ins, Info* info)
 {
     (void)info;
+    Weight  c = ins.capacity();
+    ItemPos n = ins.total_item_number();
 
-    // Note that list L'i-1 is not explicitly created and that the
-    // implementation requires Li-1 to be reversed (since pop_back is O(1)
-    // whereas pop_front() is O(n) for std::vector).
-    DBG(std::cout << "OPTSBELLMANLIST N1 " << n1 << " N2 " << n2 << " c " << c << std::endl;)
-    if (c == 0)
-        return {{0, 0}};
+    if (n == 0 || c == 0)
+        return 0;
 
-    DBG(std::cout << "IO " << i0 << std::endl;)
     Profit lb = 0;
     std::vector<State> l0{{0, 0}};
-    for (ItemPos i=n1; i<=n2; ++i) {
+    for (ItemPos i=0; i<n; ++i) {
         DBG(std::cout << "I " << i << std::endl;)
         Weight wi = ins.item(i).w;
         Profit pi = ins.item(i).p;
         std::vector<State> l{{0, 0}};
-        std::vector<State>::reverse_iterator it = l0.rbegin();
-        while (!l0.empty()) {
-            if (it != l0.rend() && it->w <= l0.back().w + wi) {
+        std::vector<State>::iterator it = l0.begin();
+        std::vector<State>::iterator it1 = l0.begin();
+        while (it != l0.end() || it1 != l0.end()) {
+            if (it != l0.end() && it->w <= it1->w + wi) {
                 DBG(std::cout << "STATE " << *it;)
                 if (it->p > l.back().p) {
                     if (it->w == l.back().w) {
@@ -60,8 +57,8 @@ std::vector<State> opts_bellman_list(const Instance& ins,
                 }
                 ++it;
             } else {
-                State s1{l0.back().w+wi, l0.back().p+pi};
-                DBG(std::cout << "STATE " << l0.back() << " => " << s1;)
+                State s1{it1->w+wi, it1->p+pi};
+                DBG(std::cout << "STATE " << *it1 << " => " << s1;)
                 if (s1.w > c) {
                     DBG(std::cout << " W>C" << std::endl;)
                     break;
@@ -71,41 +68,29 @@ std::vector<State> opts_bellman_list(const Instance& ins,
                         l.back() = s1;
                         DBG(std::cout << " OK" << std::endl;)
                     } else {
+                        if (s1.p > lb) // Update lower bound
+                            lb = s1.p;
                         Profit ub = ub_0(ins, i+1, s1.p, c-s1.w);
                         DBG(std::cout << " UB " << ub;)
-                        if (ub >= lb) {
-                            if (s1.p > lb) // Update lower bound
-                                lb = s1.p;
+                        if (ub > lb) {
                             l.push_back(s1);
                             DBG(std::cout << " OK" << std::endl;)
                         } else {
                             DBG(std::cout << " X" << std::endl;)
                         }
                     }
+                } else {
+                    DBG(std::cout << " X" << std::endl;)
                 }
-                l0.pop_back();
+                it1++;
             }
         }
-        std::reverse(l.begin(), l.end());
         l0 = std::move(l);
         DBG(std::cout << "L " << l0 << std::endl;)
     }
-    DBG(std::cout << "OPTSBELLMANLIST... END" << std::endl;)
-    return l0;
-}
 
-Profit opt_bellman_list(const Instance& ins, Info* info)
-{
-    Weight  c = ins.capacity();
-    ItemPos n = ins.item_number();
-
-    if (n == 0)
-        return 0;
-
-    auto l0 = opts_bellman_list(ins, 0, n-1, c, info);
-    Profit opt = l0.front().p;
-    assert(ins.check_opt(opt));
-    return opt;
+    assert(ins.check_opt(lb));
+    return lb;
 }
 
 #undef DBG
@@ -143,6 +128,74 @@ Solution sopt_bellman_list_part(const Instance& ins, ItemPos k, Info* info)
 #define DBG(x)
 //#define DBG(x) x
 
+std::vector<State> opts_bellman_list(const Instance& ins,
+        ItemPos n1, ItemPos n2, Weight c, Info* info = NULL)
+{
+    (void)info;
+
+    DBG(std::cout << "OPTSBELLMANLIST N1 " << n1 << " N2 " << n2 << " c " << c << std::endl;)
+    if (c == 0)
+        return {{0, 0}};
+
+    Profit lb = 0;
+    std::vector<State> l0{{0, 0}};
+    for (ItemPos i=n1; i<=n2; ++i) {
+        DBG(std::cout << "I " << i << std::endl;)
+        Weight wi = ins.item(i).w;
+        Profit pi = ins.item(i).p;
+        std::vector<State> l{{0, 0}};
+        std::vector<State>::iterator it = l0.begin();
+        std::vector<State>::iterator it1 = l0.begin();
+        while (it != l0.end() || it1 != l0.end()) {
+            if (it != l0.end() && it->w <= it1->w + wi) {
+                DBG(std::cout << "STATE " << *it;)
+                if (it->p > l.back().p) {
+                    if (it->w == l.back().w) {
+                        l.back() = *it;
+                    } else {
+                        l.push_back(*it);
+                    }
+                    DBG(std::cout << " OK" << std::endl;)
+                } else {
+                    DBG(std::cout << " X" << std::endl;)
+                }
+                ++it;
+            } else {
+                State s1{it1->w+wi, it1->p+pi};
+                DBG(std::cout << "STATE " << *it1 << " => " << s1;)
+                if (s1.w > c) {
+                    DBG(std::cout << " W>C" << std::endl;)
+                    break;
+                }
+                if (s1.p > l.back().p) {
+                    if (s1.w == l.back().w) {
+                        l.back() = s1;
+                        DBG(std::cout << " OK" << std::endl;)
+                    } else {
+                        if (s1.p > lb) // Update lower bound
+                            lb = s1.p;
+                        Profit ub = ub_0(ins, i+1, s1.p, c-s1.w);
+                        DBG(std::cout << " UB " << ub;)
+                        if (ub >= lb) {
+                            l.push_back(s1);
+                            DBG(std::cout << " OK" << std::endl;)
+                        } else {
+                            DBG(std::cout << " X" << std::endl;)
+                        }
+                    }
+                } else {
+                    DBG(std::cout << " X" << std::endl;)
+                }
+                it1++;
+            }
+        }
+        l0 = std::move(l);
+        DBG(std::cout << "L " << l0 << std::endl;)
+    }
+    DBG(std::cout << "OPTSBELLMANLIST... END" << std::endl;)
+    return l0;
+}
+
 void sopt_bellman_list_rec_rec(const Instance& ins,
         ItemPos n1, ItemPos n2, Weight c, Solution& sol_curr, Info* info)
 {
@@ -161,11 +214,11 @@ void sopt_bellman_list_rec_rec(const Instance& ins,
         Weight i1_opt = 0;
         Weight i2_opt = 0;
         if (l1.size() > 0) {
-            ItemPos i2 = 0;
-            for (Weight i1=l1.size(); i1-->0;) {
+            ItemPos i2 = l2.size()-1;
+            for (Weight i1=0; i1<(Weight)l1.size(); ++i1) {
                 while (l1[i1].w + l2[i2].w > c)
-                    i2++;
-                assert(i2 < (Weight)l2.size());
+                    i2--;
+                assert(i2 >= 0);
                 Profit z = l1[i1].p + l2[i2].p;
                 if (z > z_max) {
                     z_max = z;
@@ -175,10 +228,10 @@ void sopt_bellman_list_rec_rec(const Instance& ins,
             }
         }
         if (l2.size() > 0) {
-            ItemPos i1 = 0;
-            for (Weight i2=l2.size(); i2-->0;) {
+            ItemPos i1 = l1.size()-1;
+            for (Weight i2=0; i2<(Weight)l2.size(); ++i2) {
                 while (l2[i2].w + l1[i1].w > c)
-                    i1++;
+                    i1--;
                 Profit z = l1[i1].p + l2[i2].p;
                 if (z > z_max) {
                     z_max = z;

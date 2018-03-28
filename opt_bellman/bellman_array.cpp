@@ -179,7 +179,7 @@ Solution sopt_bellman_array_part(const Instance& ins, ItemPos k, Info* info)
     Profit opt = -1;
     Profit opt_local = -1;
     while (sol.profit() != opt) {
-        BSolFactory bsolf(k, n-1, n);
+        BSolFactory bsolf(k, n-1, 0, n-1);
         DBG(std::cout << "N " << n << " OPT " << opt_local << std::flush;)
         iter++;
         Weight w_opt = c;
