@@ -1,6 +1,11 @@
 cc_library(
         name = "cpp",
-        hdrs = ["instance.hpp", "solution.hpp", "binary_solution.hpp"],
+        hdrs = [
+                "instance.hpp",
+                "solution.hpp",
+                "part_solution_1.hpp",
+                "part_solution_2.hpp"
+        ],
         srcs = ["instance.cpp", "solution.cpp"],
         visibility = ["//visibility:public"],
         deps = [],

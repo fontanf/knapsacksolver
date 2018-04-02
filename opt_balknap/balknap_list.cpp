@@ -1,6 +1,6 @@
 #include "balknap.hpp"
 
-#include "../lib/binary_solution.hpp"
+#include "../lib/part_solution_1.hpp"
 #include "../lb_greedy/greedy.hpp"
 #include "../lb_greedynlogn/greedynlogn.hpp"
 #include "../ub_dembo/dembo.hpp"
@@ -274,7 +274,7 @@ struct StateValuePart
 {
     ItemPos a;
     ItemPos a_prec;
-    BSol sol;
+    PartSol1 sol;
 };
 
 std::ostream& operator<<(std::ostream& os, const std::pair<StatePart, StateValuePart>& s)
@@ -459,13 +459,13 @@ Solution sopt_balknap_list_part(
 
     // Initialization
     // Create first partial solution centered on the break item.
-    BSolFactory bsolf(k, b, f, l);
+    PartSolFactory1 psolf(k, b, f, l);
     DBG(std::cout << "X1 " << bsolf.x1() << " X2 " << bsolf.x2() << std::endl;)
-    BSol bsol_init = 0;
+    PartSol1 psol_init = 0;
     for (ItemPos j=f; j<b; ++j)
-        bsol_init = bsolf.add(bsol_init, j);
+        psol_init = psolf.add(psol_init, j);
     // s(w_bar,p_bar) = b
-    map.insert({{w_bar,p_bar},{b,f,bsol_init}});
+    map.insert({{w_bar,p_bar},{b,f,psol_init}});
 
     DBG(for (auto s = map.begin(); s != map.end(); ++s)
         std::cout << *s << " ";
@@ -528,10 +528,23 @@ Solution sopt_balknap_list_part(
         auto hint = s;
         hint--;
         while (s != map.begin() && (--s)->first.mu <= c) {
-            DBG(std::cout << " + STATE " << *s << " ";)
-            Weight mu_ = s->first.mu + wt;
-            Weight pi_ = s->first.pi + pt;
-            DBG(std::cout << " " << mu_ << " " << pi_ << std::flush;)
+            DBG(std::cout << " + STATE " << *s;)
+            std::pair<StatePart, StateValuePart> s1 = {
+                {s->first.mu + wt, s->first.pi + pt},
+                {s->second.a, f, psolf.add(s->second.sol, t)}};
+            Weight mu_ = s1.first.mu;
+            Profit pi_ = s1.first.pi;
+            DBG(std::cout << " " << s1 << std::flush;)
+
+            // Update LB
+            if (mu_ <= c && pi_ > lb) {
+                lb = pi_;
+                best_state = s1;
+                last_item = t;
+                DBG(std::cout << " BESTLB " << lb << std::flush;)
+                if (lb == u)
+                    goto end;
+            }
 
             // Bounding
             Profit ub = 0;
@@ -546,28 +559,18 @@ Solution sopt_balknap_list_part(
             } else {
                     assert(false);
             }
-            DBG(std::cout << "LB " << lb << " UBTMP " << ub << " UB " << u << " ";)
+            DBG(std::cout << " LB " << lb << " UBTMP " << ub << " UB " << u;)
             if (ub <= lb) {
-                DBG(std::cout << "X" << std::endl;)
+                DBG(std::cout << " X" << std::endl;)
                 continue;
             } else {
-                DBG(std::cout << "OK" << std::flush;)
+                DBG(std::cout << " OK" << std::flush;)
             }
 
-            hint = map.insert(hint, {{mu_, pi_}, {s->second.a, f, bsolf.add(s->second.sol, t)}});
+            hint = map.insert(hint, s1);
             if (hint->second.a < s->second.a) {
                 hint->second.a    = s->second.a;
-                hint->second.sol  = bsolf.add(s->second.sol, t);
-            }
-
-            // Update LB
-            if (mu_ <= c && pi_ > lb) {
-                lb = pi_;
-                best_state = {hint->first, hint->second};
-                last_item = t;
-                DBG(std::cout << " BESTLB " << lb << std::flush;)
-                if (lb == u)
-                    goto end;
+                hint->second.sol  = psolf.add(s->second.sol, t);
             }
             hint--;
             DBG(std::cout << std::endl;)
@@ -584,7 +587,20 @@ Solution sopt_balknap_list_part(
                 DBG(std::cout << "  J " << j << " " << ins.item(j);)
                 Weight mu_ = s->first.mu - ins.item(j).w;
                 Profit pi_ = s->first.pi - ins.item(j).p;
+                std::pair<StatePart, StateValuePart> s1 = {
+                    {mu_, pi_},
+                    {j, f, psolf.remove(s->second.sol, j)}};
                 DBG(std::cout << " " << mu_ << " " << pi_ << std::flush;)
+
+                // Update LB
+                if (mu_ <= c && pi_ > lb) {
+                    lb = pi_;
+                    best_state = s1;
+                    last_item = t;
+                    DBG(std::cout << " BESTLB " << lb << std::flush;)
+                    if (lb == u)
+                        goto end;
+                }
 
                 // Bounding
                 Profit ub = 0;
@@ -607,23 +623,12 @@ Solution sopt_balknap_list_part(
                     DBG(std::cout << " OK" << std::flush;)
                 }
 
-                auto res = map.insert({{mu_,pi_},
-                        {j, f, bsolf.remove(s->second.sol, j)}});
+                auto res = map.insert(s1);
                 if (!res.second) {
                     if (res.first->second.a < j) {
                         res.first->second.a = j;
-                        res.first->second.sol = bsolf.remove(s->second.sol, j);
+                        res.first->second.sol = psolf.remove(s->second.sol, j);
                     }
-                }
-
-                // Update LB
-                if (mu_ <= c && pi_ > lb) {
-                    lb = pi_;
-                    best_state = {res.first->first, res.first->second};
-                    last_item = t;
-                    DBG(std::cout << " BESTLB " << lb << std::flush;)
-                    if (lb == u)
-                        goto end;
                 }
                 DBG(std::cout << std::endl;)
             }
@@ -647,14 +652,13 @@ end:
     DBG(std::cout << "BEST STATE " << best_state
             << " FIRST ITEM " << best_state.second.a
             << " LAST ITEM " << last_item << std::endl;)
-    DBG(std::cout << "BSOL " << std::bitset<64>(best_state.second.sol) << std::endl;)
+    DBG(std::cout << "PSOL " << psolf.print(best_state.second.sol) << std::endl;)
     DBG(std::cout << "SOPT " << ins.optimal_solution()->print_bin() << std::endl;)
-    DBG(std::cout << "FIX " << bsolf.x1() << " TO " << bsolf.x2() << std::endl;)
     assert(ins.check_opt(lb));
     ins.set_first_item(best_state.second.a);
     ins.set_last_item(last_item);
     DBG(std::cout << ins << std::endl;)
-    ins.fix(bsolf, best_state.second.sol);
+    ins.fix(psolf, best_state.second.sol);
     DBG(std::cout << ins << std::endl;)
 
     DBG(std::cout << "BALKNAPLISTPART... END" << std::endl;)

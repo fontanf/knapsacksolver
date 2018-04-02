@@ -9,6 +9,7 @@ int main(int argc, char *argv[])
     std::string cert_file = "";
     std::string memory = "array";
     std::string retrieve = "all";
+    ItemPos k = 64;
     BalknapParams p;
 
     po::options_description desc("Allowed options");
@@ -24,6 +25,7 @@ int main(int argc, char *argv[])
         ("pairing,p", po::value<StateIdx>(&p.lb_pairing), "")
         ("surrogate,s", po::value<StateIdx>(&p.ub_surrogate), "")
         ("solve-sur,k", po::value<StateIdx>(&p.solve_sur), "")
+        ("part-size,x", po::value<ItemPos>(&k), "")
         ("verbose,v",  "enable verbosity")
         ;
     po::variables_map vm;
@@ -62,7 +64,7 @@ int main(int argc, char *argv[])
         } else if (retrieve == "all") {
             sopt = sopt_balknap_list_all(instance, p, &info);
         } else if (retrieve == "part") {
-            sopt = sopt_balknap_list_part(instance, p, 64, &info);
+            sopt = sopt_balknap_list_part(instance, p, k, &info);
         } else {
             assert(false);
             return 1;
