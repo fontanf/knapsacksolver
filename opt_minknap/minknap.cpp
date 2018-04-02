@@ -1,6 +1,5 @@
 #include "minknap.hpp"
 
-#include "../lib/binary_solution.hpp"
 #include "../lb_greedy/greedy.hpp"
 #include "../lb_greedynlogn/greedynlogn.hpp"
 #include "../ub_dembo/dembo.hpp"

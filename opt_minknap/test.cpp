@@ -8,5 +8,8 @@ TEST(Balknap, SimpleInstances)
 
     test(p.string() + " -v -r none", "opt");
     test(p.string() + " -v -r part", "sopt");
+    test(p.string() + " -v -r part -x 1", "sopt");
+    test(p.string() + " -v -r part -x 2", "sopt");
+    test(p.string() + " -v -r part -x 3", "sopt");
 }
 

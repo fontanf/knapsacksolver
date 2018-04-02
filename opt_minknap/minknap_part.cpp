@@ -1,6 +1,6 @@
 #include "minknap.hpp"
 
-#include "../lib/binary_solution.hpp"
+#include "../lib/part_solution_2.hpp"
 #include "../lb_greedy/greedy.hpp"
 #include "../lb_greedynlogn/greedynlogn.hpp"
 #include "../ub_dembo/dembo.hpp"
@@ -16,7 +16,7 @@ struct StatePart
 {
     Weight w;
     Profit p;
-    BSol sol;
+    PartSol2 sol;
 };
 
 std::ostream& operator<<(std::ostream& os, const StatePart& s)
@@ -27,9 +27,11 @@ std::ostream& operator<<(std::ostream& os, const StatePart& s)
 
 void add_item(const Instance& ins, std::vector<StatePart>& l0,
         ItemPos s, ItemPos t, Profit& lb, StatePart& best_state, Profit ub,
-        const BSolFactory& bsolf)
+        PartSolFactory2& psolf)
 {
     DBG(std::cout << "ADD ITEM... S " << s << " T " << t << " LB " << lb << std::endl;)
+    psolf.add_item(t);
+    best_state.sol = psolf.remove(best_state.sol);
     Weight c = ins.total_capacity();
     Weight wt = ins.item(t).w;
     Profit pt = ins.item(t).p;
@@ -38,23 +40,23 @@ void add_item(const Instance& ins, std::vector<StatePart>& l0,
     std::vector<StatePart>::iterator it1 = l0.begin();
     while (it != l0.end() || it1 != l0.end()) {
         if (it == l0.end() || it->w > it1->w + wt) {
-            StatePart s1{it1->w+wt, it1->p+pt, bsolf.add(it1->sol, t)};
+            StatePart s1{it1->w+wt, it1->p+pt, psolf.add(it1->sol)};
             DBG(std::cout << "STATE " << *it1 << " => " << s1 << std::flush;)
             if (l.empty() || s1.p > l.back().p) {
+                if (s1.w <= c && s1.p > lb) { // Update lower bound
+                    lb = s1.p;
+                    best_state = s1;
+                    if (lb == ub)
+                        return;
+                }
                 if (!l.empty() && s1.w == l.back().w) {
                     l.back() = s1;
                     DBG(std::cout << " OK" << std::endl;)
                 } else {
-                    if (s1.w <= c && s1.p > lb) { // Update lower bound
-                        lb = s1.p;
-                        best_state = s1;
-                        if (lb == ub)
-                            return;
-                    }
                     Profit ub = (s1.w <= c)?
                         ub_dembo(ins, t+1, s1.p, c-s1.w):
                         ub_dembo_rev(ins, s, s1.p, c-s1.w);
-                    DBG(std::cout << " UB " << ub << std::flush;)
+                    DBG(std::cout << " UB " << ub << " LB " << lb << std::flush;)
                     if (ub > lb) {
                         l.push_back(s1);
                         DBG(std::cout << " OK" << std::endl;)
@@ -69,6 +71,7 @@ void add_item(const Instance& ins, std::vector<StatePart>& l0,
         } else {
             assert(it != l0.end());
             DBG(std::cout << "STATE " << *it << std::flush;)
+            it->sol = psolf.remove(it->sol);
             if (l.empty() || it->p > l.back().p) {
                 if (!l.empty() && it->w == l.back().w) {
                     l.back() = *it;
@@ -77,7 +80,7 @@ void add_item(const Instance& ins, std::vector<StatePart>& l0,
                     Profit ub = (it->w <= c)?
                         ub_dembo(ins, t+1, it->p, c-it->w):
                         ub_dembo_rev(ins, s, it->p, c-it->w);
-                    DBG(std::cout << " UB " << ub << std::flush;)
+                    DBG(std::cout << " UB " << ub << " LB " << lb << std::flush;)
                     if (ub > lb) {
                         l.push_back(*it);
                         DBG(std::cout << " OK" << std::endl;)
@@ -97,9 +100,11 @@ void add_item(const Instance& ins, std::vector<StatePart>& l0,
 
 void remove_item(const Instance& ins, std::vector<StatePart>& l0,
         ItemPos s, ItemPos t, Profit& lb, StatePart& best_state, Profit ub,
-        const BSolFactory& bsolf)
+        PartSolFactory2& psolf)
 {
     DBG(std::cout << "REMOVE ITEM... S " << s << " T " << t << " LB " << lb << std::endl;)
+    psolf.add_item(s);
+    best_state.sol = psolf.add(best_state.sol);
     Weight c = ins.total_capacity();
     Weight ws = ins.item(s).w;
     Profit ps = ins.item(s).p;
@@ -109,6 +114,7 @@ void remove_item(const Instance& ins, std::vector<StatePart>& l0,
     while (it != l0.end() || it1 != l0.end()) {
         if (it1 == l0.end() || it->w <= it1->w - ws) {
             DBG(std::cout << "STATE " << *it;)
+            it->sol = psolf.add(it->sol);
             if (l.empty() || it->p > l.back().p) {
                 if (!l.empty() && it->w == l.back().w) {
                     l.back() = *it;
@@ -130,19 +136,19 @@ void remove_item(const Instance& ins, std::vector<StatePart>& l0,
             }
             ++it;
         } else {
-            StatePart s1{it1->w-ws, it1->p-ps, bsolf.remove(it1->sol, s)};
+            StatePart s1{it1->w-ws, it1->p-ps, psolf.remove(it1->sol)};
             DBG(std::cout << "STATE " << *it1 << " => " << s1;)
             if (l.empty() || s1.p > l.back().p) {
+                if (s1.w <= c && s1.p > lb) { // Update lower bound
+                    lb = s1.p;
+                    best_state = s1;
+                    if (lb == ub)
+                        return;
+                }
                 if (!l.empty() && s1.w == l.back().w) {
                     l.back() = s1;
                     DBG(std::cout << " OK" << std::endl;)
                 } else {
-                    if (s1.w <= c && s1.p > lb) { // Update lower bound
-                        lb = s1.p;
-                        best_state = s1;
-                        if (lb == ub)
-                            return;
-                    }
                     Profit ub = (s1.w <= c)?
                         ub_dembo(ins, t, s1.p, c-s1.w):
                         ub_dembo_rev(ins, s-1, s1.p, c-s1.w);
@@ -223,12 +229,8 @@ Solution sopt_minknap_list_part(Instance& ins,
 
     // Create memory table
     DBG(std::cout << "K " << k << " F " << ins.first_item() << " B " << ins.break_item() << " L " << ins.last_item() << std::endl;)
-    BSolFactory bsolf(k, ins.break_item(), ins.first_item(), ins.last_item());
-    DBG(std::cout << "X1 " << bsolf.x1() << " X2 " << bsolf.x2() << std::endl;)
-    BSol bsol_init = 0;
-    for (ItemPos j=ins.first_item(); j<ins.break_item(); ++j)
-        bsol_init = bsolf.add(bsol_init, j);
-    std::vector<StatePart> l0 = {{w_bar, p_bar, bsol_init}};
+    PartSolFactory2 psolf(k);
+    std::vector<StatePart> l0 = {{w_bar, p_bar, 0}};
 
     DBG(std::cout << "RECURSION..." << std::endl;)
     ItemPos s = ins.break_item() - 1;
@@ -240,7 +242,7 @@ Solution sopt_minknap_list_part(Instance& ins,
         if (ins.int_right_size() > 0 && t+1 > ins.last_sorted_item())
             ins.sort_right(lb);
         if (t <= ins.last_sorted_item()) {
-            add_item(ins, l0, s, t, lb, best_state, u, bsolf);
+            add_item(ins, l0, s, t, lb, best_state, u, psolf);
             ++t;
         }
         if (lb == u)
@@ -251,20 +253,21 @@ Solution sopt_minknap_list_part(Instance& ins,
         if (ins.int_left_size() > 0 && s-1 < ins.first_sorted_item())
             ins.sort_left(lb);
         if (s >= ins.first_sorted_item()) {
-            remove_item(ins, l0, s, t, lb, best_state, u, bsolf);
+            remove_item(ins, l0, s, t, lb, best_state, u, psolf);
             --s;
         }
         if (lb == u)
             break;
     }
 
-    if (best_state.p < sol.profit())
+    if (best_state.p <= sol.profit())
         return sol;
     assert(ins.check_opt(lb));
 
     ins.set_first_item(s+1);
     ins.set_last_item(t-1);
-    ins.fix(bsolf, best_state.sol);
+    DBG(std::cout << "PSOL " << psolf.print(best_state.sol) << std::endl;)
+    ins.fix(psolf, best_state.sol);
     //std::cout << "F " << ins.first_item() << " L " << ins.last_item() << std::endl;
     DBG(std::cout << "MINKNAPPART... END" << std::endl;)
     return sopt_minknap_list_part(ins, params, k, info, best_state.p);
