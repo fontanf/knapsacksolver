@@ -1,6 +1,6 @@
 #include "bellman_array.hpp"
 
-#include "../lib/binary_solution.hpp"
+#include "../lib/part_solution_1.hpp"
 
 #define INDEX(i,w) (i+1)*(c+1) + (w)
 
@@ -174,12 +174,12 @@ Solution sopt_bellman_array_part(const Instance& ins, ItemPos k, Info* info)
         return sol;
 
     std::vector<Profit> values(c+1); // Initialize memory table
-    std::vector<BSol>   bisols(c+1);
+    std::vector<PartSol1> bisols(c+1);
     ItemPos iter = 0;
     Profit opt = -1;
     Profit opt_local = -1;
     while (sol.profit() != opt) {
-        BSolFactory bsolf(k, n-1, 0, n-1);
+        PartSolFactory1 psolf(k, n-1, 0, n-1);
         DBG(std::cout << "N " << n << " OPT " << opt_local << std::flush;)
         iter++;
         Weight w_opt = c;
@@ -197,7 +197,7 @@ Solution sopt_bellman_array_part(const Instance& ins, ItemPos k, Info* info)
             for (Weight w=c; w>=0; w--) {
                 if (w >= wi && values[w-wi] + pi > values[w]) {
                     values[w] = values[w-wi] + pi;
-                    bisols[w] = bsolf.add(bisols[w-wi], i);
+                    bisols[w] = psolf.add(bisols[w-wi], i);
                     if (values[w] == opt_local) {
                         DBG(std::cout << " OPT REACHED " << i << std::flush;)
                         w_opt = w;
@@ -216,11 +216,11 @@ end:
             DBG(std::cout << " OPT " << opt << std::flush;)
         }
 
-        DBG(std::cout << " PARTSOL " << bsolf.print(bisols[w_opt]) << std::flush;)
+        DBG(std::cout << " PARTSOL " << psolf.print(bisols[w_opt]) << std::flush;)
 
         // Update solution and instance
-        sol.update_from_binary(bsolf, bisols[w_opt]);
-        n -= bsolf.size();
+        sol.update_from_partsol(psolf, bisols[w_opt]);
+        n -= psolf.size();
         c = ins.capacity() - sol.weight();
         opt_local = opt - sol.profit();
         DBG(std::cout << " P " << sol.profit() << std::endl;)

@@ -51,12 +51,12 @@ Profit opt_bellman_list(const Instance& ins, Info* info)
                     break;
                 }
                 if (s1.p > l.back().p) {
+                    if (s1.p > lb) // Update lower bound
+                        lb = s1.p;
                     if (s1.w == l.back().w) {
                         l.back() = s1;
                         DBG(std::cout << " OK" << std::endl;)
                     } else {
-                        if (s1.p > lb) // Update lower bound
-                            lb = s1.p;
                         Profit ub = ub_0(ins, i+1, s1.p, c-s1.w);
                         DBG(std::cout << " UB " << ub;)
                         if (ub > lb) {
@@ -156,12 +156,12 @@ std::vector<State> opts_bellman_list(const Instance& ins,
                     break;
                 }
                 if (s1.p > l.back().p) {
+                    if (s1.p > lb) // Update lower bound
+                        lb = s1.p;
                     if (s1.w == l.back().w) {
                         l.back() = s1;
                         DBG(std::cout << " OK" << std::endl;)
                     } else {
-                        if (s1.p > lb) // Update lower bound
-                            lb = s1.p;
                         Profit ub = ub_0(ins, i+1, s1.p, c-s1.w);
                         DBG(std::cout << " UB " << ub;)
                         if (ub >= lb) {
