@@ -1,6 +1,7 @@
 #include "instance.hpp"
 #include "solution.hpp"
-#include "binary_solution.hpp"
+#include "part_solution_1.hpp"
+#include "part_solution_2.hpp"
 
 #include <sstream>
 
@@ -774,11 +775,11 @@ void Instance::set_last_item(ItemPos j)
     l_ = j;
 }
 
-void Instance::fix(BSolFactory bsolf, BSol bsol)
+void Instance::fix(PartSolFactory1 psolf, PartSol1 psol)
 {
     DBG(std::cout << "FIX..." << std::endl;)
-    ItemPos f = std::max(f_, bsolf.x1());
-    ItemPos l = std::min(l_, bsolf.x2());
+    ItemPos f = std::max(f_, psolf.x1());
+    ItemPos l = std::min(l_, psolf.x2());
     DBG(std::cout << "F " << f << " L " << l << std::endl;)
     std::vector<Item> not_fixed;
     std::vector<Item> fixed_1;
@@ -787,7 +788,7 @@ void Instance::fix(BSolFactory bsolf, BSol bsol)
         not_fixed.push_back(item(j));
     for (ItemPos j=f; j<=l; ++j) {
         DBG(std::cout << "J " << j << std::flush;)
-        if (bsolf.contains(bsol, j)) {
+        if (psolf.contains(psol, j)) {
             DBG(std::cout << " 1" << std::endl;)
             fixed_1.push_back(item(j));
             sol_red_->set(j, true);
@@ -819,6 +820,60 @@ void Instance::fix(BSolFactory bsolf, BSol bsol)
     } else {
         b_ = -1;
     }
+    DBG(std::cout << "FIX... END" << std::endl;)
+}
+
+void Instance::fix(PartSolFactory2 psolf, PartSol2 psol)
+{
+    DBG(std::cout << "FIX..." << std::endl;)
+
+    std::vector<int> vec(total_item_number(), 0);
+    for (ItemPos j=0; j<psolf.size(); ++j) {
+        ItemPos idx = psolf.indices()[j];
+        if (idx == -1)
+            continue;
+        vec[psolf.indices()[j]] = (psolf.contains(psol, j))? 1: -1;
+    }
+
+    std::vector<Item> not_fixed;
+    std::vector<Item> fixed_1;
+    std::vector<Item> fixed_0;
+    for (ItemPos j=f_; j<=l_; ++j) {
+        DBG(std::cout << "J " << j << std::flush;)
+        if (vec[j] == 0) {
+            DBG(std::cout << " ?" << std::endl;)
+            not_fixed.push_back(item(j));
+        } else if (vec[j] == 1) {
+            DBG(std::cout << " 1" << std::endl;)
+            fixed_1.push_back(item(j));
+            sol_red_->set(j, true);
+        } else {
+            assert(vec[j] == -1);
+            DBG(std::cout << " 0" << std::endl;)
+            fixed_0.push_back(item(j));
+        }
+    }
+
+    ItemPos i = not_fixed.size();
+    ItemPos i1 = fixed_1.size();
+    ItemPos i0 = fixed_0.size();
+    std::copy(fixed_1.begin(), fixed_1.end(), items_.begin()+f_);
+    std::copy(not_fixed.begin(), not_fixed.end(), items_.begin()+f_+i1);
+    std::copy(fixed_0.begin(), fixed_0.end(), items_.begin()+f_+i1+i);
+
+    f_ += i1;
+    l_ -= i0;
+    DBG(std::cout << "F " << f_ << " L " << l_ << std::endl;)
+
+    remove_big_items();
+    if (sorted()) {
+        compute_break_item();
+        update_isum();
+    } else {
+        b_ = -1;
+    }
+
+    DBG(std::cout << *this << std::endl;)
     DBG(std::cout << "FIX... END" << std::endl;)
 }
 

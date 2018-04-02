@@ -23,8 +23,10 @@ typedef int_fast64_t ItemPos;
 typedef int_fast64_t StateIdx;
 
 class Solution;
-typedef int64_t BSol;
-class BSolFactory;
+typedef int64_t PartSol1;
+typedef int64_t PartSol2;
+class PartSolFactory1;
+class PartSolFactory2;
 
 struct Info
 {
@@ -170,7 +172,8 @@ public:
      */
     void set_last_item(ItemPos j);
 
-    void fix(BSolFactory bsolf, BSol bsol);
+    void fix(PartSolFactory1 bsolf, PartSol1 bsol);
+    void fix(PartSolFactory2 bsolf, PartSol2 bsol);
 
     /**
      * Create an instance with capacitiy and weights divided, keeping the

@@ -37,7 +37,8 @@ public:
      */
     bool update(const Solution& sol);
 
-    void update_from_binary(const BSolFactory& bsolf, BSol bsol);
+    void update_from_partsol(const PartSolFactory1& psolf, PartSol1 psol);
+    void update_from_partsol(const PartSolFactory2& psolf, PartSol2 psol);
 
     /**
      * Write the solution in the input file.

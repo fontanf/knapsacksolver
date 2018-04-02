@@ -1,6 +1,7 @@
 #include "solution.hpp"
 
-#include "binary_solution.hpp"
+#include "part_solution_1.hpp"
+#include "part_solution_2.hpp"
 
 Solution::Solution(const Instance& instance): instance_(instance),
     x_(std::vector<int>(instance.total_item_number(), 0)) { }
@@ -83,10 +84,16 @@ bool Solution::update(const Solution& sol)
     return true;
 }
 
-void Solution::update_from_binary(const BSolFactory& bsolf, BSol bsol)
+void Solution::update_from_partsol(const PartSolFactory1& bsolf, PartSol1 bsol)
 {
     for (ItemPos i=bsolf.x1(); i<=bsolf.x2(); ++i)
         set(i, bsolf.contains(bsol, i));
+}
+
+void Solution::update_from_partsol(const PartSolFactory2& psolf, PartSol2 psol)
+{
+    for (ItemPos i=0; i<psolf.size(); ++i)
+        set(psolf.indices()[i], psolf.contains(psol, i));
 }
 
 void Solution::write_cert(std::string file)
