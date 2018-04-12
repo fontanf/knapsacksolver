@@ -22,18 +22,13 @@ cc_library(
     tag = "release-1.8.0",
 )
 
-#git_repository(
-    #name = "BenchTools",
-    #remote = "https://github.com/fontanf/BenchTools.git",
-    #commit = "778f79a1e2c1da8ab4ece821eaae00f6b7a815e5"
-#)
-
-local_repository(
-        name = "BenchTools",
-        path = "/home/fontanf/Dev/bench/",
+git_repository(
+    name = "benchtools",
+    remote = "https://github.com/fontanf/benchtools.git",
+    commit = "4dffad9d44c2e1300055a50c5a8b231ee5a8ddae",
 )
 
 local_repository(
-        name = "KnapsackPisingerInstances",
-        path = "/home/fontanf/Dev/knapsack_pisinger_instances/",
+        name = "knapsack_instances_pisinger",
+        path = "/home/fontanf/Dev/knapsack_instances_pisinger/",
 )

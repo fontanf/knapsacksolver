@@ -38,25 +38,3 @@ cc_test(
         timeout = "short",
 )
 
-py_binary(
-        name = "bellman_1_bench",
-        srcs = ["bellman_1_bench.py"],
-        main = "bellman_1_bench.py",
-        data = [
-                "@BenchTools//:bench",
-                "@KnapsackPisingerInstances//:data",
-                ":main",
-        ],
-)
-
-py_binary(
-        name = "bellman_1_bench_2",
-        srcs = ["bellman_1_bench_2.py"],
-        main = "bellman_1_bench_2.py",
-        data = [
-                "@BenchTools//:bench",
-                "@KnapsackPisingerInstances//:data",
-                ":main",
-        ],
-)
-

@@ -1,5 +1,6 @@
-#ifndef PARSER_HPP_CWOQFZGE
-#define PARSER_HPP_CWOQFZGE
+#pragma once
+
+#include "external/benchtools/info.hpp"
 
 #include <cstdint>
 #include <random>
@@ -28,35 +29,6 @@ typedef int64_t PartSol2;
 class PartSolFactory1;
 class PartSolFactory2;
 
-struct Info
-{
-    Info(): t1(std::chrono::high_resolution_clock::now()) {  }
-    boost::property_tree::ptree pt;
-    bool verbose_ = false;
-    std::chrono::high_resolution_clock::time_point t1;
-
-    void verbose(bool b) { verbose_ = b; }
-    static bool verbose(const Info* info)
-    {
-        return (info != NULL && info->verbose_);
-    }
-
-    void write_ini(std::string file)
-    {
-        if (file != "")
-            boost::property_tree::write_ini(file, pt);
-    }
-
-    double elapsed_time() const
-    {
-        std::chrono::high_resolution_clock::time_point t2
-            = std::chrono::high_resolution_clock::now();
-        std::chrono::duration<double> time_span
-            = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
-        return time_span.count();
-    }
-};
-
 struct Item
 {
     Item() { }
@@ -81,12 +53,6 @@ struct Interval
     ItemPos l;
 };
 
-struct SortData {
-    Interval ir;
-    Interval il;
-    Weight   w = 0;
-};
-
 class Instance
 {
 
@@ -98,9 +64,8 @@ public:
 
     /**
      * Manual constructor.
-     * This constructor should only be used for tests.
      */
-    Instance(std::vector<Item> items, Weight c);
+    Instance(const std::vector<Item>& items, Weight c);
 
     /**
      * Create instance from file.
@@ -112,10 +77,8 @@ public:
      */
     Instance(const Instance& ins);
 
-    /**
-     * Copy instance without reduced items
-     */
-    Instance(const Instance& ins, std::vector<Interval> v);
+    ~Instance();
+
 
     /*
      * Sort items according to non-increasing profit-to-weight ratio.
@@ -183,10 +146,9 @@ public:
     void divide_weights_ceil(Weight divisor);
     void divide_profits_floor(Profit divisor);
     void divide_profits_ceil(Profit divisor);
+
     void surrogate(Weight multiplier, ItemIdx bound, ItemPos first);
     void surrogate(Weight multiplier, ItemIdx bound);
-
-    ~Instance();
 
 
     /**
@@ -248,7 +210,6 @@ private:
     ItemPos partition(ItemPos f, ItemPos l);
     bool check();
     inline void swap(ItemPos i, ItemPos j) { Item tmp = items_[i]; items_[i] = items_[j]; items_[j] = tmp; };
-    void swap(ItemPos i1, ItemPos i2, ItemPos i3, ItemPos i4);
     void update_isum();
     void compute_break_item();
     void compute_max_items();
@@ -286,4 +247,3 @@ std::ostream& operator<<(std::ostream &os, const Item& item);
 std::ostream& operator<<(std::ostream &os, const Interval& interval);
 std::ostream& operator<<(std::ostream &os, const Instance& instance);
 
-#endif /* end of include guard: PARSER_HPP_CWOQFZGE */

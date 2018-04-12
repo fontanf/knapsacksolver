@@ -8,12 +8,15 @@ cc_library(
         ],
         srcs = ["instance.cpp", "solution.cpp"],
         visibility = ["//visibility:public"],
-        deps = [],
+        deps = [
+                "@benchtools//:info",
+        ],
 )
 
 cc_library(
         name = "hpp",
         hdrs = ["instance.hpp", "solution.hpp"],
+        deps = ["@benchtools//:info",],
         visibility = ["//visibility:public"],
 )
 
@@ -41,7 +44,7 @@ cc_test(
                 "@googletest//:gtest_main",
         ],
         data = [
-                "@KnapsackPisingerInstances//:data",
+                "@knapsack_instances_pisinger//:data",
         ],
         linkopts = [
                 "-lboost_system",

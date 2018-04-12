@@ -5,7 +5,7 @@
 
 #include <sstream>
 
-Instance::Instance(std::vector<Item> items, Weight c):
+Instance::Instance(const std::vector<Item>& items, Weight c):
     name_(""), format_(""), f_(0), l_(items.size()-1), c_orig_(c), items_(items)
 {
     sol_red_ = new Solution(*this);
@@ -161,20 +161,23 @@ Profit Instance::check(boost::filesystem::path cert_file)
 {
     if (!boost::filesystem::exists(cert_file))
         return -1;
+
     boost::filesystem::ifstream file(cert_file, std::ios_base::in);
-    bool x;
-    Profit p = 0;
-    Weight c = 0;
-    for (ItemPos i=0; i<item_number(); ++i) {
+    int x;
+    std::vector<int> so(total_item_number(), 0);
+    for (ItemPos j=0; j<total_item_number(); ++j) {
         file >> x;
-        if (x) {
-            p += item(i).p;
-            c += item(i).w;
-        }
+        so[j] = x;
     }
-    if (c > capacity())
+
+    Solution sol(*this);
+    for (ItemPos j=0; j<total_item_number(); ++j)
+        if (so[item(j).i] == 1)
+            sol.set(j, true);
+
+    if (sol.weight() > capacity())
         return -1;
-    return p;
+    return sol.profit();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

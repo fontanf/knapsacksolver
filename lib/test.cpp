@@ -103,7 +103,7 @@ TEST(Instance, ReductionSmallCoeff)
 {
     auto data_dir = boost::filesystem::current_path();
     data_dir /= "external";
-    data_dir /= "KnapsackPisingerInstances";
+    data_dir /= "knapsack_instances_pisinger";
     data_dir /= "smallcoeff";
     const boost::regex my_filter("knapPI_.*_.*_1000");
     boost::filesystem::directory_iterator end_itr;
@@ -137,7 +137,7 @@ TEST(Instance, ReductionLargeCoeff)
 {
     auto data_dir = boost::filesystem::current_path();
     data_dir /= "external";
-    data_dir /= "KnapsackPisingerInstances";
+    data_dir /= "knapsack_instances_pisinger";
     data_dir /= "largecoeff";
     const boost::regex my_filter("knapPI_.*_50_.*");
     boost::filesystem::directory_iterator end_itr;
@@ -171,7 +171,7 @@ TEST(Instance, ReductionHardInstances)
 {
     auto data_dir = boost::filesystem::current_path();
     data_dir /= "external";
-    data_dir /= "KnapsackPisingerInstances";
+    data_dir /= "knapsack_instances_pisinger";
     data_dir /= "hardinstances";
     const boost::regex my_filter("knapPI_.*_100_.*");
     boost::filesystem::directory_iterator end_itr;
