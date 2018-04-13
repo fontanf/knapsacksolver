@@ -24,11 +24,11 @@ TEST(Instance, Sort)
     EXPECT_EQ(instance.item(1).p, 15);
     EXPECT_EQ(instance.item(0).p, 20);
 
-    EXPECT_EQ(instance.item(4).i, 2);
-    EXPECT_EQ(instance.item(3).i, 0);
-    EXPECT_EQ(instance.item(2).i, 3);
-    EXPECT_EQ(instance.item(1).i, 1);
-    EXPECT_EQ(instance.item(0).i, 4);
+    EXPECT_EQ(instance.item(4).j, 2);
+    EXPECT_EQ(instance.item(3).j, 0);
+    EXPECT_EQ(instance.item(2).j, 3);
+    EXPECT_EQ(instance.item(1).j, 1);
+    EXPECT_EQ(instance.item(0).j, 4);
 }
 
 TEST(Instance, SortPartially)
@@ -44,7 +44,7 @@ TEST(Instance, SortPartially)
             {7, 8, 1},
             {8, 9, 1}}, 4);
     instance.sort_partially();
-    EXPECT_EQ(instance.item(instance.break_item()).i, 2);
+    EXPECT_EQ(instance.item(instance.break_item()).j, 2);
 }
 
 TEST(Instance, SortPartially2)
@@ -60,7 +60,7 @@ TEST(Instance, SortPartially2)
             {7, 5, 1},
             {8, 6, 1}}, 6);
     instance.sort_partially();
-    EXPECT_EQ(instance.item(instance.break_item()).i, 6);
+    EXPECT_EQ(instance.item(instance.break_item()).j, 6);
 }
 
 TEST(Instance, SortPartially3)

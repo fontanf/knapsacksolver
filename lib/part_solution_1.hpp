@@ -31,45 +31,45 @@ public:
     PartSol1 bsol_break() const
     {
         PartSol1 bsolbreak = 0UL;
-        for (ItemPos i=x1_; i<b_; ++i)
-            add(bsolbreak, i);
+        for (ItemPos j=x1_; j<b_; ++j)
+            add(bsolbreak, j);
         return bsolbreak;
     }
 
-    int contains(PartSol1 s, ItemPos i) const
+    int contains(PartSol1 s, ItemPos j) const
     {
-        assert(x1_ <= i && i <= x2_);
-        return ((s >> (i-x1_)) & 1UL);
+        assert(x1_ <= j && j <= x2_);
+        return ((s >> (j-x1_)) & 1UL);
     }
 
-    PartSol1 add(const PartSol1& s, ItemPos i) const
+    PartSol1 add(const PartSol1& s, ItemPos j) const
     {
-        if (i < x1_ || x2_ < i)
+        if (j < x1_ || x2_ < j)
             return s;
-        assert(!contains(s,i));
-        return (s | (1UL << (i-x1_)));
+        assert(!contains(s,j));
+        return (s | (1UL << (j-x1_)));
     }
 
-    PartSol1 remove(const PartSol1& s, ItemPos i) const
+    PartSol1 remove(const PartSol1& s, ItemPos j) const
     {
-        if (i < x1_ || x2_ < i)
+        if (j < x1_ || x2_ < j)
             return s;
-        assert(contains(s,i));
-        return (s & (~(1UL << (i-x1_))));
+        assert(contains(s,j));
+        return (s & (~(1UL << (j-x1_))));
     }
 
-    PartSol1 toggle(PartSol1& s, ItemPos i) const
+    PartSol1 toggle(PartSol1& s, ItemPos j) const
     {
-        if (i < x1_ || x2_ < i)
+        if (j < x1_ || x2_ < j)
             return s;
-        return (s ^ (1UL << (i-x1_)));
+        return (s ^ (1UL << (j-x1_)));
     }
 
     std::string print(PartSol1& s) const
     {
         std::string str = "";
-        for (ItemPos i=x1_; i<=x2_; ++i)
-            str += std::to_string(contains(s,i));
+        for (ItemPos j=x1_; j<=x2_; ++j)
+            str += std::to_string(contains(s,j));
         return str;
     }
 

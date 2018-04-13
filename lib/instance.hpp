@@ -32,17 +32,17 @@ class PartSolFactory2;
 struct Item
 {
     Item() { }
-    Item(ItemIdx i, Weight w, Profit p): i(i), w(w), p(p) { }
+    Item(ItemIdx j, Weight w, Profit p): j(j), w(w), p(p) { }
     Item& operator=(const Item& item)
     {
         if (this != &item) {
-            i = item.i;
+            j = item.j;
             w = item.w;
             p = item.p;
         }
         return *this;
     }
-    ItemIdx i = -1;
+    ItemIdx j = -1;
     Weight  w = -1;
     Profit  p = -1;
 };
@@ -129,11 +129,11 @@ public:
     /**
      * Reduce item f..j-1, and add them to the reduced solution
      */
-    void set_first_item(ItemPos j);
+    void set_first_item(ItemPos k);
     /**
      * Reduce items j+1..l (there are not added in the reduced solution)
      */
-    void set_last_item(ItemPos j);
+    void set_last_item(ItemPos k);
 
     void fix(PartSolFactory1 bsolf, PartSol1 bsol);
     void fix(PartSolFactory2 bsolf, PartSol2 bsol);
@@ -163,7 +163,7 @@ public:
     inline ItemPos last_item()   const { return l_; }
     inline ItemIdx total_item_number() const { return items_.size(); }
     inline Weight  total_capacity()    const { return c_orig_; }
-    inline const Item& item(ItemIdx i) const { assert(i >= 0 && i < total_item_number()); return items_[i]; }
+    inline const Item& item(ItemIdx j) const { assert(j >= 0 && j < total_item_number()); return items_[j]; }
     Weight capacity() const;
 
     ItemPos break_item()     const { assert(b_ >= first_item() && b_ <= last_item() + 1); return b_; }
@@ -171,17 +171,12 @@ public:
     Weight  break_weight()   const;
     Weight  break_capacity() const;
 
-    const Item& max_weight_item()     const { return i_wmax_; }
-    const Item& max_profit_item()     const { return i_pmax_; }
-    const Item& max_efficiency_item() const { return i_emax_; }
+    const Item& max_weight_item()     const { return j_wmax_; }
+    const Item& max_profit_item()     const { return j_pmax_; }
+    const Item& max_efficiency_item() const { return j_emax_; }
 
-    const Item& isum(ItemPos i) const { assert(sorted()); return isum_[i]; }
+    const Item& isum(ItemPos j) const { assert(sorted()); return isum_[j]; }
     ItemPos ub_item(Item item) const;
-
-    /**
-     * Compute GCD of capacity and weights.
-     */
-    Weight gcd() const;
 
     /**
      * Return the profit of the certificate file.
@@ -209,7 +204,7 @@ private:
 
     ItemPos partition(ItemPos f, ItemPos l);
     bool check();
-    inline void swap(ItemPos i, ItemPos j) { Item tmp = items_[i]; items_[i] = items_[j]; items_[j] = tmp; };
+    inline void swap(ItemPos j, ItemPos k) { Item tmp = items_[j]; items_[j] = items_[k]; items_[k] = tmp; };
     void update_isum();
     void compute_break_item();
     void compute_max_items();
@@ -235,10 +230,10 @@ private:
     Solution* sol_red_   = NULL; // Reduced solution
     Solution* sol_break_ = NULL; // Break solution
     ItemPos b_ = -1; // Break item
-    Item i_wmax_ = {-1, -1, -1}; // Max weight item
-    Item i_wmin_ = {-1, c_orig_+1, -1}; // Min weight item
-    Item i_pmax_ = {-1, -1, -1}; // Max profit item
-    Item i_emax_ = {-1, 0, -1};  // Max efficiency item;
+    Item j_wmax_ = {-1, -1, -1}; // Max weight item
+    Item j_wmin_ = {-1, c_orig_+1, -1}; // Min weight item
+    Item j_pmax_ = {-1, -1, -1}; // Max profit item
+    Item j_emax_ = {-1, 0, -1};  // Max efficiency item;
     std::vector<Item> isum_;
     bool sol_red_opt_ = false;
 };

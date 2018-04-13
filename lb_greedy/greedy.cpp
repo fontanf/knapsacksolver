@@ -18,19 +18,19 @@ Solution sol_greedy(const Instance& ins, Info* info)
 
         DBG(std::cout << "BACKWARD GREEDY" << std::endl;)
         Weight rb = sol.remaining_capacity() - ins.item(b).w;
-        for (ItemPos i=ins.first_item(); i<=b; ++i) {
-            if (rb + ins.item(i).w >= 0 && ins.item(b).p - ins.item(i).p > p) {
-                p = ins.item(b).p - ins.item(i).p;
-                j = i;
+        for (ItemPos k=ins.first_item(); k<=b; ++k) {
+            if (rb + ins.item(k).w >= 0 && ins.item(b).p - ins.item(k).p > p) {
+                p = ins.item(b).p - ins.item(k).p;
+                j = k;
             }
         }
 
         DBG(std::cout << "FORWARD GREEDY" << std::endl;)
         Weight rf = sol.remaining_capacity();
-        for (ItemPos i=b+1; i<=ins.last_item(); ++i) {
-            if (ins.item(i).w <= rf && ins.item(i).p > p) {
-                p = ins.item(i).p;
-                j = i;
+        for (ItemPos k=b+1; k<=ins.last_item(); ++k) {
+            if (ins.item(k).w <= rf && ins.item(k).p > p) {
+                p = ins.item(k).p;
+                j = k;
             }
         }
 

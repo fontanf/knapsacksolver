@@ -5,7 +5,7 @@
 #define DBG(x)
 //#define DBG(x) x
 
-#define INDEX(i,q) (i+1)*(ub+1) + (q)
+#define INDEX(j,q) (j+1)*(ub+1) + (q)
 
 Profit opt_dpprofits_array(const Instance& ins, Info* info)
 {
@@ -23,13 +23,13 @@ Profit opt_dpprofits_array(const Instance& ins, Info* info)
 
     // Compute optimal value
     values[0] = 0;
-    for (ItemPos i=0; i<n; ++i) {
-        Profit pi = ins.item(i).p;
-        Weight wi = ins.item(i).w;
+    for (ItemPos j=0; j<n; ++j) {
+        Profit pj = ins.item(j).p;
+        Weight wj = ins.item(j).w;
         for (Profit q=ub; q>=0; --q) {
-            if (q < pi)
+            if (q < pj)
                 continue;
-            Weight w = (q == pi)? wi: values[q-pi] + wi;
+            Weight w = (q == pj)? wj: values[q-pj] + wj;
             if (w < values[q])
                 values[q] = w;
         }
@@ -65,17 +65,17 @@ Solution sopt_dpprofits_array_all(const Instance& ins, Info* info)
     values[0] = 0;
     for (Profit q=1; q<=ub; ++q)
         values[INDEX(-1,q)] = c+1;
-    for (ItemPos i=0; i<n; ++i) {
-        Profit pi = ins.item(i).p;
-        Profit wi = ins.item(i).w;
+    for (ItemPos j=0; j<n; ++j) {
+        Profit pj = ins.item(j).p;
+        Profit wj = ins.item(j).w;
         for (Profit q=0; q<=ub; ++q) {
-            if (q < pi) {
-                values[INDEX(i,q)] = values[INDEX(i-1,q)];
+            if (q < pj) {
+                values[INDEX(j,q)] = values[INDEX(j-1,q)];
                 continue;
             }
-            Weight v0 = values[INDEX(i-1,q)];
-            Weight v1 = (q == pi)? wi: values[INDEX(i-1,q-pi)] + wi;
-            values[INDEX(i,q)] = (v1 < v0)? v1: v0;
+            Weight v0 = values[INDEX(j-1,q)];
+            Weight v1 = (q == pj)? wj: values[INDEX(j-1,q-pj)] + wj;
+            values[INDEX(j,q)] = (v1 < v0)? v1: v0;
         }
     }
 
@@ -88,22 +88,22 @@ Solution sopt_dpprofits_array_all(const Instance& ins, Info* info)
     assert(ins.check_opt(opt));
 
     // Retrieve optimal solution
-    ItemPos i = n-1;
+    ItemPos j = n-1;
     Profit  q = opt;
-    Weight  w = values[INDEX(i,opt)];
+    Weight  w = values[INDEX(j,opt)];
     Solution sol = *ins.reduced_solution();
     while (w > 0) {
-        DBG(std::cout << q << " " << w << " " << i << std::endl;)
-        Weight wi = ins.item(i).w;
-        Profit pi = ins.item(i).p;
-        Weight v0 = values[INDEX(i-1,q)];
-        Weight v1 = (q < pi)? ins.capacity() + 1: values[INDEX(i-1,q-pi)] + wi;
+        DBG(std::cout << q << " " << w << " " << j << std::endl;)
+        Weight wj = ins.item(j).w;
+        Profit pj = ins.item(j).p;
+        Weight v0 = values[INDEX(j-1,q)];
+        Weight v1 = (q < pj)? ins.capacity() + 1: values[INDEX(j-1,q-pj)] + wj;
         if (v1 < v0) {
-            q -= pi;
-            w -= wi;
-            sol.set(i, true);
+            q -= pj;
+            w -= wj;
+            sol.set(j, true);
         }
-        i--;
+        j--;
     }
     assert(ins.check_sopt(sol));
     return sol;

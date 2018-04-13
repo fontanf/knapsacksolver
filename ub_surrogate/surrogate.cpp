@@ -22,8 +22,8 @@ ItemIdx max_card(const Instance& ins)
     while (f < l) {
         if (l - f < 128) {
             std::sort(index.begin()+f, index.begin()+l+1,
-                    [&ins](ItemPos i1, ItemPos i2) {
-                    return ins.item(i1).w <= ins.item(i2).w;});
+                    [&ins](ItemPos j1, ItemPos j2) {
+                    return ins.item(j1).w <= ins.item(j2).w;});
             break;
         }
 
@@ -83,8 +83,8 @@ ItemIdx min_card(const Instance& ins, Profit lb)
     while (f < l) {
         if (l - f < 128) {
             std::sort(index.begin()+f, index.begin()+l+1,
-                    [&ins](ItemPos i1, ItemPos i2) {
-                    return ins.item(i1).p >= ins.item(i2).p;});
+                    [&ins](ItemPos j1, ItemPos j2) {
+                    return ins.item(j1).p >= ins.item(j2).p;});
             break;
         }
 
@@ -141,13 +141,13 @@ void ub_surrogate_solve(Instance& ins, ItemIdx k,
     Weight wmax = ins.item(ins.first_item()).w;
     Weight wmin = ins.item(ins.first_item()).w;
     Profit pmax = ins.item(ins.first_item()).p;
-    for (ItemPos i=ins.first_item()+1; i<=ins.last_item(); ++i) {
-        if (ins.item(i).w > wmax)
-            wmax = ins.item(i).w;
-        if (ins.item(i).w < wmin)
-            wmin = ins.item(i).w;
-        if (ins.item(i).p > pmax)
-            pmax = ins.item(i).p;
+    for (ItemPos j=ins.first_item()+1; j<=ins.last_item(); ++j) {
+        if (ins.item(j).w > wmax)
+            wmax = ins.item(j).w;
+        if (ins.item(j).w < wmin)
+            wmin = ins.item(j).w;
+        if (ins.item(j).p > pmax)
+            pmax = ins.item(j).p;
     }
     Weight wabs = wmax;
     Weight wlim = INT_FAST64_MAX / pmax;

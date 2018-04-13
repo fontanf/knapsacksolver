@@ -27,9 +27,9 @@ public:
      * WARNING: the input correspond to the position of the item in the
      * instance, not its ID!
      */
-    void set(ItemPos i, int b);
-    int contains(ItemPos i) const;
-    int contains_idx(ItemIdx i) const;
+    void set(ItemPos j, int b);
+    int contains(ItemPos j) const;
+    int contains_idx(ItemIdx j) const;
     void clear();
 
     /**

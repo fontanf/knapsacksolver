@@ -8,8 +8,8 @@ int main(int argc, char *argv[])
     ItemIdx n = 10000000;
     Weight c = 64 * n;
     std::vector<Item> items(n);
-    for (ItemPos i=0; i<n; ++i)
-        items[i] = {i, i, 1};
+    for (ItemPos j=0; j<n; ++j)
+        items[j] = {j, j, 1};
     std::random_shuffle(items.begin(), items.end());
 
     Instance instance_eff(items, c);

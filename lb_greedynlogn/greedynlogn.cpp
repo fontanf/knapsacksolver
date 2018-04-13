@@ -29,11 +29,10 @@ bool best_exchange(Solution& sol, Info* info)
 
     std::vector<Item> taken;
     std::vector<Item> left;
-    for (ItemPos i=0; i<ins.total_item_number(); ++i)
-    {
-        Item item = ins.item(i);
-        item.i = i;
-        if (sol.contains(i)) {
+    for (ItemPos j=0; j<ins.total_item_number(); ++j) {
+        Item item = ins.item(j);
+        item.j = j;
+        if (sol.contains(j)) {
             taken.push_back(item);
         } else {
             left.push_back(item);
@@ -64,8 +63,8 @@ bool best_exchange(Solution& sol, Info* info)
             pmax = p;
             i1_max = i1;
             i2_max = std::prev(i2);
-            DBG(std::cout << "pmax " << pmax << " i1 " << i1_max->i << " i2 " << i2_max->i << std::endl;)
-            //DBG(std::cout << "w1 " << i1->w << " w1+r " << i1->w + r << " i2 " << i2_max->i << std::endl;)
+            DBG(std::cout << "pmax " << pmax << " i1 " << i1_max->j << " i2 " << i2_max->j << std::endl;)
+            //DBG(std::cout << "w1 " << i1->w << " w1+r " << i1->w + r << " i2 " << i2_max->j << std::endl;)
         }
     }
     if (pmax == -1) {
@@ -73,8 +72,8 @@ bool best_exchange(Solution& sol, Info* info)
         DBG(std::cout << "BESTEXCHANGE... END" << std::endl;)
         return false;
     }
-    sol.set(i1_max->i, false);
-    sol.set(i2_max->i, true);
+    sol.set(i1_max->j, false);
+    sol.set(i2_max->j, true);
     if (Info::verbose(info))
         std::cout
             <<  "LB "  << sol.profit()
@@ -112,11 +111,10 @@ bool best_exchangeback(Solution& sol, Info* info)
 
     std::vector<Item> taken;
     std::vector<Item> left;
-    for (ItemPos i=0; i<ins.total_item_number(); ++i)
-    {
-        Item item = ins.item(i);
-        item.i = i;
-        if (sol.contains(i)) {
+    for (ItemPos j=0; j<ins.total_item_number(); ++j) {
+        Item item = ins.item(j);
+        item.j = j;
+        if (sol.contains(j)) {
             taken.push_back(item);
         } else {
             left.push_back(item);
@@ -150,8 +148,8 @@ bool best_exchangeback(Solution& sol, Info* info)
             pmax = p;
             i1_max = i1;
             i2_max = std::prev(i2);
-            DBG(std::cout << "pmax " << pmax << " i1 " << i1_max->i << " i2 " << i2_max->i << std::endl;)
-            //DBG(std::cout << "w1 " << i1->w << " w1+r " << i1->w + r << " i2 " << i2_max->i << std::endl;)
+            DBG(std::cout << "pmax " << pmax << " i1 " << i1_max->j << " i2 " << i2_max->j << std::endl;)
+            //DBG(std::cout << "w1 " << i1->w << " w1+r " << i1->w + r << " i2 " << i2_max->j << std::endl;)
         }
     }
     if (pmax == INT_FAST64_MIN) {
@@ -159,8 +157,8 @@ bool best_exchangeback(Solution& sol, Info* info)
         DBG(std::cout << "BESTEXCHANGE... END" << std::endl;)
         return false;
     }
-    sol.set(i1_max->i, false);
-    sol.set(i2_max->i, true);
+    sol.set(i1_max->j, false);
+    sol.set(i2_max->j, true);
     if (Info::verbose(info))
         std::cout
             <<  "LB "  << sol.profit()

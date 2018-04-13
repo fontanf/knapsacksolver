@@ -25,10 +25,10 @@ Solution& Solution::operator=(const Solution& solution)
             w_ = 0;
             k_ = solution.item_number();
             x_ = solution.data();
-            for (ItemPos i=0; i<instance().total_item_number(); ++i) {
-                if (contains(i)) {
-                    p_ += instance().item(i).p;
-                    w_ += instance().item(i).w;
+            for (ItemPos j=0; j<instance().total_item_number(); ++j) {
+                if (contains(j)) {
+                    p_ += instance().item(j).p;
+                    w_ += instance().item(j).w;
                 }
             }
         }
@@ -36,36 +36,36 @@ Solution& Solution::operator=(const Solution& solution)
     return *this;
 }
 
-int Solution::contains(ItemPos i) const
+int Solution::contains(ItemPos j) const
 {
-    assert(i >= 0 && i < instance().total_item_number());
-    assert(instance().item(i).i >= 0 && instance().item(i).i < instance().total_item_number());
-    return x_[instance().item(i).i];
+    assert(j >= 0 && j < instance().total_item_number());
+    assert(instance().item(j).j >= 0 && instance().item(j).j < instance().total_item_number());
+    return x_[instance().item(j).j];
 }
 
-int Solution::contains_idx(ItemIdx i) const
+int Solution::contains_idx(ItemIdx j) const
 {
-    assert(i >= 0 && i < instance().total_item_number());
-    return x_[i];
+    assert(j >= 0 && j < instance().total_item_number());
+    return x_[j];
 }
 
-void Solution::set(ItemPos i, int b)
+void Solution::set(ItemPos j, int b)
 {
     assert(b == 0 || b == 1);
-    assert(i >= 0 && i < instance().total_item_number());
-    assert(instance().item(i).i >= 0 && instance().item(i).i < instance().total_item_number());
-    if (contains(i) == b)
+    assert(j >= 0 && j < instance().total_item_number());
+    assert(instance().item(j).j >= 0 && instance().item(j).j < instance().total_item_number());
+    if (contains(j) == b)
         return;
     if (b) {
-        p_ += instance().item(i).p;
-        w_ += instance().item(i).w;
+        p_ += instance().item(j).p;
+        w_ += instance().item(j).w;
         k_++;
     } else {
-        p_ -= instance().item(i).p;
-        w_ -= instance().item(i).w;
+        p_ -= instance().item(j).p;
+        w_ -= instance().item(j).w;
         k_--;
     }
-    x_[instance().item(i).i] = b;
+    x_[instance().item(j).j] = b;
 }
 
 void Solution::clear()
@@ -86,14 +86,14 @@ bool Solution::update(const Solution& sol)
 
 void Solution::update_from_partsol(const PartSolFactory1& bsolf, PartSol1 bsol)
 {
-    for (ItemPos i=bsolf.x1(); i<=bsolf.x2(); ++i)
-        set(i, bsolf.contains(bsol, i));
+    for (ItemPos j=bsolf.x1(); j<=bsolf.x2(); ++j)
+        set(j, bsolf.contains(bsol, j));
 }
 
 void Solution::update_from_partsol(const PartSolFactory2& psolf, PartSol2 psol)
 {
-    for (ItemPos i=0; i<psolf.size(); ++i)
-        set(psolf.indices()[i], psolf.contains(psol, i));
+    for (ItemPos j=0; j<psolf.size(); ++j)
+        set(psolf.indices()[j], psolf.contains(psol, j));
 }
 
 void Solution::write_cert(std::string file)
@@ -109,17 +109,16 @@ void Solution::write_cert(std::string file)
 std::ostream& operator<<(std::ostream& os, const Solution& solution)
 {
     const Instance& instance = solution.instance();
-    for (ItemPos i=0; i<instance.total_item_number(); ++i)
-        os << solution.data()[i] << std::endl;
+    for (ItemPos j=0; j<instance.total_item_number(); ++j)
+        os << solution.data()[j] << std::endl;
     return os;
 }
 
 std::string Solution::print_bin() const
 {
     std::string s = "";
-    for (ItemPos i=0; i<instance().total_item_number(); ++i)
-    //for (ItemPos i=instance().total_item_number()-1; i>=0; --i)
-        s += std::to_string(contains(i));
+    for (ItemPos j=0; j<instance().total_item_number(); ++j)
+        s += std::to_string(contains(j));
     return s;
-
 }
+

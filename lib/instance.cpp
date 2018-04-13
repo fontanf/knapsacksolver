@@ -53,9 +53,9 @@ void Instance::read_standard(boost::filesystem::path filepath)
     Profit p;
     Weight w;
     int    x;
-    for (ItemPos i=0; i<item_number(); ++i) {
+    for (ItemPos j=0; j<item_number(); ++j) {
         file >> id >> p >> w >> x;
-        items_[i] = {id,w,p};
+        items_[j] = {id,w,p};
         // Update Optimal solution
         if (x == 1)
             sol_opt_->set(id, true);
@@ -97,7 +97,7 @@ void Instance::read_pisinger(boost::filesystem::path filepath)
     Profit p;
     Weight w;
     int    x;
-    for (ItemPos i=0; i<item_number(); ++i) {
+    for (ItemPos j=0; j<item_number(); ++j) {
         std::getline(file, line, ',');
         std::istringstream(line) >> id;
         std::getline(file, line, ',');
@@ -106,10 +106,10 @@ void Instance::read_pisinger(boost::filesystem::path filepath)
         std::istringstream(line) >> w;
         std::getline(file, line);
         std::istringstream(line) >> x;
-        items_[i] = {i,w,p};
+        items_[j] = {j,w,p};
         // Update Optimal solution
         if (x == 1)
-            sol_opt_->set(i, true);
+            sol_opt_->set(j, true);
     }
 
     file.close();
@@ -144,8 +144,8 @@ Instance::Instance(const Instance& ins)
 
 bool Instance::check()
 {
-    for (ItemPos i=0; i<item_number(); ++i)
-        if (item(i).w <= 0 || item(i).w > capacity())
+    for (ItemPos j=0; j<item_number(); ++j)
+        if (item(j).w <= 0 || item(j).w > capacity())
             return false;
     return true;
 }
@@ -163,16 +163,13 @@ Profit Instance::check(boost::filesystem::path cert_file)
         return -1;
 
     boost::filesystem::ifstream file(cert_file, std::ios_base::in);
-    int x;
     std::vector<int> so(total_item_number(), 0);
-    for (ItemPos j=0; j<total_item_number(); ++j) {
-        file >> x;
-        so[j] = x;
-    }
+    for (ItemPos j=0; j<total_item_number(); ++j)
+        file >> so[j];
 
     Solution sol(*this);
     for (ItemPos j=0; j<total_item_number(); ++j)
-        if (so[item(j).i] == 1)
+        if (so[item(j).j] == 1)
             sol.set(j, true);
 
     if (sol.weight() > capacity())
@@ -212,10 +209,10 @@ void Instance::update_isum()
     assert(sorted());
     isum_ = std::vector<Item>(total_item_number()+1);
     isum_[0] = {0,0,0};
-    for (ItemPos i=1; i<=total_item_number(); ++i) {
-        isum_[i].i = i;
-        isum_[i].w = isum_[i-1].w + item(i-1).w;
-        isum_[i].p = isum_[i-1].p + item(i-1).p;
+    for (ItemPos j=1; j<=total_item_number(); ++j) {
+        isum_[j].j = j;
+        isum_[j].w = isum_[j-1].w + item(j-1).w;
+        isum_[j].p = isum_[j-1].p + item(j-1).p;
     }
     //std::cout << *this << std::endl;
     //DBG(for (const Item& item: isum_)
@@ -233,7 +230,7 @@ ItemPos Instance::ub_item(Item item) const
             [](const Item& i1, const Item& i2) { return i1.w < i2.w;});
     if (s == isum_.begin()+l_+1)
         return l_+1;
-    return s->i-1;
+    return s->j-1;
 }
 
 #define DBG(x)
@@ -241,21 +238,21 @@ ItemPos Instance::ub_item(Item item) const
 
 void Instance::compute_max_items()
 {
-    i_wmax_ = {-1, -1, -1}; // Max weight item
-    i_wmin_ = {-1, c_orig_+1, -1}; // Min weight item
-    i_pmax_ = {-1, -1, -1}; // Max profit item
-    i_emax_ = {-1, 0, -1};  // Max efficiency item;
+    j_wmax_ = {-1, -1, -1}; // Max weight item
+    j_wmin_ = {-1, c_orig_+1, -1}; // Min weight item
+    j_pmax_ = {-1, -1, -1}; // Max profit item
+    j_emax_ = {-1, 0, -1};  // Max efficiency item;
 
-    for (ItemPos i = f_; i<=l_; ++i) {
-        Profit p = item(i).p;
-        Weight w = item(i).w;
-        ItemIdx id = item(i).i;
-        if (p * i_emax_.w > i_emax_.p * w)
-            i_emax_ = {id,w,p};
-        if (p > i_pmax_.p)
-            i_pmax_ = {id,w,p};
-        if (w > i_wmax_.w)
-            i_wmax_ = {id,w,p};
+    for (ItemPos j=f_; j<=l_; ++j) {
+        Profit p = item(j).p;
+        Weight w = item(j).w;
+        ItemIdx id = item(j).j;
+        if (p * j_emax_.w > j_emax_.p * w)
+            j_emax_ = {id,w,p};
+        if (p > j_pmax_.p)
+            j_pmax_ = {id,w,p};
+        if (w > j_wmax_.w)
+            j_wmax_ = {id,w,p};
     }
 }
 
@@ -317,37 +314,37 @@ void Instance::remove_big_items()
     if (sorted()) {
         std::vector<Item> not_fixed;
         std::vector<Item> fixed_0;
-        for (ItemPos i=first_item(); i<=last_item(); ++i) {
-            if (item(i).w > capacity()) {
-                fixed_0.push_back(item(i));
+        for (ItemPos j=first_item(); j<=last_item(); ++j) {
+            if (item(j).w > capacity()) {
+                fixed_0.push_back(item(j));
             } else {
-                not_fixed.push_back(item(i));
+                not_fixed.push_back(item(j));
             }
         }
         if (fixed_0.size() != 0) {
-            ItemPos i = not_fixed.size();
+            ItemPos j = not_fixed.size();
             std::copy(not_fixed.begin(), not_fixed.end(), items_.begin()+f_);
-            std::copy(fixed_0.begin(), fixed_0.end(), items_.begin()+f_+i);
-            l_ = f_+i-1;
+            std::copy(fixed_0.begin(), fixed_0.end(), items_.begin()+f_+j);
+            l_ = f_+j-1;
         }
     } else {
         bool break_item_removed = false;
-        for (ItemPos i=first_item(); i<=last_item(); ++i) {
-            DBG(std::cout << "I " << i
-                    << " " << item(i)
+        for (ItemPos j=first_item(); j<=last_item(); ++j) {
+            DBG(std::cout << "J " << j
+                    << " " << item(j)
                     << " F " << f_
                     << " L " << l_
                     << " B " << b_
                     << " C " << capacity()
                     << std::flush;)
-            if (item(i).w > capacity()) {
-                if (i == b_)
+            if (item(j).w > capacity()) {
+                if (j == b_)
                     break_item_removed = true;
-                if (i <= b_) {
-                    swap(i, f_);
+                if (j <= b_) {
+                    swap(j, f_);
                     f_++;
-                } else if (i > b_) {
-                    swap(i, l_);
+                } else if (j > b_) {
+                    swap(j, l_);
                     l_--;
                 }
             }
@@ -372,10 +369,10 @@ ItemPos Instance::partition(ItemPos f, ItemPos l)
     // Partition
     swap(pivot, l);
     ItemPos j = f;
-    for (ItemPos i=f; i<l; ++i) {
-        if (item(i).p*item(l).w <= item(l).p*item(i).w)
+    for (ItemPos k=f; k<l; ++k) {
+        if (item(k).p*item(l).w <= item(l).p*item(k).w)
             continue;
-        swap(i, j);
+        swap(k, j);
         j++;
     }
     swap(j, l);
@@ -417,8 +414,8 @@ void Instance::sort_partially()
             ItemPos j = partition(f, l);
             //std::cout << " J " << j << std::flush;
             ItemPos w = 0;
-            for (ItemPos i=f; i<j; ++i)
-                w += item(i).w;
+            for (ItemPos k=f; k<j; ++k)
+                w += item(k).w;
             //std::cout << " W " << w << " C " << c << std::flush;
             if (w + item(j).w <= c) {
                 //std::cout << " =>" << std::endl;
@@ -471,21 +468,21 @@ void Instance::sort_right(Profit lb)
     //std::cout << "SORT " << in << std::endl;
     int_right_.pop_back();
     ItemPos k = t_;
-    for (ItemPos i=in.f; i<=in.l; ++i) {
-        DBG(std::cout << "I " << i << std::flush;)
-            Profit ub = break_solution()->profit() + item(i).p
-            + ((break_capacity() - item(i).w) * item(b_).p) / item(b_).w;
+    for (ItemPos j=in.f; j<=in.l; ++j) {
+        DBG(std::cout << "J " << j << std::flush;)
+            Profit ub = break_solution()->profit() + item(j).p
+            + ((break_capacity() - item(j).w) * item(b_).p) / item(b_).w;
         DBG(std::cout << " LB " << lb << " UB " << ub << std::flush;)
-        if ((item(i).w <= capacity() && ub > lb)
-                || (k == t_ && i == in.l)) {
+        if ((item(j).w <= capacity() && ub > lb)
+                || (k == t_ && j == in.l)) {
             k++;
             DBG(std::cout << " K " << k << std::endl;)
-            swap(k, i);
+            swap(k, j);
         } else {
             assert(optimal_solution() == NULL
                     || optimal_solution()->profit() == lb
-                    || !optimal_solution()->contains(i));
-            DBG(std::cout << " REDUCE " << item(i) << std::endl;)
+                    || !optimal_solution()->contains(j));
+            DBG(std::cout << " REDUCE " << item(j) << std::endl;)
         }
     }
     std::sort(items_.begin()+t_+1, items_.begin()+k+1,
@@ -509,22 +506,22 @@ void Instance::sort_left(Profit lb)
     int_left_.pop_back();
     ItemPos k = s_;
     DBG(std::cout << "K " << k << std::endl;)
-    for (ItemPos i=in.l; i>=in.f; --i) {
-        DBG(std::cout << "I " << i << std::flush;)
-        Profit ub = break_solution()->profit() - item(i).p
-            + ((break_capacity() + item(i).w) * item(b_).p) / item(b_).w;
+    for (ItemPos j=in.l; j>=in.f; --j) {
+        DBG(std::cout << "J " << j << std::flush;)
+        Profit ub = break_solution()->profit() - item(j).p
+            + ((break_capacity() + item(j).w) * item(b_).p) / item(b_).w;
         DBG(std::cout << " LB " << lb << " UB " << ub << std::flush;)
-        if ((item(i).w <= capacity() && ub > lb)
-                || (i == in.f && k == s_)) {
+        if ((item(j).w <= capacity() && ub > lb)
+                || (j == in.f && k == s_)) {
             k--;
             DBG(std::cout << " K " << k << std::endl;)
-            swap(k, i);
+            swap(k, j);
         } else {
             assert(optimal_solution() == NULL
                     || optimal_solution()->profit() == lb
-                    || optimal_solution()->contains(i));
-            sol_red_->set(i, true);
-            DBG(std::cout << " REDUCE " << item(i) << " C " << capacity() << std::endl;)
+                    || optimal_solution()->contains(j));
+            sol_red_->set(j, true);
+            DBG(std::cout << " REDUCE " << item(j) << " C " << capacity() << std::endl;)
         }
     }
     std::sort(items_.begin()+k, items_.begin()+s_,
@@ -557,14 +554,14 @@ void Instance::surrogate(Weight multiplier, ItemIdx bound, ItemPos first)
     }
     f_ = first;
     l_ = last_item();
-    for (ItemIdx i=f_; i<=l_; ++i)
-        sol_red_->set(i, false);
+    for (ItemIdx j=f_; j<=l_; ++j)
+        sol_red_->set(j, false);
     bound -= sol_red_->item_number();
-    for (ItemIdx i=f_; i<=l_; ++i) {
-        items_[i].w += multiplier;
-        if (items_[i].w <= 0) {
-            sol_red_->set(i, true);
-            swap(i, f_);
+    for (ItemIdx j=f_; j<=l_; ++j) {
+        items_[j].w += multiplier;
+        if (items_[j].w <= 0) {
+            sol_red_->set(j, true);
+            swap(j, f_);
             f_++;
         }
     }
@@ -592,41 +589,41 @@ void Instance::reduce1(Profit lb, bool verbose)
     sol_red_opt_ = (lb == optimum());
 
     DBG(std::cout << "b " << b_ << std::endl;)
-    for (ItemIdx i=f_; i<b_;) {
-        DBG(std::cout << "I " << i << " (" << item(i).i << ")" << " F " << f_;)
-        Profit ub = reduced_solution()->profit() + break_profit() - item(i).p
-                + ((break_capacity() + item(i).w) * item(b_).p) / item(b_).w;
+    for (ItemIdx j=f_; j<b_;) {
+        DBG(std::cout << "J " << j << " (" << item(j).j << ")" << " F " << f_;)
+        Profit ub = reduced_solution()->profit() + break_profit() - item(j).p
+                + ((break_capacity() + item(j).w) * item(b_).p) / item(b_).w;
         DBG(std::cout << " UB " << ub;)
         if (ub <= lb) {
-            assert(sol_red_opt_ || optimal_solution()->contains(i));
+            assert(sol_red_opt_ || optimal_solution()->contains(j));
             DBG(std::cout << " 1";)
-            sol_red_->set(i, true);
-            if (i != f_)
-                swap(i, f_);
+            sol_red_->set(j, true);
+            if (j != f_)
+                swap(j, f_);
             f_++;
             if (capacity() < 0)
                 return;
         } else {
             DBG(std::cout << " ?";)
         }
-        i++;
+        j++;
         DBG(std::cout << std::endl;)
     }
-    for (ItemPos i=l_; i>b_;) {
-        DBG(std::cout << "I " << i << " (" << item(i).i << ")" << " L " << l_;)
-        Profit ub = reduced_solution()->profit() + break_profit() + item(i).p
-                + ((break_capacity() - item(i).w) * item(b_).p) / item(b_).w;
+    for (ItemPos j=l_; j>b_;) {
+        DBG(std::cout << "J " << j << " (" << item(j).j << ")" << " L " << l_;)
+        Profit ub = reduced_solution()->profit() + break_profit() + item(j).p
+                + ((break_capacity() - item(j).w) * item(b_).p) / item(b_).w;
         DBG(std::cout << " UB " << ub;)
         if (ub <= lb) {
-            assert(sol_red_opt_ || !optimal_solution()->contains(i));
+            assert(sol_red_opt_ || !optimal_solution()->contains(j));
             DBG(std::cout << " 0";)
-            if (i != l_)
-                swap(i, l_);
+            if (j != l_)
+                swap(j, l_);
             l_--;
         } else {
             DBG(std::cout << " ?";)
         }
-        i--;
+        j--;
         DBG(std::cout << std::endl;)
     }
 
@@ -655,89 +652,88 @@ void Instance::reduce2(Profit lb, bool verbose)
     std::vector<Item> fixed_0;
 
     DBG(std::cout << "b " << b_ << std::endl;)
-    for (ItemPos i=f_; i<=b_; ++i) {
-        DBG(std::cout << "i " << i << " (" << item(i).i << ")" << std::flush;)
-        Item ubitem = {0, total_capacity() + item(i).w, 0};
+    for (ItemPos j=f_; j<=b_; ++j) {
+        DBG(std::cout << "J " << j << " (" << item(j).j << ")" << std::flush;)
+        Item ubitem = {0, total_capacity() + item(j).w, 0};
         ItemPos bb = ub_item(ubitem);
         DBG(std::cout << " bb " << bb << std::flush;)
         Profit ub = 0;
         if (bb == last_item() + 1) {
-            ub = isum(last_item()+1).p - item(i).p;
+            ub = isum(last_item()+1).p - item(j).p;
             DBG(std::cout << " UB " << ub << std::flush;)
         } else if (bb == last_item()) {
-            Profit ub1 = isum(bb  ).p - item(i).p;
-            Profit ub2 = isum(bb+1).p - item(i).p + ((total_capacity() + item(i).w - isum(bb+1).w) * item(bb-1).p + 1) / item(bb-1).w - 1;
+            Profit ub1 = isum(bb  ).p - item(j).p;
+            Profit ub2 = isum(bb+1).p - item(j).p + ((total_capacity() + item(j).w - isum(bb+1).w) * item(bb-1).p + 1) / item(bb-1).w - 1;
             ub = (ub1 > ub2)? ub1: ub2;
             DBG(std::cout << " UB1 " << ub1 << " UB2 " << ub2 << " UB " << ub << std::flush;)
         } else {
-            Profit ub1 = isum(bb  ).p - item(i).p + ((total_capacity() + item(i).w - isum(bb  ).w) * item(bb+1).p    ) / item(bb+1).w;
-            Profit ub2 = isum(bb+1).p - item(i).p + ((total_capacity() + item(i).w - isum(bb+1).w) * item(bb-1).p + 1) / item(bb-1).w - 1;
+            Profit ub1 = isum(bb  ).p - item(j).p + ((total_capacity() + item(j).w - isum(bb  ).w) * item(bb+1).p    ) / item(bb+1).w;
+            Profit ub2 = isum(bb+1).p - item(j).p + ((total_capacity() + item(j).w - isum(bb+1).w) * item(bb-1).p + 1) / item(bb-1).w - 1;
             ub = (ub1 > ub2)? ub1: ub2;
             DBG(std::cout << " UB1 " << ub1 << " UB2 " << ub2 << " UB " << ub << std::flush;)
         }
         if (ub <= lb) {
             DBG(std::cout << " 1";)
-            //assert(sol_red_opt_ || optimal_solution()->contains(i));
-            sol_red_->set(i, true);
-            fixed_1.push_back(item(i));
+            //assert(sol_red_opt_ || optimal_solution()->contains(j));
+            sol_red_->set(j, true);
+            fixed_1.push_back(item(j));
             if (capacity() < 0)
                 return;
         } else {
             DBG(std::cout << " ?" << std::flush;)
-            if (i != b_)
-                not_fixed.push_back(item(i));
+            if (j != b_)
+                not_fixed.push_back(item(j));
         }
         DBG(std::cout << std::endl;)
     }
-    for (ItemPos i=b_; i<=l_; ++i) {
-        if (i == b_ && !fixed_1.empty() && fixed_1.back().i == item(b_).i)
+    for (ItemPos j=b_; j<=l_; ++j) {
+        if (j == b_ && !fixed_1.empty() && fixed_1.back().j == item(b_).j)
             continue;
-        DBG(std::cout << "I " << i << " (" << item(i).i << ")" << std::flush;)
+        DBG(std::cout << "J " << j << " (" << item(j).j << ")" << std::flush;)
 
-        Item ubitem = {0, total_capacity() - item(i).w, 0};
+        Item ubitem = {0, total_capacity() - item(j).w, 0};
         ItemPos bb = ub_item(ubitem);
         DBG(std::cout << " bb " << bb << std::flush;)
         Profit ub = 0;
         if (bb == last_item() + 1) {
-            ub = isum(last_item()+1).p + item(i).p;
+            ub = isum(last_item()+1).p + item(j).p;
             DBG(std::cout << " UB " << ub << std::flush;)
         } else if (bb == last_item()) {
-            Profit ub1 = isum(bb  ).p + item(i).p;
-            Profit ub2 = isum(bb+1).p + item(i).p + ((total_capacity() - item(i).w - isum(bb+1).w) * item(bb-1).p + 1) / item(bb-1).w - 1;
+            Profit ub1 = isum(bb  ).p + item(j).p;
+            Profit ub2 = isum(bb+1).p + item(j).p + ((total_capacity() - item(j).w - isum(bb+1).w) * item(bb-1).p + 1) / item(bb-1).w - 1;
             ub = (ub1 > ub2)? ub1: ub2;
             DBG(std::cout << " UB " << ub << std::flush;)
         } else if (bb == 0) {
-            ub = ((total_capacity() + item(i).w) * item(bb).p) / item(bb).w;
+            ub = ((total_capacity() + item(j).w) * item(bb).p) / item(bb).w;
             DBG(std::cout << " UB " << ub << std::flush;)
         } else {
-            Profit ub1 = isum(bb  ).p + item(i).p + ((total_capacity() - item(i).w - isum(bb  ).w) * item(bb+1).p) / item(bb+1).w;
-            Profit ub2 = isum(bb+1).p + item(i).p + ((total_capacity() - item(i).w - isum(bb+1).w) * item(bb-1).p + 1) / item(bb-1).w - 1;
+            Profit ub1 = isum(bb  ).p + item(j).p + ((total_capacity() - item(j).w - isum(bb  ).w) * item(bb+1).p) / item(bb+1).w;
+            Profit ub2 = isum(bb+1).p + item(j).p + ((total_capacity() - item(j).w - isum(bb+1).w) * item(bb-1).p + 1) / item(bb-1).w - 1;
             ub = (ub1 > ub2)? ub1: ub2;
             DBG(std::cout << " UB1 " << ub1 << " UB2 " << ub2 << " UB " << ub << std::flush;)
         }
 
         if (ub <= lb) {
             DBG(std::cout << " 0" << std::flush;)
-            //assert(sol_red_opt_ || !optimal_solution()->contains(i));
-            fixed_0.push_back(item(i));
+            //assert(sol_red_opt_ || !optimal_solution()->contains(j));
+            fixed_0.push_back(item(j));
         } else {
             DBG(std::cout << " ?" << std::flush;)
-            not_fixed.push_back(item(i));
+            not_fixed.push_back(item(j));
         }
         DBG(std::cout << std::endl;)
     }
 
-    ItemPos i = not_fixed.size();
-    ItemPos i0 = fixed_0.size();
-    ItemPos i1 = fixed_1.size();
-    DBG(std::cout << "I " << i << " I0 " << i0 << " I1 " << i1 << " N " << item_number() << std::endl;)
-    assert(i + i0 + i1 == item_number());
+    ItemPos j = not_fixed.size();
+    ItemPos j0 = fixed_0.size();
+    ItemPos j1 = fixed_1.size();
+    DBG(std::cout << "J " << j << " J0 " << j0 << " J1 " << j1 << " N " << item_number() << std::endl;) assert(j + j0 + j1 == item_number());
 
     std::copy(fixed_1.begin(), fixed_1.end(), items_.begin()+f_);
-    std::copy(not_fixed.begin(), not_fixed.end(), items_.begin()+f_+i1);
-    std::copy(fixed_0.begin(), fixed_0.end(), items_.begin()+f_+i1+i);
-    f_ += i1;
-    l_ -= i0;
+    std::copy(not_fixed.begin(), not_fixed.end(), items_.begin()+f_+j1);
+    std::copy(fixed_0.begin(), fixed_0.end(), items_.begin()+f_+j1+j);
+    f_ += j1;
+    l_ -= j0;
 
     DBG(std::cout << std::endl << *this << std::endl;)
 
@@ -764,18 +760,18 @@ void Instance::reduce2(Profit lb, bool verbose)
 #define DBG(x)
 //#define DBG(x) x
 
-void Instance::set_first_item(ItemPos j)
+void Instance::set_first_item(ItemPos k)
 {
-    assert(j >= f_);
-    for (ItemPos i=f_; i<j; ++i)
-        sol_red_->set(i, true);
-    f_ = j;
+    assert(k >= f_);
+    for (ItemPos j=f_; j<k; ++j)
+        sol_red_->set(j, true);
+    f_ = k;
 }
 
-void Instance::set_last_item(ItemPos j)
+void Instance::set_last_item(ItemPos k)
 {
-    assert(j <= l_);
-    l_ = j;
+    assert(k <= l_);
+    l_ = k;
 }
 
 void Instance::fix(PartSolFactory1 psolf, PartSol1 psol)
@@ -805,15 +801,15 @@ void Instance::fix(PartSolFactory1 psolf, PartSol1 psol)
     for (ItemPos j=l+1; j<=l_; ++j)
         not_fixed.push_back(item(j));
 
-    ItemPos i = not_fixed.size();
-    ItemPos i1 = fixed_1.size();
-    ItemPos i0 = fixed_0.size();
+    ItemPos j = not_fixed.size();
+    ItemPos j1 = fixed_1.size();
+    ItemPos j0 = fixed_0.size();
     std::copy(fixed_1.begin(), fixed_1.end(), items_.begin()+f_);
-    std::copy(not_fixed.begin(), not_fixed.end(), items_.begin()+f_+i1);
-    std::copy(fixed_0.begin(), fixed_0.end(), items_.begin()+f_+i1+i);
+    std::copy(not_fixed.begin(), not_fixed.end(), items_.begin()+f_+j1);
+    std::copy(fixed_0.begin(), fixed_0.end(), items_.begin()+f_+j1+j);
 
-    f_ += i1;
-    l_ -= i0;
+    f_ += j1;
+    l_ -= j0;
     DBG(std::cout << "F " << f_ << " L " << l_ << std::endl;)
 
     remove_big_items();
@@ -857,15 +853,15 @@ void Instance::fix(PartSolFactory2 psolf, PartSol2 psol)
         }
     }
 
-    ItemPos i = not_fixed.size();
-    ItemPos i1 = fixed_1.size();
-    ItemPos i0 = fixed_0.size();
+    ItemPos j = not_fixed.size();
+    ItemPos j1 = fixed_1.size();
+    ItemPos j0 = fixed_0.size();
     std::copy(fixed_1.begin(), fixed_1.end(), items_.begin()+f_);
-    std::copy(not_fixed.begin(), not_fixed.end(), items_.begin()+f_+i1);
-    std::copy(fixed_0.begin(), fixed_0.end(), items_.begin()+f_+i1+i);
+    std::copy(not_fixed.begin(), not_fixed.end(), items_.begin()+f_+j1);
+    std::copy(fixed_0.begin(), fixed_0.end(), items_.begin()+f_+j1+j);
 
-    f_ += i1;
-    l_ -= i0;
+    f_ += j1;
+    l_ -= j0;
     DBG(std::cout << "F " << f_ << " L " << l_ << std::endl;)
 
     remove_big_items();
@@ -883,22 +879,6 @@ void Instance::fix(PartSolFactory2 psolf, PartSol2 psol)
 #undef DBG
 
 ////////////////////////////////////////////////////////////////////////////////
-
-Weight Instance::gcd() const
-{
-    Weight gcd = capacity();
-    for (ItemPos i=0; i<item_number(); ++i) {
-        if (gcd == 1)
-            return gcd;
-        Weight wi = item(i).w;
-        while (wi != 0) {
-            Weight tmp = gcd % wi;
-            gcd = wi;
-            wi = tmp;
-        }
-    }
-    return gcd;
-}
 
 Profit Instance::optimum() const
 {
@@ -996,7 +976,7 @@ std::string Instance::print_opt(Profit opt) const
 
 std::ostream& operator<<(std::ostream& os, const Item& it)
 {
-    os << "(" << it.i << " " << it.w << " " << it.p << " " << (double)it.p/(double)it.w << ")";
+    os << "(" << it.j << " " << it.w << " " << it.p << " " << (double)it.p/(double)it.w << ")";
     return os;
 }
 
@@ -1017,19 +997,19 @@ std::ostream& operator<<(std::ostream& os, const Instance& instance)
         << std::endl;
     if (instance.break_item_found())
         os << "b " << instance.break_item() << " wsum " << instance.break_weight() << " psum " << instance.break_profit() << std::endl;
-    for (ItemPos i=0; i<instance.total_item_number(); ++i) {
-        os << i << ": " << instance.item(i) << std::flush;
+    for (ItemPos j=0; j<instance.total_item_number(); ++j) {
+        os << j << ": " << instance.item(j) << std::flush;
         if (instance.break_solution() != NULL)
-            os << " B " << instance.break_solution()->contains(i);
+            os << " B " << instance.break_solution()->contains(j);
         if (instance.optimal_solution() != NULL)
-            os << " O " << instance.optimal_solution()->contains(i);
+            os << " O " << instance.optimal_solution()->contains(j);
         if (instance.reduced_solution() != NULL)
-            os << " R " << instance.reduced_solution()->contains(i);
-        if (instance.break_item_found() && i == instance.break_item())
+            os << " R " << instance.reduced_solution()->contains(j);
+        if (instance.break_item_found() && j == instance.break_item())
             os << " B";
-        if (i == instance.first_item())
+        if (j == instance.first_item())
             os << " F";
-        if (i == instance.last_item())
+        if (j == instance.last_item())
             os << " L";
         os << std::endl;
     }

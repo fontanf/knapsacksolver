@@ -18,9 +18,9 @@ public:
 
     const std::vector<ItemPos>& indices() const { return idx_; }
 
-    int contains(PartSol2 s, ItemPos i) const
+    int contains(PartSol2 s, ItemPos j) const
     {
-        return ((s >> i) & 1UL);
+        return ((s >> j) & 1UL);
     }
 
     PartSol2 add(const PartSol2& s) const
@@ -33,27 +33,27 @@ public:
         return (s & (~(1UL << cur_)));
     }
 
-    PartSol2 toggle(PartSol2& s, ItemPos i) const
+    PartSol2 toggle(PartSol2& s, ItemPos j) const
     {
-        assert(0 <= i && i < size_);
-        return (s ^ (1UL << i));
+        assert(0 <= j && j < size_);
+        return (s ^ (1UL << j));
     }
 
     std::string print(PartSol2& s) const
     {
         std::string str = "";
-        for (ItemPos i=0; i<size_; ++i)
-            if (idx_[i] != -1)
-                str += std::to_string(idx_[i]) + " " + std::to_string(contains(s, i)) + "; ";
+        for (ItemPos j=0; j<size_; ++j)
+            if (idx_[j] != -1)
+                str += std::to_string(idx_[j]) + " " + std::to_string(contains(s, j)) + "; ";
         return str;
     }
 
-    void add_item(ItemPos i)
+    void add_item(ItemPos j)
     {
         cur_++;
         if (cur_ == size_)
             cur_ = 0;
-        idx_[cur_] = i;
+        idx_[cur_] = j;
     }
 
 private:
