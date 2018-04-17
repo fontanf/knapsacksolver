@@ -44,24 +44,39 @@ void Instance::read_standard(boost::filesystem::path filepath)
 {
     name_ = filepath.stem().string();
     boost::filesystem::fstream file(filepath, std::ios_base::in);
-    file >> l_ >> c_orig_;
+
+    ItemIdx n;
+    file >> n >> c_orig_;
+
     f_ = 0;
-    l_--;
-    items_.resize(item_number());
-    sol_opt_ = new Solution(*this);
-    ItemIdx id;
+    l_ = n-1;
+
+    items_.reserve(n);
     Profit p;
     Weight w;
-    int    x;
-    for (ItemPos j=0; j<item_number(); ++j) {
-        file >> id >> p >> w >> x;
-        items_[j] = {id,w,p};
-        // Update Optimal solution
-        if (x == 1)
-            sol_opt_->set(id, true);
+    for (ItemPos j=0; j<n; ++j) {
+        file >> p >> w;
+        items_.push_back({j,w,p});
     }
 
     file.close();
+
+    boost::filesystem::path sol = filepath;
+    sol += ".sol";
+    if (boost::filesystem::exists(sol))
+        read_standard_solution(sol);
+}
+
+void Instance::read_standard_solution(boost::filesystem::path filepath)
+{
+    sol_opt_ = new Solution(*this);
+    boost::filesystem::ifstream file(filepath, std::ios_base::in);
+
+    int x = 0;
+    for (ItemPos j=0; j<total_item_number(); ++j) {
+        file >> x;
+        sol_opt_->set(j, x);
+    }
 }
 
 void Instance::read_pisinger(boost::filesystem::path filepath)

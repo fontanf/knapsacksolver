@@ -200,6 +200,7 @@ public:
 private:
 
     void read_standard(boost::filesystem::path filename);
+    void read_standard_solution(boost::filesystem::path filename);
     void read_pisinger(boost::filesystem::path filename);
 
     ItemPos partition(ItemPos f, ItemPos l);
