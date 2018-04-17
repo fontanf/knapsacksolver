@@ -7,14 +7,13 @@
 void opts_bellman_array(const Instance& ins, std::vector<Profit>& values,
         ItemPos n1, ItemPos n2, Weight c)
 {
-    for (Weight w=c+1; w-->0;)
-        values[w] = 0;
+    std::fill(values.begin(), values.begin()+c+1, 0);
     for (ItemPos j=n1; j<=n2; ++j) {
-        Weight wi = ins.item(j).w;
-        Profit pi = ins.item(j).p;
-        for (Weight w=c+1; w-->0;)
-            if (w >= wi && values[w-wi] + pi > values[w])
-                values[w] = values[w-wi] + pi;
+        Weight wj = ins.item(j).w;
+        Profit pj = ins.item(j).p;
+        for (Weight w=c+1; w>=wj; w--)
+            if (values[w-wj] + pj > values[w])
+                values[w] = values[w-wj] + pj;
     }
 }
 
@@ -42,13 +41,15 @@ Solution sopt_bellman_array_all(const Instance& ins, Info* info)
     std::vector<Profit> values(values_size);
 
     // Compute optimal value
-    for (Weight w=0; w<=ins.capacity(); ++w)
-        values[INDEX(-1,w)] = 0;
-    for (ItemPos j=0; j<ins.item_number(); ++j) {
+    std::fill(values.begin(), values.begin()+c+1, 0);
+    for (ItemPos j=0; j<ins.total_item_number(); ++j) {
         Weight wj = ins.item(j).w;
-        for (Weight w=0; w<=ins.capacity(); ++w) {
+        for (Weight w=0; w<wj; ++w)
+            values[INDEX(j,w)] = values[INDEX(j-1,w)];
+        Profit pj = ins.item(j).p;
+        for (Weight w=wj; w<=ins.capacity(); ++w) {
             Profit v0 = values[INDEX(j-1,w)];
-            Profit v1 = (w < wj)? 0: values[INDEX(j-1,w-wj)] + ins.item(j).p;
+            Profit v1 = values[INDEX(j-1,w-wj)] + pj;
             values[INDEX(j,w)] = (v1 > v0)? v1: v0;
         }
     }
@@ -117,8 +118,8 @@ Solution sopt_bellman_array_one(const Instance& ins, Info* info)
             }
 
             // For other values of w
-            for (Weight w=c-1; w>=0; w--) {
-                if (w >= wj && values[w-wj] + pj > values[w]) {
+            for (Weight w=c-1; w>=wj; w--) {
+                if (values[w-wj] + pj > values[w]) {
                     values[w] = values[w-wj] + pj;
                     if (values[w] == opt_local) {
                         DBG(std::cout << " OPT REACHED " << j << std::flush;)
@@ -194,8 +195,8 @@ Solution sopt_bellman_array_part(const Instance& ins, ItemPos k, Info* info)
             Profit pj = ins.item(j).p;
 
             // For other values of w
-            for (Weight w=c; w>=0; w--) {
-                if (w >= wj && values[w-wj] + pj > values[w]) {
+            for (Weight w=c; w>=wj; w--) {
+                if (values[w-wj] + pj > values[w]) {
                     values[w] = values[w-wj] + pj;
                     bisols[w] = psolf.add(bisols[w-wj], j);
                     if (values[w] == opt_local) {
