@@ -11,6 +11,10 @@ cc_library(
         deps = [
                 "@benchtools//:info",
         ],
+        linkopts = [
+                "-lboost_iostreams",
+                "-lboost_serialization",
+        ],
 )
 
 cc_library(
@@ -18,6 +22,33 @@ cc_library(
         hdrs = ["instance.hpp", "solution.hpp"],
         deps = ["@benchtools//:info",],
         visibility = ["//visibility:public"],
+)
+
+cc_library(
+        name = "libgenerator",
+        hdrs = ["generator.hpp"],
+        srcs = ["generator.cpp"],
+        visibility = ["//visibility:public"],
+        linkopts = [
+                "-lboost_system",
+                "-lboost_filesystem",
+        ],
+        deps = [
+                ":cpp", 
+        ],
+)
+
+cc_binary(
+        name = "generator_main",
+        srcs = ["generator.cpp", "generator.hpp"],
+        linkopts = [
+                "-lboost_system",
+                "-lboost_filesystem",
+                "-lboost_iostreams",
+                "-lboost_serialization",
+                "-lboost_program_options"
+        ],
+        deps = ["//lib:cpp"],
 )
 
 cc_library(
