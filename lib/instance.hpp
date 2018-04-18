@@ -10,8 +10,6 @@
 #include <fstream>
 #include <chrono>
 
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/ini_parser.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -199,9 +197,10 @@ public:
 
 private:
 
-    void read_standard(boost::filesystem::path filename);
-    void read_standard_solution(boost::filesystem::path filename);
-    void read_pisinger(boost::filesystem::path filename);
+    void read_standard(std::stringstream& data);
+    void read_subsetsum_standard(std::stringstream& data);
+    void read_pisinger(std::stringstream& data);
+    void read_standard_solution(boost::filesystem::path filepath);
 
     ItemPos partition(ItemPos f, ItemPos l);
     bool check();

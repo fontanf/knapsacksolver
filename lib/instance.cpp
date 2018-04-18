@@ -5,6 +5,16 @@
 
 #include <sstream>
 
+#include <boost/iostreams/filtering_stream.hpp>
+#include <boost/iostreams/filter/zlib.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
+#include <boost/iostreams/filter/bzip2.hpp>
+#include <boost/iostreams/copy.hpp>
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/serialization/vector.hpp>
+
+
 Instance::Instance(const std::vector<Item>& items, Weight c):
     name_(""), format_(""), f_(0), l_(items.size()-1), c_orig_(c), items_(items)
 {
@@ -24,12 +34,32 @@ Instance::Instance(boost::filesystem::path filepath)
         assert(false);
     }
 
+    name_ = filepath.stem().string();
+    std::stringstream data;
+    if (filepath.extension() == ".txt") {
+        boost::filesystem::ifstream file(filepath, std::ios_base::in);
+        data << file.rdbuf();
+        file.close();
+    } else if (filepath.extension() == ".bz2") {
+        boost::filesystem::ifstream file(filepath, std::ios_base::in);
+        boost::iostreams::filtering_istream in;
+        in.push(boost::iostreams::bzip2_decompressor());
+        in.push(file);
+        boost::iostreams::copy(in, data);
+        file.close();
+    } else {
+        std::cout << filepath.extension() << ": extension unknown." << std::endl;
+        assert(false);
+    }
+
     boost::filesystem::fstream file(FORMAT, std::ios_base::in);
     std::getline(file, format_);
     if        (format_ == "knapsack_standard") {
-        read_standard(filepath);
+        read_standard(data);
+    } else if (format_ == "subsetsum_standard") {
+        read_subsetsum_standard(data);
     } else if (format_ == "knapsack_pisinger") {
-        read_pisinger(filepath);
+        read_pisinger(data);
     } else {
         std::cout << format_ << ": Unknown instance format." << std::endl;
         assert(false);
@@ -37,16 +67,17 @@ Instance::Instance(boost::filesystem::path filepath)
 
     sol_red_ = new Solution(*this);
     compute_max_items();
-    assert(check());
+
+    boost::filesystem::path sol = filepath;
+    sol += ".sol";
+    if (boost::filesystem::exists(sol))
+        read_standard_solution(sol);
 }
 
-void Instance::read_standard(boost::filesystem::path filepath)
+void Instance::read_standard(std::stringstream& data)
 {
-    name_ = filepath.stem().string();
-    boost::filesystem::fstream file(filepath, std::ios_base::in);
-
     ItemIdx n;
-    file >> n >> c_orig_;
+    data >> n >> c_orig_;
 
     f_ = 0;
     l_ = n-1;
@@ -55,16 +86,25 @@ void Instance::read_standard(boost::filesystem::path filepath)
     Profit p;
     Weight w;
     for (ItemPos j=0; j<n; ++j) {
-        file >> p >> w;
+        data >> p >> w;
         items_.push_back({j,w,p});
     }
+}
 
-    file.close();
+void Instance::read_subsetsum_standard(std::stringstream& data)
+{
+    ItemIdx n;
+    data >> n >> c_orig_;
 
-    boost::filesystem::path sol = filepath;
-    sol += ".sol";
-    if (boost::filesystem::exists(sol))
-        read_standard_solution(sol);
+    f_ = 0;
+    l_ = n-1;
+
+    items_.reserve(n);
+    Weight w;
+    for (ItemPos j=0; j<n; ++j) {
+        data >> w;
+        items_.push_back({j,w,w});
+    }
 }
 
 void Instance::read_standard_solution(boost::filesystem::path filepath)
@@ -79,31 +119,30 @@ void Instance::read_standard_solution(boost::filesystem::path filepath)
     }
 }
 
-void Instance::read_pisinger(boost::filesystem::path filepath)
+void Instance::read_pisinger(std::stringstream& data)
 {
-    boost::filesystem::fstream file(filepath, std::ios_base::in);
     uint_fast64_t null;
 
-    std::getline(file, name_);
+    std::getline(data, name_);
 
     std::string line;
     std::istringstream iss;
 
-    std::getline(file, line, ' ');
-    std::getline(file, line);
+    std::getline(data, line, ' ');
+    std::getline(data, line);
     std::istringstream(line) >> l_;
     f_ = 0;
     l_--;
 
-    std::getline(file, line, ' ');
-    std::getline(file, line);
+    std::getline(data, line, ' ');
+    std::getline(data, line);
     std::istringstream(line) >> c_orig_;
 
-    std::getline(file, line, ' ');
-    std::getline(file, line);
+    std::getline(data, line, ' ');
+    std::getline(data, line);
     std::istringstream(line) >> null;
 
-    std::getline(file, line);
+    std::getline(data, line);
 
     items_.resize(item_number());
     sol_opt_ = new Solution(*this);
@@ -113,21 +152,19 @@ void Instance::read_pisinger(boost::filesystem::path filepath)
     Weight w;
     int    x;
     for (ItemPos j=0; j<item_number(); ++j) {
-        std::getline(file, line, ',');
+        std::getline(data, line, ',');
         std::istringstream(line) >> id;
-        std::getline(file, line, ',');
+        std::getline(data, line, ',');
         std::istringstream(line) >> p;
-        std::getline(file, line, ',');
+        std::getline(data, line, ',');
         std::istringstream(line) >> w;
-        std::getline(file, line);
+        std::getline(data, line);
         std::istringstream(line) >> x;
         items_[j] = {j,w,p};
         // Update Optimal solution
         if (x == 1)
             sol_opt_->set(j, true);
     }
-
-    file.close();
 }
 
 Instance::Instance(const Instance& ins)

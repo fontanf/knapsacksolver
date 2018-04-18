@@ -68,7 +68,7 @@ void check_opt(std::string prog, boost::filesystem::path input)
 void test(std::string exec, std::string test)
 {
 	boost::filesystem::path data_dir = boost::filesystem::current_path();
-	data_dir /= boost::filesystem::path("test_instances");
+	data_dir /= boost::filesystem::path("data_tests");
 
 	boost::filesystem::directory_iterator end_itr;
 	for (boost::filesystem::directory_iterator itr(data_dir); itr != end_itr; ++itr) {
