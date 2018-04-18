@@ -33,7 +33,7 @@ cc_test(
         ],
         data = [
                 ":main",
-                "//test_instances:data",
+                "//data_tests::data",
         ],
         timeout = "short",
 )
