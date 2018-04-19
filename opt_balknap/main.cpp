@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
         ("help,h", "produce help message")
         ("input-data,i", po::value<std::string>()->required(), "set input data (required)")
         ("output-file,o", po::value<std::string>(&output_file), "set output file")
-        ("cert-file,c", po::value<std::string>(&cert_file), "set certificate output file")
+        ("cert-file,c", po::value<std::string>(&cert_file)->implicit_value("//"), "set certificate output file")
         ("memory,m", po::value<std::string>(&memory), "set algorithm")
         ("retrieve,r", po::value<std::string>(&retrieve), "set algorithm")
         ("upper-bound,u", po::value<std::string>(&p.upper_bound), "set upper bound")
@@ -40,6 +40,8 @@ int main(int argc, char *argv[])
         std::cout << desc << std::endl;;
         return 1;
     }
+    if (cert_file == "//")
+        cert_file = vm["input-data"].as<std::string>() + ".sol";
 
     Instance instance(vm["input-data"].as<std::string>());
     Solution sopt(instance);
