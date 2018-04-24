@@ -1,5 +1,4 @@
-#ifndef SOLUTION_HPP_JYHGMADO
-#define SOLUTION_HPP_JYHGMADO
+#pragma once
 
 #include "instance.hpp"
 
@@ -59,4 +58,3 @@ private:
 
 std::ostream& operator<<(std::ostream &os, const Solution& solution);
 
-#endif /* end of include guard: SOLUTION_HPP_JYHGMADO */
