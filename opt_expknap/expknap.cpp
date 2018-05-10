@@ -6,6 +6,8 @@
 #include "../ub_dantzig/dantzig.hpp"
 #include "../ub_surrogate/surrogate.hpp"
 
+using namespace knapsack;
+
 #define DBG(x)
 //#define DBG(x) x
 
@@ -170,7 +172,7 @@ bool sopt_expknap_rec(Instance& ins,
     return improved;
 }
 
-Solution sopt_expknap(Instance& ins, ExpknapParams& params, Info* info)
+Solution knapsack::sopt_expknap(Instance& ins, ExpknapParams& params, Info* info)
 {
     (void)info;
     if (ins.item_number() == 0)

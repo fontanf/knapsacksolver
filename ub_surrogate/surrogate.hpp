@@ -6,6 +6,9 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
 
+namespace knapsack
+{
+
 struct SurrogateOut
 {
     SurrogateOut(Info* info): info(info) {}
@@ -17,4 +20,6 @@ struct SurrogateOut
 };
 
 SurrogateOut ub_surrogate(const Instance& instance, Profit lb, Info* info = NULL);
+
+}
 

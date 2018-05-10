@@ -3,6 +3,9 @@
 #include "../lib/instance.hpp"
 #include "../lib/solution.hpp"
 
+namespace knapsack
+{
+
 struct ExpknapParams
 {
     StateIdx lb_greedy = 0;
@@ -12,4 +15,6 @@ struct ExpknapParams
 };
 
 Solution sopt_expknap(Instance& ins, ExpknapParams& params, Info* info = NULL);
+
+}
 

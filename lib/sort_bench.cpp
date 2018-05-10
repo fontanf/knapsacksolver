@@ -1,5 +1,7 @@
 #include "instance.hpp"
 
+using namespace knapsack;
+
 int main(int argc, char *argv[])
 {
     (void)argc;

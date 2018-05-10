@@ -2,6 +2,8 @@
 
 #include "../lib/part_solution_1.hpp"
 
+using namespace knapsack;
+
 #define INDEX(i,w) (i+1)*(c+1) + (w)
 
 void opts_bellman_array(const Instance& ins, std::vector<Profit>& values,
@@ -17,7 +19,7 @@ void opts_bellman_array(const Instance& ins, std::vector<Profit>& values,
     }
 }
 
-Profit opt_bellman_array(const Instance& ins, Info* info)
+Profit knapsack::opt_bellman_array(const Instance& ins, Info* info)
 {
     (void)info;
     Weight  c = ins.capacity();
@@ -30,7 +32,7 @@ Profit opt_bellman_array(const Instance& ins, Info* info)
 
 /******************************************************************************/
 
-Solution sopt_bellman_array_all(const Instance& ins, Info* info)
+Solution knapsack::sopt_bellman_array_all(const Instance& ins, Info* info)
 {
     (void)info;
 
@@ -81,7 +83,7 @@ Solution sopt_bellman_array_all(const Instance& ins, Info* info)
 //#define DBG(x)
 #define DBG(x) x
 
-Solution sopt_bellman_array_one(const Instance& ins, Info* info)
+Solution knapsack::sopt_bellman_array_one(const Instance& ins, Info* info)
 {
     ItemPos n = ins.item_number();
     Weight  c = ins.capacity();
@@ -164,7 +166,7 @@ end:
 #define DBG(x)
 //#define DBG(x) x
 
-Solution sopt_bellman_array_part(const Instance& ins, ItemPos k, Info* info)
+Solution knapsack::sopt_bellman_array_part(const Instance& ins, ItemPos k, Info* info)
 {
     assert(0 <= k && k <= 64);
     ItemPos n = ins.item_number();
@@ -316,7 +318,7 @@ void sopt_bellman_array_rec_rec(RecData& d)
     }
 }
 
-Solution sopt_bellman_array_rec(const Instance& ins, Info* info)
+Solution knapsack::sopt_bellman_array_rec(const Instance& ins, Info* info)
 {
     (void)info;
 

@@ -2,10 +2,12 @@
 
 #include "../ub_dembo/dembo.hpp"
 
+using namespace knapsack;
+
 #define DBG(x)
 //#define DBG(x) x
 
-Solution sopt_bab(const Instance& ins, Info* info)
+Solution knapsack::sopt_bab(const Instance& ins, Info* info)
 {
     (void)info;
     ItemIdx n = ins.item_number();

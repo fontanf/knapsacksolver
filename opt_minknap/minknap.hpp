@@ -3,6 +3,9 @@
 #include "../lib/instance.hpp"
 #include "../lib/solution.hpp"
 
+namespace knapsack
+{
+
 struct MinknapParams
 {
     StateIdx lb_greedy = 0;
@@ -15,4 +18,6 @@ struct MinknapParams
 Profit opt_minknap_list(Instance& ins, MinknapParams params, Info* info = NULL);
 Solution sopt_minknap_list_part(Instance& ins,
         MinknapParams params, ItemPos k, Info* info = NULL, Profit o = -1);
+
+}
 

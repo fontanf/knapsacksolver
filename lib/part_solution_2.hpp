@@ -2,6 +2,9 @@
 
 #include "instance.hpp"
 
+namespace knapsack
+{
+
 class PartSolFactory2
 {
 
@@ -63,3 +66,6 @@ private:
     ItemPos cur_ = -1;
 
 };
+
+}
+

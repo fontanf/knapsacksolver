@@ -1,5 +1,7 @@
 #include "dantzig.hpp"
 
+using namespace knapsack;
+
 int main(int argc, char *argv[])
 {
     namespace po = boost::program_options;
@@ -44,8 +46,7 @@ int main(int argc, char *argv[])
     info.pt.put("Solution.UB", ub);
     if (Info::verbose(&info)) {
         std::cout << "---" << std::endl;
-        std::cout << "UB " << ub << std::endl;
-        std::cout << "GAP " << ub - instance.optimum() << std::endl;
+        std::cout << instance.print_ub(ub) << std::endl;
         std::cout << "TIME " << t << std::endl;
     }
 

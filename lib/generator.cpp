@@ -11,6 +11,8 @@
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/serialization/vector.hpp>
 
+using namespace knapsack;
+
 void write_compressed_file(boost::filesystem::path filepath, std::stringstream& data)
 {
     std::ofstream file;
@@ -32,7 +34,7 @@ void write_format_file(boost::filesystem::path dest, std::string str)
     f.close();
 }
 
-void generate_uncorrelated(boost::filesystem::path dir,
+void knapsack::generate_uncorrelated(boost::filesystem::path dir,
         const std::vector<ItemIdx>& ns, const std::vector<Profit>& rs)
 {
     ItemIdx hmax = 100;
@@ -69,7 +71,7 @@ void generate_uncorrelated(boost::filesystem::path dir,
     }
 }
 
-void generate_weakly_correlated(boost::filesystem::path dir,
+void knapsack::generate_weakly_correlated(boost::filesystem::path dir,
         const std::vector<ItemIdx>& ns, const std::vector<Profit>& rs)
 {
     ItemIdx hmax = 100;
@@ -107,7 +109,7 @@ void generate_weakly_correlated(boost::filesystem::path dir,
     }
 }
 
-void generate_strongly_correlated(boost::filesystem::path dir,
+void knapsack::generate_strongly_correlated(boost::filesystem::path dir,
         const std::vector<ItemIdx>& ns, const std::vector<Profit>& rs)
 {
     ItemIdx hmax = 100;
@@ -144,7 +146,7 @@ void generate_strongly_correlated(boost::filesystem::path dir,
     }
 }
 
-void generate_inverse_strongly_correlated(boost::filesystem::path dir,
+void knapsack::generate_inverse_strongly_correlated(boost::filesystem::path dir,
         const std::vector<ItemIdx>& ns, const std::vector<Profit>& rs)
 {
     ItemIdx hmax = 100;
@@ -181,7 +183,7 @@ void generate_inverse_strongly_correlated(boost::filesystem::path dir,
     }
 }
 
-void generate_almost_strongly_correlated(boost::filesystem::path dir,
+void knapsack::generate_almost_strongly_correlated(boost::filesystem::path dir,
         const std::vector<ItemIdx>& ns, const std::vector<Profit>& rs)
 {
     ItemIdx hmax = 100;
@@ -219,7 +221,7 @@ void generate_almost_strongly_correlated(boost::filesystem::path dir,
     }
 }
 
-void generate_subset_sum(boost::filesystem::path dir,
+void knapsack::generate_subset_sum(boost::filesystem::path dir,
         const std::vector<ItemIdx>& ns, const std::vector<Profit>& rs)
 {
     ItemIdx hmax = 100;
@@ -255,7 +257,7 @@ void generate_subset_sum(boost::filesystem::path dir,
     }
 }
 
-void generate_similar_weights(boost::filesystem::path dir,
+void knapsack::generate_similar_weights(boost::filesystem::path dir,
         const std::vector<ItemIdx> ns)
 {
     ItemIdx hmax = 100;
@@ -291,7 +293,7 @@ void generate_similar_weights(boost::filesystem::path dir,
     }
 }
 
-void generate_all(boost::filesystem::path dir)
+void knapsack::generate_all(boost::filesystem::path dir)
 {
     std::vector<ItemIdx> ns {
             10, 20, 50,

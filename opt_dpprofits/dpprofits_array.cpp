@@ -7,7 +7,9 @@
 
 #define INDEX(j,q) (j+1)*(ub+1) + (q)
 
-Profit opt_dpprofits_array(const Instance& ins, Info* info)
+using namespace knapsack;
+
+Profit knapsack::opt_dpprofits_array(const Instance& ins, Info* info)
 {
     DBG(std::cout << "DPPROFITS..." << std::endl;)
     (void)info;
@@ -47,7 +49,7 @@ Profit opt_dpprofits_array(const Instance& ins, Info* info)
 
 /******************************************************************************/
 
-Solution sopt_dpprofits_array_all(const Instance& ins, Info* info)
+Solution knapsack::sopt_dpprofits_array_all(const Instance& ins, Info* info)
 {
     (void)info;
 
@@ -111,7 +113,7 @@ Solution sopt_dpprofits_array_all(const Instance& ins, Info* info)
 
 /******************************************************************************/
 
-Solution sopt_dpprofits_array_one(const Instance& ins, Info* info)
+Solution knapsack::sopt_dpprofits_array_one(const Instance& ins, Info* info)
 {
     (void)info;
     assert(false); // TODO
@@ -120,7 +122,7 @@ Solution sopt_dpprofits_array_one(const Instance& ins, Info* info)
 
 /******************************************************************************/
 
-Solution sopt_dpprofits_array_part(const Instance& ins, ItemPos k, Info* info)
+Solution knapsack::sopt_dpprofits_array_part(const Instance& ins, ItemPos k, Info* info)
 {
     (void)info;
     (void)k;
@@ -130,7 +132,7 @@ Solution sopt_dpprofits_array_part(const Instance& ins, ItemPos k, Info* info)
 
 /******************************************************************************/
 
-Solution sopt_dpprofits_array_rec(const Instance& ins, Info* info)
+Solution knapsack::sopt_dpprofits_array_rec(const Instance& ins, Info* info)
 {
     (void)info;
     assert(false); // TODO

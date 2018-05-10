@@ -3,6 +3,8 @@
 #include "../lb_greedy/greedy.hpp"
 #include "../lb_greedynlogn/greedynlogn.hpp"
 
+using namespace knapsack;
+
 int main(int argc, char *argv[])
 {
     namespace po = boost::program_options;

@@ -8,6 +8,8 @@
 
 #include <bitset>
 
+using namespace knapsack;
+
 #define DBG(x)
 //#define DBG(x) x
 
@@ -152,7 +154,7 @@ void remove_item(const Instance& ins, std::vector<State>& l0,
     DBG(std::cout << "REMOVE ITEM... END" << std::endl;)
 }
 
-Profit opt_minknap_list(Instance& ins, MinknapParams params, Info* info)
+Profit knapsack::opt_minknap_list(Instance& ins, MinknapParams params, Info* info)
 {
     DBG(std::cout << "MINKNAPOPT..." << std::endl;)
     DBG(std::cout << ins << std::endl;)

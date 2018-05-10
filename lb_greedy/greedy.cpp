@@ -1,9 +1,11 @@
 #include "greedy.hpp"
 
+using namespace knapsack;
+
 #define DBG(x)
 //#define DBG(x) x
 
-Solution sol_greedy(const Instance& ins, Info* info)
+Solution knapsack::sol_greedy(const Instance& ins, Info* info)
 {
     DBG(std::cout << "GREEDYBEST..." << std::endl;)
     assert(ins.break_item_found());

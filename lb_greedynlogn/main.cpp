@@ -4,6 +4,8 @@
 
 #include <boost/program_options.hpp>
 
+using namespace knapsack;
+
 int main(int argc, char *argv[])
 {
     namespace po = boost::program_options;

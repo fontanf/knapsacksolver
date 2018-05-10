@@ -1,5 +1,7 @@
 #include "../lib/tester.hpp"
 
+using namespace knapsack;
+
 TEST(BellmanRecursion, SimpleInstances)
 {
     boost::filesystem::path p = boost::filesystem::current_path();

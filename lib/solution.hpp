@@ -2,6 +2,9 @@
 
 #include "instance.hpp"
 
+namespace knapsack
+{
+
 class Solution
 {
 
@@ -58,3 +61,4 @@ private:
 
 std::ostream& operator<<(std::ostream &os, const Solution& solution);
 
+}

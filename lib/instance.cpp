@@ -14,6 +14,7 @@
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/serialization/vector.hpp>
 
+using namespace knapsack;
 
 Instance::Instance(const std::vector<Item>& items, Weight c):
     name_(""), format_(""), f_(0), l_(items.size()-1), c_orig_(c), items_(items)
@@ -56,8 +57,16 @@ Instance::Instance(boost::filesystem::path filepath)
     std::getline(file, format_);
     if        (format_ == "knapsack_standard") {
         read_standard(data);
+        boost::filesystem::path sol = filepath;
+        sol += ".sol";
+        if (boost::filesystem::exists(sol))
+            read_standard_solution(sol);
     } else if (format_ == "subsetsum_standard") {
         read_subsetsum_standard(data);
+        boost::filesystem::path sol = filepath;
+        sol += ".sol";
+        if (boost::filesystem::exists(sol))
+            read_standard_solution(sol);
     } else if (format_ == "knapsack_pisinger") {
         read_pisinger(data);
     } else {
@@ -67,11 +76,6 @@ Instance::Instance(boost::filesystem::path filepath)
 
     sol_red_ = new Solution(*this);
     compute_max_items();
-
-    boost::filesystem::path sol = filepath;
-    sol += ".sol";
-    if (boost::filesystem::exists(sol))
-        read_standard_solution(sol);
 }
 
 void Instance::read_standard(std::stringstream& data)
@@ -1026,19 +1030,19 @@ std::string Instance::print_opt(Profit opt) const
 
 ////////////////////////////////////////////////////////////////////////////////
 
-std::ostream& operator<<(std::ostream& os, const Item& it)
+std::ostream& knapsack::operator<<(std::ostream& os, const Item& it)
 {
     os << "(" << it.j << " " << it.w << " " << it.p << " " << (double)it.p/(double)it.w << ")";
     return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const Interval& interval)
+std::ostream& knapsack::operator<<(std::ostream& os, const Interval& interval)
 {
     os << "[" << interval.f << "," << interval.l << "]";
     return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const Instance& instance)
+std::ostream& knapsack::operator<<(std::ostream& os, const Instance& instance)
 {
     os
         <<  "n "   << instance.item_number()

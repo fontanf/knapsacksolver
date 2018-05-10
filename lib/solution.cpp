@@ -3,6 +3,8 @@
 #include "part_solution_1.hpp"
 #include "part_solution_2.hpp"
 
+using namespace knapsack;
+
 Solution::Solution(const Instance& instance): instance_(instance),
     x_(std::vector<int>(instance.total_item_number(), 0)) { }
 
@@ -106,7 +108,7 @@ void Solution::write_cert(std::string file)
     }
 }
 
-std::ostream& operator<<(std::ostream& os, const Solution& solution)
+std::ostream& knapsack::operator<<(std::ostream& os, const Solution& solution)
 {
     const Instance& instance = solution.instance();
     for (ItemPos j=0; j<instance.total_item_number(); ++j)

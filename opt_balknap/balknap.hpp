@@ -3,6 +3,9 @@
 #include "../lib/instance.hpp"
 #include "../lib/solution.hpp"
 
+namespace knapsack
+{
+
 struct BalknapParams
 {
     std::string upper_bound = "b";
@@ -26,4 +29,6 @@ Solution sopt_balknap_list_all(
         Instance& ins, BalknapParams params, Info* info = NULL);
 Solution sopt_balknap_list_part(Instance& ins,
         BalknapParams params, ItemPos k, Info* info = NULL, Profit ub = -1);
+
+}
 

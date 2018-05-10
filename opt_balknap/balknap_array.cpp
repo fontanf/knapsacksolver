@@ -6,13 +6,15 @@
 #include "../ub_dantzig/dantzig.hpp"
 #include "../ub_surrogate/surrogate.hpp"
 
+using namespace knapsack;
+
 #define IDX2(k,w,p) rl2*(k) + rl1*(w) + (p)
 #define IDX1(  w,p)           rl1*(w) + (p)
 
 #define DBG(x)
 //#define DBG(x) x
 
-Profit opt_balknap_array(Instance& ins, BalknapParams p, Info* info)
+Profit knapsack::opt_balknap_array(Instance& ins, BalknapParams p, Info* info)
 {
     DBG(std::cout << "BALKNAPOPT..." << std::endl;)
     DBG(std::cout << ins << std::endl;)
@@ -223,7 +225,7 @@ Profit opt_balknap_array(Instance& ins, BalknapParams p, Info* info)
 #define DBG(x)
 //#define DBG(x) x
 
-Solution sopt_balknap_array_all(Instance& ins,
+Solution knapsack::sopt_balknap_array_all(Instance& ins,
         BalknapParams params, Info* info)
 {
     DBG(std::cout << "BALKNAPSOL..." << std::endl;);
@@ -482,7 +484,7 @@ Solution sopt_balknap_array_all(Instance& ins,
 
 /******************************************************************************/
 
-Solution sopt_balknap_array_part(Instance& ins,
+Solution knapsack::sopt_balknap_array_part(Instance& ins,
         BalknapParams p, ItemPos k, Info* info)
 {
     (void)info;

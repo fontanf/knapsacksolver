@@ -8,6 +8,8 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/regex.hpp>
 
+using namespace knapsack;
+
 TEST(Instance, Sort)
 {
     Instance instance({

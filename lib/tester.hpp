@@ -5,5 +5,10 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
 
+namespace knapsack
+{
+
 void test(std::string exec, std::string test);
+
+}
 

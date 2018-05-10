@@ -9,6 +9,8 @@
 
 #include <bitset>
 
+using namespace knapsack;
+
 #define DBG(x)
 //#define DBG(x) x
 
@@ -175,7 +177,7 @@ void remove_item(const Instance& ins, std::vector<StatePart>& l0,
 #define DBG(x)
 //#define DBG(x) x
 
-Solution sopt_minknap_list_part(Instance& ins,
+Solution knapsack::sopt_minknap_list_part(Instance& ins,
         MinknapParams params, ItemPos k, Info* info, Profit o)
 {
     DBG(std::cout << "MINKNAPART... F " << ins.first_item() << " L " << ins.last_item() << std::endl;)
@@ -270,7 +272,7 @@ Solution sopt_minknap_list_part(Instance& ins,
     ins.fix(psolf, best_state.sol);
     //std::cout << "F " << ins.first_item() << " L " << ins.last_item() << std::endl;
     DBG(std::cout << "MINKNAPPART... END" << std::endl;)
-    return sopt_minknap_list_part(ins, params, k, info, best_state.p);
+    return knapsack::sopt_minknap_list_part(ins, params, k, info, best_state.p);
 }
 
 #undef DBG

@@ -3,6 +3,9 @@
 #include "../lib/instance.hpp"
 #include "../lib/solution.hpp"
 
+namespace knapsack
+{
+
 Profit ub_0(const Instance& ins, ItemPos j, const Solution& sol_curr);
 Profit ub_0(const Instance& ins, ItemPos j, Profit p, Weight r);
 Profit ub_0_rev(const Instance& ins, ItemPos j, const Solution& sol_curr);
@@ -89,3 +92,4 @@ inline Profit ub_dembo_rev(const Instance& ins, ItemIdx j, Profit p, Weight r)
 
 #undef DBG
 
+}

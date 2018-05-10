@@ -4,6 +4,8 @@
 
 #include <stdlib.h>
 
+using namespace knapsack;
+
 #define DBG(x)
 //#define DBG(x) x
 
@@ -222,7 +224,7 @@ void ub_surrogate_solve(Instance& ins, ItemIdx k,
     assert(ins.first_item() == first);
 }
 
-SurrogateOut ub_surrogate(const Instance& instance, Profit lb, Info* info)
+SurrogateOut knapsack::ub_surrogate(const Instance& instance, Profit lb, Info* info)
 {
     DBG(std::cout << "SURROGATERELAX..." << std::endl;)
     Instance ins(instance);

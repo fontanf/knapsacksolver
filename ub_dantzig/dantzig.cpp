@@ -1,9 +1,11 @@
 #include "dantzig.hpp"
 
+using namespace knapsack;
+
 #define DBG(x)
 //#define DBG(x) x
 
-Profit ub_dantzig(const Instance& ins, Info* info)
+Profit knapsack::ub_dantzig(const Instance& ins, Info* info)
 {
     DBG(std::cout << "UBDANTZIG..." << std::endl;)
     (void)info;

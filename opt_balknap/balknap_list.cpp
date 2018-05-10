@@ -10,6 +10,8 @@
 #include <map>
 #include <bitset>
 
+using namespace knapsack;
+
 #define DBG(x)
 //#define DBG(x) x
 
@@ -39,7 +41,7 @@ std::ostream& operator<<(std::ostream& os, const std::pair<State, StateValue>& s
     return os;
 }
 
-Profit opt_balknap_list(
+Profit knapsack::opt_balknap_list(
         Instance& ins, BalknapParams params, Info* info)
 {
     DBG(std::cout << "BALKNAPLISTOPT..." << std::endl;)
@@ -353,7 +355,7 @@ void update_bounds(const Instance& ins, Solution& sol_best, Profit& lb,
     }
 }
 
-Solution sopt_balknap_list_part(
+Solution knapsack::sopt_balknap_list_part(
         Instance& ins, BalknapParams params, ItemPos k, Info* info, Profit o)
 {
     DBG(std::cout << "BALKNAPLISTPART... OPT " << o << std::endl;)
@@ -662,7 +664,7 @@ end:
     DBG(std::cout << ins << std::endl;)
 
     DBG(std::cout << "BALKNAPLISTPART... END" << std::endl;)
-    return sopt_balknap_list_part(ins, params, k, info, best_state.first.pi);
+    return knapsack::sopt_balknap_list_part(ins, params, k, info, best_state.first.pi);
 }
 
 #undef DBG
@@ -710,7 +712,7 @@ std::ostream& operator<<(std::ostream& os, const std::pair<StateAll, StateValueA
     return os;
 }
 
-Solution sopt_balknap_list_all(
+Solution knapsack::sopt_balknap_list_all(
         Instance& ins, BalknapParams params, Info* info)
 {
     DBG(std::cout << "BALKNAPLISTSOL..." << std::endl;);

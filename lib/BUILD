@@ -19,7 +19,10 @@ cc_library(
 
 cc_library(
         name = "hpp",
-        hdrs = ["instance.hpp", "solution.hpp"],
+        hdrs = [
+                "instance.hpp",
+                "solution.hpp"
+        ],
         deps = ["@benchtools//:info",],
         visibility = ["//visibility:public"],
 )

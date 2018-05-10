@@ -2,6 +2,8 @@
 
 #include "../ub_dembo/dembo.hpp"
 
+using namespace knapsack;
+
 #define DBG(x)
 //#define DBG(x) x
 
@@ -24,7 +26,7 @@ std::ostream& operator<<(std::ostream& os, std::vector<State>& l)
     return os;
 }
 
-Profit opt_bellman_list(const Instance& ins, Info* info)
+Profit knapsack::opt_bellman_list(const Instance& ins, Info* info)
 {
     (void)info;
     Weight  c = ins.capacity();
@@ -98,7 +100,7 @@ Profit opt_bellman_list(const Instance& ins, Info* info)
 
 /******************************************************************************/
 
-Solution sopt_bellman_list_all(const Instance& ins, Info* info)
+Solution knapsack::sopt_bellman_list_all(const Instance& ins, Info* info)
 {
     (void)info;
     assert(false); // TODO
@@ -107,7 +109,7 @@ Solution sopt_bellman_list_all(const Instance& ins, Info* info)
 
 /******************************************************************************/
 
-Solution sopt_bellman_list_one(const Instance& ins, Info* info)
+Solution knapsack::sopt_bellman_list_one(const Instance& ins, Info* info)
 {
     (void)info;
     assert(false); // TODO
@@ -116,7 +118,7 @@ Solution sopt_bellman_list_one(const Instance& ins, Info* info)
 
 /******************************************************************************/
 
-Solution sopt_bellman_list_part(const Instance& ins, ItemPos k, Info* info)
+Solution knapsack::sopt_bellman_list_part(const Instance& ins, ItemPos k, Info* info)
 {
     (void)info;
     (void)k;
@@ -264,7 +266,7 @@ void sopt_bellman_list_rec_rec(const Instance& ins,
     }
 }
 
-Solution sopt_bellman_list_rec(const Instance& ins, Info* info)
+Solution knapsack::sopt_bellman_list_rec(const Instance& ins, Info* info)
 {
     ItemPos n = ins.item_number();
 

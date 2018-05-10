@@ -5,6 +5,8 @@
 
 #include <thread>
 
+using namespace knapsack;
+
 void executeProgram(std::string cmd)
 {
     std::cout << cmd << std::endl;
@@ -65,7 +67,7 @@ void check_opt(std::string prog, boost::filesystem::path input)
     boost::filesystem::remove(output_file);
 }
 
-void test(std::string exec, std::string test)
+void knapsack::test(std::string exec, std::string test)
 {
     boost::filesystem::path data_dir = boost::filesystem::current_path();
     data_dir /= boost::filesystem::path("data_tests");

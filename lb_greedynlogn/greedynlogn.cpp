@@ -2,6 +2,8 @@
 
 #include "../lb_greedy/greedy.hpp"
 
+using namespace knapsack;
+
 #define DBG(x)
 //#define DBG(x) x
 
@@ -84,7 +86,7 @@ bool best_exchange(Solution& sol, Info* info)
     return true;
 }
 
-Solution sol_forwardgreedynlogn(const Instance& ins, Info* info)
+Solution knapsack::sol_forwardgreedynlogn(const Instance& ins, Info* info)
 {
     if (ins.break_item() == ins.total_item_number()
             || ins.break_item() == 0)
@@ -169,7 +171,7 @@ bool best_exchangeback(Solution& sol, Info* info)
     return true;
 }
 
-Solution sol_backwardgreedynlogn(const Instance& ins, Info* info)
+Solution knapsack::sol_backwardgreedynlogn(const Instance& ins, Info* info)
 {
     if (ins.break_item() == ins.total_item_number()
             || ins.break_item() == 0)
@@ -190,7 +192,7 @@ Solution sol_backwardgreedynlogn(const Instance& ins, Info* info)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Solution sol_bestgreedynlogn(const Instance& ins, Info* info)
+Solution knapsack::sol_bestgreedynlogn(const Instance& ins, Info* info)
 {
     DBG(std::cout << "GREEDYBESTPLUS..." << std::endl;)
     Solution sol = sol_greedy(ins);
