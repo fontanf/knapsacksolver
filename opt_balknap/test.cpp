@@ -1,4 +1,4 @@
-#include "../lib/tester.hpp"
+#include "lib/tester.hpp"
 
 using namespace knapsack;
 

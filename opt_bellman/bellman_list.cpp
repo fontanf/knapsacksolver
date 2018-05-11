@@ -1,6 +1,6 @@
-#include "bellman_list.hpp"
+#include "opt_bellman/bellman_list.hpp"
 
-#include "../ub_dembo/dembo.hpp"
+#include "ub_dembo/dembo.hpp"
 
 using namespace knapsack;
 

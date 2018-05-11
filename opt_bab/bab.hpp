@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../lib/instance.hpp"
-#include "../lib/solution.hpp"
+#include "lib/instance.hpp"
+#include "lib/solution.hpp"
 
 namespace knapsack
 {

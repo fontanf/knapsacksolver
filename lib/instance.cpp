@@ -1,7 +1,7 @@
-#include "instance.hpp"
-#include "solution.hpp"
-#include "part_solution_1.hpp"
-#include "part_solution_2.hpp"
+#include "lib/instance.hpp"
+#include "lib/solution.hpp"
+#include "lib/part_solution_1.hpp"
+#include "lib/part_solution_2.hpp"
 
 #include <sstream>
 

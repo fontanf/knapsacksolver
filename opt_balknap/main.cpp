@@ -1,4 +1,4 @@
-#include "balknap.hpp"
+#include "opt_balknap/balknap.hpp"
 
 using namespace knapsack;
 

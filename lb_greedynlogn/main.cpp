@@ -1,4 +1,4 @@
-#include "greedynlogn.hpp"
+#include "lb_greedynlogn/greedynlogn.hpp"
 
 #include <iostream>
 

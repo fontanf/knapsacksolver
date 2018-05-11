@@ -1,4 +1,4 @@
-#include "dantzig.hpp"
+#include "ub_dantzig/dantzig.hpp"
 
 using namespace knapsack;
 

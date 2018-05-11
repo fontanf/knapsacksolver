@@ -1,7 +1,7 @@
-#include "instance.hpp"
-#include "solution.hpp"
+#include "lib/instance.hpp"
+#include "lib/solution.hpp"
 
-#include "../lb_greedy/greedy.hpp"
+#include "lb_greedy/greedy.hpp"
 
 #include <gtest/gtest.h>
 #include <boost/filesystem/operations.hpp>

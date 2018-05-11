@@ -1,4 +1,4 @@
-#include "dpprofits_list.hpp"
+#include "opt_dpprofits/dpprofits_list.hpp"
 
 using namespace knapsack;
 

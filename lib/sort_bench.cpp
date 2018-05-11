@@ -1,4 +1,4 @@
-#include "instance.hpp"
+#include "lib/instance.hpp"
 
 using namespace knapsack;
 

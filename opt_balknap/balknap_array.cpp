@@ -1,10 +1,10 @@
-#include "balknap.hpp"
+#include "opt_balknap/balknap.hpp"
 
-#include "../lb_greedy/greedy.hpp"
-#include "../lb_greedynlogn/greedynlogn.hpp"
-#include "../ub_dembo/dembo.hpp"
-#include "../ub_dantzig/dantzig.hpp"
-#include "../ub_surrogate/surrogate.hpp"
+#include "lb_greedy/greedy.hpp"
+#include "lb_greedynlogn/greedynlogn.hpp"
+#include "ub_dembo/dembo.hpp"
+#include "ub_dantzig/dantzig.hpp"
+#include "ub_surrogate/surrogate.hpp"
 
 using namespace knapsack;
 

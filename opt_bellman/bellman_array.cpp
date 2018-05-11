@@ -1,6 +1,6 @@
-#include "bellman_array.hpp"
+#include "opt_bellman/bellman_array.hpp"
 
-#include "../lib/part_solution_1.hpp"
+#include "lib/part_solution_1.hpp"
 
 using namespace knapsack;
 

@@ -1,4 +1,4 @@
-#include "minknap.hpp"
+#include "opt_minknap/minknap.hpp"
 
 using namespace knapsack;
 

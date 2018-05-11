@@ -1,4 +1,4 @@
-#include "generator.hpp"
+#include "lib/generator.hpp"
 
 #include <random>
 

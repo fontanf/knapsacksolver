@@ -1,7 +1,7 @@
-#include "surrogate.hpp"
+#include "ub_surrogate/surrogate.hpp"
 
-#include "../lb_greedy/greedy.hpp"
-#include "../lb_greedynlogn/greedynlogn.hpp"
+#include "lb_greedy/greedy.hpp"
+#include "lb_greedynlogn/greedynlogn.hpp"
 
 using namespace knapsack;
 

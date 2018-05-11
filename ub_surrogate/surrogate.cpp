@@ -1,6 +1,6 @@
-#include "surrogate.hpp"
+#include "ub_surrogate/surrogate.hpp"
 
-#include "../ub_dantzig/dantzig.hpp"
+#include "ub_dantzig/dantzig.hpp"
 
 #include <stdlib.h>
 
