@@ -1,6 +1,6 @@
 #include "opt_minknap/minknap.hpp"
 
-#include "lib/part_solution_2.hpp"
+#include "knapsack/lib/part_solution_2.hpp"
 #include "lb_greedy/greedy.hpp"
 #include "lb_greedynlogn/greedynlogn.hpp"
 #include "ub_dembo/dembo.hpp"
@@ -273,6 +273,12 @@ Solution knapsack::sopt_minknap_list_part(Instance& ins,
     //std::cout << "F " << ins.first_item() << " L " << ins.last_item() << std::endl;
     DBG(std::cout << "MINKNAPPART... END" << std::endl;)
     return knapsack::sopt_minknap_list_part(ins, params, k, info, best_state.p);
+}
+
+Solution knapsack::sopt_minknap_list_part(Instance& ins,
+        MinknapParams params, Info* info, Profit o)
+{
+    return knapsack::sopt_minknap_list_part(ins, params, 64, info, o);
 }
 
 #undef DBG

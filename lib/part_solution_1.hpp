@@ -1,6 +1,6 @@
 #pragma once
 
-#include "lib/instance.hpp"
+#include "knapsack/lib/instance.hpp"
 
 namespace knapsack
 {

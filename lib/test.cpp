@@ -1,5 +1,5 @@
-#include "lib/instance.hpp"
-#include "lib/solution.hpp"
+#include "knapsack/lib/instance.hpp"
+#include "knapsack/lib/solution.hpp"
 
 #include "lb_greedy/greedy.hpp"
 

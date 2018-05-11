@@ -7,7 +7,6 @@ cc_library(
                 "part_solution_2.hpp"
         ],
         srcs = ["instance.cpp", "solution.cpp"],
-        visibility = ["//visibility:public"],
         deps = [
                 "@benchtools//:info",
         ],
@@ -15,6 +14,8 @@ cc_library(
                 "-lboost_iostreams",
                 "-lboost_serialization",
         ],
+        include_prefix = "knapsack/lib/",
+        visibility = ["//visibility:public"],
 )
 
 cc_library(
@@ -24,6 +25,7 @@ cc_library(
                 "solution.hpp"
         ],
         deps = ["@benchtools//:info",],
+        include_prefix = "knapsack/lib/",
         visibility = ["//visibility:public"],
 )
 

@@ -1,7 +1,7 @@
 #include "lib/tester.hpp"
 
-#include "lib/instance.hpp"
-#include "lib/solution.hpp"
+#include "knapsack/lib/instance.hpp"
+#include "knapsack/lib/solution.hpp"
 
 #include <thread>
 

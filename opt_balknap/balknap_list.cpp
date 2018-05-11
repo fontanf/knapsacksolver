@@ -1,6 +1,6 @@
 #include "opt_balknap/balknap.hpp"
 
-#include "lib/part_solution_1.hpp"
+#include "knapsack/lib/part_solution_1.hpp"
 #include "lb_greedy/greedy.hpp"
 #include "lb_greedynlogn/greedynlogn.hpp"
 #include "ub_dembo/dembo.hpp"

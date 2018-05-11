@@ -1,7 +1,7 @@
 #pragma once
 
-#include "lib/instance.hpp"
-#include "lib/solution.hpp"
+#include "knapsack/lib/instance.hpp"
+#include "knapsack/lib/solution.hpp"
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
