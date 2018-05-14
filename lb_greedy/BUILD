@@ -2,8 +2,9 @@ cc_library(
         name = "libgreedy",
         hdrs = ["greedy.hpp"],
         srcs = ["greedy.cpp"],
-        visibility = ["//visibility:public"],
         deps = ["//lib:cpp"],
+        visibility = ["//visibility:public"],
+        include_prefix = "knapsack/lb_greedy/",
 )
 
 cc_binary(

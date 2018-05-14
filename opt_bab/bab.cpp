@@ -1,6 +1,6 @@
-#include "opt_bab/bab.hpp"
+#include "knapsack/opt_bab/bab.hpp"
 
-#include "ub_dembo/dembo.hpp"
+#include "knapsack/ub_dembo/dembo.hpp"
 
 using namespace knapsack;
 

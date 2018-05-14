@@ -2,7 +2,6 @@ cc_library(
         name = "libexpknap",
         hdrs = ["expknap.hpp"],
         srcs = ["expknap.cpp"],
-        visibility = ["//visibility:public"],
         deps = [
                 "//lib:cpp",
                 "//lb_greedy:libgreedy",
@@ -10,6 +9,8 @@ cc_library(
                 "//ub_dembo:libdembo",
                 "//ub_surrogate:libsurrogate",
         ],
+        visibility = ["//visibility:public"],
+        include_prefix = "knapsack/opt_expknap/",
 )
 
 cc_binary(

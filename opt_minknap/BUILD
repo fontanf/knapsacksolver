@@ -10,6 +10,7 @@ cc_library(
                 "//ub_surrogate:libsurrogate",
         ],
         visibility = ["//visibility:public"],
+        include_prefix = "knapsack/opt_minknap/",
 )
 
 cc_binary(

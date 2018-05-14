@@ -1,4 +1,4 @@
-#include "lb_greedy/greedy.hpp"
+#include "knapsack/lb_greedy/greedy.hpp"
 
 #include <gtest/gtest.h>
 #include <boost/filesystem/operations.hpp>

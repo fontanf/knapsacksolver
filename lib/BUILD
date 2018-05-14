@@ -18,8 +18,8 @@ cc_library(
                 "-lboost_program_options",
                 "-lboost_regex",
         ],
-        include_prefix = "knapsack/lib/",
         visibility = ["//visibility:public"],
+        include_prefix = "knapsack/lib/",
 )
 
 cc_library(
@@ -29,21 +29,13 @@ cc_library(
                 "solution.hpp"
         ],
         deps = ["@benchtools//:info",],
+        visibility = ["//visibility:public"],
         include_prefix = "knapsack/lib/",
-        visibility = ["//visibility:public"],
-)
-
-cc_library(
-        name = "libgenerator",
-        hdrs = ["generator.hpp"],
-        srcs = ["generator.cpp"],
-        deps = [":cpp"],
-        visibility = ["//visibility:public"],
 )
 
 cc_binary(
-        name = "generator_main",
-        srcs = ["generator.cpp", "generator.hpp"],
+        name = "generator",
+        srcs = ["generator.cpp"],
         deps = ["//lib:cpp"],
 )
 
@@ -56,6 +48,7 @@ cc_library(
                 "@googletest//:gtest_main",
         ],
         visibility = ["//visibility:public"],
+        include_prefix = "knapsack/lib/",
 )
 
 cc_test(

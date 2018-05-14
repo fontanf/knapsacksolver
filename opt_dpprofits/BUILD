@@ -2,11 +2,12 @@ cc_library(
         name = "libdpprofits",
         hdrs = ["dpprofits_array.hpp", "dpprofits_list.hpp"],
         srcs = ["dpprofits_array.cpp", "dpprofits_list.cpp"],
-        visibility = ["//visibility:public"],
         deps = [
                 "//lib:cpp",
                 "//ub_dembo:libdembo",
         ],
+        visibility = ["//visibility:public"],
+        include_prefix = "knapsack/opt_dpprofits/",
 )
 
 cc_binary(

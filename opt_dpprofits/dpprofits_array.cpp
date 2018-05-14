@@ -1,6 +1,6 @@
-#include "opt_dpprofits/dpprofits_array.hpp"
+#include "knapsack/opt_dpprofits/dpprofits_array.hpp"
 
-#include "ub_dembo/dembo.hpp"
+#include "knapsack/ub_dembo/dembo.hpp"
 
 #define DBG(x)
 //#define DBG(x) x

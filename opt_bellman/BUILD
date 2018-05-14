@@ -2,11 +2,12 @@ cc_library(
         name = "libbellman",
         hdrs = ["bellman_array.hpp", "bellman_list.hpp"],
         srcs = ["bellman_array.cpp", "bellman_list.cpp"],
-        visibility = ["//visibility:public"],
         deps = [
                 "//lib:cpp",
                 "//ub_dembo:libdembo",
         ],
+        visibility = ["//visibility:public"],
+        include_prefix = "knapsack/opt_bellman/",
 )
 
 cc_binary(

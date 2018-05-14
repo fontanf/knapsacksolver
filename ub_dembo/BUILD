@@ -2,7 +2,8 @@ cc_library(
         name = "libdembo",
         hdrs = ["dembo.hpp"],
         srcs = ["dembo.cpp"],
-        visibility = ["//visibility:public"],
         deps = ["//lib:hpp"],
+        visibility = ["//visibility:public"],
+        include_prefix = "knapsack/ub_dembo/",
 )
 

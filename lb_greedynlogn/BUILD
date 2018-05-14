@@ -2,11 +2,12 @@ cc_library(
         name = "libgreedynlogn",
         hdrs = ["greedynlogn.hpp"],
         srcs = ["greedynlogn.cpp"],
-        visibility = ["//visibility:public"],
         deps = [
                 "//lib:cpp",
                 "//lb_greedy:libgreedy",
         ],
+        visibility = ["//visibility:public"],
+        include_prefix = "knapsack/lb_greedynlogn/",
 )
 
 cc_binary(

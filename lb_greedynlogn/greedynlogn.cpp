@@ -1,6 +1,6 @@
-#include "lb_greedynlogn/greedynlogn.hpp"
+#include "knapsack/lb_greedynlogn/greedynlogn.hpp"
 
-#include "lb_greedy/greedy.hpp"
+#include "knapsack/lb_greedy/greedy.hpp"
 
 using namespace knapsack;
 

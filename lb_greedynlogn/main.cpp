@@ -1,8 +1,4 @@
-#include "lb_greedynlogn/greedynlogn.hpp"
-
-#include <iostream>
-
-#include <boost/program_options.hpp>
+#include "knapsack/lb_greedynlogn/greedynlogn.hpp"
 
 using namespace knapsack;
 

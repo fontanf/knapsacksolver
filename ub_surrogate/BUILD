@@ -2,11 +2,12 @@ cc_library(
         name = "libsurrogate",
         hdrs = ["surrogate.hpp"],
         srcs = ["surrogate.cpp"],
-        visibility = ["//visibility:public"],
         deps = [
                 "//lib:cpp",
                 "//ub_dantzig:libdantzig"
         ],
+        visibility = ["//visibility:public"],
+        include_prefix = "knapsack/ub_surrogate/",
 )
 
 cc_binary(

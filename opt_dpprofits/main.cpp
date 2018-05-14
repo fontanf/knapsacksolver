@@ -1,5 +1,5 @@
-#include "opt_dpprofits/dpprofits_array.hpp"
-#include "opt_dpprofits/dpprofits_list.hpp"
+#include "knapsack/opt_dpprofits/dpprofits_array.hpp"
+#include "knapsack/opt_dpprofits/dpprofits_list.hpp"
 
 using namespace knapsack;
 

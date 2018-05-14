@@ -2,14 +2,9 @@ cc_library(
         name = "libdantzig",
         hdrs = ["dantzig.hpp"],
         srcs = ["dantzig.cpp"],
-        visibility = ["//visibility:public"],
         deps = ["//lib:cpp"],
-)
-
-cc_library(
-        name = "libdantzigh",
-        hdrs = ["dantzig.hpp"],
         visibility = ["//visibility:public"],
+        include_prefix = "knapsack/ub_dantzig/",
 )
 
 cc_binary(

@@ -86,13 +86,12 @@ def FlagsForFile( filename, **kwargs ):
     '-Wall',
     '-Wextra',
     '-Werror',
-    # You 100% do NOT need -DUSE_CLANG_COMPLETER in your flags; only the YCM
-    # source code needs it.
     '-DUSE_CLANG_COMPLETER',
     '-I', './',
     '-I', '../',
     '-I', './ClangCompleter',
     '-I', './bazel-knapsack/external/benchtools/',
+    '-I', './bazel-knapsack/external/',
     '-isystem', '../BoostParts',
     '-isystem', '/System/Library/Frameworks/Python.framework/Headers',
     '-isystem', '../llvm/include',

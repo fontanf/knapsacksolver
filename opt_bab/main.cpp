@@ -1,4 +1,4 @@
-#include "opt_bab/bab.hpp"
+#include "knapsack/opt_bab/bab.hpp"
 
 using namespace knapsack;
 

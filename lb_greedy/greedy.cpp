@@ -1,4 +1,4 @@
-#include "lb_greedy/greedy.hpp"
+#include "knapsack/lb_greedy/greedy.hpp"
 
 using namespace knapsack;
 

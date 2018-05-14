@@ -2,11 +2,12 @@ cc_library(
         name = "libbab",
         hdrs = ["bab.hpp"],
         srcs = ["bab.cpp"],
-        visibility = ["//visibility:public"],
         deps = [
                 "//lib:cpp",
                 "//ub_dembo:libdembo",
         ],
+        visibility = ["//visibility:public"],
+        include_prefix = "knapsack/opt_bab/",
 )
 
 cc_binary(
