@@ -3,7 +3,7 @@ cc_library(
         hdrs = ["dantzig.hpp"],
         srcs = ["dantzig.cpp"],
         visibility = ["//visibility:public"],
-        deps = ["//lib:hpp"],
+        deps = ["//lib:cpp"],
 )
 
 cc_library(
@@ -15,10 +15,5 @@ cc_library(
 cc_binary(
         name = "main",
         srcs = ["main.cpp"],
-        deps = [":libdantzig", "//lib:cpp"],
-        linkopts = [
-                "-lboost_system",
-                "-lboost_filesystem",
-                "-lboost_program_options"
-        ],
+        deps = [":libdantzig"],
 )

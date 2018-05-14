@@ -8,7 +8,6 @@
 #include <algorithm>
 #include <iostream>
 #include <fstream>
-#include <chrono>
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>

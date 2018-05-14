@@ -13,6 +13,10 @@ cc_library(
         linkopts = [
                 "-lboost_iostreams",
                 "-lboost_serialization",
+                "-lboost_system",
+                "-lboost_filesystem",
+                "-lboost_program_options",
+                "-lboost_regex",
         ],
         include_prefix = "knapsack/lib/",
         visibility = ["//visibility:public"],
@@ -33,26 +37,13 @@ cc_library(
         name = "libgenerator",
         hdrs = ["generator.hpp"],
         srcs = ["generator.cpp"],
+        deps = [":cpp"],
         visibility = ["//visibility:public"],
-        linkopts = [
-                "-lboost_system",
-                "-lboost_filesystem",
-        ],
-        deps = [
-                ":cpp", 
-        ],
 )
 
 cc_binary(
         name = "generator_main",
         srcs = ["generator.cpp", "generator.hpp"],
-        linkopts = [
-                "-lboost_system",
-                "-lboost_filesystem",
-                "-lboost_iostreams",
-                "-lboost_serialization",
-                "-lboost_program_options"
-        ],
         deps = ["//lib:cpp"],
 )
 
@@ -60,15 +51,11 @@ cc_library(
         name = "tester",
         hdrs = ["tester.hpp"],
         srcs = ["tester.cpp"],
-        visibility = ["//visibility:public"],
-        linkopts = [
-                "-lboost_system",
-                "-lboost_filesystem",
-        ],
         deps = [
                 ":cpp", 
                 "@googletest//:gtest_main",
         ],
+        visibility = ["//visibility:public"],
 )
 
 cc_test(
@@ -82,22 +69,11 @@ cc_test(
         data = [
                 "@knapsack_instances_pisinger//:data",
         ],
-        linkopts = [
-                "-lboost_system",
-                "-lboost_filesystem",
-                "-lboost_program_options",
-                "-lboost_regex",
-        ],
         timeout = "long",
 )
 
 cc_binary(
         name = "sort_bench",
         srcs = ["sort_bench.cpp"],
-        linkopts = [
-                "-lboost_system",
-                "-lboost_filesystem",
-                "-lboost_program_options"
-        ],
         deps = ["//lib:cpp"],
 )

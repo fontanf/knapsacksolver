@@ -2,7 +2,6 @@ cc_library(
         name = "libminknap",
         hdrs = ["minknap.hpp"],
         srcs = ["minknap.cpp", "minknap_part.cpp"],
-        visibility = ["//visibility:public"],
         deps = [
                 "//lib:cpp",
                 "//lb_greedy:libgreedy",
@@ -10,33 +9,19 @@ cc_library(
                 "//ub_dembo:libdembo",
                 "//ub_surrogate:libsurrogate",
         ],
+        visibility = ["//visibility:public"],
 )
 
 cc_binary(
         name = "main",
         srcs = ["main.cpp"],
-        linkopts = [
-                "-lboost_system",
-                "-lboost_filesystem",
-                "-lboost_program_options"
-        ],
-        deps = [
-                "//lib:cpp",
-                ":libminknap",
-        ],
+        deps = [":libminknap"],
 )
 
 cc_test(
         name = "test",
         srcs = ["test.cpp"],
-        linkopts = [
-                "-lboost_system",
-                "-lboost_filesystem",
-        ],
-        deps = [
-                "//lib:tester",
-                "//lib:cpp",
-        ],
+        deps = ["//lib:tester"],
         data = [
                 ":main",
                 "//data_tests:data",
