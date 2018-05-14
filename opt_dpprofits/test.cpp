@@ -1,14 +1,9 @@
 #include "knapsack/lib/tester.hpp"
 
-using namespace knapsack;
-
-TEST(DPProfits, SimpleInstances)
+TEST(DPProfits, DataTests)
 {
-    boost::filesystem::path p = boost::filesystem::current_path();
-    p /= boost::filesystem::path("opt_dpprofits");
-    p /= boost::filesystem::path("main");
-
-    test(p.string() + " -m array -r none", "opt");
-    test(p.string() + " -m array -r all", "sopt");
+    auto p = boost::filesystem::current_path() / "opt_dpprofits" / "main";
+    knapsack::test(p.string() + " -m array -r none", "opt");
+    knapsack::test(p.string() + " -m array -r all", "sopt");
 }
 

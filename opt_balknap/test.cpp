@@ -1,25 +1,20 @@
 #include "knapsack/lib/tester.hpp"
 
-using namespace knapsack;
-
-TEST(Balknap, SimpleInstances)
+TEST(Balknap, DataTests)
 {
-    boost::filesystem::path p = boost::filesystem::current_path();
-    p /= boost::filesystem::path("opt_balknap");
-    p /= boost::filesystem::path("main");
-
-    test(p.string() + " -v -m array -r none", "opt");
-    test(p.string() + " -v -m array -r all", "sopt");
-    //test(p.string() + " -v -m array -r part", "sopt");
-    test(p.string() + " -v -m list -r none -u b", "opt");
-    test(p.string() + " -v -m list -r all -u b", "sopt");
-    test(p.string() + " -v -m list -r part -u b", "sopt");
-    test(p.string() + " -v -m list -r none -u t", "opt");
-    test(p.string() + " -v -m list -r all -u t", "sopt");
-    test(p.string() + " -v -m list -r part -u t", "sopt");
-    test(p.string() + " -v -m list -r all -u t -x 2", "sopt");
-    test(p.string() + " -v -m list -r part -u t -x 2", "sopt");
-    test(p.string() + " -v -m list -r part -u b -s 0", "sopt");
-    test(p.string() + " -v -m list -r part -u t -s 0", "sopt");
+    auto p = boost::filesystem::current_path() / "opt_balknap" / "main";
+    knapsack::test(p.string() + " -v -m array -r none", "opt");
+    knapsack::test(p.string() + " -v -m array -r all", "sopt");
+    //knapsack::test(p.string() + " -v -m array -r part", "sopt");
+    knapsack::test(p.string() + " -v -m list -r none -u b", "opt");
+    knapsack::test(p.string() + " -v -m list -r all -u b", "sopt");
+    knapsack::test(p.string() + " -v -m list -r part -u b", "sopt");
+    knapsack::test(p.string() + " -v -m list -r none -u t", "opt");
+    knapsack::test(p.string() + " -v -m list -r all -u t", "sopt");
+    knapsack::test(p.string() + " -v -m list -r part -u t", "sopt");
+    knapsack::test(p.string() + " -v -m list -r all -u t -x 2", "sopt");
+    knapsack::test(p.string() + " -v -m list -r part -u t -x 2", "sopt");
+    knapsack::test(p.string() + " -v -m list -r part -u b -s 0", "sopt");
+    knapsack::test(p.string() + " -v -m list -r part -u t -s 0", "sopt");
 }
 

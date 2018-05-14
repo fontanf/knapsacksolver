@@ -1,22 +1,17 @@
 #include "knapsack/lib/tester.hpp"
 
-using namespace knapsack;
-
-TEST(BellmanRecursion, SimpleInstances)
+TEST(Bellman, DataTests)
 {
-    boost::filesystem::path p = boost::filesystem::current_path();
-    p /= boost::filesystem::path("opt_bellman");
-    p /= boost::filesystem::path("main");
-
-    test(p.string() + " -m array -r none",  "opt");
-    test(p.string() + " -m array -r all",  "sopt");
-    test(p.string() + " -m array -r one",  "sopt");
-    test(p.string() + " -m array -r part", "sopt");
-    test(p.string() + " -m array -r rec",  "sopt");
-    test(p.string() + " -m list -r none",  "opt");
-    //test(p.string() + " -m list -r all",  "sopt");
-    //test(p.string() + " -m list -r one",  "sopt");
-    //test(p.string() + " -m list -r part", "sopt");
-    test(p.string() + " -m list -r rec",  "sopt");
+    auto p = boost::filesystem::current_path() / "opt_bellman" / "main";
+    knapsack::test(p.string() + " -m array -r none",  "opt");
+    knapsack::test(p.string() + " -m array -r all",  "sopt");
+    knapsack::test(p.string() + " -m array -r one",  "sopt");
+    knapsack::test(p.string() + " -m array -r part", "sopt");
+    knapsack::test(p.string() + " -m array -r rec",  "sopt");
+    knapsack::test(p.string() + " -m list -r none",  "opt");
+    //knapsack::test(p.string() + " -m list -r all",  "sopt");
+    //knapsack::test(p.string() + " -m list -r one",  "sopt");
+    //knapsack::test(p.string() + " -m list -r part", "sopt");
+    knapsack::test(p.string() + " -m list -r rec",  "sopt");
 }
 

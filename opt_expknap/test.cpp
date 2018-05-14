@@ -1,12 +1,8 @@
 #include "knapsack/lib/tester.hpp"
 
-using namespace knapsack;
-
-TEST(Expknap, SimpleInstances)
+TEST(Expknap, DataTests)
 {
-    boost::filesystem::path p = boost::filesystem::current_path();
-    p /= boost::filesystem::path("opt_expknap");
-    p /= boost::filesystem::path("main");
-    test(p.string() + " -v", "sopt");
+    auto p = boost::filesystem::current_path() / "opt_expknap" / "main";
+    knapsack::test(p.string() + " -v", "sopt");
 }
 
