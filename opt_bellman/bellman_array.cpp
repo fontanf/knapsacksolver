@@ -13,7 +13,7 @@ void opts_bellman_array(const Instance& ins, std::vector<Profit>& values,
     for (ItemPos j=n1; j<=n2; ++j) {
         Weight wj = ins.item(j).w;
         Profit pj = ins.item(j).p;
-        for (Weight w=c+1; w>=wj; w--)
+        for (Weight w=c; w>=wj; w--)
             if (values[w-wj] + pj > values[w])
                 values[w] = values[w-wj] + pj;
     }
@@ -80,8 +80,8 @@ Solution knapsack::sopt_bellman_array_all(const Instance& ins, Info* info)
 
 /******************************************************************************/
 
-//#define DBG(x)
-#define DBG(x) x
+#define DBG(x)
+//#define DBG(x) x
 
 Solution knapsack::sopt_bellman_array_one(const Instance& ins, Info* info)
 {

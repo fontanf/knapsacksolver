@@ -74,7 +74,7 @@ TEST(Instance, SortPartially3)
         iota(w.begin(), w.end(), 1);
         Weight c = 0;
         for (ItemIdx i=0; i<n; ++i) {
-            items.push_back({i, i, 1});
+            items.push_back({i, i, 1, -1});
             c += w[i];
         }
         c /= 2;
@@ -101,104 +101,104 @@ TEST(Instance, SortPartially3)
     }
 }
 
-TEST(Instance, ReductionSmallCoeff)
-{
-    auto data_dir = boost::filesystem::current_path();
-    data_dir /= "external";
-    data_dir /= "knapsack_instances_pisinger";
-    data_dir /= "smallcoeff";
-    const boost::regex my_filter("knapPI_.*_.*_1000");
-    boost::filesystem::directory_iterator end_itr;
-    for (boost::filesystem::directory_iterator i(data_dir); i != end_itr; ++i) {
-        std::cout << i->path() << std::endl;
-        boost::smatch what;
-        if(!boost::regex_match(i->path().filename().string(), what, my_filter))
-            continue;
-        for (boost::filesystem::directory_iterator ii(i->path()); ii != end_itr; ++ii) {
-            std::cout << "FILE " << ii->path() << std::endl;
-            assert(boost::filesystem::exists(ii->path()));
-            if (ii->path().filename() == "FORMAT.txt")
-                continue;
-            {
-                Instance instance(ii->path().string());
-                instance.sort_partially();
-                Solution sol = sol_greedy(instance);
-                instance.reduce1(sol.profit(), true);
-            }
-            {
-                Instance instance(ii->path().string());
-                instance.sort();
-                Solution sol = sol_greedy(instance);
-                instance.reduce2(sol.profit(), true);
-            }
-        }
-    }
-}
+//TEST(Instance, ReductionSmallCoeff)
+//{
+    //auto data_dir = boost::filesystem::current_path();
+    //data_dir /= "external";
+    //data_dir /= "knapsack_instances_pisinger";
+    //data_dir /= "smallcoeff";
+    //const boost::regex my_filter("knapPI_.*_.*_1000");
+    //boost::filesystem::directory_iterator end_itr;
+    //for (boost::filesystem::directory_iterator i(data_dir); i != end_itr; ++i) {
+        //std::cout << i->path() << std::endl;
+        //boost::smatch what;
+        //if(!boost::regex_match(i->path().filename().string(), what, my_filter))
+            //continue;
+        //for (boost::filesystem::directory_iterator ii(i->path()); ii != end_itr; ++ii) {
+            //std::cout << "FILE " << ii->path() << std::endl;
+            //assert(boost::filesystem::exists(ii->path()));
+            //if (ii->path().filename() == "FORMAT.txt")
+                //continue;
+            //{
+                //Instance instance(ii->path().string());
+                //instance.sort_partially();
+                //Solution sol = sol_greedy(instance);
+                //instance.reduce1(sol.profit(), true);
+            //}
+            //{
+                //Instance instance(ii->path().string());
+                //instance.sort();
+                //Solution sol = sol_greedy(instance);
+                //instance.reduce2(sol.profit(), true);
+            //}
+        //}
+    //}
+//}
 
-TEST(Instance, ReductionLargeCoeff)
-{
-    auto data_dir = boost::filesystem::current_path();
-    data_dir /= "external";
-    data_dir /= "knapsack_instances_pisinger";
-    data_dir /= "largecoeff";
-    const boost::regex my_filter("knapPI_.*_50_.*");
-    boost::filesystem::directory_iterator end_itr;
-    for (boost::filesystem::directory_iterator i(data_dir); i != end_itr; ++i) {
-        std::cout << i->path() << std::endl;
-        boost::smatch what;
-        if(!boost::regex_match(i->path().filename().string(), what, my_filter))
-            continue;
-        for (boost::filesystem::directory_iterator ii(i->path()); ii != end_itr; ++ii) {
-            std::cout << "FILE " << ii->path() << std::endl;
-            assert(boost::filesystem::exists(ii->path()));
-            if (ii->path().filename() == "FORMAT.txt")
-                continue;
-            {
-                Instance instance(ii->path().string());
-                instance.sort_partially();
-                Solution sol = sol_greedy(instance);
-                instance.reduce1(sol.profit());
-            }
-            {
-                Instance instance(ii->path().string());
-                instance.sort();
-                Solution sol = sol_greedy(instance);
-                instance.reduce2(sol.profit());
-            }
-        }
-    }
-}
+//TEST(Instance, ReductionLargeCoeff)
+//{
+    //auto data_dir = boost::filesystem::current_path();
+    //data_dir /= "external";
+    //data_dir /= "knapsack_instances_pisinger";
+    //data_dir /= "largecoeff";
+    //const boost::regex my_filter("knapPI_.*_50_.*");
+    //boost::filesystem::directory_iterator end_itr;
+    //for (boost::filesystem::directory_iterator i(data_dir); i != end_itr; ++i) {
+        //std::cout << i->path() << std::endl;
+        //boost::smatch what;
+        //if(!boost::regex_match(i->path().filename().string(), what, my_filter))
+            //continue;
+        //for (boost::filesystem::directory_iterator ii(i->path()); ii != end_itr; ++ii) {
+            //std::cout << "FILE " << ii->path() << std::endl;
+            //assert(boost::filesystem::exists(ii->path()));
+            //if (ii->path().filename() == "FORMAT.txt")
+                //continue;
+            //{
+                //Instance instance(ii->path().string());
+                //instance.sort_partially();
+                //Solution sol = sol_greedy(instance);
+                //instance.reduce1(sol.profit());
+            //}
+            //{
+                //Instance instance(ii->path().string());
+                //instance.sort();
+                //Solution sol = sol_greedy(instance);
+                //instance.reduce2(sol.profit());
+            //}
+        //}
+    //}
+//}
 
-TEST(Instance, ReductionHardInstances)
-{
-    auto data_dir = boost::filesystem::current_path();
-    data_dir /= "external";
-    data_dir /= "knapsack_instances_pisinger";
-    data_dir /= "hardinstances";
-    const boost::regex my_filter("knapPI_.*_100_.*");
-    boost::filesystem::directory_iterator end_itr;
-    for (boost::filesystem::directory_iterator i(data_dir); i != end_itr; ++i) {
-        std::cout << i->path() << std::endl;
-        boost::smatch what;
-        if(!boost::regex_match(i->path().filename().string(), what, my_filter))
-            continue;
-        for (boost::filesystem::directory_iterator ii(i->path()); ii != end_itr; ++ii) {
-            std::cout << "FILE " << ii->path() << std::endl;
-            assert(boost::filesystem::exists(ii->path()));
-            if (ii->path().filename() == "FORMAT.txt")
-                continue;
-            {
-                Instance instance(ii->path().string());
-                instance.sort_partially();
-                Solution sol = sol_greedy(instance);
-                instance.reduce1(sol.profit());
-            }
-            {
-                Instance instance(ii->path().string());
-                instance.sort();
-                Solution sol = sol_greedy(instance);
-                instance.reduce2(sol.profit());
-            }
-        }
-    }
-}
+//TEST(Instance, ReductionHardInstances)
+//{
+    //auto data_dir = boost::filesystem::current_path();
+    //data_dir /= "external";
+    //data_dir /= "knapsack_instances_pisinger";
+    //data_dir /= "hardinstances";
+    //const boost::regex my_filter("knapPI_.*_100_.*");
+    //boost::filesystem::directory_iterator end_itr;
+    //for (boost::filesystem::directory_iterator i(data_dir); i != end_itr; ++i) {
+        //std::cout << i->path() << std::endl;
+        //boost::smatch what;
+        //if(!boost::regex_match(i->path().filename().string(), what, my_filter))
+            //continue;
+        //for (boost::filesystem::directory_iterator ii(i->path()); ii != end_itr; ++ii) {
+            //std::cout << "FILE " << ii->path() << std::endl;
+            //assert(boost::filesystem::exists(ii->path()));
+            //if (ii->path().filename() == "FORMAT.txt")
+                //continue;
+            //{
+                //Instance instance(ii->path().string());
+                //instance.sort_partially();
+                //Solution sol = sol_greedy(instance);
+                //instance.reduce1(sol.profit());
+            //}
+            //{
+                //Instance instance(ii->path().string());
+                //instance.sort();
+                //Solution sol = sol_greedy(instance);
+                //instance.reduce2(sol.profit());
+            //}
+        //}
+    //}
+//}

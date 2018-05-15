@@ -22,6 +22,7 @@ typedef int_fast64_t Weight;
 typedef int_fast64_t ItemIdx;
 typedef int_fast64_t ItemPos;
 typedef int_fast64_t StateIdx;
+typedef int_fast64_t Label;
 
 class Solution;
 typedef int64_t PartSol1;
@@ -31,20 +32,22 @@ class PartSolFactory2;
 
 struct Item
 {
-    Item() { }
     Item(ItemIdx j, Weight w, Profit p): j(j), w(w), p(p) { }
+    Item(ItemIdx j, Weight w, Profit p, Label l): j(j), w(w), p(p), l(l) { }
     Item& operator=(const Item& item)
     {
         if (this != &item) {
             j = item.j;
             w = item.w;
             p = item.p;
+            l = item.l;
         }
         return *this;
     }
-    ItemIdx j = -1;
-    Weight  w = -1;
-    Profit  p = -1;
+    ItemIdx j = -1; // Index, 0 <= j < n, must be different for each item
+    Weight  w = -1; // Weight, w >= 0
+    Profit  p = -1; // Profit, p >= 0
+    Label   l = -1; // Label, this parameter is not used in this package
 };
 
 struct Interval

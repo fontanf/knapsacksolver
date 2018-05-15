@@ -148,7 +148,7 @@ void Instance::read_pisinger(std::stringstream& data)
 
     std::getline(data, line);
 
-    items_.resize(item_number());
+    items_.reserve(item_number());
     sol_opt_ = new Solution(*this);
 
     ItemIdx id;
@@ -164,7 +164,7 @@ void Instance::read_pisinger(std::stringstream& data)
         std::istringstream(line) >> w;
         std::getline(data, line);
         std::istringstream(line) >> x;
-        items_[j] = {j,w,p};
+        items_.push_back({j,w,p});
         // Update Optimal solution
         if (x == 1)
             sol_opt_->set(j, true);
@@ -263,13 +263,11 @@ void Instance::update_isum()
 {
     DBG(std::cout << "UPDATEISUM..." << std::endl;)
     assert(sorted());
-    isum_ = std::vector<Item>(total_item_number()+1);
-    isum_[0] = {0,0,0};
-    for (ItemPos j=1; j<=total_item_number(); ++j) {
-        isum_[j].j = j;
-        isum_[j].w = isum_[j-1].w + item(j-1).w;
-        isum_[j].p = isum_[j-1].p + item(j-1).p;
-    }
+    isum_.clear();
+    isum_.reserve(total_item_number()+1);
+    isum_.push_back({0,0,0});
+    for (ItemPos j=1; j<=total_item_number(); ++j)
+        isum_.push_back({j, isum_[j-1].w + item(j-1).w, isum_[j-1].p + item(j-1).p});
     //std::cout << *this << std::endl;
     //DBG(for (const Item& item: isum_)
         //std::cout << item << " ";
@@ -302,13 +300,12 @@ void Instance::compute_max_items()
     for (ItemPos j=f_; j<=l_; ++j) {
         Profit p = item(j).p;
         Weight w = item(j).w;
-        ItemIdx id = item(j).j;
         if (p * j_emax_.w > j_emax_.p * w)
-            j_emax_ = {id,w,p};
+            j_emax_ = item(j);
         if (p > j_pmax_.p)
-            j_pmax_ = {id,w,p};
+            j_pmax_ = item(j);
         if (w > j_wmax_.w)
-            j_wmax_ = {id,w,p};
+            j_wmax_ = item(j);
     }
 }
 

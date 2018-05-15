@@ -77,6 +77,7 @@ int main(int argc, char *argv[])
         assert(false);
         return 1;
     }
+    std::cout << "tututu" << std::endl;
 
     double t = info.elapsed_time();
     opt = std::max(opt, sopt.profit());

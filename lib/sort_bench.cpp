@@ -9,9 +9,10 @@ int main(int argc, char *argv[])
 
     ItemIdx n = 10000000;
     Weight c = 64 * n;
-    std::vector<Item> items(n);
+    std::vector<Item> items;
+    items.reserve(n);
     for (ItemPos j=0; j<n; ++j)
-        items[j] = {j, j, 1};
+        items.push_back({j, j, 1});
     std::random_shuffle(items.begin(), items.end());
 
     Instance instance_eff(items, c);

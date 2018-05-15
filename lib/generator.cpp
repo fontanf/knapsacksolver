@@ -40,7 +40,8 @@ void generate_uncorrelated(boost::filesystem::path dir,
     ItemIdx hmax = 100;
 
     for (ItemIdx n: ns) {
-        std::vector<Item> items(n);
+        std::vector<Weight> w(n);
+        std::vector<Profit> p(n);
         for (Profit r: rs) {
             boost::filesystem::path dest = dir
                 / "u" / std::to_string(n) / std::to_string(r);
@@ -52,16 +53,16 @@ void generate_uncorrelated(boost::filesystem::path dir,
             for (ItemIdx h=1; h<=hmax; ++h) {
                 Weight wsum = 0;
                 for (ItemIdx j=0; j<n; ++j) {
-                    items[j].w = distribution(generator);
-                    items[j].p = distribution(generator);
-                    wsum += items[j].w;
+                    w[j] = distribution(generator);
+                    p[j] = distribution(generator);
+                    wsum += w[j];
                 }
                 Weight c = (h * wsum) / hmax;
 
                 std::stringstream data;
                 data << n << " " << c << std::endl << std::endl;
                 for (ItemIdx j=0; j<n; ++j)
-                    data << items[j].p << " " << items[j].w << std::endl;
+                    data << p[j] << " " << w[j] << std::endl;
 
                 std::string filename = std::to_string(h) + ".txt.bz2";
                 boost::filesystem::path filepath = dest / filename;
@@ -77,7 +78,8 @@ void generate_weakly_correlated(boost::filesystem::path dir,
     ItemIdx hmax = 100;
 
     for (ItemIdx n: ns) {
-        std::vector<Item> items(n);
+        std::vector<Weight> w(n);
+        std::vector<Profit> p(n);
         for (Profit r: rs) {
             boost::filesystem::path dest = dir
                 / "wc" / std::to_string(n) / std::to_string(r);
@@ -90,16 +92,16 @@ void generate_weakly_correlated(boost::filesystem::path dir,
             for (ItemIdx h=1; h<=hmax; ++h) {
                 Weight wsum = 0;
                 for (ItemIdx j=0; j<n; ++j) {
-                    items[j].w = d1(generator);
-                    items[j].p = items[j].w + d2(generator);
-                    wsum += items[j].w;
+                    w[j] = d1(generator);
+                    p[j] = w[j] + d2(generator);
+                    wsum += w[j];
                 }
                 Weight c = (h * wsum) / hmax;
 
                 std::stringstream data;
                 data << n << " " << c << std::endl << std::endl;
                 for (ItemIdx j=0; j<n; ++j)
-                    data << items[j].p << " " << items[j].w << std::endl;
+                    data << p[j] << " " << w[j] << std::endl;
 
                 std::string filename = std::to_string(h) + ".txt.bz2";
                 boost::filesystem::path filepath = dest / filename;
@@ -115,7 +117,8 @@ void generate_strongly_correlated(boost::filesystem::path dir,
     ItemIdx hmax = 100;
 
     for (ItemIdx n: ns) {
-        std::vector<Item> items(n);
+        std::vector<Weight> w(n);
+        std::vector<Profit> p(n);
         for (Profit r: rs) {
             boost::filesystem::path dest = dir
                 / "sc" / std::to_string(n) / std::to_string(r);
@@ -127,16 +130,16 @@ void generate_strongly_correlated(boost::filesystem::path dir,
             for (ItemIdx h=1; h<=hmax; ++h) {
                 Weight wsum = 0;
                 for (ItemIdx j=0; j<n; ++j) {
-                    items[j].w = d1(generator);
-                    items[j].p = items[j].w + r/10;
-                    wsum += items[j].w;
+                    w[j] = d1(generator);
+                    p[j] = w[j] + r/10;
+                    wsum += w[j];
                 }
                 Weight c = (h * wsum) / hmax;
 
                 std::stringstream data;
                 data << n << " " << c << std::endl << std::endl;
                 for (ItemIdx j=0; j<n; ++j)
-                    data << items[j].p << " " << items[j].w << std::endl;
+                    data << p[j] << " " << w[j] << std::endl;
 
                 std::string filename = std::to_string(h) + ".txt.bz2";
                 boost::filesystem::path filepath = dest / filename;
@@ -152,7 +155,8 @@ void generate_inverse_strongly_correlated(boost::filesystem::path dir,
     ItemIdx hmax = 100;
 
     for (ItemIdx n: ns) {
-        std::vector<Item> items(n);
+        std::vector<Weight> w(n);
+        std::vector<Profit> p(n);
         for (Profit r: rs) {
             boost::filesystem::path dest = dir
                 / "isc" / std::to_string(n) / std::to_string(r);
@@ -164,16 +168,16 @@ void generate_inverse_strongly_correlated(boost::filesystem::path dir,
             for (ItemIdx h=1; h<=hmax; ++h) {
                 Weight wsum = 0;
                 for (ItemIdx j=0; j<n; ++j) {
-                    items[j].p = d1(generator);
-                    items[j].w = items[j].p + r/10;
-                    wsum += items[j].w;
+                    p[j] = d1(generator);
+                    w[j] = p[j] + r/10;
+                    wsum += w[j];
                 }
                 Weight c = (h * wsum) / hmax;
 
                 std::stringstream data;
                 data << n << " " << c << std::endl << std::endl;
                 for (ItemIdx j=0; j<n; ++j)
-                    data << items[j].p << " " << items[j].w << std::endl;
+                    data << p[j] << " " << w[j] << std::endl;
 
                 std::string filename = std::to_string(h) + ".txt.bz2";
                 boost::filesystem::path filepath = dest / filename;
@@ -189,7 +193,8 @@ void generate_almost_strongly_correlated(boost::filesystem::path dir,
     ItemIdx hmax = 100;
 
     for (ItemIdx n: ns) {
-        std::vector<Item> items(n);
+        std::vector<Weight> w(n);
+        std::vector<Profit> p(n);
         for (Profit r: rs) {
             boost::filesystem::path dest = dir
                 / "asc" / std::to_string(n) / std::to_string(r);
@@ -202,16 +207,16 @@ void generate_almost_strongly_correlated(boost::filesystem::path dir,
             for (ItemIdx h=1; h<=hmax; ++h) {
                 Weight wsum = 0;
                 for (ItemIdx j=0; j<n; ++j) {
-                    items[j].w = d1(generator);
-                    items[j].p = items[j].w + r/10 + d2(generator);
-                    wsum += items[j].w;
+                    w[j] = d1(generator);
+                    p[j] = w[j] + r/10 + d2(generator);
+                    wsum += w[j];
                 }
                 Weight c = (h * wsum) / hmax;
 
                 std::stringstream data;
                 data << n << " " << c << std::endl << std::endl;
                 for (ItemIdx j=0; j<n; ++j)
-                    data << items[j].p << " " << items[j].w << std::endl;
+                    data << p[j] << " " << w[j] << std::endl;
 
                 std::string filename = std::to_string(h) + ".txt.bz2";
                 boost::filesystem::path filepath = dest / filename;
@@ -227,7 +232,7 @@ void generate_subset_sum(boost::filesystem::path dir,
     ItemIdx hmax = 100;
 
     for (ItemIdx n: ns) {
-        std::vector<Weight> weights(n);
+        std::vector<Weight> w(n);
         for (Profit r: rs) {
             boost::filesystem::path dest = dir
                 / "ss" / std::to_string(n) / std::to_string(r);
@@ -239,15 +244,15 @@ void generate_subset_sum(boost::filesystem::path dir,
             for (ItemIdx h=1; h<=hmax; ++h) {
                 Weight wsum = 0;
                 for (ItemIdx j=0; j<n; ++j) {
-                    weights[j] = d1(generator);
-                    wsum += weights[j];
+                    w[j] = d1(generator);
+                    wsum += w[j];
                 }
                 Weight c = (h * wsum) / hmax;
 
                 std::stringstream data;
                 data << n << " " << c << std::endl << std::endl;
                 for (ItemIdx j=0; j<n; ++j)
-                    data << weights[j] << std::endl;
+                    data << w[j] << std::endl;
 
                 std::string filename = std::to_string(h) + ".txt.bz2";
                 boost::filesystem::path filepath = dest / filename;
@@ -268,23 +273,24 @@ void generate_similar_weights(boost::filesystem::path dir,
         boost::filesystem::create_directories(dest);
         write_format_file(dest, "knapsack_standard");
 
-        std::vector<Item> items(n);
+        std::vector<Weight> w(n);
+        std::vector<Profit> p(n);
         std::default_random_engine generator;
         std::uniform_int_distribution<int> d1(100000, 100100);
         std::uniform_int_distribution<int> d2(1, 1000);
         for (ItemIdx h=1; h<=hmax; ++h) {
             Weight wsum = 0;
             for (ItemIdx j=0; j<n; ++j) {
-                items[j].w = d1(generator);
-                items[j].p = d2(generator);
-                wsum += items[j].w;
+                w[j] = d1(generator);
+                p[j] = d2(generator);
+                wsum += w[j];
             }
             Weight c = (h * wsum) / hmax;
 
             std::stringstream data;
             data << n << " " << c << std::endl << std::endl;
             for (ItemIdx j=0; j<n; ++j)
-                data << items[j].p << " " << items[j].w << std::endl;
+                data << p[j] << " " << w[j] << std::endl;
 
             std::string filename = std::to_string(h) + ".txt.bz2";
             boost::filesystem::path filepath = dest / filename;
@@ -325,6 +331,8 @@ void generate_all(boost::filesystem::path dir)
 
 int main(int argc, char *argv[])
 {
+    (void)argc;
+    (void)argv;
     boost::filesystem::path dir("./data_pisinger");
     generate_all(dir);
     return 0;
