@@ -46,33 +46,6 @@ void Instance::add_items(const std::vector<std::pair<Weight, Profit>>& wp)
         add_item(i.first, i.second);
 }
 
-void Instance::update_item(ItemIdx j, Weight w, Profit p)
-{
-    items_[j].w = w;
-    items_[j].p = p;
-    version_++;
-}
-
-void Instance::update_item(ItemIdx j, Weight w, Profit p, Label l)
-{
-    items_[j].w = w;
-    items_[j].p = p;
-    items_[j].l = l;
-    version_++;
-}
-
-void Instance::update_profit(ItemIdx j, Profit p)
-{
-    items_[j].p = p;
-    version_++;
-}
-
-void Instance::update_weight(ItemIdx j, Weight w)
-{
-    items_[j].w = w;
-    version_++;
-}
-
 const Item& Instance::max_weight_item()
 {
     compute_max_items();
@@ -241,14 +214,14 @@ void Instance::read_pisinger(std::stringstream& data)
 
 Instance::Instance(const Instance& ins)
 {
-    name_ = ins.name();
-    format_ = ins.format();
+    name_ = ins.name_;
+    format_ = ins.format_;
 
-    c_orig_ = ins.total_capacity();
-    sorted_ = ins.sorted();
+    c_orig_ = ins.c_orig_;
+    sorted_ = ins.sorted_;
     items_ = ins.items_;
-    f_ = ins.first_item();
-    l_ = ins.last_item();
+    f_ = ins.f_;
+    l_ = ins.l_;
 
     if (ins.optimal_solution() != NULL) {
         sol_opt_ = new Solution(*this);
@@ -261,7 +234,7 @@ Instance::Instance(const Instance& ins)
     sol_red_ = new Solution(*this);
     *sol_red_ = *ins.reduced_solution();
     sol_red_opt_ = ins.sol_red_opt_;
-    b_ = ins.break_item();
+    b_ = ins.b_;
     isum_ = ins.isum_;
 }
 
@@ -1100,7 +1073,7 @@ std::string Instance::print_opt(Profit opt) const
 
 std::ostream& knapsack::operator<<(std::ostream& os, const Item& it)
 {
-    os << "(" << it.j << " " << it.w << " " << it.p << " " << (double)it.p/(double)it.w << ")";
+    os << "(" << it.j << " " << it.w << " " << it.p << " " << (double)it.p/(double)it.w << " " << it.l << ")";
     return os;
 }
 

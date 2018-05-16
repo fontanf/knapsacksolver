@@ -72,10 +72,6 @@ public:
     void add_item(Weight w, Profit p);
     void add_item(Weight w, Profit p, Label l);
     void add_items(const std::vector<std::pair<Weight, Profit>>& wp);
-    void update_item(ItemIdx j, Weight w, Profit p);
-    void update_item(ItemIdx j, Weight w, Profit p, Label l);
-    void update_profit(ItemIdx j, Profit p);
-    void update_weight(ItemIdx j, Weight w);
 
     /**
      * Create instance from file.
