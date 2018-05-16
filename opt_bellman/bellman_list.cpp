@@ -26,7 +26,7 @@ std::ostream& operator<<(std::ostream& os, std::vector<State>& l)
     return os;
 }
 
-Profit knapsack::opt_bellman_list(const Instance& ins, Info* info)
+Profit knapsack::opt_bellman_list(Instance& ins, Info* info)
 {
     (void)info;
     Weight  c = ins.capacity();
@@ -100,7 +100,7 @@ Profit knapsack::opt_bellman_list(const Instance& ins, Info* info)
 
 /******************************************************************************/
 
-Solution knapsack::sopt_bellman_list_all(const Instance& ins, Info* info)
+Solution knapsack::sopt_bellman_list_all(Instance& ins, Info* info)
 {
     (void)info;
     assert(false); // TODO
@@ -109,7 +109,7 @@ Solution knapsack::sopt_bellman_list_all(const Instance& ins, Info* info)
 
 /******************************************************************************/
 
-Solution knapsack::sopt_bellman_list_one(const Instance& ins, Info* info)
+Solution knapsack::sopt_bellman_list_one(Instance& ins, Info* info)
 {
     (void)info;
     assert(false); // TODO
@@ -118,7 +118,7 @@ Solution knapsack::sopt_bellman_list_one(const Instance& ins, Info* info)
 
 /******************************************************************************/
 
-Solution knapsack::sopt_bellman_list_part(const Instance& ins, ItemPos k, Info* info)
+Solution knapsack::sopt_bellman_list_part(Instance& ins, ItemPos k, Info* info)
 {
     (void)info;
     (void)k;
@@ -131,7 +131,7 @@ Solution knapsack::sopt_bellman_list_part(const Instance& ins, ItemPos k, Info* 
 #define DBG(x)
 //#define DBG(x) x
 
-std::vector<State> opts_bellman_list(const Instance& ins,
+std::vector<State> opts_bellman_list(Instance& ins,
         ItemPos n1, ItemPos n2, Weight c, Info* info = NULL)
 {
     (void)info;
@@ -199,7 +199,7 @@ std::vector<State> opts_bellman_list(const Instance& ins,
     return l0;
 }
 
-void sopt_bellman_list_rec_rec(const Instance& ins,
+void sopt_bellman_list_rec_rec(Instance& ins,
         ItemPos n1, ItemPos n2, Weight c, Solution& sol_curr, Info* info)
 {
     ItemPos k = (2*n1 + 8*n2) / 10;
@@ -266,7 +266,7 @@ void sopt_bellman_list_rec_rec(const Instance& ins,
     }
 }
 
-Solution knapsack::sopt_bellman_list_rec(const Instance& ins, Info* info)
+Solution knapsack::sopt_bellman_list_rec(Instance& ins, Info* info)
 {
     ItemPos n = ins.item_number();
 

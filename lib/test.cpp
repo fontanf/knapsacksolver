@@ -12,12 +12,13 @@ using namespace knapsack;
 
 TEST(Instance, Sort)
 {
-    Instance instance({
-            {0, 10, 10},
-            {1, 10, 15},
-            {2, 10, 5},
-            {3, 10, 12},
-            {4, 10, 20}}, 100);
+    Instance instance(5, 100);
+    instance.add_items({
+            {10, 10},
+            {10, 15},
+            {10, 5},
+            {10, 12},
+            {10, 20}});
     instance.sort();
 
     EXPECT_EQ(instance.item(4).p, 5);
@@ -35,32 +36,34 @@ TEST(Instance, Sort)
 
 TEST(Instance, SortPartially)
 {
-    Instance instance({ // break item b = 3 (1, 3)
-            {0, 1, 1},
-            {1, 2, 1},
-            {2, 3, 1},
-            {3, 4, 1},
-            {4, 5, 1},
-            {5, 6, 1},
-            {6, 7, 1},
-            {7, 8, 1},
-            {8, 9, 1}}, 4);
+    Instance instance(9, 4); // break item b = 3 (1, 3)
+    instance.add_items({
+            {1, 1},
+            {2, 1},
+            {3, 1},
+            {4, 1},
+            {5, 1},
+            {6, 1},
+            {7, 1},
+            {8, 1},
+            {9, 1}});
     instance.sort_partially();
     EXPECT_EQ(instance.item(instance.break_item()).j, 2);
 }
 
 TEST(Instance, SortPartially2)
 {
-    Instance instance({ // break item b = 3 (1, 3)
-            {0, 1, 1},
-            {1, 9, 1},
-            {2, 2, 1},
-            {3, 8, 1},
-            {4, 3, 1},
-            {5, 7, 1},
-            {6, 4, 1},
-            {7, 5, 1},
-            {8, 6, 1}}, 6);
+    Instance instance(9, 6);
+    instance.add_items({ // break item b = 3 (1, 3)
+            {1, 1},
+            {9, 1},
+            {2, 1},
+            {8, 1},
+            {3, 1},
+            {7, 1},
+            {4, 1},
+            {5, 1},
+            {6, 1}});
     instance.sort_partially();
     EXPECT_EQ(instance.item(instance.break_item()).j, 6);
 }
@@ -68,22 +71,21 @@ TEST(Instance, SortPartially2)
 TEST(Instance, SortPartially3)
 {
     for (ItemIdx n = 0; n <= 1000; ++n) {
-        std::vector<Item> items;
-        std::vector<Profit> p(n, 1);
-        std::vector<Weight> w(n);
-        iota(w.begin(), w.end(), 1);
+        std::vector<std::pair<Weight, Profit>> wp;
         Weight c = 0;
         for (ItemIdx i=0; i<n; ++i) {
-            items.push_back({i, i, 1, -1});
-            c += w[i];
+            wp.push_back({i, 1});
+            c += i;
         }
         c /= 2;
         c += 10;
-        std::cout << "n " << n << " c " << c << std::endl;
-        std::random_shuffle(w.begin(), w.end());
+        std::cout << "N " << n << " C " << c << std::endl;
+        std::random_shuffle(wp.begin(), wp.end());
 
-        Instance instance_eff(items, c);
-        Instance instance_peff(items, c);
+        Instance instance_eff(n, c);
+        Instance instance_peff(n, c);
+        instance_eff.add_items(wp);
+        instance_peff.add_items(wp);
         instance_eff.sort();
         instance_peff.sort_partially();
         EXPECT_EQ(

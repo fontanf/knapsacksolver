@@ -7,7 +7,7 @@ using namespace knapsack;
 #define DBG(x)
 //#define DBG(x) x
 
-Solution knapsack::sopt_bab(const Instance& ins, Info* info)
+Solution knapsack::sopt_bab(Instance& ins, Info* info)
 {
     (void)info;
     ItemIdx n = ins.item_number();

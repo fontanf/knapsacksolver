@@ -9,20 +9,21 @@ int main(int argc, char *argv[])
 
     ItemIdx n = 10000000;
     Weight c = 64 * n;
-    std::vector<Item> items;
-    items.reserve(n);
+    Instance ins_eff(n, c);
+    Instance ins_peff(n, c);
+    std::vector<std::pair<Weight, Profit>> wp;
     for (ItemPos j=0; j<n; ++j)
-        items.push_back({j, j, 1});
-    std::random_shuffle(items.begin(), items.end());
+        wp.push_back({j,1});
+    std::random_shuffle(wp.begin(), wp.end());
 
-    Instance instance_eff(items, c);
-    Instance instance_peff(items, c);
+    ins_eff.add_items(wp);
+    ins_peff.add_items(wp);
 
     std::cout << "Conmplete sorting" << std::endl;
-    instance_eff.sort();
+    ins_eff.sort();
 
     std::cout << "Partial sorting" << std::endl;
-    instance_eff.sort_partially();
+    ins_eff.sort_partially();
 
     return 0;
 }

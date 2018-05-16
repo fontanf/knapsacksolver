@@ -33,6 +33,7 @@ public:
     int contains(ItemPos j) const;
     int contains_idx(ItemIdx j) const;
     void clear();
+    void resize(ItemIdx n) { x_.resize(n, 0); }
 
     /**
      * Replace the current solution by "sol" if it is better.

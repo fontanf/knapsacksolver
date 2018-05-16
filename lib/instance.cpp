@@ -16,10 +16,79 @@
 
 using namespace knapsack;
 
-Instance::Instance(const std::vector<Item>& items, Weight c):
-    name_(""), format_(""), f_(0), l_(items.size()-1), c_orig_(c), items_(items)
+Instance::Instance(ItemIdx n, Weight c):
+    name_(""), format_(""), c_orig_(c), f_(0), l_(-1)
 {
+    items_.reserve(n);
     sol_red_ = new Solution(*this);
+}
+
+
+void Instance::add_item(Weight w, Profit p)
+{
+    add_item(w, p, -1);
+}
+
+void Instance::add_item(Weight w, Profit p, Label l)
+{
+    ItemIdx j = items_.size();
+    items_.push_back({j, w, p, l});
+    l_ = j;
+    version_++;
+    sol_opt_ = NULL;
+    sol_red_->resize(j+1);
+    sol_break_ = NULL;
+}
+
+void Instance::add_items(const std::vector<std::pair<Weight, Profit>>& wp)
+{
+    for (auto i: wp)
+        add_item(i.first, i.second);
+}
+
+void Instance::update_item(ItemIdx j, Weight w, Profit p)
+{
+    items_[j].w = w;
+    items_[j].p = p;
+    version_++;
+}
+
+void Instance::update_item(ItemIdx j, Weight w, Profit p, Label l)
+{
+    items_[j].w = w;
+    items_[j].p = p;
+    items_[j].l = l;
+    version_++;
+}
+
+void Instance::update_profit(ItemIdx j, Profit p)
+{
+    items_[j].p = p;
+    version_++;
+}
+
+void Instance::update_weight(ItemIdx j, Weight w)
+{
+    items_[j].w = w;
+    version_++;
+}
+
+const Item& Instance::max_weight_item()
+{
+    compute_max_items();
+    return j_wmax_;
+}
+
+const Item& Instance::max_profit_item()
+{
+    compute_max_items();
+    return j_pmax_;
+}
+
+const Item& Instance::max_efficiency_item()
+{
+    compute_max_items();
+    return j_emax_;
 }
 
 Instance::Instance(boost::filesystem::path filepath)
@@ -75,7 +144,6 @@ Instance::Instance(boost::filesystem::path filepath)
     }
 
     sol_red_ = new Solution(*this);
-    compute_max_items();
 }
 
 void Instance::read_standard(std::stringstream& data)
@@ -91,7 +159,7 @@ void Instance::read_standard(std::stringstream& data)
     Weight w;
     for (ItemPos j=0; j<n; ++j) {
         data >> p >> w;
-        items_.push_back({j,w,p});
+        add_item(w,p);
     }
 }
 
@@ -107,7 +175,7 @@ void Instance::read_subsetsum_standard(std::stringstream& data)
     Weight w;
     for (ItemPos j=0; j<n; ++j) {
         data >> w;
-        items_.push_back({j,w,w});
+        add_item(w,w);
     }
 }
 
@@ -164,7 +232,7 @@ void Instance::read_pisinger(std::stringstream& data)
         std::istringstream(line) >> w;
         std::getline(data, line);
         std::istringstream(line) >> x;
-        items_.push_back({j,w,p});
+        add_item(w,p);
         // Update Optimal solution
         if (x == 1)
             sol_opt_->set(j, true);
@@ -195,7 +263,6 @@ Instance::Instance(const Instance& ins)
     sol_red_opt_ = ins.sol_red_opt_;
     b_ = ins.break_item();
     isum_ = ins.isum_;
-    compute_max_items();
 }
 
 bool Instance::check()
@@ -292,10 +359,14 @@ ItemPos Instance::ub_item(Item item) const
 
 void Instance::compute_max_items()
 {
-    j_wmax_ = {-1, -1, -1}; // Max weight item
+    if (max_version_ == version_)
+        return;
+    max_version_ = version_;
+
+    j_wmax_ = {-1, -1, -1};        // Max weight item
     j_wmin_ = {-1, c_orig_+1, -1}; // Min weight item
-    j_pmax_ = {-1, -1, -1}; // Max profit item
-    j_emax_ = {-1, 0, -1};  // Max efficiency item;
+    j_pmax_ = {-1, -1, -1};        // Max profit item
+    j_emax_ = {-1, 0, -1};         // Max efficiency item;
 
     for (ItemPos j=f_; j<=l_; ++j) {
         Profit p = item(j).p;
@@ -619,7 +690,7 @@ void Instance::surrogate(Weight multiplier, ItemIdx bound, ItemPos first)
         }
     }
     c_orig_ += multiplier * bound;
-    compute_max_items();
+    version_++;
 
     sorted_ = false;
     b_      = -1;

@@ -68,7 +68,14 @@ public:
     /**
      * Manual constructor.
      */
-    Instance(const std::vector<Item>& items, Weight c);
+    Instance(ItemIdx n, Weight c);
+    void add_item(Weight w, Profit p);
+    void add_item(Weight w, Profit p, Label l);
+    void add_items(const std::vector<std::pair<Weight, Profit>>& wp);
+    void update_item(ItemIdx j, Weight w, Profit p);
+    void update_item(ItemIdx j, Weight w, Profit p, Label l);
+    void update_profit(ItemIdx j, Profit p);
+    void update_weight(ItemIdx j, Weight w);
 
     /**
      * Create instance from file.
@@ -81,6 +88,21 @@ public:
     Instance(const Instance& ins);
 
     ~Instance();
+
+
+    /**
+     * Getters
+     */
+
+    inline std::string name()   const { return name_; }
+    inline std::string format() const { return format_; }
+
+    inline ItemIdx total_item_number() const { return items_.size(); }
+    inline Weight  total_capacity()    const { return c_orig_; }
+    inline const Item& item(ItemIdx j) const { assert(j >= 0 && j < total_item_number()); return items_[j]; }
+
+    const Solution* optimal_solution() const { return sol_opt_; }
+    Profit optimum() const;
 
 
     /*
@@ -123,11 +145,12 @@ public:
      */
     void reduce1(Profit lb, bool verbose = false);
     void reduce2(Profit lb, bool verbose = false);
-
     const Solution* reduced_solution() const { return sol_red_; }
-    const Solution* optimal_solution() const { return sol_opt_; }
-    const Solution* break_solution()   const { return sol_break_; }
-    Profit optimum() const;
+
+    inline ItemIdx item_number() const { return l_-f_+1; }
+    inline ItemPos first_item()  const { return f_; }
+    inline ItemPos last_item()   const { return l_; }
+    Weight capacity() const;
 
     /**
      * Reduce item f..j-1, and add them to the reduced solution
@@ -153,33 +176,19 @@ public:
     void surrogate(Weight multiplier, ItemIdx bound, ItemPos first);
     void surrogate(Weight multiplier, ItemIdx bound);
 
-
-    /**
-     * Getters
-     */
-
-    inline std::string name()   const { return name_; }
-    inline std::string format() const { return format_; }
-
-    inline ItemIdx item_number() const { return l_-f_+1; }
-    inline ItemPos first_item()  const { return f_; }
-    inline ItemPos last_item()   const { return l_; }
-    inline ItemIdx total_item_number() const { return items_.size(); }
-    inline Weight  total_capacity()    const { return c_orig_; }
-    inline const Item& item(ItemIdx j) const { assert(j >= 0 && j < total_item_number()); return items_[j]; }
-    Weight capacity() const;
-
+    const Solution* break_solution()   const { return sol_break_; }
     ItemPos break_item()     const { assert(b_ >= first_item() && b_ <= last_item() + 1); return b_; }
     Profit  break_profit()   const;
     Weight  break_weight()   const;
     Weight  break_capacity() const;
 
-    const Item& max_weight_item()     const { return j_wmax_; }
-    const Item& max_profit_item()     const { return j_pmax_; }
-    const Item& max_efficiency_item() const { return j_emax_; }
+    const Item& max_weight_item();
+    const Item& max_profit_item();
+    const Item& max_efficiency_item();
 
     const Item& isum(ItemPos j) const { assert(sorted()); return isum_[j]; }
     ItemPos ub_item(Item item) const;
+
 
     /**
      * Return the profit of the certificate file.
@@ -202,6 +211,10 @@ public:
 
 private:
 
+    /*
+     * Methods
+     */
+
     void read_standard(std::stringstream& data);
     void read_subsetsum_standard(std::stringstream& data);
     void read_pisinger(std::stringstream& data);
@@ -218,27 +231,33 @@ private:
      */
     void remove_big_items();
 
+
+    /*
+     * Attributes
+     */
+
     std::string name_;
     std::string format_;
 
-    ItemPos f_;
-    ItemPos l_;
-    ItemPos s_;
-    ItemPos t_;
-    Weight  c_orig_;
-    bool sorted_ = false;
-    std::vector<Interval> int_right_;
-    std::vector<Interval> int_left_;
     std::vector<Item> items_;
+    Weight c_orig_;
+    Solution* sol_opt_ = NULL; // Optimal solution
+    int version_ = 0;
 
-    Solution* sol_opt_   = NULL; // Optimal solution
-    Solution* sol_red_   = NULL; // Reduced solution
-    Solution* sol_break_ = NULL; // Break solution
-    ItemPos b_ = -1; // Break item
     Item j_wmax_ = {-1, -1, -1}; // Max weight item
     Item j_wmin_ = {-1, c_orig_+1, -1}; // Min weight item
     Item j_pmax_ = {-1, -1, -1}; // Max profit item
     Item j_emax_ = {-1, 0, -1};  // Max efficiency item;
+    int max_version_ = 0;
+
+
+    ItemPos f_, l_, s_, t_;
+    bool sorted_ = false;
+    std::vector<Interval> int_right_, int_left_;
+
+    Solution* sol_red_   = NULL; // Reduced solution
+    Solution* sol_break_ = NULL; // Break solution
+    ItemPos b_ = -1; // Break item
     std::vector<Item> isum_;
     bool sol_red_opt_ = false;
 };
