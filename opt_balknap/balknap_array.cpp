@@ -11,8 +11,11 @@ using namespace knapsack;
 #define IDX2(k,w,p) rl2*(k) + rl1*(w) + (p)
 #define IDX1(  w,p)           rl1*(w) + (p)
 
-#define DBG(x)
-//#define DBG(x) x
+//#define DBG(x)
+#define DBG(x) x
+
+#define ALPHA(mu) (mu <= c)? z + 1 - ((c - mu) * pb) / wb: z + 1 + ((mu - c) * pb) / wb
+#define BETA(mu) (mu >= w_bar)? p_bar + ((mu - w_bar) * pb) / wb: p_bar - ((w_bar - mu) * pb) / wb
 
 Profit knapsack::opt_balknap_array(Instance& ins, BalknapParams p, Info* info)
 {
@@ -21,21 +24,27 @@ Profit knapsack::opt_balknap_array(Instance& ins, BalknapParams p, Info* info)
 
     ins.sort_partially();
     ItemPos b = ins.break_item();
-    if (b == ins.last_item()+1) // all items are in the break solution
+    if (b == ins.last_item()+1) { // all items are in the break solution
+        std::cout << ins << std::endl;
+        DBG(std::cout << "BALKNAPSOL... END ALL ITEMS" << std::endl;)
         return ins.break_profit();
+    }
 
-    DBG(std::cout << "LB..." << std::endl;)
+    DBG(std::cout << "LB... " << std::flush;)
     Profit lb = 0;
     if (p.lb_greedy == 0) {
         lb = sol_greedy(ins).profit();
     } else {
         lb = ins.break_solution()->profit();
     }
+    DBG(std::cout << lb << std::endl;)
 
     DBG(std::cout << "REDUCTION..." << std::endl;)
     ins.reduce1(lb, Info::verbose(info));
-    if (ins.capacity() < 0)
+    if (ins.capacity() < 0) {
+        DBG(std::cout << "BALKNAPSOL... END SOLRED OPT" << std::endl;)
         return lb;
+    }
     Weight  c = ins.capacity();
     ItemPos f = ins.first_item();
     ItemPos l = ins.last_item();
@@ -44,10 +53,13 @@ Profit knapsack::opt_balknap_array(Instance& ins, BalknapParams p, Info* info)
 
     // Trivial cases
     if (n == 0 || c == 0) {
+        DBG(std::cout << "BALKNAPSOL... END EMPTY INSTANCE" << std::endl;)
         return std::max(lb, p0);
     } else if (n == 1) {
+        DBG(std::cout << "BALKNAPSOL... END 1 ITEM INSTANCE" << std::endl;)
         return std::max(lb, p0 + ins.item(f).p);
     } else if (ins.break_item() == ins.last_item()+1) {
+        DBG(std::cout << "BALKNAPSOL... END NO BREAK ITEM" << std::endl;)
         return std::max(lb, ins.break_solution()->profit());
     }
 
@@ -71,12 +83,14 @@ Profit knapsack::opt_balknap_array(Instance& ins, BalknapParams p, Info* info)
             << " UB " << u
             << " GAP " << u - z << std::endl;
 
-    if (z == u) // If UB == LB, then stop
+    if (z == u) { // If UB == LB, then stop
+        DBG(std::cout << "BALKNAPOPT... END Z == U" << std::endl;)
         return z;
+    }
 
     // Create memory table
     DBG(std::cout << "CREATE TABLE..." << std::endl;)
-    Profit rl1 = u - z;
+    Profit rl1 = u - z + 1;
     StateIdx rl2 = rl1 * 2 * w_max;
     DBG(std::cout << "RL1 " << rl1 << " RL2 " << rl2 << std::endl;)
     if (Info::verbose(info))
@@ -88,20 +102,19 @@ Profit knapsack::opt_balknap_array(Instance& ins, BalknapParams p, Info* info)
     DBG(std::cout << "INITIALIZATION..." << std::endl;)
     for (Weight mu=c-w_max+1; mu<=c; ++mu) { // s(mu,pi) = 0 for mu <= c
         Weight w = mu + w_max - c - 1;
-        Profit x = ((c - mu) * pb) / wb;
-        x = (x >= 0)? x: x-1;
-        for (Profit pi=z+1-x; pi<=u-x; ++pi) {
-            Profit p = pi + x - z - 1;
+        Profit alpha = ALPHA(mu);
+        Profit beta  = BETA(mu);
+        for (Profit pi=alpha; pi<=beta; ++pi) {
+            Profit p = pi - alpha;
             s0[IDX1(w,p)] = f-1;
         }
     }
     for (Weight mu=c+1; mu<=c+w_max; ++mu) { // s(mu,pi) = 1 for mu > c
         Weight w = mu + w_max - c - 1;
-        Profit x = ((c - mu) * pb) / wb;
-        if (c < mu)
-            x -= 1;
-        for (Profit pi=z+1-x; pi<=u-x; ++pi) {
-            Profit p = pi + x - z - 1;
+        Profit alpha = ALPHA(mu);
+        Profit beta  = BETA(mu);
+        for (Profit pi=alpha; pi<=beta; ++pi) {
+            Profit p = pi - alpha;
             s0[IDX1(w,p)] = f;
         }
     }
@@ -119,11 +132,10 @@ Profit knapsack::opt_balknap_array(Instance& ins, BalknapParams p, Info* info)
         // Copy previous iteration table
         for (Weight mu=c-w_max+1; mu<=c+w_max; ++mu) {
             Weight w = mu + w_max - c - 1;
-            Profit x = ((c - mu) * pb) / wb;
-            if (c < mu)
-                x -= 1;
-            for (Profit pi=z+1-x; pi<=u-x; ++pi) {
-                Profit p = pi + x - z - 1;
+            Profit alpha = ALPHA(mu);
+            Profit beta  = BETA(mu);
+            for (Profit pi=alpha; pi<=beta; ++pi) {
+                Profit p = pi - alpha;
                 s1[IDX1(w,p)] = s0[IDX1(w,p)];
             }
         }
@@ -136,25 +148,31 @@ Profit knapsack::opt_balknap_array(Instance& ins, BalknapParams p, Info* info)
             Weight w_  = mu_ + w_max - c - 1;
             assert(w_ < 2 * w_max);
 
-            Profit x   = ((c - mu)  * pb) / wb;
-            Profit x_  = ((c - mu_) * pb) / wb;
-            if (c < mu)
-                x -= 1;
-            if (c < mu_)
-                x_ -= 1;
-            Profit inf = z + 1 - ((x <= x_ + pt)? x: x_ + pt);
-            Profit sup = u     - ((x >= x_ + pt)? x: x_ + pt);
-            DBG(std::cout << " INF " << inf << " SUP " << sup << std::endl;)
+            Profit alpha = ALPHA(mu);
+            Profit beta  = BETA(mu);
+            Profit alpha_ = ALPHA(mu_);
+            Profit beta_  = BETA(mu_);
+            DBG(std::cout << " ALPHA " << alpha << " BETA " << beta << std::endl;)
 
-            for (Profit pi=inf; pi<=sup; ++pi) {
+            //for (Profit pi=inf; pi<=sup; ++pi) {
+            for (Profit pi=alpha; pi<=beta; ++pi) {
                 DBG(std::cout << "  pi " << pi;)
                 Profit pi_ = pi + pt;
+                DBG(std::cout << " mu_ " << mu_;)
                 DBG(std::cout << " pi_ " << pi_;)
-                Profit p  = pi  + x  - z - 1;
-                Profit p_ = pi_ + x_ - z - 1;
+                if (pi_ < alpha_) {
+                    std::cout << std::endl;
+                    continue;
+                }
+                if (pi_ > beta_) {
+                    std::cout << std::endl;
+                    break;
+                }
+                Profit p  = pi  - alpha;
+                Profit p_ = pi_ - alpha_;
                 DBG(std::cout << " " << s0[IDX1(w,p)]);
                 if (s1[IDX1(w_,p_)] < s0[IDX1(w,p)]) {
-                    DBG(std::cout << " OK" << std::endl;)
+                    DBG(std::cout << " OK " << s0[IDX1(w,p)] << std::endl;)
                     s1[IDX1(w_,p_)] = s0[IDX1(w,p)];
                 } else {
                     DBG(std::cout <<  " X" << std::endl;)
@@ -164,25 +182,26 @@ Profit knapsack::opt_balknap_array(Instance& ins, BalknapParams p, Info* info)
 
         // Remove previously added items
         for (Weight mu=c+wt; mu>c; --mu) {
-            DBG(std::cout << " - mu " << mu << std::endl;)
             Weight w = mu + w_max - c - 1;
-            Profit x = ((c - mu) * pb) / wb;
-            if (c < mu)
-                x -= 1;
-            for (Profit pi=z+1-x; pi<=u-x; ++pi) {
-                DBG(std::cout << "  pi " << pi << std::endl;)
-                Profit p = pi + x - z - 1;
+            DBG(std::cout << " - mu " << mu << " (" << w << ")" << std::endl;)
+            Profit alpha = ALPHA(mu);
+            Profit beta  = BETA(mu);
+            for (Profit pi=alpha; pi<=beta; ++pi) {
+                Profit p = pi - alpha;
+                DBG(std::cout << "  pi " << pi << " (" << p << ")" << std::flush;)
+                DBG(std::cout << " j0 " << s0[IDX1(w,p)] << " j1 " << s1[IDX1(w,p)] << std::endl;)
                 for (ItemPos j=s0[IDX1(w,p)]; j<s1[IDX1(w,p)]; ++j) {
                     DBG(std::cout << "    j " << j;)
                     Weight mu_ = mu - ins.item(j).w;
                     Profit pi_ = pi - ins.item(j).p;
-                    Profit x_  = ((c - mu_) * pb) / wb;
-                    if (c < mu_)
-                        x_ -= 1;
-                    if (pi_ < z + 1 - x_ || pi_ > u - x_)
+                    Profit alpha_ = ALPHA(mu_);
+                    Profit beta_  = BETA(mu_);
+                    if (pi_ < alpha_ || pi_ > beta_)
                         continue;
-                    Weight w_  = mu_ + w_max - 1 - c;
-                    Profit p_  = pi_ + x_ - z - 1;
+                    Weight w_ = mu_ + w_max - 1 - c;
+                    Profit p_ = pi_ - alpha_;
+                    DBG(std::cout << " mu_ " << mu_ << " (" << w_ << ")";)
+                    DBG(std::cout << " pi_ " << pi_ << " (" << p_ << ")";)
                     if (s1[IDX1(w_,p_)] < j) {
                         DBG(std::cout << " OK" << std::endl;)
                         s1[IDX1(w_,p_)] = j;
@@ -202,17 +221,16 @@ Profit knapsack::opt_balknap_array(Instance& ins, BalknapParams p, Info* info)
     Profit opt = z;
     for (Weight mu=c-w_max+1; mu<=c; ++mu) {
         Weight w = mu + w_max - c - 1;
-        Profit x = ((c - mu) * pb) / wb;
-        if (c < mu)
-            x -= 1;
-        for (Profit pi=z+1-x; pi<=u-x; ++pi) {
-            Profit p = pi + x - z - 1;
+        Profit alpha = ALPHA(mu);
+        Profit beta  = BETA(mu);
+        for (Profit pi=alpha; pi<=beta; ++pi) {
+            Profit p = pi - alpha;
             if (s0[IDX1(w,p)] >= f && pi > opt)
                 opt = pi;
         }
     }
     opt += p0;
-    std::cout << "OPT " << opt << std::endl;
+    DBG(std::cout << "OPT " << opt << std::endl;)
     assert(ins.check_opt(opt));
     DBG(std::cout << "BALKNAPOPT... END" << std::endl;)
     return opt;
@@ -222,8 +240,8 @@ Profit knapsack::opt_balknap_array(Instance& ins, BalknapParams p, Info* info)
 
 /******************************************************************************/
 
-#define DBG(x)
-//#define DBG(x) x
+//#define DBG(x)
+#define DBG(x) x
 
 Solution knapsack::sopt_balknap_array_all(Instance& ins,
         BalknapParams params, Info* info)
@@ -233,8 +251,10 @@ Solution knapsack::sopt_balknap_array_all(Instance& ins,
 
     ins.sort_partially();
     ItemPos b = ins.break_item();
-    if (b == ins.last_item()+1) // all items are in the break solution
+    if (b == ins.last_item()+1) { // all items are in the break solution
+        DBG(std::cout << "BALKNAPSOL... END ALL ITEMS" << std::endl;)
         return *ins.break_solution();
+    }
 
     DBG(std::cout << "LB..." << std::endl;)
     Solution sol(ins);
@@ -246,8 +266,10 @@ Solution knapsack::sopt_balknap_array_all(Instance& ins,
 
     DBG(std::cout << "REDUCTION..." << std::endl;)
     ins.reduce1(sol.profit(), Info::verbose(info));
-    if (ins.capacity() < 0)
+    if (ins.capacity() < 0) {
+        DBG(std::cout << "BALKNAPSOL... END SOLRED OPT" << std::endl;)
         return sol;
+    }
     Weight  c = ins.capacity();
     ItemPos f = ins.first_item();
     ItemPos l = ins.last_item();
@@ -256,16 +278,16 @@ Solution knapsack::sopt_balknap_array_all(Instance& ins,
 
     // Trivial cases
     if (n == 0 || c == 0) {
-        DBG(std::cout << "EMPTY INSTANCE" << std::endl;)
+        DBG(std::cout << "BALKNAPSOL... END EMPTY INSTANCE" << std::endl;)
         return (ins.reduced_solution()->profit() > sol.profit())?
             *ins.reduced_solution(): sol;
     } else if (n == 1) {
-        DBG(std::cout << "1 ITEM INSTANCE" << std::endl;)
+        DBG(std::cout << "BALKNAPSOL... END 1 ITEM INSTANCE" << std::endl;)
         Solution sol1 = *ins.reduced_solution();
         sol1.set(f, true);
         return (sol1.profit() > sol.profit())? sol1: sol;
     } else if (ins.break_item() == ins.last_item()+1) {
-        DBG(std::cout << "NO BREAK ITEM" << std::endl;)
+        DBG(std::cout << "BALKNAPSOL... END NO BREAK ITEM" << std::endl;)
         return (ins.break_solution()->profit() > sol.profit())?
             *ins.break_solution(): sol;
     }
@@ -291,12 +313,14 @@ Solution knapsack::sopt_balknap_array_all(Instance& ins,
             << " UB " << u
             << " GAP " << u - z << std::endl;
 
-    if (z == u) // If UB == LB, then stop
+    if (z == u) { // If UB == LB, then stop
+        DBG(std::cout << "BALKNAPSOL... END Z == U" << std::endl;)
         return sol;
+    }
 
     // Create memory table
     DBG(std::cout << "CREATE TABLE..." << std::endl;)
-    Profit rl1 = u - z;
+    Profit rl1 = u - z + 1;
     StateIdx rl2 = rl1 * 2 * w_max;
     DBG(std::cout << "RL1 " << rl1 << " RL2 " << rl2 << std::endl;)
     if (Info::verbose(info))
@@ -308,20 +332,19 @@ Solution knapsack::sopt_balknap_array_all(Instance& ins,
     DBG(std::cout << "INITIALIZATION..." << std::endl;)
     for (Weight mu=c-w_max+1; mu<=c; ++mu) { // s(mu,pi) = 0 for mu <= c
         Weight w = mu + w_max - c - 1;
-        Profit x = ((c - mu) * pb) / wb;
-        x = (x >= 0)? x: x-1;
-        for (Profit pi=z+1-x; pi<=u-x; ++pi) {
-            Profit p = pi + x - z - 1;
+        Profit alpha = ALPHA(mu);
+        Profit beta  = BETA(mu);
+        for (Profit pi=alpha; pi<=beta; ++pi) {
+            Profit p = pi - alpha;
             s[IDX2(0,w,p)] = f-1;
         }
     }
     for (Weight mu=c+1; mu<=c+w_max; ++mu) { // s(mu,pi) = 1 for mu > c
         Weight w = mu + w_max - c - 1;
-        Profit x = ((c - mu) * pb) / wb;
-        if (c < mu)
-            x -= 1;
-        for (Profit pi=z+1-x; pi<=u-x; ++pi) {
-            Profit p = pi + x - z - 1;
+        Profit alpha = ALPHA(mu);
+        Profit beta  = BETA(mu);
+        for (Profit pi=alpha; pi<=beta; ++pi) {
+            Profit p = pi - alpha;
             s[IDX2(0,w,p)] = f;
         }
     }
@@ -340,11 +363,10 @@ Solution knapsack::sopt_balknap_array_all(Instance& ins,
         // Copy previous iteration table
         for (Weight mu=c-w_max+1; mu<=c+w_max; ++mu) {
             Weight w = mu + w_max - c - 1;
-            Profit x = ((c - mu) * pb) / wb;
-            if (c < mu)
-                x -= 1;
-            for (Profit pi=z+1-x; pi<=u-x; ++pi) {
-                Profit p = pi + x - z - 1;
+            Profit alpha = ALPHA(mu);
+            Profit beta  = BETA(mu);
+            for (Profit pi=alpha; pi<=beta; ++pi) {
+                Profit p = pi - alpha;
                 s[IDX2(k,w,p)] = s[IDX2(k-1,w,p)];
                 pred[IDX2(k,w,p)] = IDX2(k-1,w,p);
             }
@@ -355,19 +377,24 @@ Solution knapsack::sopt_balknap_array_all(Instance& ins,
             Weight mu_ = mu + wt;
             Weight w   = mu  + w_max - c - 1;
             Weight w_  = mu_ + w_max - c - 1;
-            Profit x   = ((c - mu)  * pb) / wb;
-            Profit x_  = ((c - mu_) * pb) / wb;
-            if (c < mu)
-                x -= 1;
-            if (c < mu_)
-                x_ -= 1;
-            Profit inf = z + 1 - ((x <= x_ + pt)? x: x_ + pt);
-            Profit sup = u     - ((x >= x_ + pt)? x: x_ + pt);
+            Profit alpha = ALPHA(mu);
+            Profit beta  = BETA(mu);
+            Profit alpha_ = ALPHA(mu_);
+            Profit beta_  = BETA(mu_);
             assert(w_ < 2 * w_max);
-            for (Profit pi=inf; pi<=sup; ++pi) {
+            for (Profit pi=alpha; pi<=beta; ++pi) {
+                DBG(std::cout << "  pi " << pi;)
                 Profit pi_ = pi + pt;
-                Profit p  = pi  + x  - z - 1;
-                Profit p_ = pi_ + x_ - z - 1;
+                if (pi_ < alpha_) {
+                    std::cout << std::endl;
+                    continue;
+                }
+                if (pi_ > beta_) {
+                    std::cout << std::endl;
+                    break;
+                }
+                Profit p  = pi  - alpha;
+                Profit p_ = pi_ - alpha_;
                 if (s[IDX2(k,w_,p_)] < s[IDX2(k-1,w,p)]) {
                     s[IDX2(k,w_,p_)] = s[IDX2(k-1,w,p)];
                     pred[IDX2(k,w_,p_)] = IDX2(k-1,w,p);
@@ -378,21 +405,19 @@ Solution knapsack::sopt_balknap_array_all(Instance& ins,
         // Remove previously added items
         for (Weight mu=c+wt; mu>c; --mu) {
             Weight w = mu + w_max - c - 1;
-            Profit x = ((c - mu) * pb) / wb;
-            if (c < mu)
-                x -= 1;
-            for (Profit pi=z+1-x; pi<=u-x; ++pi) {
-                Profit p = pi + x - z - 1;
+            Profit alpha = ALPHA(mu);
+            Profit beta  = BETA(mu);
+            for (Profit pi=alpha; pi<=beta; ++pi) {
+                Profit p = pi - alpha;
                 for (ItemPos j=s[IDX2(k-1,w,p)]; j<s[IDX2(k,w,p)]; ++j) {
                     Weight mu_ = mu - ins.item(j).w;
                     Profit pi_ = pi - ins.item(j).p;
-                    Profit x_  = ((c - mu_) * pb) / wb;
-                    if (c < mu_)
-                        x_ -= 1;
-                    if (pi_ < z + 1 - x_ || pi_ > u - x_)
+                    Profit alpha_ = ALPHA(mu_);
+                    Profit beta_  = BETA(mu_);
+                    if (pi_ < alpha_ || pi_ > beta_)
                         continue;
                     Weight w_  = mu_ + w_max - 1 - c;
-                    Profit p_  = pi_ + x_ - z - 1;
+                    Profit p_ = pi_ - alpha_;
                     if (s[IDX2(k,w_,p_)] < j) {
                         s[IDX2(k,w_,p_)] = j;
                         pred[IDX2(k,w_,p_)] = IDX2(k,w,p);
@@ -408,11 +433,10 @@ Solution knapsack::sopt_balknap_array_all(Instance& ins,
     StateIdx idx_opt = 0;
     for (Weight mu=c-w_max+1; mu<=c; ++mu) {
         Weight w = mu + w_max - c - 1;
-        Profit x = ((c - mu) * pb) / wb;
-        if (c < mu)
-            x -= 1;
-        for (Profit pi=z+1-x; pi<=u-x; ++pi) {
-            Profit p = pi + x - z - 1;
+        Profit alpha = ALPHA(mu);
+        Profit beta  = BETA(mu);
+        for (Profit pi=alpha; pi<=beta; ++pi) {
+            Profit p = pi - alpha;
             if (s[IDX2(l-b+1,w,p)] >= f && pi > opt) {
                 opt = pi;
                 idx_opt = IDX2(l-b+1,w,p);
@@ -435,10 +459,8 @@ Solution knapsack::sopt_balknap_array_all(Instance& ins,
     Weight   w   = (idx % rl2) / rl1;
     Weight   mu  = c + 1 + w - w_max;
     Profit   p   = (idx % rl2) % rl1;
-    Profit   x   = ((c - mu) * pb) / wb;
-    if (c < mu)
-        x -= 1;
-    Profit pi = p + z + 1 - x;
+    Profit alpha = ALPHA(mu);
+    Profit pi = p + alpha;
     DBG(std::cout << "A " << s[k] << " T " << t << " WT " << ins.item(t).w << " PT " << ins.item(t).p << " MU " << mu << " PI " << pi << std::endl;)
 
     while (!(sol.profit() == opt && sol.remaining_capacity() >= 0)) {
@@ -449,10 +471,8 @@ Solution knapsack::sopt_balknap_array_all(Instance& ins,
         Weight   w_next   = (idx_next % rl2) / rl1;
         Weight   mu_next  = c + 1 + w_next - w_max;
         Profit   p_next   = (idx_next % rl2) % rl1;
-        Profit   x_next   = ((c - mu_next) * pb) / wb;
-        if (c < mu_next)
-            x_next -= 1;
-        Profit pi_next = p_next + z + 1 - x_next;
+        Profit   alpha_next = ALPHA(mu_next);
+        Profit   pi_next    = p_next + alpha_next;
         DBG(std::cout << "A" << s[k_next] << " T " << t_next << " WT " << ins.item(t_next).w << " PT " << ins.item(t_next).p << " MU " << mu_next << " PI " << pi_next << std::endl;)
 
         if (k_next < k && pi_next < pi) {
