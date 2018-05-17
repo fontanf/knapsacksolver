@@ -429,26 +429,27 @@ void Instance::remove_big_items()
         }
     } else {
         bool break_item_removed = false;
-        for (ItemPos j=first_item(); j<=last_item(); ++j) {
-            DBG(std::cout << "J " << j
-                    << " " << item(j)
+        for (ItemPos j=first_item(); j<=last_item();) {
+            DBG(std::cout << "J " << j << " " << item(j)
                     << " F " << f_
                     << " L " << l_
                     << " B " << b_
                     << " C " << capacity()
-                    << std::flush;)
-            if (item(j).w > capacity()) {
-                if (j == b_)
-                    break_item_removed = true;
-                if (j <= b_) {
-                    swap(j, f_);
-                    f_++;
-                } else if (j > b_) {
-                    swap(j, l_);
-                    l_--;
-                }
+                    << std::endl;)
+            if (item(j).w <= capacity()) {
+                j++;
+                continue;
             }
-            DBG(std::cout << std::endl;)
+            if (j == b_)
+                break_item_removed = true;
+            if (j <= b_) {
+                swap(j, f_);
+                f_++;
+                j++;
+            } else {
+                swap(j, l_);
+                l_--;
+            }
         }
         if (break_item_removed)
             sort_partially();

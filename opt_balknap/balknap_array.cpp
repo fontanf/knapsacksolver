@@ -11,8 +11,8 @@ using namespace knapsack;
 #define IDX2(k,w,p) rl2*(k) + rl1*(w) + (p)
 #define IDX1(  w,p)           rl1*(w) + (p)
 
-//#define DBG(x)
-#define DBG(x) x
+#define DBG(x)
+//#define DBG(x) x
 
 #define ALPHA(mu) (mu <= c)? z + 1 - ((c - mu) * pb) / wb: z + 1 + ((mu - c) * pb) / wb
 #define BETA(mu) (mu >= w_bar)? p_bar + ((mu - w_bar) * pb) / wb: p_bar - ((w_bar - mu) * pb) / wb
@@ -23,8 +23,7 @@ Profit knapsack::opt_balknap_array(Instance& ins, BalknapParams p, Info* info)
     DBG(std::cout << ins << std::endl;)
 
     ins.sort_partially();
-    ItemPos b = ins.break_item();
-    if (b == ins.last_item()+1) { // all items are in the break solution
+    if (ins.break_item() == ins.last_item()+1) { // all items are in the break solution
         std::cout << ins << std::endl;
         DBG(std::cout << "BALKNAPSOL... END ALL ITEMS" << std::endl;)
         return ins.break_profit();
@@ -45,6 +44,7 @@ Profit knapsack::opt_balknap_array(Instance& ins, BalknapParams p, Info* info)
         DBG(std::cout << "BALKNAPSOL... END SOLRED OPT" << std::endl;)
         return lb;
     }
+    DBG(std::cout << ins << std::endl;)
     Weight  c = ins.capacity();
     ItemPos f = ins.first_item();
     ItemPos l = ins.last_item();
@@ -63,6 +63,7 @@ Profit knapsack::opt_balknap_array(Instance& ins, BalknapParams p, Info* info)
         return std::max(lb, ins.break_solution()->profit());
     }
 
+    ItemPos b = ins.break_item();
     Weight w_max = ins.max_weight_item().w;
     Weight w_bar = ins.break_weight();
     Profit p_bar = ins.break_profit();
@@ -70,7 +71,7 @@ Profit knapsack::opt_balknap_array(Instance& ins, BalknapParams p, Info* info)
     Profit pb    = ins.item(b).p;
     Weight r     = ins.break_capacity();
     Profit z     = lb - p0;
-    Profit u     = ins.break_profit() + r * pb / wb;
+    Profit u     = p_bar + r * pb / wb;
 
     DBG(std::cout << "N " << n << " C " << c << std::endl;)
     DBG(std::cout << " F " << f << " L " << l << std::endl;)
@@ -83,9 +84,9 @@ Profit knapsack::opt_balknap_array(Instance& ins, BalknapParams p, Info* info)
             << " UB " << u
             << " GAP " << u - z << std::endl;
 
-    if (z == u) { // If UB == LB, then stop
+    if (z >= u) { // If UB == LB, then stop
         DBG(std::cout << "BALKNAPOPT... END Z == U" << std::endl;)
-        return z;
+        return lb;
     }
 
     // Create memory table
@@ -240,8 +241,8 @@ Profit knapsack::opt_balknap_array(Instance& ins, BalknapParams p, Info* info)
 
 /******************************************************************************/
 
-//#define DBG(x)
-#define DBG(x) x
+#define DBG(x)
+//#define DBG(x) x
 
 Solution knapsack::sopt_balknap_array_all(Instance& ins,
         BalknapParams params, Info* info)
@@ -250,8 +251,7 @@ Solution knapsack::sopt_balknap_array_all(Instance& ins,
     DBG(std::cout << ins << std::endl;)
 
     ins.sort_partially();
-    ItemPos b = ins.break_item();
-    if (b == ins.last_item()+1) { // all items are in the break solution
+    if (ins.break_item() == ins.last_item()+1) { // all items are in the break solution
         DBG(std::cout << "BALKNAPSOL... END ALL ITEMS" << std::endl;)
         return *ins.break_solution();
     }
@@ -292,6 +292,7 @@ Solution knapsack::sopt_balknap_array_all(Instance& ins,
             *ins.break_solution(): sol;
     }
 
+    ItemPos b = ins.break_item();
     Weight w_max = ins.max_weight_item().w;
     Weight w_bar = ins.break_weight();
     Profit p_bar = ins.break_profit();
@@ -313,7 +314,7 @@ Solution knapsack::sopt_balknap_array_all(Instance& ins,
             << " UB " << u
             << " GAP " << u - z << std::endl;
 
-    if (z == u) { // If UB == LB, then stop
+    if (z >= u) { // If UB == LB, then stop
         DBG(std::cout << "BALKNAPSOL... END Z == U" << std::endl;)
         return sol;
     }
