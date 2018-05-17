@@ -36,7 +36,8 @@ void Instance::add_item(Weight w, Profit p, Label l)
     l_ = j;
     version_++;
     sol_opt_ = NULL;
-    sol_red_->resize(j+1);
+    if (sol_red_ != NULL)
+        sol_red_->resize(j+1);
     sol_break_ = NULL;
 }
 
@@ -222,6 +223,8 @@ Instance::Instance(const Instance& ins)
     items_ = ins.items_;
     f_ = ins.f_;
     l_ = ins.l_;
+    version_ = ins.version_;
+    max_version_ = ins.max_version_;
 
     if (ins.optimal_solution() != NULL) {
         sol_opt_ = new Solution(*this);
@@ -685,15 +688,14 @@ void Instance::reduce1(Profit lb, bool verbose)
     assert(b_ != l_+1);
     sol_red_opt_ = (lb == optimum());
 
-    DBG(std::cout << "b " << b_ << std::endl;)
+    DBG(std::cout << "B " << b_ << std::endl;)
     for (ItemIdx j=f_; j<b_;) {
-        DBG(std::cout << "J " << j << " (" << item(j).j << ")" << " F " << f_;)
+        DBG(std::cout << "J " << j << " (" << item(j).j << ")" << " F " << f_ << std::flush;)
         Profit ub = reduced_solution()->profit() + break_profit() - item(j).p
                 + ((break_capacity() + item(j).w) * item(b_).p) / item(b_).w;
-        DBG(std::cout << " UB " << ub;)
+        DBG(std::cout << " UB " << ub << std::flush;)
         if (ub <= lb) {
-            assert(sol_red_opt_ || optimal_solution()->contains(j));
-            DBG(std::cout << " 1";)
+            DBG(std::cout << " 1" << std::flush;)
             sol_red_->set(j, true);
             if (j != f_)
                 swap(j, f_);
@@ -701,24 +703,23 @@ void Instance::reduce1(Profit lb, bool verbose)
             if (capacity() < 0)
                 return;
         } else {
-            DBG(std::cout << " ?";)
+            DBG(std::cout << " ?" << std::flush;)
         }
         j++;
         DBG(std::cout << std::endl;)
     }
     for (ItemPos j=l_; j>b_;) {
-        DBG(std::cout << "J " << j << " (" << item(j).j << ")" << " L " << l_;)
+        DBG(std::cout << "J " << j << " (" << item(j).j << ")" << " L " << l_ << std::flush;)
         Profit ub = reduced_solution()->profit() + break_profit() + item(j).p
                 + ((break_capacity() - item(j).w) * item(b_).p) / item(b_).w;
-        DBG(std::cout << " UB " << ub;)
+        DBG(std::cout << " UB " << ub << std::flush;)
         if (ub <= lb) {
-            assert(sol_red_opt_ || !optimal_solution()->contains(j));
-            DBG(std::cout << " 0";)
+            DBG(std::cout << " 0" << std::flush;)
             if (j != l_)
                 swap(j, l_);
             l_--;
         } else {
-            DBG(std::cout << " ?";)
+            DBG(std::cout << " ?" << std::flush;)
         }
         j--;
         DBG(std::cout << std::endl;)
@@ -771,7 +772,6 @@ void Instance::reduce2(Profit lb, bool verbose)
         }
         if (ub <= lb) {
             DBG(std::cout << " 1";)
-            //assert(sol_red_opt_ || optimal_solution()->contains(j));
             sol_red_->set(j, true);
             fixed_1.push_back(item(j));
             if (capacity() < 0)
@@ -812,7 +812,6 @@ void Instance::reduce2(Profit lb, bool verbose)
 
         if (ub <= lb) {
             DBG(std::cout << " 0" << std::flush;)
-            //assert(sol_red_opt_ || !optimal_solution()->contains(j));
             fixed_0.push_back(item(j));
         } else {
             DBG(std::cout << " ?" << std::flush;)

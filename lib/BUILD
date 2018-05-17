@@ -33,10 +33,13 @@ cc_library(
         include_prefix = "knapsack/lib/",
 )
 
-cc_binary(
-        name = "generator",
+cc_library(
+        name = "libgenerator",
+        hdrs = ["generator.hpp"],
         srcs = ["generator.cpp"],
         deps = ["//lib:cpp"],
+        visibility = ["//visibility:public"],
+        include_prefix = "knapsack/lib/",
 )
 
 cc_library(

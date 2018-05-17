@@ -72,6 +72,7 @@ public:
     void add_item(Weight w, Profit p);
     void add_item(Weight w, Profit p, Label l);
     void add_items(const std::vector<std::pair<Weight, Profit>>& wp);
+    void set_capacity(Weight c) { c_orig_ = c; }
 
     /**
      * Create instance from file.
