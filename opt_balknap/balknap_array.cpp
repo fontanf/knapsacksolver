@@ -24,7 +24,6 @@ Profit knapsack::opt_balknap_array(Instance& ins, BalknapParams p, Info* info)
 
     ins.sort_partially();
     if (ins.break_item() == ins.last_item()+1) { // all items are in the break solution
-        std::cout << ins << std::endl;
         DBG(std::cout << "BALKNAPSOL... END ALL ITEMS" << std::endl;)
         return ins.break_profit();
     }
@@ -162,11 +161,11 @@ Profit knapsack::opt_balknap_array(Instance& ins, BalknapParams p, Info* info)
                 DBG(std::cout << " mu_ " << mu_;)
                 DBG(std::cout << " pi_ " << pi_;)
                 if (pi_ < alpha_) {
-                    std::cout << std::endl;
+                    DBG(std::cout << std::endl;)
                     continue;
                 }
                 if (pi_ > beta_) {
-                    std::cout << std::endl;
+                    DBG(std::cout << std::endl;)
                     break;
                 }
                 Profit p  = pi  - alpha;
@@ -387,11 +386,11 @@ Solution knapsack::sopt_balknap_array_all(Instance& ins,
                 DBG(std::cout << "  pi " << pi;)
                 Profit pi_ = pi + pt;
                 if (pi_ < alpha_) {
-                    std::cout << std::endl;
+                    DBG(std::cout << std::endl;)
                     continue;
                 }
                 if (pi_ > beta_) {
-                    std::cout << std::endl;
+                    DBG(std::cout << std::endl;)
                     break;
                 }
                 Profit p  = pi  - alpha;

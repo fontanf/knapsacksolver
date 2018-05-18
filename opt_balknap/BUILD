@@ -22,10 +22,15 @@ cc_binary(
 cc_test(
         name = "test",
         srcs = ["test.cpp"],
-        deps = ["//lib:tester"],
+        deps = [
+                "//lib:tester",
+                ":libbalknap",
+                "//lib:libgenerator",
+                "//opt_minknap:libminknap",
+        ],
         data = [
                 ":main",
                 "//data_tests:data",
         ],
-        timeout = "short",
+        timeout = "long",
 )

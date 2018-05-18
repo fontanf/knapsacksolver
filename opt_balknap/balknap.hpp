@@ -16,19 +16,19 @@ struct BalknapParams
     StateIdx solve_sur = -1;
 };
 
-Profit opt_balknap_array(
-        Instance& ins, BalknapParams params, Info* info = NULL);
-Solution sopt_balknap_array_all(
-        Instance& ins, BalknapParams params, Info* info = NULL);
-Solution sopt_balknap_array_part(
-        Instance& ins, BalknapParams params, ItemPos k, Info* info = NULL);
+Profit opt_balknap_array(Instance& ins,
+        BalknapParams params = BalknapParams(), Info* info = NULL);
+Solution sopt_balknap_array_all(Instance& ins,
+        BalknapParams params = BalknapParams(), Info* info = NULL);
+Solution sopt_balknap_array_part(Instance& ins,
+        BalknapParams params = BalknapParams(), ItemPos k = 64, Info* info = NULL);
 
-Profit opt_balknap_list(
-        Instance& ins, BalknapParams params, Info* info = NULL);
-Solution sopt_balknap_list_all(
-        Instance& ins, BalknapParams params, Info* info = NULL);
+Profit opt_balknap_list(Instance& ins,
+        BalknapParams params = BalknapParams(), Info* info = NULL);
+Solution sopt_balknap_list_all(Instance& ins,
+        BalknapParams params = BalknapParams(), Info* info = NULL);
 Solution sopt_balknap_list_part(Instance& ins,
-        BalknapParams params, ItemPos k, Info* info = NULL, Profit ub = -1);
+        BalknapParams params = BalknapParams(), ItemPos k = 64, Info* info = NULL, Profit ub = -1);
 
 }
 
