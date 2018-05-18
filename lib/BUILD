@@ -48,6 +48,7 @@ cc_library(
         srcs = ["tester.cpp"],
         deps = [
                 ":cpp", 
+                ":libgenerator",
                 "@googletest//:gtest_main",
         ],
         visibility = ["//visibility:public"],

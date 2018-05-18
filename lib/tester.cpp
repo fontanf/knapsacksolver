@@ -1,7 +1,7 @@
 #include "knapsack/lib/tester.hpp"
 
-#include "knapsack/lib/instance.hpp"
 #include "knapsack/lib/solution.hpp"
+#include "knapsack/lib/generator.hpp"
 
 #include <thread>
 
@@ -84,6 +84,32 @@ void knapsack::test(std::string exec, std::string test)
             check_sopt(exec, itr->path());
         } else if (test == "opt") {
             check_opt(exec, itr->path());
+        }
+    }
+}
+
+void knapsack::test_pisinger(
+        std::vector<ItemIdx> ns,
+        std::vector<Profit> rs,
+        std::vector<std::string> types,
+        std::vector<Profit (*)(Instance&)> fs)
+{
+    for (std::string type: types) {
+        for (ItemIdx n: ns) {
+            for (Profit r: rs) {
+                for (int h=1; h<=100; h++) {
+                    std::cout << type << " " << n << " " << r << " " << h << std::endl;
+                    Instance ins = generate(type, n, r, h);
+                    Profit opt = -1;
+                    for (auto f: fs) {
+                        Instance ins_tmp = ins;
+                        Profit opt_tmp = f(ins_tmp);
+                        if (opt == -1)
+                            opt = opt_tmp;
+                        EXPECT_EQ(opt_tmp, opt);
+                    }
+                }
+            }
         }
     }
 }

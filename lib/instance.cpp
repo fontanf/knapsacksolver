@@ -571,7 +571,7 @@ void Instance::sort_right(Profit lb)
     ItemPos k = t_;
     for (ItemPos j=in.f; j<=in.l; ++j) {
         DBG(std::cout << "J " << j << std::flush;)
-            Profit ub = break_solution()->profit() + item(j).p
+        Profit ub = break_solution()->profit() + item(j).p
             + ((break_capacity() - item(j).w) * item(b_).p) / item(b_).w;
         DBG(std::cout << " LB " << lb << " UB " << ub << std::flush;)
         if ((item(j).w <= capacity() && ub > lb)
