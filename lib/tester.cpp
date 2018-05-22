@@ -92,7 +92,8 @@ void knapsack::test_pisinger(
         std::vector<ItemIdx> ns,
         std::vector<Profit> rs,
         std::vector<std::string> types,
-        std::vector<Profit (*)(Instance&)> fs)
+        std::vector<Profit (*)(Instance&)> fs,
+        int test)
 {
     for (std::string type: types) {
         for (ItemIdx n: ns) {
@@ -103,10 +104,16 @@ void knapsack::test_pisinger(
                     Profit opt = -1;
                     for (auto f: fs) {
                         Instance ins_tmp = ins;
-                        Profit opt_tmp = f(ins_tmp);
+                        Profit val = f(ins_tmp);
                         if (opt == -1)
-                            opt = opt_tmp;
-                        EXPECT_EQ(opt_tmp, opt);
+                            opt = val;
+                        if (test == 0) {
+                            EXPECT_EQ(val, opt);
+                        } else if (test == 1) {
+                            EXPECT_GE(val, opt);
+                        } else if (test == -1) {
+                            EXPECT_LE(val, opt);
+                        }
                     }
                 }
             }

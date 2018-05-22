@@ -16,7 +16,8 @@ void test_pisinger(
         std::vector<ItemIdx> ns,
         std::vector<Profit> rs,
         std::vector<std::string> types,
-        std::vector<Profit (*)(Instance&)> fs);
+        std::vector<Profit (*)(Instance&)> fs,
+        int test = 0);
 
 }
 
