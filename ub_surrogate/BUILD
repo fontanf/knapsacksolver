@@ -20,3 +20,20 @@ cc_binary(
         ],
 )
 
+cc_test(
+        name = "test",
+        srcs = ["test.cpp"],
+        deps = [
+                "//lib:tester",
+                ":libsurrogate",
+                "//lib:libgenerator",
+                "//opt_minknap:libminknap",
+                "//opt_bellman:libbellman",
+        ],
+        data = [
+                ":main",
+                "//data_tests:data",
+        ],
+        timeout = "long",
+)
+
