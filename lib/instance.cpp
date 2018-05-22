@@ -550,6 +550,17 @@ void Instance::sort_partially()
     std::cout << std::endl;)
 
     compute_break_item();
+    DBG(
+    if (b_ != l_+1) {
+        for (ItemPos j=f_; j<b_; ++j) {
+            std::cout << "J " << j << std::endl;
+            assert(item(j).p * item(b_).w >= item(b_).p * item(j).w);
+        }
+        for (ItemPos j=b_+1; j<=l_; ++j)
+            assert(item(j).p * item(b_).w <= item(b_).p * item(j).w);
+    }
+    )
+
     s_ = b_;
     t_ = b_;
     DBG(std::cout << "PARTSORT... END" << std::endl;)
@@ -1073,7 +1084,7 @@ std::string Instance::print_opt(Profit opt) const
 
 std::ostream& knapsack::operator<<(std::ostream& os, const Item& it)
 {
-    os << "(" << it.j << " " << it.w << " " << it.p << " " << (double)it.p/(double)it.w << " " << it.l << ")";
+    os << "(J " << it.j << " W " << it.w << " P " << it.p << " E " << (double)it.p/(double)it.w << " L " << it.l << ")";
     return os;
 }
 
@@ -1086,14 +1097,12 @@ std::ostream& knapsack::operator<<(std::ostream& os, const Interval& interval)
 std::ostream& knapsack::operator<<(std::ostream& os, const Instance& instance)
 {
     os
-        <<  "n "   << instance.item_number()
-        << " c "   << instance.capacity()
-        << " opt " << instance.optimum() << std::endl
-        << "F " << instance.first_item()
-        << " L " << instance.last_item()
+        <<  "N "   << instance.item_number() << " C "   << instance.capacity()
+        << " OPT " << instance.optimum() << std::endl
+        << "F " << instance.first_item() << " L " << instance.last_item()
         << std::endl;
     if (instance.break_item_found())
-        os << "b " << instance.break_item() << " wsum " << instance.break_weight() << " psum " << instance.break_profit() << std::endl;
+        os << "B " << instance.break_item() << " WSUM " << instance.break_weight() << " PSUM " << instance.break_profit() << std::endl;
     for (ItemPos j=0; j<instance.total_item_number(); ++j) {
         os << j << ": " << instance.item(j) << std::flush;
         if (instance.break_solution() != NULL)

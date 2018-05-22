@@ -96,7 +96,15 @@ public:
 
     inline ItemIdx total_item_number() const { return items_.size(); }
     inline Weight  total_capacity()    const { return c_orig_; }
-    inline const Item& item(ItemIdx j) const { assert(j >= 0 && j < total_item_number()); return items_[j]; }
+    inline const Item& item(ItemIdx j) const
+    {
+
+        if (j < 0 || j >= total_item_number()) {
+            std::cout << "J " << j << "/" << total_item_number();
+        }
+        assert(j >= 0 && j < total_item_number());
+        return items_[j];
+    }
 
     const Solution* optimal_solution() const { return sol_opt_; }
     Profit optimum() const;
