@@ -37,6 +37,7 @@ Instance generate_uncorrelated(ItemIdx n, Profit r, int h)
         Profit p = distribution(generator);
         ins.add_item(w, p);
         wsum += w;
+        wmax = std::max(wmax, w);
     }
     ins.set_capacity(std::max(wmax, (h * wsum) / 100));
     return ins;
@@ -52,7 +53,7 @@ Instance generate_weakly_correlated(ItemIdx n, Profit r, int h)
     Weight wmax = 0;
     for (ItemIdx j=0; j<n; ++j) {
         Weight w = d1(generator);
-        Profit p = w + d2(generator);
+        Profit p = std::max((Weight)1, w + d2(generator));
         ins.add_item(w, p);
         wsum += w;
         wmax = std::max(wmax, w);
