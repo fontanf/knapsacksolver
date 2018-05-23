@@ -34,6 +34,6 @@ cc_test(
                 ":main",
                 "//data_tests:data",
         ],
-        timeout = "long",
+        timeout = "moderate",
 )
 

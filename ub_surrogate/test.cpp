@@ -32,7 +32,7 @@ std::vector<Profit (*)(Instance&)> tested_functions()
     };
 }
 
-TEST(Balknap, DataPisingerSmall)
+TEST(SR, DataPisingerSmall)
 {
     test_pisinger(
         {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20},
@@ -41,7 +41,7 @@ TEST(Balknap, DataPisingerSmall)
         {tested_functions()}, 1);
 }
 
-TEST(Balknap, DataPisingerMedium)
+TEST(SR, DataPisingerMedium)
 {
     test_pisinger(
         {50, 100},
@@ -50,7 +50,7 @@ TEST(Balknap, DataPisingerMedium)
         {tested_functions()}, 1);
 }
 
-TEST(Balknap, DataPisingerBig)
+TEST(SR, DataPisingerBig)
 {
     test_pisinger(
         {1000},
