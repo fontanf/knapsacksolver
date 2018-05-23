@@ -37,6 +37,11 @@ void add_item(const Instance& ins, std::vector<StatePart>& l0,
     Weight c = ins.total_capacity();
     Weight wt = ins.item(t).w;
     Profit pt = ins.item(t).p;
+    ItemPos tx = (ins.int_right_size() > 0 && t == ins.last_sorted_item())?
+            ins.last_item()+1: t+1;
+    ItemPos sx = (ins.int_left_size() > 0 && s == ins.first_sorted_item())?
+            ins.first_item()-1: s;
+    DBG(std::cout << "SX " << sx << " TX " << tx << std::endl;)
     std::vector<StatePart> l;
     std::vector<StatePart>::iterator it = l0.begin();
     std::vector<StatePart>::iterator it1 = l0.begin();
@@ -56,8 +61,8 @@ void add_item(const Instance& ins, std::vector<StatePart>& l0,
                     DBG(std::cout << " OK" << std::endl;)
                 } else {
                     Profit ub = (s1.w <= c)?
-                        ub_dembo(ins, t+1, s1.p, c-s1.w):
-                        ub_dembo_rev(ins, s, s1.p, c-s1.w);
+                        ub_dembo(ins, tx, s1.p, c-s1.w):
+                        ub_dembo_rev(ins, sx, s1.p, c-s1.w);
                     DBG(std::cout << " UB " << ub << " LB " << lb << std::flush;)
                     if (ub > lb) {
                         l.push_back(s1);
@@ -80,8 +85,8 @@ void add_item(const Instance& ins, std::vector<StatePart>& l0,
                     DBG(std::cout << " OK" << std::endl;)
                 } else {
                     Profit ub = (it->w <= c)?
-                        ub_dembo(ins, t+1, it->p, c-it->w):
-                        ub_dembo_rev(ins, s, it->p, c-it->w);
+                        ub_dembo(ins, tx, it->p, c-it->w):
+                        ub_dembo_rev(ins, sx, it->p, c-it->w);
                     DBG(std::cout << " UB " << ub << " LB " << lb << std::flush;)
                     if (ub > lb) {
                         l.push_back(*it);
@@ -110,6 +115,11 @@ void remove_item(const Instance& ins, std::vector<StatePart>& l0,
     Weight c = ins.total_capacity();
     Weight ws = ins.item(s).w;
     Profit ps = ins.item(s).p;
+    ItemPos tx = (ins.int_right_size() > 0 && t == ins.last_sorted_item())?
+            ins.last_item()+1: t;
+    ItemPos sx = (ins.int_left_size() > 0 && s == ins.first_sorted_item())?
+            ins.first_item()-1: s-1;
+    DBG(std::cout << "SX " << sx << " TX " << tx << std::endl;)
     std::vector<StatePart> l;
     std::vector<StatePart>::iterator it = l0.begin();
     std::vector<StatePart>::iterator it1 = l0.begin();
@@ -123,8 +133,8 @@ void remove_item(const Instance& ins, std::vector<StatePart>& l0,
                     DBG(std::cout << " OK" << std::endl;)
                 } else {
                     Profit ub = (it->w <= c)?
-                        ub_dembo(ins, t, it->p, c-it->w):
-                        ub_dembo_rev(ins, s-1, it->p, c-it->w);
+                        ub_dembo(ins, tx, it->p, c-it->w):
+                        ub_dembo_rev(ins, sx, it->p, c-it->w);
                     DBG(std::cout << " UB " << ub << " LB " << lb;)
                     if (ub > lb) {
                         l.push_back(*it);
@@ -152,8 +162,8 @@ void remove_item(const Instance& ins, std::vector<StatePart>& l0,
                     DBG(std::cout << " OK" << std::endl;)
                 } else {
                     Profit ub = (s1.w <= c)?
-                        ub_dembo(ins, t, s1.p, c-s1.w):
-                        ub_dembo_rev(ins, s-1, s1.p, c-s1.w);
+                        ub_dembo(ins, tx, s1.p, c-s1.w):
+                        ub_dembo_rev(ins, sx, s1.p, c-s1.w);
                     DBG(std::cout << " UB " << ub << " LB " << lb;)
                     if (ub > lb) {
                         l.push_back(s1);
@@ -273,12 +283,6 @@ Solution knapsack::sopt_minknap_list_part(Instance& ins,
     //std::cout << "F " << ins.first_item() << " L " << ins.last_item() << std::endl;
     DBG(std::cout << "MINKNAPPART... END" << std::endl;)
     return knapsack::sopt_minknap_list_part(ins, params, k, info, best_state.p);
-}
-
-Solution knapsack::sopt_minknap_list_part(Instance& ins,
-        MinknapParams params, Info* info, Profit o)
-{
-    return knapsack::sopt_minknap_list_part(ins, params, 64, info, o);
 }
 
 #undef DBG
