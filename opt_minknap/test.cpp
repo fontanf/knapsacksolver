@@ -1,4 +1,9 @@
 #include "knapsack/lib/tester.hpp"
+#include "knapsack/lib/generator.hpp"
+#include "knapsack/opt_minknap/minknap.hpp"
+#include "knapsack/opt_bellman/bellman_array.hpp"
+
+using namespace knapsack;
 
 TEST(Minknap, DataTests)
 {
@@ -8,5 +13,45 @@ TEST(Minknap, DataTests)
     knapsack::test(p.string() + " -v -r part -x 1", "sopt");
     knapsack::test(p.string() + " -v -r part -x 2", "sopt");
     knapsack::test(p.string() + " -v -r part -x 3", "sopt");
+}
+
+Profit opt_bellman_array_test(Instance& ins) { return opt_bellman_array(ins); }
+Profit opt_minknap_list_test(Instance& ins) { return opt_minknap_list(ins); }
+Profit opt_minknap_list_part_test(Instance& ins) { return sopt_minknap_list_part(ins).profit(); }
+
+std::vector<Profit (*)(Instance&)> tested_functions()
+{
+    return {
+        opt_bellman_array_test,
+        opt_minknap_list_test,
+        opt_minknap_list_part_test,
+    };
+}
+
+TEST(Minknap, DataPisingerSmall)
+{
+    test_pisinger(
+        {1, 2, 5, 10, 15, 20, 30, 40},
+        {10, 100},
+        {"u", "wc", "sc", "isc", "asc", "ss", "sw"},
+        {tested_functions()});
+}
+
+TEST(Minknap, DataPisingerMedium)
+{
+    test_pisinger(
+        {50, 100},
+        {100},
+        {"wc", "isc", "asc"},
+        {tested_functions()}, 1);
+}
+
+TEST(Minknap, DataPisingerBig)
+{
+    test_pisinger(
+        {500},
+        {100},
+        {"sc", "asc"},
+        {tested_functions()}, 1);
 }
 
