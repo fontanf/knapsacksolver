@@ -22,10 +22,15 @@ cc_library(
     tag = "release-1.8.0",
 )
 
-git_repository(
-    name = "benchtools",
-    remote = "https://github.com/fontanf/benchtools.git",
-    commit = "4dffad9d44c2e1300055a50c5a8b231ee5a8ddae",
+#git_repository(
+    #name = "benchtools",
+    #remote = "https://github.com/fontanf/benchtools.git",
+    #commit = "4dffad9d44c2e1300055a50c5a8b231ee5a8ddae",
+#)
+
+local_repository(
+        name = "benchtools",
+        path = "/home/fontanf/Dev/bench/",
 )
 
 local_repository(

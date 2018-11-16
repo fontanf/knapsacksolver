@@ -23,7 +23,7 @@ std::vector<Item> remove_dominated_items(std::vector<Item>& v)
     return t;
 }
 
-bool best_exchange(Solution& sol, Info* info)
+bool best_exchange(Solution& sol, Info& info)
 {
     DBG(std::cout << "BESTEXCHANGE..." << std::endl;)
 
@@ -76,7 +76,7 @@ bool best_exchange(Solution& sol, Info* info)
     }
     sol.set(i1_max->j, false);
     sol.set(i2_max->j, true);
-    if (Info::verbose(info))
+    if (info.verbose)
         std::cout
             <<  "LB "  << sol.profit()
             << " GAP " << sol.instance().optimum() - sol.profit()
@@ -86,14 +86,14 @@ bool best_exchange(Solution& sol, Info* info)
     return true;
 }
 
-Solution knapsack::sol_forwardgreedynlogn(const Instance& ins, Info* info)
+Solution knapsack::sol_forwardgreedynlogn(const Instance& ins, Info& info)
 {
     if (ins.break_item() == ins.total_item_number()
             || ins.break_item() == 0)
         return Solution(ins);
     DBG(std::cout << "FORWARDGREEDY..." << std::endl;)
     Solution sol = *ins.break_solution();
-    if (Info::verbose(info))
+    if (info.verbose)
         std::cout
             <<  "LB "  << sol.profit()
             << " GAP " << sol.instance().optimum() - sol.profit()
@@ -105,7 +105,7 @@ Solution knapsack::sol_forwardgreedynlogn(const Instance& ins, Info* info)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-bool best_exchangeback(Solution& sol, Info* info)
+bool best_exchangeback(Solution& sol, Info& info)
 {
     DBG(std::cout << "BESTEXCHANGEBACK..." << std::endl;)
 
@@ -161,7 +161,7 @@ bool best_exchangeback(Solution& sol, Info* info)
     }
     sol.set(i1_max->j, false);
     sol.set(i2_max->j, true);
-    if (Info::verbose(info))
+    if (info.verbose)
         std::cout
             <<  "LB "  << sol.profit()
             << " GAP " << sol.instance().optimum() - sol.profit()
@@ -171,7 +171,7 @@ bool best_exchangeback(Solution& sol, Info* info)
     return true;
 }
 
-Solution knapsack::sol_backwardgreedynlogn(const Instance& ins, Info* info)
+Solution knapsack::sol_backwardgreedynlogn(const Instance& ins, Info& info)
 {
     if (ins.break_item() == ins.total_item_number()
             || ins.break_item() == 0)
@@ -179,7 +179,7 @@ Solution knapsack::sol_backwardgreedynlogn(const Instance& ins, Info* info)
     DBG(std::cout << "BACKWARDGREEDYBEST..." << std::endl;)
     Solution sol = *ins.break_solution();
     Solution sol0 = sol;
-    if (Info::verbose(info))
+    if (info.verbose)
         std::cout
             <<  "LB "  << sol.profit()
             << " GAP " << sol.instance().optimum() - sol.profit()
@@ -192,18 +192,19 @@ Solution knapsack::sol_backwardgreedynlogn(const Instance& ins, Info* info)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Solution knapsack::sol_bestgreedynlogn(const Instance& ins, Info* info)
+Solution knapsack::sol_bestgreedynlogn(const Instance& ins, Info& info)
 {
     DBG(std::cout << "GREEDYBESTPLUS..." << std::endl;)
-    Solution sol = sol_greedy(ins);
+    Info info_tmp;
+    Solution sol = sol_greedy(ins, info_tmp);
     std::string best = "Greedy";
     if (ins.total_item_number() == 0)
         return sol;
-    if (sol.update(sol_forwardgreedynlogn(ins)))
+    if (sol.update(sol_forwardgreedynlogn(ins, info)))
         best = "ForwardBest";
-    if (sol.update(sol_backwardgreedynlogn(ins)))
+    if (sol.update(sol_backwardgreedynlogn(ins, info)))
         best = "BackwardBest";
-    if (Info::verbose(info))
+    if (info.verbose)
         std::cout << "ALG " << best << std::endl;
     DBG(std::cout << "GREEDYBESTPLUS... END" << std::endl;)
     return sol;

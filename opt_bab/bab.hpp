@@ -6,7 +6,7 @@
 namespace knapsack
 {
 
-Solution sopt_bab(Instance& ins, Info* info = NULL);
+Solution sopt_bab(Instance& ins, Info& info);
 
 }
 

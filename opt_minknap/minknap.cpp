@@ -10,8 +10,8 @@
 
 using namespace knapsack;
 
-//#define DBG(x)
-#define DBG(x) x
+#define DBG(x)
+//#define DBG(x) x
 
 struct State
 {
@@ -29,14 +29,14 @@ void add_item(const Instance& ins, std::vector<State>& l0,
         ItemPos s, ItemPos t, Profit& lb)
 {
     DBG(std::cout << "ADD ITEM... S " << s << " T " << t << " LB " << lb << std::endl;)
+    Weight c = ins.total_capacity();
+    Weight wt = ins.item(t).w;
+    Profit pt = ins.item(t).p;
     ItemPos tx = (ins.int_right_size() > 0 && t == ins.last_sorted_item())?
             ins.last_item()+1: t+1;
     ItemPos sx = (ins.int_left_size() > 0 && s == ins.first_sorted_item())?
             ins.first_item()-1: s;
     DBG(std::cout << "SX " << sx << " TX " << tx << std::endl;)
-    Weight c = ins.total_capacity();
-    Weight wt = ins.item(t).w;
-    Profit pt = ins.item(t).p;
     std::vector<State> l;
     std::vector<State>::iterator it = l0.begin();
     std::vector<State>::iterator it1 = l0.begin();
@@ -168,7 +168,7 @@ void remove_item(const Instance& ins, std::vector<State>& l0,
     DBG(std::cout << "REMOVE ITEM... END" << std::endl;)
 }
 
-Profit knapsack::opt_minknap_list(Instance& ins, MinknapParams params, Info* info)
+Profit knapsack::opt_minknap_list(Instance& ins, Info& info, MinknapParams params)
 {
     DBG(std::cout << "MINKNAPOPT..." << std::endl;)
     DBG(std::cout << ins << std::endl;)
@@ -182,9 +182,11 @@ Profit knapsack::opt_minknap_list(Instance& ins, MinknapParams params, Info* inf
     DBG(std::cout << "LB..." << std::flush;)
     Profit lb = 0;
     if (params.lb_greedynlogn == 0) {
-        lb = sol_bestgreedynlogn(ins).profit();
+        Info info_tmp;
+        lb = sol_bestgreedynlogn(ins, info_tmp).profit();
     } else if (params.lb_greedy == 0) {
-        lb = sol_greedy(ins).profit();
+        Info info_tmp;
+        lb = sol_greedy(ins, info_tmp).profit();
     } else {
         lb = ins.break_profit();
     }

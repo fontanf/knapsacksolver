@@ -248,14 +248,14 @@ void ub_surrogate_solve(Instance& ins, ItemIdx k,
     assert(ins.first_item() == first);
 }
 
-SurrogateOut knapsack::ub_surrogate(const Instance& instance, Profit lb, Info* info)
+SurrogateOut knapsack::ub_surrogate(const Instance& instance, Profit lb, Info& info)
 {
     DBG(std::cout << "SURROGATERELAX..." << std::endl;)
     Instance ins(instance);
     ins.sort_partially();
     ItemPos b = ins.break_item();
 
-    SurrogateOut out(info);
+    SurrogateOut out;
 
     // Trivial cases
     if (ins.item_number() == 0) {
@@ -284,9 +284,8 @@ SurrogateOut knapsack::ub_surrogate(const Instance& instance, Profit lb, Info* i
 
     if (max_card(ins) == b) {
         ub_surrogate_solve(ins, b, 0, s_max, out);
-        if (info != NULL)
-            info->pt.put("UB.Type", "max");
-        if (Info::verbose(info))
+        info.pt.put("UB.Type", "max");
+        if (info.verbose)
             std::cout << "MAXCARD" << std::endl;
     } else if (min_card(ins, lb) == b + 1) {
         ub_surrogate_solve(ins, b + 1, s_min, 0, out);
@@ -294,12 +293,11 @@ SurrogateOut knapsack::ub_surrogate(const Instance& instance, Profit lb, Info* i
             assert(ins.optimal_solution() == NULL || lb == ins.optimal_solution()->profit());
             out.ub = lb;
         }
-        if (info != NULL)
-            info->pt.put("UB.Type", "min");
-        if (Info::verbose(info))
+        info.pt.put("UB.Type", "min");
+        if (info.verbose)
             std::cout << "MINCARD" << std::endl;
     } else {
-        SurrogateOut out2(info);
+        SurrogateOut out2;
         out2.ub = out.ub;
         ub_surrogate_solve(ins, b,     0,     s_max, out);
         ub_surrogate_solve(ins, b + 1, s_min, 0,     out2);
@@ -312,9 +310,8 @@ SurrogateOut knapsack::ub_surrogate(const Instance& instance, Profit lb, Info* i
             out.multiplier = out2.multiplier;
             out.bound      = out2.bound;
         }
-        if (info != NULL)
-            info->pt.put("UB.Type", "maxmin");
-        if (Info::verbose(info))
+        info.pt.put("UB.Type", "maxmin");
+        if (info.verbose)
             std::cout << "MAXCARD MINCARD" << std::endl;
     }
 

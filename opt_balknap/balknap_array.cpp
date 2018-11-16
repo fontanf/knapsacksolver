@@ -17,7 +17,7 @@ using namespace knapsack;
 #define ALPHA(mu) (mu <= c)? z + 1 - ((c - mu) * pb) / wb: z + 1 + ((mu - c) * pb) / wb
 #define BETA(mu) (mu >= w_bar)? p_bar + ((mu - w_bar) * pb) / wb: p_bar - ((w_bar - mu) * pb) / wb
 
-Profit knapsack::opt_balknap_array(Instance& ins, BalknapParams p, Info* info)
+Profit knapsack::opt_balknap_array(Instance& ins, Info& info, BalknapParams p)
 {
     DBG(std::cout << "BALKNAPOPT..." << std::endl;)
     DBG(std::cout << ins << std::endl;)
@@ -31,14 +31,15 @@ Profit knapsack::opt_balknap_array(Instance& ins, BalknapParams p, Info* info)
     DBG(std::cout << "LB... " << std::flush;)
     Profit lb = 0;
     if (p.lb_greedy == 0) {
-        lb = sol_greedy(ins).profit();
+        Info info_tmp;
+        lb = sol_greedy(ins, info_tmp).profit();
     } else {
         lb = ins.break_solution()->profit();
     }
     DBG(std::cout << lb << std::endl;)
 
     DBG(std::cout << "REDUCTION..." << std::endl;)
-    ins.reduce1(lb, Info::verbose(info));
+    ins.reduce1(lb, info.verbose);
     if (ins.capacity() < 0) {
         DBG(std::cout << "BALKNAPSOL... END SOLRED OPT" << std::endl;)
         return lb;
@@ -77,7 +78,7 @@ Profit knapsack::opt_balknap_array(Instance& ins, BalknapParams p, Info* info)
     DBG(std::cout << " B " << ins.item(b) << std::endl;)
     DBG(std::cout << "PBAR " << p_bar << " WBAR " << w_bar << std::endl;)
 
-    if (Info::verbose(info))
+    if (info.verbose)
         std::cout
             <<  "LB " << z
             << " UB " << u
@@ -93,7 +94,7 @@ Profit knapsack::opt_balknap_array(Instance& ins, BalknapParams p, Info* info)
     Profit rl1 = u - z + 1;
     StateIdx rl2 = rl1 * 2 * w_max;
     DBG(std::cout << "RL1 " << rl1 << " RL2 " << rl2 << std::endl;)
-    if (Info::verbose(info))
+    if (info.verbose)
         std::cout << "MEMORY " << (double)((rl2 * 2) * sizeof(ItemPos)) / 1000000000 << std::endl;
     std::vector<ItemPos> s0(rl2);
     std::vector<ItemPos> s1(rl2);
@@ -243,8 +244,8 @@ Profit knapsack::opt_balknap_array(Instance& ins, BalknapParams p, Info* info)
 #define DBG(x)
 //#define DBG(x) x
 
-Solution knapsack::sopt_balknap_array_all(Instance& ins,
-        BalknapParams params, Info* info)
+Solution knapsack::sopt_balknap_array_all(Instance& ins, Info& info,
+        BalknapParams params)
 {
     DBG(std::cout << "BALKNAPSOL..." << std::endl;);
     DBG(std::cout << ins << std::endl;)
@@ -258,13 +259,14 @@ Solution knapsack::sopt_balknap_array_all(Instance& ins,
     DBG(std::cout << "LB..." << std::endl;)
     Solution sol(ins);
     if (params.lb_greedy == 0) {
-        sol = sol_greedy(ins);
+        Info info_tmp;
+        sol = sol_greedy(ins, info_tmp);
     } else {
         sol = *ins.break_solution();
     }
 
     DBG(std::cout << "REDUCTION..." << std::endl;)
-    ins.reduce1(sol.profit(), Info::verbose(info));
+    ins.reduce1(sol.profit(), info.verbose);
     if (ins.capacity() < 0) {
         DBG(std::cout << "BALKNAPSOL... END SOLRED OPT" << std::endl;)
         return sol;
@@ -307,7 +309,7 @@ Solution knapsack::sopt_balknap_array_all(Instance& ins,
             << " B " << ins.item(b) << std::endl
             << "WMAX " << w_max << " PBAR " << p_bar << " WBAR " << w_bar << std::endl;)
 
-    if (Info::verbose(info))
+    if (info.verbose)
         std::cout
             <<  "LB " << z
             << " UB " << u
@@ -323,7 +325,7 @@ Solution knapsack::sopt_balknap_array_all(Instance& ins,
     Profit rl1 = u - z + 1;
     StateIdx rl2 = rl1 * 2 * w_max;
     DBG(std::cout << "RL1 " << rl1 << " RL2 " << rl2 << std::endl;)
-    if (Info::verbose(info))
+    if (info.verbose)
         std::cout << "MEMORY " << (double)(((l-b+2) * rl2 * 2) * sizeof(ItemPos)) / 1000000000 << std::endl;
     std::vector<ItemPos> s   ((l-b+2)*rl2);
     std::vector<ItemPos> pred((l-b+2)*rl2);
@@ -504,8 +506,8 @@ Solution knapsack::sopt_balknap_array_all(Instance& ins,
 
 /******************************************************************************/
 
-Solution knapsack::sopt_balknap_array_part(Instance& ins,
-        BalknapParams p, ItemPos k, Info* info)
+Solution knapsack::sopt_balknap_array_part(Instance& ins, Info& info,
+        BalknapParams p, ItemPos k)
 {
     (void)info;
     (void)p;

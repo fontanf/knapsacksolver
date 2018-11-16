@@ -41,8 +41,8 @@ std::ostream& operator<<(std::ostream& os, const std::pair<State, StateValue>& s
     return os;
 }
 
-Profit knapsack::opt_balknap_list(
-        Instance& ins, BalknapParams params, Info* info)
+Profit knapsack::opt_balknap_list(Instance& ins, Info& info,
+        BalknapParams params)
 {
     DBG(std::cout << "BALKNAPLISTOPT..." << std::endl;)
     DBG(std::cout << ins << std::endl;)
@@ -61,9 +61,11 @@ Profit knapsack::opt_balknap_list(
     DBG(std::cout << "LB..." << std::flush;)
     Profit lb = 0;
     if (params.lb_greedynlogn == 0) {
-        lb = sol_bestgreedynlogn(ins).profit();
+        Info info_tmp;
+        lb = sol_bestgreedynlogn(ins, info_tmp).profit();
     } else if (params.lb_greedy == 0) {
-        lb = sol_greedy(ins).profit();
+        Info info_tmp;
+        lb = sol_greedy(ins, info_tmp).profit();
     } else {
         lb = ins.break_profit();
     }
@@ -71,11 +73,11 @@ Profit knapsack::opt_balknap_list(
 
     DBG(std::cout << "REDUCTION..." << std::endl;)
     if (params.upper_bound == "b") {
-        ins.reduce1(lb, Info::verbose(info));
+        ins.reduce1(lb, info.verbose);
         if (ins.capacity() < 0)
             return lb;
     } else if (params.upper_bound == "t") {
-        ins.reduce2(lb, Info::verbose(info));
+        ins.reduce2(lb, info.verbose);
         if (ins.capacity() < 0)
             return lb;
     } else {
@@ -106,7 +108,7 @@ Profit knapsack::opt_balknap_list(
             << " F " << f << " L " << l
             << " B " << ins.item(b) << std::endl
             << "PBAR " << p_bar << " WBAR " << w_bar << std::endl;)
-    if (Info::verbose(info))
+    if (info.verbose)
         std::cout
             <<  "LB " << lb
             << " UB " << u
@@ -293,21 +295,22 @@ std::ostream& operator<<(std::ostream& os, const std::pair<StatePart, StateValue
 
 void update_bounds(const Instance& ins, Solution& sol_best, Profit& lb,
         Profit& ub, SurrogateOut& so,
-        BalknapParams& params, ItemPos k, StateIdx nodes, Info* info)
+        BalknapParams& params, ItemPos k, StateIdx nodes, Info& info)
 {
     if (0 <= params.ub_surrogate && params.ub_surrogate <= nodes) {
         params.ub_surrogate = -1;
-        if (Info::verbose(info))
+        if (info.verbose)
             std::cout << "SURROGATE..." << std::flush;
-        so = ub_surrogate(ins, sol_best.profit());
-        if (Info::verbose(info))
+        Info info_tmp;
+        so = ub_surrogate(ins, sol_best.profit(), info);
+        if (info.verbose)
             std::cout << " K " << so.bound << " S " << so.multiplier << std::flush;
         if (ub > so.ub) {
             ub = so.ub;
-            if (Info::verbose(info))
+            if (info.verbose)
                 std::cout << " " << ins.print_ub(ub) << std::endl;
         } else {
-            if (Info::verbose(info))
+            if (info.verbose)
                 std::cout << " NO IMPROVEMENT" << std::endl;
         }
     }
@@ -316,52 +319,53 @@ void update_bounds(const Instance& ins, Solution& sol_best, Profit& lb,
         params.solve_sur = -1;
         if (sol_best.profit() == ub)
             return;
-        if (Info::verbose(info))
+        if (info.verbose)
             std::cout << "SOLVE SURROGATE..." << std::endl;
         assert(so.bound != -1);
         Instance ins_sur(ins);
         ins_sur.surrogate(so.multiplier, so.bound, ins_sur.first_item());
-        Solution sol_sur = sopt_balknap_list_part(ins_sur, params, k, info, -1);
+        Solution sol_sur = sopt_balknap_list_part(ins_sur, info, params, k, -1);
         if (ub > sol_sur.profit()) {
             ub = sol_sur.profit();
-            if (Info::verbose(info))
+            if (info.verbose)
                 std::cout << "END SOLVE SURROGATE " << ins.print_ub(ub) << std::flush;
         }
-        if (Info::verbose(info))
+        if (info.verbose)
             std::cout << " K " << sol_sur.item_number() << "/" << so.bound << std::flush;
         if (sol_sur.item_number() == so.bound) {
             sol_best = sol_sur;
             lb = sol_best.profit();
-            if (Info::verbose(info))
+            if (info.verbose)
                 std::cout << " " << ins.print_lb(sol_best.profit()) << std::flush;
         }
-        if (Info::verbose(info))
+        if (info.verbose)
             std::cout << std::endl;
     }
 
     if (0 <= params.lb_greedynlogn && params.lb_greedynlogn <= nodes) {
         params.lb_greedynlogn = -1;
-        if (Info::verbose(info))
+        if (info.verbose)
             std::cout << "GREEDYNLOGN..." << std::flush;
-        if (sol_best.update(sol_bestgreedynlogn(ins))) {
+        Info info_tmp;
+        if (sol_best.update(sol_bestgreedynlogn(ins, info_tmp))) {
             if (sol_best.profit() > lb)
                 lb = sol_best.profit();
-            if (Info::verbose(info))
+            if (info.verbose)
                 std::cout << " " << ins.print_lb(sol_best.profit()) << std::endl;
         } else {
-            if (Info::verbose(info))
+            if (info.verbose)
                 std::cout << " NO IMPROVEMENT" << std::endl;
         }
     }
 }
 
-Solution knapsack::sopt_balknap_list_part(
-        Instance& ins, BalknapParams params, ItemPos k, Info* info, Profit o)
+Solution knapsack::sopt_balknap_list_part(Instance& ins, Info& info,
+        BalknapParams params, ItemPos k, Profit o)
 {
     DBG(std::cout << "BALKNAPLISTPART... OPT " << o << std::endl;)
     DBG(std::cout << ins << std::endl;)
 
-    if (Info::verbose(info))
+    if (info.verbose)
         std::cout << "F " << ins.first_item()
             << " L " << ins.last_item()
             << " N " << ins.item_number()
@@ -385,10 +389,12 @@ Solution knapsack::sopt_balknap_list_part(
     Solution sol(ins);
     if (params.lb_greedynlogn == 0) {
         params.lb_greedynlogn = -1;
-        sol = sol_bestgreedynlogn(ins);
+        Info info_tmp;
+        sol = sol_bestgreedynlogn(ins, info_tmp);
     } else if (params.lb_greedy == 0) {
         params.lb_greedy = -1;
-        sol = sol_greedy(ins);
+        Info info_tmp;
+        sol = sol_greedy(ins, info_tmp);
     } else {
         sol = *ins.break_solution();
     }
@@ -400,14 +406,14 @@ Solution knapsack::sopt_balknap_list_part(
     // for the reduction.
     Profit lb = (o != -1 && o > sol.profit())? o-1: sol.profit();
     if (params.upper_bound == "b") {
-        ins.reduce1(lb, Info::verbose(info));
+        ins.reduce1(lb, info.verbose);
         // If the capacity is negative, then it means that sol was the optimal
         // solution. Note that this is not possible if opt-1 has been used as
         // lower bound for the reduction.
         if (ins.capacity() < 0)
             return sol;
     } else if (params.upper_bound == "t") {
-        ins.reduce2(lb, Info::verbose(info));
+        ins.reduce2(lb, info.verbose);
         if (ins.capacity() < 0)
             return sol;
     } else {
@@ -440,7 +446,7 @@ Solution knapsack::sopt_balknap_list_part(
     Weight w_bar = ins.break_solution()->weight();
     Profit p_bar = ins.break_solution()->profit();
     Profit u = (o != -1)? o: ub_dantzig(ins);
-    SurrogateOut so(info);
+    SurrogateOut so;
     if (sol.profit() == u) // If UB == LB, then stop
         return sol;
 
@@ -450,7 +456,7 @@ Solution knapsack::sopt_balknap_list_part(
             << " B " << ins.item(b) << std::endl
             << "PBAR " << p_bar << " WBAR " << w_bar << std::endl;)
 
-    if (Info::verbose(info))
+    if (info.verbose)
         std::cout
             <<  "LB " << sol.profit()
             << " UB " << u
@@ -664,7 +670,7 @@ end:
     DBG(std::cout << ins << std::endl;)
 
     DBG(std::cout << "BALKNAPLISTPART... END" << std::endl;)
-    return knapsack::sopt_balknap_list_part(ins, params, k, info, best_state.first.pi);
+    return knapsack::sopt_balknap_list_part(ins, info,  params, k, best_state.first.pi);
 }
 
 #undef DBG
@@ -712,8 +718,8 @@ std::ostream& operator<<(std::ostream& os, const std::pair<StateAll, StateValueA
     return os;
 }
 
-Solution knapsack::sopt_balknap_list_all(
-        Instance& ins, BalknapParams params, Info* info)
+Solution knapsack::sopt_balknap_list_all(Instance& ins, Info& info,
+        BalknapParams params)
 {
     DBG(std::cout << "BALKNAPLISTSOL..." << std::endl;);
     DBG(std::cout << ins << std::endl;)
@@ -732,23 +738,25 @@ Solution knapsack::sopt_balknap_list_all(
     DBG(std::cout << "LB..." << std::endl;)
     Solution sol(ins);
     if (params.lb_greedynlogn == 0) {
-        sol = sol_bestgreedynlogn(ins);
+        Info info_tmp;
+        sol = sol_bestgreedynlogn(ins, info_tmp);
     } else if (params.lb_greedy == 0) {
-        sol = sol_greedy(ins);
+        Info info_tmp;
+        sol = sol_greedy(ins, info_tmp);
     } else {
         sol = *ins.break_solution();
     }
 
     DBG(std::cout << "REDUCTION..." << std::endl;)
     if (params.upper_bound == "b") {
-        ins.reduce1(sol.profit(), Info::verbose(info));
+        ins.reduce1(sol.profit(), info.verbose);
         // If the capacity is negative, then it means that sol was the optimal
         // solution. Note that this is not possible if opt-1 has been used as
         // lower bound for the reduction.
         if (ins.capacity() < 0)
             return sol;
     } else if (params.upper_bound == "t") {
-        ins.reduce2(sol.profit(), Info::verbose(info));
+        ins.reduce2(sol.profit(), info.verbose);
         if (ins.capacity() < 0)
             return sol;
     } else {
@@ -789,7 +797,7 @@ Solution knapsack::sopt_balknap_list_all(
             << " B " << ins.item(b) << std::endl
             << "PBAR " << p_bar << " WBAR " << w_bar << std::endl;)
 
-    if (Info::verbose(info))
+    if (info.verbose)
         std::cout
             <<  "LB " << sol.profit()
             << " UB " << u

@@ -187,16 +187,15 @@ void remove_item(const Instance& ins, std::vector<StatePart>& l0,
 #define DBG(x)
 //#define DBG(x) x
 
-Solution knapsack::sopt_minknap_list_part(Instance& ins,
-        MinknapParams params, ItemPos k, Info* info, Profit o)
+Solution knapsack::sopt_minknap_list_part(Instance& ins, Info& info,
+        MinknapParams params, ItemPos k, Profit o)
 {
     DBG(std::cout << "MINKNAPART... F " << ins.first_item() << " L " << ins.last_item() << std::endl;)
-    if (Info::verbose(info))
+    if (info.verbose)
         std::cout << "N " << ins.item_number() << "/" << ins.total_item_number()
             << " F " << ins.first_item()
             << " L " << ins.last_item() << std::endl;
     DBG(std::cout << ins << std::endl;)
-    (void)info;
 
     DBG(std::cout << "SORTING..." << std::endl;)
     ins.sort_partially();
@@ -207,10 +206,12 @@ Solution knapsack::sopt_minknap_list_part(Instance& ins,
     Solution sol(ins);
     if (params.lb_greedynlogn == 0) {
         params.lb_greedynlogn = -1;
-        sol = sol_bestgreedynlogn(ins);
+        Info info_tmp;
+        sol = sol_bestgreedynlogn(ins, info_tmp);
     } else if (params.lb_greedy == 0) {
         params.lb_greedy = -1;
-        sol = sol_greedy(ins);
+        Info info_tmp;
+        sol = sol_greedy(ins, info_tmp);
     } else {
         sol = *ins.break_solution();
     }
@@ -282,7 +283,7 @@ Solution knapsack::sopt_minknap_list_part(Instance& ins,
     ins.fix(psolf, best_state.sol);
     //std::cout << "F " << ins.first_item() << " L " << ins.last_item() << std::endl;
     DBG(std::cout << "MINKNAPPART... END" << std::endl;)
-    return knapsack::sopt_minknap_list_part(ins, params, k, info, best_state.p);
+    return knapsack::sopt_minknap_list_part(ins, info, params, k, best_state.p);
 }
 
 #undef DBG

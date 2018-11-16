@@ -50,6 +50,7 @@ public:
     void write_cert(std::string file);
 
     std::string print_bin() const;
+    std::string print_in() const;
 
 private:
 

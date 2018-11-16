@@ -5,7 +5,7 @@ using namespace knapsack;
 #define DBG(x)
 //#define DBG(x) x
 
-Solution knapsack::sol_greedy(const Instance& ins, Info* info)
+Solution knapsack::sol_greedy(const Instance& ins, Info& info)
 {
     DBG(std::cout << "GREEDYBEST..." << std::endl;)
     assert(ins.break_item_found());
@@ -49,10 +49,9 @@ Solution knapsack::sol_greedy(const Instance& ins, Info* info)
         }
     }
 
-    if (Info::verbose(info))
+    if (info.verbose)
         std::cout << "ALGO " << best_algo << std::endl;
-    if (info != NULL)
-        info->pt.put("Solution.Algo", best_algo);
+    info.pt.put("Solution.Algo", best_algo);
 
     ins.check_sol(sol);
     DBG(std::cout << "GREEDY... END" << std::endl;)
