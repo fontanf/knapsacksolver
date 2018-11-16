@@ -74,3 +74,22 @@ cc_binary(
         srcs = ["sort_bench.cpp"],
         deps = ["//lib:cpp"],
 )
+
+cc_binary(
+        name = "main",
+        srcs = ["main.cpp"],
+        deps = [
+                "//lb_greedy:libgreedy",
+                "//lb_greedynlogn:libgreedynlogn",
+                "//ub_dembo:libdembo",
+                "//ub_surrogate:libsurrogate",
+                "//opt_bab:libbab",
+                "//opt_babstar:libbabstar",
+                "//opt_expknap:libexpknap",
+                "//opt_bellman:libbellman",
+                "//opt_balknap:libbalknap",
+                "//opt_minknap:libminknap",
+                ":libgenerator",
+        ],
+)
+
