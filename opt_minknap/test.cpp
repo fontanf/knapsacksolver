@@ -16,8 +16,8 @@ TEST(Minknap, DataTests)
 }
 
 Profit opt_bellman_array_test(Instance& ins) { return opt_bellman_array(ins); }
-Profit opt_minknap_list_test(Instance& ins) { return opt_minknap_list(ins); }
-Profit opt_minknap_list_part_test(Instance& ins) { return sopt_minknap_list_part(ins).profit(); }
+Profit opt_minknap_list_test(Instance& ins) { Info info; return opt_minknap_list(ins, info); }
+Profit opt_minknap_list_part_test(Instance& ins) { Info info; return sopt_minknap_list_part(ins, info).profit(); }
 
 std::vector<Profit (*)(Instance&)> tested_functions()
 {

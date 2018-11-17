@@ -120,7 +120,7 @@ std::string Solution::print_bin() const
 {
     std::string s = "";
     for (ItemPos j=0; j<instance().total_item_number(); ++j)
-        s += std::to_string(contains(j));
+        s += std::to_string(x_[j]);
     return s;
 }
 
@@ -128,8 +128,8 @@ std::string Solution::print_in() const
 {
     std::string s = "";
     for (ItemPos j=0; j<instance().total_item_number(); ++j)
-        if (contains(j))
-            s += std::to_string(j);
+        if (x_[j])
+            s += std::to_string(j) + ",";
     return s;
 }
 

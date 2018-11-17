@@ -45,26 +45,15 @@ int main(int argc, char *argv[])
     Instance instance(vm["input-data"].as<std::string>());
     Solution sopt(instance);
     Profit opt = -1;
-    Info info;
-    info.verbose(vm.count("verbose"));
+    Info info(vm.count("verbose"), vm.count("debug"));
 
     if (retrieve == "none") {
-        opt = opt_minknap_list(instance, p, &info);
+        opt = opt_minknap_list(instance, info, p);
     } else if (retrieve == "part") {
-        sopt = sopt_minknap_list_part(instance, p, k, &info);
+        sopt = sopt_minknap_list_part(instance, info, p, k);
     } else {
         assert(false);
         return 1;
-    }
-
-    double t = info.elapsed_time();
-    opt = std::max(opt, sopt.profit());
-    info.pt.put("Solution.OPT", opt);
-    info.pt.put("Solution.Time", t);
-    if (Info::verbose(&info)) {
-        std::cout << "---" << std::endl;
-        std::cout << instance.print_opt(opt) << std::endl;
-        std::cout << "TIME " << t << std::endl;
     }
 
     info.write_ini(output_file); // Write output file

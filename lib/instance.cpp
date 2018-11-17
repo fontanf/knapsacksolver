@@ -4,6 +4,7 @@
 #include "knapsack/lib/part_solution_2.hpp"
 
 #include <sstream>
+#include <iomanip>
 
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/filter/zlib.hpp>
@@ -1084,7 +1085,12 @@ std::string Instance::print_opt(Profit opt) const
 
 std::ostream& knapsack::operator<<(std::ostream& os, const Item& it)
 {
-    os << "(J " << it.j << " W " << it.w << " P " << it.p << " E " << (double)it.p/(double)it.w << " L " << it.l << ")";
+    os
+        << "(J "   << std::setw(3) << it.j
+        << "     W " << std::setw(3) << it.w
+        << "     P " << std::setw(3) << it.p
+        << "     E " << std::setw(5) << std::fixed << std::setprecision(4) << (double)it.p/(double)it.w
+        << "     L " << it.l << ")";
     return os;
 }
 
@@ -1104,7 +1110,7 @@ std::ostream& knapsack::operator<<(std::ostream& os, const Instance& instance)
     if (instance.break_item_found())
         os << "B " << instance.break_item() << " WSUM " << instance.break_weight() << " PSUM " << instance.break_profit() << std::endl;
     for (ItemPos j=0; j<instance.total_item_number(); ++j) {
-        os << j << ": " << instance.item(j) << std::flush;
+        os << std::setw(3) << j << ": " << instance.item(j) << std::flush;
         if (instance.break_solution() != NULL)
             os << " B " << instance.break_solution()->contains(j);
         if (instance.optimal_solution() != NULL)

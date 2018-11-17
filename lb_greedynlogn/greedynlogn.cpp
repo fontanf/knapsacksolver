@@ -134,7 +134,7 @@ bool best_exchangeback(Solution& sol, Info& info)
     DBG(std::cout << "FIND i1max i2max" << std::endl;)
     Weight r = sol.remaining_capacity();
     assert(r < 0);
-    Profit pmax = -INT_FAST64_MIN;
+    Profit pmax = INT_FAST64_MIN;
     auto i1_max = t.end();
     auto i2_max = l.end();
     auto i2 = l.begin();
