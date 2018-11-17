@@ -15,21 +15,39 @@ int main(int argc, char *argv[])
     (void)argc;
     (void)argv;
 
-    Instance ins = generate("u", 10, 10, 25);
-    std::cout << ins << std::endl;
+    //for (std::string t: {"u", "wc", "sc", "isc", "asc"}) {
+        //for (ItemIdx i=10; i<50; i++) {
+            //for (Weight r=5; r<=200; ++r) {
+                //for (int h=1; h<=100; ++h) {
+                    std::string t = "sc";
+                    ItemIdx i = 30;
+                    Weight r = 100;
+                    int h = 50;
+                    std::cout << t << " " << i << " " << r << " " << h << std::endl;
+                    std::cout << std::endl;
+                    Instance ins = generate(t, i, r, h);
+                    //std::cout << ins << std::endl;
 
-    Instance ins1(ins);
-    Info info1(true, false);
-    Solution sopt1 = sopt_minknap_list_part(ins1, info1);
-    std::cout << "OPT1 " << sopt1.profit() << std::endl;
-    //double t1 = info1.elapsed_time();
+                    Instance ins1(ins);
+                    Info info1(true);
+                    Solution sopt1 = sopt_minknap_list_part(ins1, info1);
 
-    Instance ins2(ins);
-    Info info2(true, true);
-    Solution sopt2 = sopt_babstar_dp(ins2, info2);
-    //double t2 = info2.elapsed_time();
-    std::cout << "OPT2 " << sopt2.profit() << std::endl;
-    std::cout << info2.debug_string << std::endl;
+                    std::cout << std::endl;
 
+                    Instance ins2(ins);
+                    Info info2(true, false, false);
+                    Solution sopt2 = sopt_babstar_dp(ins2, info2);
+                    if (sopt1.profit() != sopt2.profit()) {
+                        std::cout << info2.debug_string << std::endl;
+                        return 0;
+                    }
+
+                    std::cout << std::endl;
+                    std::cout << std::endl;
+
+                //}
+            //}
+        //}
+    //}
     return 0;
 }
