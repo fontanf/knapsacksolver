@@ -39,36 +39,34 @@ int main(int argc, char *argv[])
 
     Instance instance(vm["input-data"].as<std::string>());
     Solution sopt(instance);
-    Profit opt = -1;
-    Info info;
-    info.verbose(vm.count("verbose"));
+    Info info(vm.count("verbose"));
 
     if (memory == "array") {
         if (retrieve == "none") {
-            opt = opt_bellman_array(instance, &info);
+            opt_bellman_array(instance, info);
         } else if (retrieve == "all") {
-            sopt = sopt_bellman_array_all(instance, &info);
+            sopt = sopt_bellman_array_all(instance, info);
         } else if (retrieve == "one") {
-            sopt = sopt_bellman_array_one(instance, &info);
+            sopt = sopt_bellman_array_one(instance, info);
         } else if (retrieve == "part") {
-            sopt = sopt_bellman_array_part(instance, 64, &info);
+            sopt = sopt_bellman_array_part(instance, info, 64);
         } else if (retrieve == "rec") {
-            sopt = sopt_bellman_array_rec(instance, &info);
+            sopt = sopt_bellman_array_rec(instance, info);
         } else {
             assert(false);
             return 1;
         }
     } else if (memory == "list") {
         if (retrieve == "none") {
-            opt = opt_bellman_list(instance, &info);
+            opt_bellman_list(instance, info);
         } else if (retrieve == "all") {
-            sopt = sopt_bellman_list_all(instance, &info);
+            sopt = sopt_bellman_list_all(instance, info);
         } else if (retrieve == "one") {
-            sopt = sopt_bellman_list_one(instance, &info);
+            sopt = sopt_bellman_list_one(instance, info);
         } else if (retrieve == "part") {
-            sopt = sopt_bellman_list_part(instance, 64, &info);
+            sopt = sopt_bellman_list_part(instance, info, 64);
         } else if (retrieve == "rec") {
-            sopt = sopt_bellman_list_rec(instance, &info);
+            sopt = sopt_bellman_list_rec(instance, info);
         } else {
             assert(false);
             return 1;
@@ -77,19 +75,9 @@ int main(int argc, char *argv[])
         assert(false);
         return 1;
     }
-    std::cout << "tututu" << std::endl;
-
-    double t = info.elapsed_time();
-    opt = std::max(opt, sopt.profit());
-    info.pt.put("Solution.OPT", opt);
-    info.pt.put("Solution.Time", t);
-    if (Info::verbose(&info)) {
-        std::cout << "---" << std::endl;
-        std::cout << instance.print_opt(opt) << std::endl;
-        std::cout << "TIME " << t << std::endl;
-    }
 
     info.write_ini(output_file); // Write output file
     sopt.write_cert(cert_file); // Write certificate file
     return 0;
 }
+

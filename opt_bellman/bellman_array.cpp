@@ -19,23 +19,20 @@ void opts_bellman_array(const Instance& ins, std::vector<Profit>& values,
     }
 }
 
-Profit knapsack::opt_bellman_array(const Instance& ins, Info* info)
+Profit knapsack::opt_bellman_array(const Instance& ins, Info& info)
 {
-    (void)info;
     Weight  c = ins.capacity();
     ItemPos n = ins.item_number();
     std::vector<Profit> values(c+1);
     opts_bellman_array(ins, values, 0, n-1, c);
     assert(ins.check_opt(values[c]));
-    return values[c];
+    return algorithm_end(values[c], info);
 }
 
 /******************************************************************************/
 
-Solution knapsack::sopt_bellman_array_all(const Instance& ins, Info* info)
+Solution knapsack::sopt_bellman_array_all(const Instance& ins, Info& info)
 {
-    (void)info;
-
     // Initialize memory table
     ItemPos n = ins.item_number();
     Weight  c = ins.capacity();
@@ -58,7 +55,7 @@ Solution knapsack::sopt_bellman_array_all(const Instance& ins, Info* info)
     Profit opt = values[values_size-1];
 
     // Retrieve optimal solution
-    Solution solution(ins);
+    Solution sol(ins);
     ItemPos j = n-1;
     Weight  w = c;
     Profit  v = 0;
@@ -70,12 +67,12 @@ Solution knapsack::sopt_bellman_array_all(const Instance& ins, Info* info)
         if (v1 > v0) {
             v += pj;
             w -= wj;
-            solution.set(j, true);
+            sol.set(j, true);
         }
         j--;
     }
-    assert(ins.check_sol(solution));
-    return solution;
+    assert(ins.check_sol(sol));
+    return algorithm_end(sol, info);
 }
 
 /******************************************************************************/
@@ -83,20 +80,20 @@ Solution knapsack::sopt_bellman_array_all(const Instance& ins, Info* info)
 #define DBG(x)
 //#define DBG(x) x
 
-Solution knapsack::sopt_bellman_array_one(const Instance& ins, Info* info)
+Solution knapsack::sopt_bellman_array_one(const Instance& ins, Info& info)
 {
     ItemPos n = ins.item_number();
     Weight  c = ins.capacity();
-    Solution solution(ins);
+    Solution sol(ins);
 
     if (n == 0)
-        return solution;
+        return algorithm_end(sol, info);
 
     std::vector<Profit> values(c+1); // Initialize memory table
     ItemPos iter = 0;
     Profit opt = -1;
     Profit opt_local = -1;
-    while (solution.profit() != opt) {
+    while (sol.profit() != opt) {
         DBG(std::cout << "N " << n << " OPT " << opt_local << std::flush;)
         iter++;
         ItemPos last_item = -1;
@@ -145,18 +142,16 @@ end:
 
         // Update solution and instance
         DBG(std::cout << " ADD" << last_item << std::flush;)
-        solution.set(last_item, true);
+        sol.set(last_item, true);
         c -= ins.item(last_item).w;
         opt_local -= ins.item(last_item).p;
         n = last_item;
         DBG(std::cout << " P " << solution.profit() << std::endl;)
     }
 
-    if (info != NULL) {
-        info->pt.put("Solution.Iterations", iter);
-    }
-    assert(ins.check_sopt(solution));
-    return solution;
+    info.pt.put("Algorithm.Iterations", iter);
+    assert(ins.check_sopt(sol));
+    return algorithm_end(sol, info);
 }
 
 #undef DBG
@@ -166,7 +161,7 @@ end:
 #define DBG(x)
 //#define DBG(x) x
 
-Solution knapsack::sopt_bellman_array_part(const Instance& ins, ItemPos k, Info* info)
+Solution knapsack::sopt_bellman_array_part(const Instance& ins, Info& info, ItemPos k)
 {
     assert(0 <= k && k <= 64);
     ItemPos n = ins.item_number();
@@ -174,7 +169,7 @@ Solution knapsack::sopt_bellman_array_part(const Instance& ins, ItemPos k, Info*
     Solution sol(ins);
 
     if (n == 0)
-        return sol;
+        return algorithm_end(sol, info);
 
     std::vector<Profit> values(c+1); // Initialize memory table
     std::vector<PartSol1> bisols(c+1);
@@ -229,11 +224,9 @@ end:
         DBG(std::cout << " P " << sol.profit() << std::endl;)
     }
 
-    if (info != NULL) {
-        info->pt.put("Solution.Iterations", iter);
-    }
+    info.pt.put("Algorithm.Iterations", iter);
     assert(ins.check_sopt(sol));
-    return sol;
+    return algorithm_end(sol, info);
 }
 
 #undef DBG
@@ -318,24 +311,24 @@ void sopt_bellman_array_rec_rec(RecData& d)
     }
 }
 
-Solution knapsack::sopt_bellman_array_rec(const Instance& ins, Info* info)
+Solution knapsack::sopt_bellman_array_rec(const Instance& ins, Info& info)
 {
-    (void)info;
-
-    if (ins.item_number() == 0)
-        return Solution(ins);
+    if (ins.item_number() == 0) {
+        Solution sol(ins);
+        return algorithm_end(sol, info);
+    }
 
     if (ins.item_number() == 1) {
-        Solution solution(ins);
-        solution.set(0, true);
-        return solution;
+        Solution sol(ins);
+        sol.set(0, true);
+        return algorithm_end(sol, info);
     }
 
     RecData data(ins);
     sopt_bellman_array_rec_rec(data);
     DBG(std::cout << data.sol_curr << std::endl;)
     assert(ins.check_sopt(data.sol_curr));
-    return data.sol_curr;
+    return algorithm_end(data.sol_curr, info);
 }
 
 #undef DBG

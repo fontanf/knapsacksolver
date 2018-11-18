@@ -26,14 +26,14 @@ std::ostream& operator<<(std::ostream& os, std::vector<State>& l)
     return os;
 }
 
-Profit knapsack::opt_bellman_list(Instance& ins, Info* info)
+Profit knapsack::opt_bellman_list(Instance& ins, Info& info)
 {
     (void)info;
     Weight  c = ins.capacity();
     ItemPos n = ins.total_item_number();
 
     if (n == 0 || c == 0)
-        return 0;
+        return algorithm_end(0, info);
 
     Profit lb = 0;
     std::vector<State> l0{{0, 0}};
@@ -93,14 +93,14 @@ Profit knapsack::opt_bellman_list(Instance& ins, Info* info)
     }
 
     assert(ins.check_opt(lb));
-    return lb;
+    return algorithm_end(lb, info);
 }
 
 #undef DBG
 
 /******************************************************************************/
 
-Solution knapsack::sopt_bellman_list_all(Instance& ins, Info* info)
+Solution knapsack::sopt_bellman_list_all(Instance& ins, Info& info)
 {
     (void)info;
     assert(false); // TODO
@@ -109,7 +109,7 @@ Solution knapsack::sopt_bellman_list_all(Instance& ins, Info* info)
 
 /******************************************************************************/
 
-Solution knapsack::sopt_bellman_list_one(Instance& ins, Info* info)
+Solution knapsack::sopt_bellman_list_one(Instance& ins, Info& info)
 {
     (void)info;
     assert(false); // TODO
@@ -118,7 +118,7 @@ Solution knapsack::sopt_bellman_list_one(Instance& ins, Info* info)
 
 /******************************************************************************/
 
-Solution knapsack::sopt_bellman_list_part(Instance& ins, ItemPos k, Info* info)
+Solution knapsack::sopt_bellman_list_part(Instance& ins, Info& info, ItemPos k)
 {
     (void)info;
     (void)k;
@@ -132,10 +132,9 @@ Solution knapsack::sopt_bellman_list_part(Instance& ins, ItemPos k, Info* info)
 //#define DBG(x) x
 
 std::vector<State> opts_bellman_list(Instance& ins,
-        ItemPos n1, ItemPos n2, Weight c, Info* info = NULL)
+        ItemPos n1, ItemPos n2, Weight c, Info& info)
 {
     (void)info;
-
     DBG(std::cout << "OPTSBELLMANLIST N1 " << n1 << " N2 " << n2 << " c " << c << std::endl;)
     if (c == 0)
         return {{0, 0}};
@@ -200,7 +199,7 @@ std::vector<State> opts_bellman_list(Instance& ins,
 }
 
 void sopt_bellman_list_rec_rec(Instance& ins,
-        ItemPos n1, ItemPos n2, Weight c, Solution& sol_curr, Info* info)
+        ItemPos n1, ItemPos n2, Weight c, Solution& sol_curr, Info& info)
 {
     ItemPos k = (2*n1 + 8*n2) / 10;
 
@@ -266,22 +265,21 @@ void sopt_bellman_list_rec_rec(Instance& ins,
     }
 }
 
-Solution knapsack::sopt_bellman_list_rec(Instance& ins, Info* info)
+Solution knapsack::sopt_bellman_list_rec(Instance& ins, Info& info)
 {
     ItemPos n = ins.item_number();
+    Solution sol(ins);
 
     if (n == 0)
-        return Solution(ins);
+        return algorithm_end(sol, info);
     if (n == 1) {
-        Solution solution(ins);
-        solution.set(0, true);
-        return solution;
+        sol.set(0, true);
+        return algorithm_end(sol, info);
     }
 
-    Solution sol(ins);
     sopt_bellman_list_rec_rec(ins, 0, n-1, ins.capacity(), sol, info);
     assert(ins.check_sopt(sol));
-    return sol;
+    return algorithm_end(sol, info);
 }
 
 #undef DBG
