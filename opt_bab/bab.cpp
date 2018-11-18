@@ -12,7 +12,7 @@ Solution knapsack::sopt_bab(Instance& ins, Info& info)
     ItemIdx n = ins.item_number();
     Solution sol_curr(ins);
     if (n == 0)
-        return sol_curr;
+        return algorithm_end(sol_curr, info);
 
     // Compute min weight table
     std::vector<Weight> min_weight(n);
@@ -27,8 +27,15 @@ Solution knapsack::sopt_bab(Instance& ins, Info& info)
         if (i == n || sol_curr.remaining_capacity() < min_weight[i]) {
             do { // Backtrack
                 i--;
-                if (i < 0)
-                    goto end;
+                if (i < 0) {
+                    info.pt.put("Algorithm.NodeNumber", node_number);
+                    if (info.verbose()) {
+                        std::cout << "NODE NUMBER " << node_number << std::endl;
+                        std::cout << "NODE NUMBER " << std::scientific << (double)node_number << std::endl;
+                    }
+
+                    return algorithm_end(sol_best, info);
+                }
             } while (!sol_curr.contains(i));
         }
 
@@ -45,14 +52,6 @@ Solution knapsack::sopt_bab(Instance& ins, Info& info)
             sol_curr.set(i, false);
         }
     }
-end:
-
-    if (info.verbose)
-        //std::cout << "NODES " << std::scientific << (double)node_number << std::endl;
-        std::cout << "NODES " << node_number << std::endl;
-
-    assert(ins.check_sopt(sol_best));
-    return sol_best;
 }
 
 #undef DBG
