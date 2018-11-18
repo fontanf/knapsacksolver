@@ -35,27 +35,16 @@ int main(int argc, char *argv[])
 
     Instance instance(input_data);
     Solution sol_best(instance);
-    Info info;
-    info.verbose(vm.count("verbose"));
+    Info info(vm.count("verbose"));
 
     instance.sort_partially();
 
     if (algorithm == "for") {
-        sol_best = sol_forwardgreedynlogn(instance, &info);
+        sol_best = sol_forwardgreedynlogn(instance, info);
     } else if (algorithm == "back") {
-        sol_best = sol_backwardgreedynlogn(instance, &info);
+        sol_best = sol_backwardgreedynlogn(instance, info);
     } else if (algorithm == "best") {
-        sol_best = sol_bestgreedynlogn(instance, &info);
-    }
-
-    double t = info.elapsed_time();
-    info.pt.put("Solution.Time", t);
-    info.pt.put("Solution.OPT", sol_best.profit());
-    if (Info::verbose(&info)) {
-        std::cout << "---" << std::endl;
-        std::cout << "LB " << sol_best.profit() << std::endl;
-        std::cout << "GAP " << instance.optimum() - sol_best.profit() << std::endl;
-        std::cout << "TIME " << t << std::endl;
+        sol_best = sol_bestgreedynlogn(instance, info);
     }
 
     info.write_ini(output_file); // Write output file

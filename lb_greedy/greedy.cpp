@@ -49,13 +49,13 @@ Solution knapsack::sol_greedy(const Instance& ins, Info& info)
         }
     }
 
-    if (info.verbose)
+    if (info.verbose())
         std::cout << "ALGO " << best_algo << std::endl;
     info.pt.put("Solution.Algo", best_algo);
 
     ins.check_sol(sol);
     DBG(std::cout << "GREEDY... END" << std::endl;)
-    return sol;
+    return algorithm_end(sol, info);
 }
 
 #undef DBG
