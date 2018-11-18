@@ -35,20 +35,10 @@ int main(int argc, char *argv[])
 
     Instance instance(input_data);
     Solution sol_best(instance);
-    Info info;
-    info.verbose(vm.count("verbose"));
+    Info info(vm.count("verbose"));
 
     instance.sort_partially();
-    Profit ub = ub_dantzig(instance, &info);
-
-    double t = info.elapsed_time();
-    info.pt.put("Solution.Time", t);
-    info.pt.put("Solution.UB", ub);
-    if (Info::verbose(&info)) {
-        std::cout << "---" << std::endl;
-        std::cout << instance.print_ub(ub) << std::endl;
-        std::cout << "TIME " << t << std::endl;
-    }
+    ub_dantzig(instance, info);
 
     info.write_ini(output_file); // Write output file
     sol_best.write_cert(cert_file); // Write certificate file

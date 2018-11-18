@@ -6,7 +6,7 @@
 namespace knapsack
 {
 
-Profit ub_dantzig(const Instance& ins, Info* info = NULL);
+Profit ub_dantzig(const Instance& ins, Info& info);
 
 }
 

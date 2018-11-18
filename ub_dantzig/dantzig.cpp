@@ -5,10 +5,9 @@ using namespace knapsack;
 #define DBG(x)
 //#define DBG(x) x
 
-Profit knapsack::ub_dantzig(const Instance& ins, Info* info)
+Profit knapsack::ub_dantzig(const Instance& ins, Info& info)
 {
     DBG(std::cout << "UBDANTZIG..." << std::endl;)
-    (void)info;
     assert(ins.break_item_found());
 
     ItemPos b = ins.break_item();
@@ -21,7 +20,7 @@ Profit knapsack::ub_dantzig(const Instance& ins, Info* info)
     DBG(std::cout << "UB " << p << std::endl;)
     assert(ins.check_ub(p));
     DBG(std::cout << "UBDANTZIG... END" << std::endl;)
-    return p;
+    return algorithm_end(p, info);
 }
 
 #undef DBG
