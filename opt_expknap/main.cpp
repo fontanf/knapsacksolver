@@ -37,20 +37,10 @@ int main(int argc, char *argv[])
         cert_file = vm["input-data"].as<std::string>() + ".sol";
 
     Instance instance(vm["input-data"].as<std::string>());
-    Info info;
-    info.verbose(vm.count("verbose"));
+    Info info(vm.count("verbose"));
 
     // Expknap
-    Solution sopt = sopt_expknap(instance, p, &info);
-
-    double t = info.elapsed_time();
-    info.pt.put("Solution.OPT", sopt.profit());
-    info.pt.put("Solution.Time", t);
-    if (Info::verbose(&info)) {
-        std::cout << "---" << std::endl;
-        std::cout << instance.print_opt(sopt.profit()) << std::endl;
-        std::cout << "TIME " << t << std::endl;
-    }
+    Solution sopt = sopt_expknap(instance, p, info);
 
     info.write_ini(output_file); // Write output file
     sopt.write_cert(cert_file); // Write certificate file
