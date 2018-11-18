@@ -140,8 +140,8 @@ public:
      * then the lower bound is optimal. Otherwise, the optimal value is the max
      * between the lower bound and the optimal value of the reduced solution.
      */
-    void reduce1(Profit lb, bool verbose = false);
-    void reduce2(Profit lb, bool verbose = false);
+    void reduce1(Profit lb, Info& info);
+    void reduce2(Profit lb, Info& info);
     const Solution* reduced_solution() const { return sol_red_; }
 
     inline ItemIdx item_number() const { return l_-f_+1; }
@@ -262,5 +262,8 @@ private:
 std::ostream& operator<<(std::ostream &os, const Item& item);
 std::ostream& operator<<(std::ostream &os, const Interval& interval);
 std::ostream& operator<<(std::ostream &os, const Instance& instance);
+
+Solution algorithm_end(const Solution& sol, Info& info);
+Profit   algorithm_end(Profit val, Info& info);
 
 }

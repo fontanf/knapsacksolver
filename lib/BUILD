@@ -64,7 +64,6 @@ cc_test(
                 "@googletest//:gtest_main",
         ],
         data = [
-                "@knapsack_instances_pisinger//:data",
         ],
         timeout = "long",
 )

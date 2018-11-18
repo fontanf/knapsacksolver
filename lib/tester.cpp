@@ -37,8 +37,8 @@ void check_sopt(std::string prog, boost::filesystem::path input)
 
     boost::property_tree::ptree pt;
     boost::property_tree::ini_parser::read_ini(output_file, pt);
-    EXPECT_EQ(pt.get<Profit>("Solution.OPT"), opt);
-    EXPECT_EQ(instance.check(cert_file),      opt);
+    EXPECT_EQ(pt.get<Profit>("Solution.Value"), opt);
+    EXPECT_EQ(instance.check(cert_file), opt);
 
     boost::filesystem::remove(output_file);
     boost::filesystem::remove(cert_file);
@@ -62,7 +62,7 @@ void check_opt(std::string prog, boost::filesystem::path input)
 
     boost::property_tree::ptree pt;
     boost::property_tree::ini_parser::read_ini(output_file, pt);
-    EXPECT_EQ(pt.get<Profit>("Solution.OPT"), opt);
+    EXPECT_EQ(pt.get<Profit>("Solution.Value"), opt);
 
     boost::filesystem::remove(output_file);
 }
@@ -95,9 +95,9 @@ void knapsack::test_pisinger(
         std::vector<Profit (*)(Instance&)> fs,
         int test)
 {
-    for (std::string type: types) {
-        for (ItemIdx n: ns) {
-            for (Profit r: rs) {
+    for (ItemIdx n: ns) {
+        for (Profit r: rs) {
+            for (std::string type: types) {
                 for (int h=1; h<=100; h++) {
                     std::cout << type << " " << n << " " << r << " " << h << std::endl;
                     Instance ins = generate(type, n, r, h);
@@ -109,10 +109,16 @@ void knapsack::test_pisinger(
                             opt = val;
                         if (test == 0) {
                             EXPECT_EQ(val, opt);
+                            if (val != opt)
+                                return;
                         } else if (test == 1) {
                             EXPECT_GE(val, opt);
+                            if (val < opt)
+                                return;
                         } else if (test == -1) {
                             EXPECT_LE(val, opt);
+                            if (val > opt)
+                                return;
                         }
                     }
                 }
