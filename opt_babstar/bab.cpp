@@ -27,7 +27,7 @@ Solution knapsack::sopt_babstar(Instance& ins, Info& info)
     ItemIdx n = ins.item_number();
     Solution sol_curr(ins);
     if (n == 0)
-        return sol_curr;
+        return algorithm_end(sol_curr, info);
 
     // Compute min weight table
     std::vector<Weight> min_weight(n);
@@ -76,24 +76,17 @@ Solution knapsack::sopt_babstar(Instance& ins, Info& info)
 
     }
 
-    double t = info.elapsed_time();
-    if (info.verbose) {
-        std::cout << "OPT " << sol_best.profit() << std::endl;
-        std::cout << "SOPT " << sol_best.print_bin() << std::endl;
-        std::cout << "SOPT " << sol_best.print_in() << std::endl;
-        std::cout << "TIME " << t << std::endl;
+    if (info.verbose()) {
         std::cout << "NODE NUMBER " << node_number << std::endl;
         std::cout << "QUEUE MAX SIZE " << q_max_size << std::endl;
         std::cout << "QUEUE AVERAGE SIZE " << q_average_size / node_number << std::endl;
     }
-    info.pt.put("BAB.NodeNumber", node_number);
-    info.pt.put("BAB.QueueMaxSize", q_max_size);
-    info.pt.put("BAB.QueueAverageSize", q_average_size / node_number);
-    info.pt.put("Solution.OPT", sol_best.profit());
-    info.pt.put("Solution.Time", t);
+    info.pt.put("Algorithm.NodeNumber", node_number);
+    info.pt.put("Algorithm.QueueMaxSize", q_max_size);
+    info.pt.put("Algorithm.QueueAverageSize", q_average_size / node_number);
 
     assert(ins.check_sopt(sol_best));
-    return sol_best;
+    return algorithm_end(sol_best, info);
 }
 
 /*****************************************************************************/
@@ -225,7 +218,7 @@ Solution knapsack::sopt_babstar_dp(Instance& ins, Info& info)
 
     if (n == 0) {
         info.debug("INSTANCE CONTAINS NO ITEMS\n");
-        return sol_curr;
+        return algorithm_end(sol_curr, info);
     }
 
     // Compute min weight table
@@ -234,7 +227,7 @@ Solution knapsack::sopt_babstar_dp(Instance& ins, Info& info)
     for (ItemIdx i=n-2; i>=0; --i)
         min_weight[i] = std::min(ins.item(i).w, min_weight[i+1]);
 
-    if (info.dbg) {
+    if (info.debug()) {
         info.debug("MINWEIGHTS ");
         for (ItemIdx i=0; i<n; ++i)
             info.debug(std::to_string(min_weight[i]) + " ");
@@ -264,7 +257,7 @@ Solution knapsack::sopt_babstar_dp(Instance& ins, Info& info)
         node_number++;
 
         // Debug traces
-        if (info.dbg) {
+        if (info.debug()) {
             info.debug("\n");
             info.debug("NODENUMBER " + std::to_string(node_number) +
                 " PBEST " + std::to_string(sol_best.profit()) + "\n");
@@ -358,24 +351,17 @@ Solution knapsack::sopt_babstar_dp(Instance& ins, Info& info)
 
     n0.cut_child(q, info);
 
-    double t = info.elapsed_time();
-    if (info.verbose) {
-        std::cout << "OPT " << sol_best.profit() << std::endl;
-        std::cout << "SOPT " << sol_best.print_bin() << std::endl;
-        std::cout << "SOPT " << sol_best.print_in() << std::endl;
-        std::cout << "TIME " << t << std::endl;
+    if (info.verbose()) {
         std::cout << "NODE NUMBER " << node_number << std::endl;
         std::cout << "QUEUE MAX SIZE " << q_max_size << std::endl;
         std::cout << "QUEUE AVERAGE SIZE " << q_average_size / node_number << std::endl;
     }
-    info.pt.put("BAB.NodeNumber", node_number);
-    info.pt.put("BAB.QueueMaxSize", q_max_size);
-    info.pt.put("BAB.QueueAverageSize", q_average_size / node_number);
-    info.pt.put("Solution.OPT", sol_best.profit());
-    info.pt.put("Solution.Time", t);
+    info.pt.put("Algorithm.NodeNumber", node_number);
+    info.pt.put("Algorithm.QueueMaxSize", q_max_size);
+    info.pt.put("Algorithm.QueueAverageSize", q_average_size / node_number);
 
     assert(ins.check_sopt(sol_best));
-    return sol_best;
+    return algorithm_end(sol_best, info);
 }
 
 #undef DBG

@@ -11,19 +11,9 @@ TEST(BABSTAR, DataTests)
     knapsack::test(p.string(), "sopt");
 }
 
-Profit opt_minknap_list_test(Instance& ins) { std::cout << "MKL " << std::endl; return opt_minknap_list(ins); }
-Profit opt_babstar_test(Instance& ins)
-{
-    Info info(true, true);
-    std::cout << "BAB*" << std::endl;
-    return sopt_babstar(ins, &info).profit();
-}
-Profit opt_babstar_dp_test(Instance& ins)
-{
-    Info info(true, true);
-    std::cout << "BAB*DP" << std::endl;
-    return sopt_babstar_dp(ins, &info).profit();
-}
+Profit opt_minknap_list_test(Instance& ins) { Info info; return opt_minknap_list(ins, info); }
+Profit opt_babstar_test(Instance& ins)      { Info info; return sopt_babstar(ins, info).profit(); }
+Profit opt_babstar_dp_test(Instance& ins)   { Info info; return sopt_babstar_dp(ins, info).profit(); }
 
 std::vector<Profit (*)(Instance&)> tested_functions()
 {
