@@ -9,15 +9,14 @@
 
 using namespace knapsack;
 
-Profit knapsack::opt_dpprofits_array(Instance& ins, Info* info)
+Profit knapsack::opt_dpprofits_array(Instance& ins, Info& info)
 {
     DBG(std::cout << "DPPROFITS..." << std::endl;)
-    (void)info;
 
     ItemIdx n = ins.item_number();
     Weight  c = ins.capacity();
     if (n == 0)
-        return 0;
+        return algorithm_end(0, info);
 
     // Initialize memory table
     Profit ub = ub_0(ins, 0, 0, ins.capacity());
@@ -44,19 +43,19 @@ Profit knapsack::opt_dpprofits_array(Instance& ins, Info* info)
             opt = q;
     assert(ins.check_opt(opt));
     DBG(std::cout << "DPPROFITS... END" << std::endl;)
-    return opt;
+    return algorithm_end(opt, info);
 }
 
 /******************************************************************************/
 
-Solution knapsack::sopt_dpprofits_array_all(Instance& ins, Info* info)
+Solution knapsack::sopt_dpprofits_array_all(Instance& ins, Info& info)
 {
-    (void)info;
-
     ItemIdx n = ins.item_number();
     Weight  c = ins.capacity();
-    if (n == 0)
-        return Solution(ins);
+    if (n == 0) {
+        Solution sol(ins);
+        return algorithm_end(sol, info);
+    }
 
     // Initialize memory table
     Profit ub = ub_0(ins, 0, 0, ins.capacity());
@@ -108,12 +107,12 @@ Solution knapsack::sopt_dpprofits_array_all(Instance& ins, Info* info)
         j--;
     }
     assert(ins.check_sopt(sol));
-    return sol;
+    return algorithm_end(sol, info);
 }
 
 /******************************************************************************/
 
-Solution knapsack::sopt_dpprofits_array_one(Instance& ins, Info* info)
+Solution knapsack::sopt_dpprofits_array_one(Instance& ins, Info& info)
 {
     (void)info;
     assert(false); // TODO
@@ -122,7 +121,7 @@ Solution knapsack::sopt_dpprofits_array_one(Instance& ins, Info* info)
 
 /******************************************************************************/
 
-Solution knapsack::sopt_dpprofits_array_part(Instance& ins, ItemPos k, Info* info)
+Solution knapsack::sopt_dpprofits_array_part(Instance& ins, ItemPos k, Info& info)
 {
     (void)info;
     (void)k;
@@ -132,7 +131,7 @@ Solution knapsack::sopt_dpprofits_array_part(Instance& ins, ItemPos k, Info* inf
 
 /******************************************************************************/
 
-Solution knapsack::sopt_dpprofits_array_rec(Instance& ins, Info* info)
+Solution knapsack::sopt_dpprofits_array_rec(Instance& ins, Info& info)
 {
     (void)info;
     assert(false); // TODO
