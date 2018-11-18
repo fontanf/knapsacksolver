@@ -35,7 +35,10 @@ int main(int argc, char *argv[])
 
     Instance instance(input_data);
     Solution sol_best(instance);
-    Info info(vm.count("verbose"));
+
+    Info info;
+    if (vm.count("verbose"))
+        info.set_verbose();
 
     instance.sort_partially();
     ub_dantzig(instance, info);

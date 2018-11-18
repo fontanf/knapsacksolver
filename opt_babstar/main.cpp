@@ -33,7 +33,10 @@ int main(int argc, char *argv[])
         cert_file = vm["input-data"].as<std::string>() + ".sol";
 
     Instance instance(vm["input-data"].as<std::string>());
-    Info info(vm.count("verbose"));
+
+    Info info;
+    if (vm.count("verbose"))
+        info.set_verbose();
 
     // Primal BAB
     Solution sopt = sopt_babstar(instance, info);

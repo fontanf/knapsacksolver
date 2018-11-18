@@ -39,7 +39,9 @@ int main(int argc, char *argv[])
 
     Instance instance(vm["input-data"].as<std::string>());
     Solution sopt(instance);
-    Info info(vm.count("verbose"));
+    Info info;
+    if (vm.count("verbose"))
+        info.set_verbose();
 
     // DPProfits
     if (memory == "array") {

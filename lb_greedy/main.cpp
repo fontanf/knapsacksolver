@@ -33,7 +33,10 @@ int main(int argc, char *argv[])
 
     Instance instance(input_data);
     Solution sol(instance);
-    Info info(vm.count("verbose"));
+
+    Info info;
+    if (vm.count("verbose"))
+        info.set_verbose();
 
     instance.sort_partially();
 

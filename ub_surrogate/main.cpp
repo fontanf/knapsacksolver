@@ -34,7 +34,11 @@ int main(int argc, char *argv[])
     }
 
     Instance ins(vm["input-data"].as<std::string>());
-    Info info(vm.count("verbose"));
+
+    Info info;
+    if (vm.count("verbose"))
+        info.set_verbose();
+
     ins.sort_partially();
     Info info_tmp;
     Solution sol = sol_bestgreedynlogn(ins, info);

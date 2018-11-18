@@ -44,7 +44,10 @@ int main(int argc, char *argv[])
 
     Instance instance(vm["input-data"].as<std::string>());
     Solution sopt(instance);
-    Info info(vm.count("verbose"), vm.count("debug"));
+
+    Info info;
+    if (vm.count("verbose"))
+        info.set_verbose();
 
     if (retrieve == "none") {
         opt_minknap_list(instance, info, p);
