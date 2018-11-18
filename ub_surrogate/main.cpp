@@ -33,21 +33,12 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    Instance instance(vm["input-data"].as<std::string>());
-    Info info;
-    info.verbose(vm.count("verbose"));
-    instance.sort_partially();
-    Solution sol = sol_bestgreedynlogn(instance);
-    Profit ub = ub_surrogate(instance, sol.profit(), &info).ub;
-
-    double t = info.elapsed_time();
-    info.pt.put("UB.Time", t);
-    info.pt.put("UB.Value", ub);
-    if (Info::verbose(&info)) {
-        std::cout << "---" << std::endl;
-        std::cout << instance.print_ub(ub) << std::endl;
-        std::cout << "TIME " << t << std::endl;
-    }
+    Instance ins(vm["input-data"].as<std::string>());
+    Info info(vm.count("verbose"));
+    ins.sort_partially();
+    Info info_tmp;
+    Solution sol = sol_bestgreedynlogn(ins, info);
+    ub_surrogate(ins, sol.profit(), info);
 
     info.write_ini(output_file); // Write output file
     return 0;

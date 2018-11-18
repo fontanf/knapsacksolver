@@ -206,7 +206,8 @@ void ub_surrogate_solve(Instance& ins, ItemIdx k,
         }
 
         ins.surrogate(s-s_prec, k, first);
-        Profit p = ub_dantzig(ins);
+        Info info_tmp;
+        Profit p = ub_dantzig(ins, info_tmp);
         ItemPos b = ins.break_item();
 
         DBG(std::cout
@@ -260,11 +261,14 @@ SurrogateOut knapsack::ub_surrogate(const Instance& instance, Profit lb, Info& i
     // Trivial cases
     if (ins.item_number() == 0) {
         DBG(std::cout << "SURROGATERELAX... END - NO ITEM" << std::endl;)
+        algorithm_end(out.ub, info);
         return out;
     }
-    out.ub = ub_dantzig(ins);
+    Info info_tmp;
+    out.ub = ub_dantzig(ins, info_tmp);
     if (ins.break_capacity() == 0 || b == ins.last_item() + 1) {
         DBG(std::cout << "SURROGATERELAX... END - NO CAPACITY OR BREAK ITEM" << std::endl;)
+        algorithm_end(out.ub, info);
         return out;
     }
 
@@ -285,7 +289,7 @@ SurrogateOut knapsack::ub_surrogate(const Instance& instance, Profit lb, Info& i
     if (max_card(ins) == b) {
         ub_surrogate_solve(ins, b, 0, s_max, out);
         info.pt.put("UB.Type", "max");
-        if (info.verbose)
+        if (info.verbose())
             std::cout << "MAXCARD" << std::endl;
     } else if (min_card(ins, lb) == b + 1) {
         ub_surrogate_solve(ins, b + 1, s_min, 0, out);
@@ -294,7 +298,7 @@ SurrogateOut knapsack::ub_surrogate(const Instance& instance, Profit lb, Info& i
             out.ub = lb;
         }
         info.pt.put("UB.Type", "min");
-        if (info.verbose)
+        if (info.verbose())
             std::cout << "MINCARD" << std::endl;
     } else {
         SurrogateOut out2;
@@ -311,12 +315,13 @@ SurrogateOut knapsack::ub_surrogate(const Instance& instance, Profit lb, Info& i
             out.bound      = out2.bound;
         }
         info.pt.put("UB.Type", "maxmin");
-        if (info.verbose)
+        if (info.verbose())
             std::cout << "MAXCARD MINCARD" << std::endl;
     }
 
     assert(ins.check_ub(out.ub));
     DBG(std::cout << "SURROGATERELAX... END" << std::endl;)
+    algorithm_end(out.ub, info);
     return out;
 }
 

@@ -7,21 +7,16 @@
 
 using namespace knapsack;
 
-Profit opt_bellman_array_test(Instance &ins)
-{
-    return opt_bellman_array(ins);
-}
-
-Profit opt_bellman_array_all_test(Instance &ins)
-{
-    return sopt_bellman_array_all(ins).profit();
-}
+Profit opt_bellman_array_test(Instance &ins) { Info info; return opt_bellman_array(ins, info); }
+Profit opt_bellman_array_all_test(Instance &ins) { Info info; return sopt_bellman_array_all(ins, info).profit(); }
 
 Profit ub_surrogate_test(Instance& ins)
 {
     ins.sort_partially();
-    Solution sol = sol_greedy(ins);
-    return ub_surrogate(ins, sol.profit()).ub;
+    Info info_tmp;
+    Solution sol = sol_greedy(ins, info_tmp);
+    Info info;
+    return ub_surrogate(ins, sol.profit(), info).ub;
 }
 
 std::vector<Profit (*)(Instance&)> tested_functions()
