@@ -15,8 +15,8 @@ TEST(Minknap, DataTests)
     knapsack::test(p.string() + " -v -r part -x 3", "sopt");
 }
 
-Profit opt_bellman_array_test(Instance& ins) { return opt_bellman_array(ins); }
-Profit opt_minknap_list_test(Instance& ins) { Info info; return opt_minknap_list(ins, info); }
+Profit opt_bellman_array_test(Instance& ins)     { Info info; return opt_bellman_array(ins, info); }
+Profit opt_minknap_list_test(Instance& ins)      { Info info; return opt_minknap_list(ins, info); }
 Profit opt_minknap_list_part_test(Instance& ins) { Info info; return sopt_minknap_list_part(ins, info).profit(); }
 
 std::vector<Profit (*)(Instance&)> tested_functions()
@@ -31,13 +31,22 @@ std::vector<Profit (*)(Instance&)> tested_functions()
 TEST(Minknap, DataPisingerSmall)
 {
     test_pisinger(
-        {1, 2, 5, 10, 15, 20, 30, 40},
-        {10, 100},
+        {1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
+        {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12},
         {"u", "wc", "sc", "isc", "asc", "ss", "sw"},
-        {tested_functions()});
+    {tested_functions()});
 }
 
 TEST(Minknap, DataPisingerMedium)
+{
+    test_pisinger(
+        {15, 20, 30, 40, 50},
+        {10, 50, 100},
+        {"u", "wc", "sc", "isc", "asc", "ss", "sw"},
+    {tested_functions()});
+}
+
+TEST(Minknap, DataPisingerMedium2)
 {
     test_pisinger(
         {50, 100},

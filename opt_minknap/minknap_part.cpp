@@ -187,25 +187,11 @@ void remove_item(const Instance& ins, std::vector<StatePart>& l0,
 #define DBG(x)
 //#define DBG(x) x
 
-Solution sopt_minknap_list_part_end(Solution& sol, Info& info)
-{
-    double t = info.elapsed_time();
-    if (info.verbose) {
-        std::cout << "OPT " << sol.profit() << std::endl;
-        std::cout << "SOPT " << sol.print_bin() << std::endl;
-        std::cout << "SOPT " << sol.print_in() << std::endl;
-        std::cout << "TIME " << t << std::endl;
-    }
-    info.pt.put("Solution.OPT", sol.profit());
-    info.pt.put("Solution.Time", t);
-    return sol;
-}
-
 Solution knapsack::sopt_minknap_list_part(Instance& ins, Info& info,
         MinknapParams params, ItemPos k, Profit o)
 {
     DBG(std::cout << "MINKNAPART... F " << ins.first_item() << " L " << ins.last_item() << std::endl;)
-    if (info.verbose)
+    if (info.verbose())
         std::cout << "N " << ins.item_number() << "/" << ins.total_item_number()
             << " F " << ins.first_item()
             << " L " << ins.last_item() << std::endl;
@@ -215,7 +201,7 @@ Solution knapsack::sopt_minknap_list_part(Instance& ins, Info& info,
     ins.sort_partially();
     if (ins.break_item() == ins.last_item()+1) { // all items are in the break solution
         Solution sol = *ins.break_solution();
-        return sopt_minknap_list_part_end(sol, info);
+        return algorithm_end(sol, info);
     }
 
     DBG(std::cout << "LB..." << std::flush;)
@@ -241,22 +227,23 @@ Solution knapsack::sopt_minknap_list_part(Instance& ins, Info& info,
     if (n == 0 || c == 0) {
         if (ins.reduced_solution()->profit() > sol.profit())
             sol = *ins.reduced_solution();
-        return sopt_minknap_list_part_end(sol, info);
+        return algorithm_end(sol, info);
     } else if (n == 1) {
         Solution sol1 = *ins.reduced_solution();
         sol1.set(ins.first_item(), true);
-        return sopt_minknap_list_part_end((sol1.profit() > sol.profit())? sol1: sol, info);
+        return algorithm_end((sol1.profit() > sol.profit())? sol1: sol, info);
     } else if (ins.break_item() == ins.last_item()+1) {
         if (ins.break_solution()->profit() > sol.profit())
             sol = *ins.break_solution();
-        return sopt_minknap_list_part_end(sol, info);
+        return algorithm_end(sol, info);
     }
 
     Weight w_bar = ins.break_solution()->weight();
     Profit p_bar = ins.break_solution()->profit();
-    Profit u = (o != -1)? o: ub_dantzig(ins);
+    Info info_tmp;
+    Profit u = (o != -1)? o: ub_dantzig(ins, info_tmp);
     if (sol.profit() == u) // If UB == LB, then stop
-        return sopt_minknap_list_part_end(sol, info);
+        return algorithm_end(sol, info);
 
     // Create memory table
     DBG(std::cout << "K " << k << " F " << ins.first_item() << " B " << ins.break_item() << " L " << ins.last_item() << std::endl;)
@@ -292,7 +279,7 @@ Solution knapsack::sopt_minknap_list_part(Instance& ins, Info& info,
     }
 
     if (best_state.p <= sol.profit())
-        return sopt_minknap_list_part_end(sol, info);
+        return algorithm_end(sol, info);
     assert(ins.check_opt(lb));
 
     ins.set_first_item(s+1);

@@ -44,11 +44,10 @@ int main(int argc, char *argv[])
 
     Instance instance(vm["input-data"].as<std::string>());
     Solution sopt(instance);
-    Profit opt = -1;
     Info info(vm.count("verbose"), vm.count("debug"));
 
     if (retrieve == "none") {
-        opt = opt_minknap_list(instance, info, p);
+        opt_minknap_list(instance, info, p);
     } else if (retrieve == "part") {
         sopt = sopt_minknap_list_part(instance, info, p, k);
     } else {

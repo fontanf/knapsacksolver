@@ -168,18 +168,6 @@ void remove_item(const Instance& ins, std::vector<State>& l0,
     DBG(std::cout << "REMOVE ITEM... END" << std::endl;)
 }
 
-Profit opt_minknap_list_end(Profit opt, Info& info)
-{
-    double t = info.elapsed_time();
-    if (info.verbose) {
-        std::cout << "OPT " << opt << std::endl;
-        std::cout << "TIME " << t << std::endl;
-    }
-    info.pt.put("Solution.OPT", opt);
-    info.pt.put("Solution.Time", t);
-    return opt;
-}
-
 Profit knapsack::opt_minknap_list(Instance& ins, Info& info, MinknapParams params)
 {
     DBG(std::cout << "MINKNAPOPT..." << std::endl;)
@@ -189,7 +177,7 @@ Profit knapsack::opt_minknap_list(Instance& ins, Info& info, MinknapParams param
     DBG(std::cout << "SORTING..." << std::endl;)
     ins.sort_partially();
     if (ins.break_item() == ins.last_item()+1) // all items are in the break solution
-        return opt_minknap_list_end(ins.break_profit(), info);
+        return algorithm_end(ins.break_profit(), info);
 
     DBG(std::cout << "LB..." << std::flush;)
     Profit lb = 0;
@@ -210,18 +198,19 @@ Profit knapsack::opt_minknap_list(Instance& ins, Info& info, MinknapParams param
 
     // Trivial cases
     if (n == 0 || c == 0) {
-        return opt_minknap_list_end(std::max(lb, p0), info);
+        return algorithm_end(std::max(lb, p0), info);
     } else if (n == 1) {
-        return opt_minknap_list_end(std::max(lb, p0 + ins.item(ins.first_item()).p), info);
+        return algorithm_end(std::max(lb, p0 + ins.item(ins.first_item()).p), info);
     } else if (ins.break_item() == ins.last_item()+1) {
-        return opt_minknap_list_end(std::max(lb, ins.break_solution()->profit()), info);
+        return algorithm_end(std::max(lb, ins.break_solution()->profit()), info);
     }
 
     Weight w_bar = ins.break_solution()->weight();
     Profit p_bar = ins.break_solution()->profit();
-    Profit u     = ub_dantzig(ins);
+    Info info_tmp;
+    Profit u = ub_dantzig(ins, info_tmp);
     if (lb == u) // If UB == LB, then stop
-        return opt_minknap_list_end(lb, info);
+        return algorithm_end(lb, info);
 
     // Create memory table
     std::vector<State> l0 = {{w_bar, p_bar}};
@@ -251,7 +240,7 @@ Profit knapsack::opt_minknap_list(Instance& ins, Info& info, MinknapParams param
 
     assert(ins.check_opt(lb));
     DBG(std::cout << "MINKNAPOPT... END" << std::endl;)
-    return opt_minknap_list_end(lb, info);
+    return algorithm_end(lb, info);
 }
 
 #undef DBG
