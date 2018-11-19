@@ -190,12 +190,12 @@ void remove_item(const Instance& ins, std::vector<StatePart>& l0,
 Solution knapsack::sopt_minknap_list_part(Instance& ins, Info& info,
         MinknapParams params, ItemPos k, Profit o)
 {
-    DBG(std::cout << "MINKNAPART... F " << ins.first_item() << " L " << ins.last_item() << std::endl;)
-    if (info.verbose())
-        std::cout << "N " << ins.item_number() << "/" << ins.total_item_number()
-            << " F " << ins.first_item()
-            << " L " << ins.last_item() << std::endl;
-    DBG(std::cout << ins << std::endl;)
+    info.verbose("*** minknap (list, part) ***\n");
+    info.verbose(
+            "n " + std::to_string(ins.item_number()) + "/" + std::to_string(ins.total_item_number()) +
+            " f " + std::to_string(ins.first_item()) +
+            " l " + std::to_string(ins.last_item()) +
+            "\n");
 
     DBG(std::cout << "SORTING..." << std::endl;)
     ins.sort_partially();
