@@ -746,13 +746,11 @@ void Instance::reduce1(Profit lb, Info& info)
     remove_big_items();
     compute_break_item();
 
-    if (info.verbose()) {
-        std::cout
-            << "REDUCTION: " << print_lb(lb) << " - "
-            << "N " << item_number() << "/" << total_item_number() << " (" << (double)item_number() / (double)total_item_number() << ") - "
-            << "C " << capacity()    << "/" << total_capacity()    << " (" << (double)capacity()    / (double)total_capacity()    << ")"
-            << std::endl;
-    }
+    info.verbose("Reduction: " + std::to_string(lb) + " - " +
+            "n " + std::to_string(item_number()) + "/" + std::to_string(total_item_number()) +
+            " (" + std::to_string((double)item_number() / (double)total_item_number()) + ") -"
+            " c " + std::to_string((double)capacity() / (double)total_capacity()) +
+            "\n");
 }
 
 void Instance::reduce2(Profit lb, Info& info)
@@ -869,13 +867,11 @@ void Instance::reduce2(Profit lb, Info& info)
     compute_break_item();
     update_isum();
 
-    if (info.verbose()) {
-        std::cout
-            << "REDUCTION: " << print_lb(lb) << " - "
-            << "N " << item_number() << "/" << total_item_number() << " (" << (double)item_number() / (double)total_item_number() << ") - "
-            << "C " << (double)capacity()    / (double)total_capacity()
-            << std::endl;
-    }
+    info.verbose("Reduction: " + std::to_string(lb) + " - " +
+            "n " + std::to_string(item_number()) + "/" + std::to_string(total_item_number()) +
+            " (" + std::to_string((double)item_number() / (double)total_item_number()) + ") -"
+            " c " + std::to_string((double)capacity() / (double)total_capacity()) +
+            "\n");
 }
 
 #undef DBG
@@ -1149,11 +1145,9 @@ Solution knapsack::algorithm_end(const Solution& sol, Info& info)
     double t = info.elapsed_time();
     info.pt.put("Solution.Value", sol.profit());
     info.pt.put("Solution.Time", t);
-    if (info.verbose()) {
-        std::cout << "---" << std::endl;
-        std::cout << "VALUE " << sol.profit() << std::endl;
-        std::cout << "TIME " << t << std::endl;
-    }
+    info.verbose("---\n"
+            "Value " + std::to_string(sol.profit()) + "\n" +
+            "Time " + std::to_string(t) + "\n");
     return sol;
 }
 
@@ -1162,11 +1156,9 @@ Profit knapsack::algorithm_end(Profit val, Info& info)
     double t = info.elapsed_time();
     info.pt.put("Solution.Value", val);
     info.pt.put("Solution.Time", t);
-    if (info.verbose()) {
-        std::cout << "---" << std::endl;
-        std::cout << "VALUE " << val << std::endl;
-        std::cout << "TIME " << t << std::endl;
-    }
+    info.verbose("---\n"
+            "Value " + std::to_string(val) + "\n" +
+            "Time " + std::to_string(t) + "\n");
     return val;
 }
 
