@@ -27,18 +27,9 @@ std::vector<Profit (*)(Instance&)> tested_functions()
 TEST(BABSTAR, DataPisingerSmall)
 {
     test_pisinger(
-        //{1, 2, 5, 10, 15, 20, 30, 40},
-        {1, 2, 5, 10, 15},
-        {10, 100},
+        {1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
+        {2, 3, 4, 5, 6, 7, 8, 9, 10},
         {"u", "wc", "sc", "isc", "asc", "ss", "sw"},
         {tested_functions()});
 }
 
-//TEST(Minknap, DataPisingerMedium)
-//{
-    //test_pisinger(
-        //{50, 100},
-        //{100},
-        //{"wc", "isc", "asc"},
-        //{tested_functions()}, 1);
-//}

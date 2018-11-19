@@ -20,9 +20,9 @@ int main(int argc, char *argv[])
             //for (Weight r=5; r<=200; ++r) {
                 //for (int h=1; h<=100; ++h) {
                     std::string t = "wc";
-                    ItemIdx i = 20;
-                    Weight r = 50;
-                    int h = 41;
+                    ItemIdx i = 8;
+                    Weight r = 10;
+                    int h = 25;
                     std::cout << t << " " << i << " " << r << " " << h << std::endl;
                     std::cout << std::endl;
                     Instance ins = generate(t, i, r, h);
@@ -40,10 +40,10 @@ int main(int argc, char *argv[])
                     Instance ins2(ins);
                     Info info2;
                     info2.set_verbose();
+                    //info2.set_debug();
                     info2.set_debug();
-                    info2.set_debuglive();
-                    //Solution sopt2 = sopt_babstar_dp(ins2, info2);
-                    Solution sopt2 = sopt_balknap_list_all(ins2, info2);
+                    Solution sopt2 = sopt_babstar(ins2, info2);
+                    //Solution sopt2 = sopt_balknap_list_all(ins2, info2);
                     //if (sopt1.profit() != sopt2.profit()) {
                         //std::cout << info2.debug_string << std::endl;
                         //return 0;

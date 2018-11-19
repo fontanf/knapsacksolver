@@ -11,6 +11,14 @@ struct Node
     Solution sol;
     ItemPos j;
     Profit ub;
+    std::string to_string()
+    {
+        return
+            "{id " + sol.print_in() +
+            " w " + std::to_string(sol.weight()) +
+            " p " + std::to_string(sol.profit()) +
+            " ub " + std::to_string(ub);
+    }
 };
 
 class Compare
@@ -24,25 +32,36 @@ public:
 
 Solution knapsack::sopt_babstar(Instance& ins, Info& info)
 {
+    info.verbose("*** babstar ***\n");
+
     ItemIdx n = ins.item_number();
-    Solution sol_curr(ins);
-    if (n == 0)
-        return algorithm_end(sol_curr, info);
+    Solution sol(ins);
+    if (n == 0) {
+        info.debug("Empty instance.");
+        return algorithm_end(sol, info);
+    }
 
     // Compute min weight table
     std::vector<Weight> min_weight(n);
     min_weight[n-1] = ins.item(n-1).w;
     for (ItemIdx i=n-2; i>=0; --i)
         min_weight[i] = std::min(ins.item(i).w, min_weight[i+1]);
+    if (info.debug()) {
+        info.debug("min weights:");
+        for (ItemIdx i=0; i<n; ++i)
+            info.debug(" " + std::to_string(min_weight[i]));
+        info.debug("\n");
+    }
 
     std::priority_queue<Node, std::vector<Node>, Compare> q;
     StateIdx q_max_size = 0;
     StateIdx q_average_size = 0;
+    StateIdx node_number = 0;
 
     Solution sol_best(ins);
+
     Node n0 = {Solution(ins), 0, 1};
     q.push(n0);
-    StateIdx node_number = 0;
     while (!q.empty()) {
         // Update infos
         node_number++;
@@ -50,42 +69,71 @@ Solution knapsack::sopt_babstar(Instance& ins, Info& info)
             q_max_size = q.size();
         q_average_size += q.size();
 
+        // Debug traces
+        if (info.debug()) {
+            info.debug("\n");
+            info.debug("Node number " + std::to_string(node_number) +
+                " pbest " + std::to_string(sol_best.profit()) + "\n");
+            info.debug("Queue size " + std::to_string(q.size()) + "\n");
+        }
+
         // Get node
         Node node = q.top();
         q.pop();
+        info.debug("Node " + node.to_string() + " r " + std::to_string(node.sol.remaining_capacity()) + "\n");
 
         // Update best solution
-        sol_best.update(node.sol);
+        if (sol_best.update(node.sol))
+            info.debug("Update best solution\n");
 
         // Stop condition
         if (node.ub <= sol_best.profit())
             break;
 
+        // Try to add item k for k = j+1..n-1
         for (ItemPos k=node.j; k<n; ++k) {
-            if (node.sol.remaining_capacity() < min_weight[k])
+            info.debug(ins.item(k).to_string());
+
+            // Compare remaining capacity to minimum weight of all the
+            // remaining items
+            if (node.sol.remaining_capacity() < min_weight[k]) {
+                info.debug(" no remaining item can fit\n");
                 break;
-            if (node.sol.remaining_capacity() < ins.item(k).w)
+            }
+
+            // Check if item k fits in remaining capacity
+            if (node.sol.remaining_capacity() < ins.item(k).w) {
+                info.debug( " item cannot fit\n");
                 continue;
+            }
+
             Solution sol = node.sol;
             sol.set(k, true);
+
             Profit ub = ub_0(ins, k+1, sol.profit(), sol.remaining_capacity());
-            if (ub < sol_best.profit())
+            if (ub < sol_best.profit()) {
+                info.debug( " ub is too small\n");
                 continue;
-            q.push({sol, k+1, ub});
+            } else {
+                info.debug("\n");
+            }
+
+            // Create new node and add it to the queue
+            Node n{sol, k+1, ub};
+            info.debug("Add node " + n.to_string() + "\n");
+            q.push(n);
         }
 
     }
 
-    if (info.verbose()) {
-        std::cout << "NODE NUMBER " << node_number << std::endl;
-        std::cout << "QUEUE MAX SIZE " << q_max_size << std::endl;
-        std::cout << "QUEUE AVERAGE SIZE " << q_average_size / node_number << std::endl;
-    }
+    info.verbose(
+        "Node number: " + std::to_string(node_number) + "\n" +
+        "Queue max size: " + std::to_string(q_max_size) + "\n" +
+        "Queue average size: " + std::to_string(q_average_size / node_number) + "\n");
     info.pt.put("Algorithm.NodeNumber", node_number);
     info.pt.put("Algorithm.QueueMaxSize", q_max_size);
     info.pt.put("Algorithm.QueueAverageSize", q_average_size / node_number);
 
-    assert(ins.check_sopt(sol_best));
     return algorithm_end(sol_best, info);
 }
 
@@ -120,15 +168,15 @@ struct NodeDP
     std::string to_string()
     {
         std::string s =
-            "{ID " + id() +
-            " W " + std::to_string(w) +
-            " P " + std::to_string(p) +
-            " UB " + std::to_string(ub) +
-            " F ";
+            "{id " + id() +
+            " w " + std::to_string(w) +
+            " p " + std::to_string(p) +
+            " ub " + std::to_string(ub) +
+            " f ";
         s += (father != NULL)? father->id(): "NULL";
-        s += " B ";
+        s += " b ";
         s += (brother != NULL)? brother->id(): "NULL";
-        s += " C ";
+        s += " c ";
         s += (child != NULL)? child->id() + "}": "NULL}";
         return s;
     }
@@ -213,12 +261,13 @@ bool NodeDPCompare::operator()(NodeDP* n1, NodeDP* n2)
 
 Solution knapsack::sopt_babstar_dp(Instance& ins, Info& info)
 {
+    info.verbose("*** babstar with dp ***\n");
     ItemIdx n = ins.item_number();
-    Solution sol_curr(ins);
+    Solution sol(ins);
 
     if (n == 0) {
-        info.debug("INSTANCE CONTAINS NO ITEMS\n");
-        return algorithm_end(sol_curr, info);
+        info.debug("Empty instance.\n");
+        return algorithm_end(sol, info);
     }
 
     // Compute min weight table
@@ -226,17 +275,17 @@ Solution knapsack::sopt_babstar_dp(Instance& ins, Info& info)
     min_weight[n-1] = ins.item(n-1).w;
     for (ItemIdx i=n-2; i>=0; --i)
         min_weight[i] = std::min(ins.item(i).w, min_weight[i+1]);
-
     if (info.debug()) {
-        info.debug("MINWEIGHTS ");
+        info.debug("min weights: ");
         for (ItemIdx i=0; i<n; ++i)
-            info.debug(std::to_string(min_weight[i]) + " ");
+            info.debug(" " + std::to_string(min_weight[i]));
         info.debug("\n");
     }
 
     std::set<NodeDP*, NodeDPCompare> q;
     StateIdx q_max_size = 0;
     StateIdx q_average_size = 0;
+    StateIdx node_number = 0;
 
     Solution sol_best(ins);
 
@@ -246,9 +295,7 @@ Solution knapsack::sopt_babstar_dp(Instance& ins, Info& info)
     n0.j = -1;
     n0.ub = ub_0(ins, 0, 0, ins.capacity());
     n0.father = NULL;
-
     q.insert(&n0);
-    StateIdx node_number = 0;
     while (!q.empty()) {
         // Update infos
         if ((StateIdx)q.size() > q_max_size)
@@ -259,10 +306,10 @@ Solution knapsack::sopt_babstar_dp(Instance& ins, Info& info)
         // Debug traces
         if (info.debug()) {
             info.debug("\n");
-            info.debug("NODENUMBER " + std::to_string(node_number) +
-                " PBEST " + std::to_string(sol_best.profit()) + "\n");
-            info.debug("TREE\n" + n0.to_string_all() + "\n");
-            info.debug("QSIZE " + std::to_string(q.size()) + " Q\n");
+            info.debug("Node number " + std::to_string(node_number) +
+                " pbest " + std::to_string(sol_best.profit()) + "\n");
+            info.debug("Tree\n" + n0.to_string_all() + "\n");
+            info.debug("Queue size " + std::to_string(q.size()) + " - q:\n");
             for (NodeDP* n: q)
                 info.debug(n->to_string() + "\n");
         }
@@ -271,11 +318,11 @@ Solution knapsack::sopt_babstar_dp(Instance& ins, Info& info)
         NodeDP* node = *q.begin();
         q.erase(q.begin());
         Weight r = ins.capacity() - node->w; // remaining capacity
-        info.debug("NODE " + node->to_string() + " R " + std::to_string(r) + "\n");
+        info.debug("Node " + node->to_string() + " r " + std::to_string(r) + "\n");
 
         // Update best solution
         if (node->p > sol_best.profit()) {
-            info.debug("UPDATE BEST SOLUTION\n");
+            info.debug("Update best solution\n");
             Solution sol(ins);
             NodeDP* node_tmp = node;
             while (node_tmp->j != -1) {
@@ -291,30 +338,27 @@ Solution knapsack::sopt_babstar_dp(Instance& ins, Info& info)
 
         // Try to add item k for k = j+1..n-1
         for (ItemPos k=node->j+1; k<n; ++k) {
-            info.debug(
-                    "K " + std::to_string(k) +
-                    " WK " + std::to_string(ins.item(k).w) +
-                    " PK " + std::to_string(ins.item(k).p));
+            info.debug(ins.item(k).to_string());
 
             // Compare remaining capacity to minimum weight of all the
             // remaining items
             if (r < min_weight[k]) {
-                info.debug(" NO REMAINING ITEM CAN FIT\n");
+                info.debug(" no remaining item can fit\n");
                 break;
             }
 
             // Check if item k fits in remaining capacity
             if (r < ins.item(k).w) {
-                info.debug( " ITEM CANNOT FIT\n");
+                info.debug( " item cannot fit\n");
                 continue;
             }
 
             Weight w = node->w + ins.item(k).w;
             Profit p = node->p + ins.item(k).p;
             Profit ub = ub_0(ins, k+1, p, ins.capacity() - w);
-            info.debug(" W " + std::to_string(w) + " P " + std::to_string(p) + " UB " + std::to_string(ub));
+            info.debug(" w " + std::to_string(w) + " p " + std::to_string(p) + " ub " + std::to_string(ub));
             if (ub <= sol_best.profit()) {
-                info.debug( " UB is too small\n");
+                info.debug( " ub is too small\n");
                 continue;
             } else {
                 info.debug("\n");
@@ -341,21 +385,20 @@ Solution knapsack::sopt_babstar_dp(Instance& ins, Info& info)
                 tmp->brother = n;
             }
 
-            info.debug("ADD NODE " + n->to_string() + "\n");
+            info.debug("Add node " + n->to_string() + "\n");
             q.insert(n);
         }
 
     }
 
-    info.debug("END OF THE SEARCH\n");
+    info.debug("End of the search.\n");
 
     n0.cut_child(q, info);
 
-    if (info.verbose()) {
-        std::cout << "NODE NUMBER " << node_number << std::endl;
-        std::cout << "QUEUE MAX SIZE " << q_max_size << std::endl;
-        std::cout << "QUEUE AVERAGE SIZE " << q_average_size / node_number << std::endl;
-    }
+    info.verbose(
+        "Node number: " + std::to_string(node_number) + "\n" +
+        "Queue max size: " + std::to_string(q_max_size) + "\n" +
+        "Queue average size: " + std::to_string(q_average_size / node_number) + "\n");
     info.pt.put("Algorithm.NodeNumber", node_number);
     info.pt.put("Algorithm.QueueMaxSize", q_max_size);
     info.pt.put("Algorithm.QueueAverageSize", q_average_size / node_number);
