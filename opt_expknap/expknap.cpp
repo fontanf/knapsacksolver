@@ -213,9 +213,7 @@ Solution knapsack::sopt_expknap(Instance& ins, Info& info, ExpknapParams params)
         sopt_expknap_rec(ins, sol_curr, sol_best, ub, so, b-1, b, params, node_number, info);
 
     info.pt.put("Algorithm.NodeNumber", node_number);
-    info.verbose("Node number: " + to_string(node_number) + "\n");
-    info.pt.put("Algorithm.NodeNumber", node_number);
-    assert(ins.check_sopt(sol_best));
+    info.verbose("Node number: " + Info::to_string(node_number) + "\n");
     return algorithm_end(sol_best, info);
 }
 

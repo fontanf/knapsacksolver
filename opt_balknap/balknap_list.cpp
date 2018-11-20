@@ -824,14 +824,13 @@ Solution knapsack::sopt_balknap_list_all(Instance& ins, Info& info,
     ItemPos f = ins.first_item();
     ItemPos l = ins.last_item();
     ItemPos n = ins.item_number();
-    Profit lb = sol.profit();
 
     // Trivial cases
     if (n == 0 || c == 0) {
         info.debug("Empty instance (after reduction).\n");
         if (ins.reduced_solution()->profit() > sol.profit())
             sol = *ins.reduced_solution();
-        algorithm_end(sol, info);
+        return algorithm_end(sol, info);
     } else if (n == 1) {
         info.debug("Instance only contains one item (after reduction).\n");
         Solution sol1 = *ins.reduced_solution();
@@ -868,6 +867,7 @@ Solution knapsack::sopt_balknap_list_all(Instance& ins, Info& info,
         sol = *ins.break_solution();
     }
 
+    Profit lb = sol.profit();
     info.verbose(
             "lb " + std::to_string(sol.profit()) +
             " ub " + std::to_string(u) +

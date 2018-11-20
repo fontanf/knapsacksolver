@@ -9,6 +9,7 @@ int main(int argc, char *argv[])
     // Parse program options
     std::string output_file = "";
     std::string cert_file = "";
+    std::string debug_file = "";
     std::string memory = "array";
     std::string retrieve = "all";
     ItemPos k = 64;
@@ -19,7 +20,7 @@ int main(int argc, char *argv[])
         ("help,h", "produce help message")
         ("input-data,i", po::value<std::string>()->required(), "set input data (required)")
         ("output-file,o", po::value<std::string>(&output_file), "set output file")
-        ("cert-file,c", po::value<std::string>(&cert_file)->implicit_value("//"), "set certificate output file")
+        ("cert-file,c", po::value<std::string>(&cert_file), "set certificate output file")
         ("memory,m", po::value<std::string>(&memory), "set algorithm")
         ("retrieve,r", po::value<std::string>(&retrieve), "set algorithm")
         ("upper-bound,u", po::value<std::string>(&p.upper_bound), "set upper bound")
@@ -29,6 +30,8 @@ int main(int argc, char *argv[])
         ("solve-sur,k", po::value<StateIdx>(&p.solve_sur), "")
         ("part-size,x", po::value<ItemPos>(&k), "")
         ("verbose,v",  "enable verbosity")
+        ("debug,d", "enable live debugging")
+        ("debug-file", po::value<std::string>(&debug_file), "set debug file")
         ;
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -42,15 +45,14 @@ int main(int argc, char *argv[])
         std::cout << desc << std::endl;;
         return 1;
     }
-    if (cert_file == "//")
-        cert_file = vm["input-data"].as<std::string>() + ".sol";
 
     Instance instance(vm["input-data"].as<std::string>());
     Solution sopt(instance);
 
     Info info;
-    if (vm.count("verbose"))
-        info.set_verbose();
+    info.set_verbose(vm.count("verbose"));
+    info.set_debug(debug_file != "");
+    info.set_debuglive(vm.count("debug"));
 
     if (memory == "array") {
         if (retrieve == "none") {
@@ -81,5 +83,6 @@ int main(int argc, char *argv[])
 
     info.write_ini(output_file); // Write output file
     sopt.write_cert(cert_file); // Write certificate file
+    info.write_dbg(debug_file); // Write debug file
     return 0;
 }

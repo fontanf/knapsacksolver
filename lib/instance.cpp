@@ -1146,8 +1146,8 @@ Solution knapsack::algorithm_end(const Solution& sol, Info& info)
     info.pt.put("Solution.Value", sol.profit());
     info.pt.put("Solution.Time", t);
     info.verbose("---\n"
-            "Value " + std::to_string(sol.profit()) + "\n" +
-            "Time " + std::to_string(t) + "\n");
+            "Value: " + std::to_string(sol.profit()) + "\n" +
+            "Time: " + std::to_string(t) + "\n");
     return sol;
 }
 
@@ -1157,8 +1157,8 @@ Profit knapsack::algorithm_end(Profit val, Info& info)
     info.pt.put("Solution.Value", val);
     info.pt.put("Solution.Time", t);
     info.verbose("---\n"
-            "Value " + std::to_string(val) + "\n" +
-            "Time " + std::to_string(t) + "\n");
+            "Value: " + std::to_string(val) + "\n" +
+            "Time: " + std::to_string(t) + "\n");
     return val;
 }
 

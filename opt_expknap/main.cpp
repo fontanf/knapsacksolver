@@ -36,8 +36,6 @@ int main(int argc, char *argv[])
         std::cout << desc << std::endl;;
         return 1;
     }
-    if (cert_file == "//")
-        cert_file = vm["input-data"].as<std::string>() + ".sol";
 
     Instance instance(vm["input-data"].as<std::string>());
 
