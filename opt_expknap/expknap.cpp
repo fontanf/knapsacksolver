@@ -41,7 +41,7 @@ void update_bounds(const Instance& ins, Solution& sol_best, Profit& ub, Surrogat
         ins_sur.surrogate(so.multiplier, so.bound);
         params.ub_surrogate = -1;
         params.solve_sur = -1;
-        Solution sol_sur = sopt_expknap(ins_sur, params, info);
+        Solution sol_sur = sopt_expknap(ins_sur, info, params);
         if (ub > sol_sur.profit()) {
             ub = sol_sur.profit();
             if (info.verbose())
@@ -98,8 +98,6 @@ bool sopt_expknap_rec(Instance& ins,
     bool improved = false;
     if (sol_curr.remaining_capacity() >= 0) {
         if (sol_best.update(sol_curr)) {
-            if (info.verbose())
-                std::cout << ins.print_lb(sol_best.profit()) << std::endl;
             improved = true;
         }
         for (;;t++) {
@@ -175,28 +173,37 @@ bool sopt_expknap_rec(Instance& ins,
 }
 
 
-Solution knapsack::sopt_expknap(Instance& ins, ExpknapParams& params, Info& info)
+Solution knapsack::sopt_expknap(Instance& ins, Info& info, ExpknapParams params)
 {
+    info.verbose("*** expknap ***\n");
+
     if (ins.item_number() == 0) {
+        info.debug("Empty instance.\n");
         Solution sol(ins);
         return algorithm_end(sol, info);
     }
 
     ins.sort_partially();
     if (ins.break_item() == ins.last_item()+1) {
+        info.debug("All items fit in the knapsack.\n");
         Solution sol = *ins.break_solution();
         return algorithm_end(sol, info);
     }
 
     Solution sol_curr = *ins.break_solution();
-    Info info_tmp;
-    Solution sol_best = sol_greedy(ins, info_tmp);
+
+    Info info_tmp1;
+    Solution sol_best = sol_greedy(ins, info_tmp1);
+
     Info info_tmp2;
     Profit ub = ub_dantzig(ins, info_tmp2);
-    if (info.verbose())
-        std::cout
-            << ins.print_lb(sol_best.profit()) << " "
-            << ins.print_ub(ub) << std::endl;
+
+    info.verbose(
+            "lb " + std::to_string(sol_best.profit()) +
+            " ub " + std::to_string(ub) +
+            " gap " + std::to_string(ub - sol_best.profit()) +
+            "\n");
+
     ItemPos b = ins.break_item();
 
     SurrogateOut so;
@@ -206,10 +213,8 @@ Solution knapsack::sopt_expknap(Instance& ins, ExpknapParams& params, Info& info
         sopt_expknap_rec(ins, sol_curr, sol_best, ub, so, b-1, b, params, node_number, info);
 
     info.pt.put("Algorithm.NodeNumber", node_number);
-    if (info.verbose()) {
-        std::cout << "NODE NUMBER " << node_number << std::endl;
-        std::cout << "NODE NUMBER " << std::scientific << (double)node_number << std::endl;
-    }
+    info.verbose("Node number: " + to_string(node_number) + "\n");
+    info.pt.put("Algorithm.NodeNumber", node_number);
     assert(ins.check_sopt(sol_best));
     return algorithm_end(sol_best, info);
 }

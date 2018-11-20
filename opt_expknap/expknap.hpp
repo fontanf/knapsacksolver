@@ -14,7 +14,8 @@ struct ExpknapParams
     StateIdx solve_sur = -1;
 };
 
-Solution sopt_expknap(Instance& ins, ExpknapParams& params, Info& info);
+Solution sopt_expknap(Instance& ins, Info& info,
+        ExpknapParams params = ExpknapParams());
 
 }
 
