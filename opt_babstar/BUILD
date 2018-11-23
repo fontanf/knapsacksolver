@@ -5,6 +5,8 @@ cc_library(
         deps = [
                 "//lib:cpp",
                 "//ub_dembo:libdembo",
+                "//lb_greedy:libgreedy",
+                "//lb_greedynlogn:libgreedynlogn",
         ],
         visibility = ["//visibility:public"],
         include_prefix = "knapsack/opt_babstar/",

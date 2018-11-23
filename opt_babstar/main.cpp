@@ -9,13 +9,16 @@ int main(int argc, char *argv[])
     // Parse program options
     std::string output_file = "";
     std::string cert_file = "";
+    std::string debug_file = "";
     po::options_description desc("Allowed options");
     desc.add_options()
         ("help,h", "produce help message")
         ("input-data,i", po::value<std::string>()->required(), "set input data (required)")
         ("output-file,o", po::value<std::string>(&output_file), "set output file")
-        ("cert-file,c", po::value<std::string>(&cert_file)->implicit_value("//"), "set certificate output file")
+        ("cert-file,c", po::value<std::string>(&cert_file), "set certificate output file")
         ("verbose,v",  "enable verbosity")
+        ("debug,d", "enable live debugging")
+        ("debug-file", po::value<std::string>(&debug_file), "set debug file")
         ;
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -29,19 +32,19 @@ int main(int argc, char *argv[])
         std::cout << desc << std::endl;;
         return 1;
     }
-    if (cert_file == "//")
-        cert_file = vm["input-data"].as<std::string>() + ".sol";
 
     Instance instance(vm["input-data"].as<std::string>());
 
     Info info;
-    if (vm.count("verbose"))
-        info.set_verbose();
+    info.set_verbose(vm.count("verbose"));
+    info.set_debug(debug_file != "");
+    info.set_debuglive(vm.count("debug"));
 
     // Primal BAB
     Solution sopt = sopt_babstar(instance, info);
 
     info.write_ini(output_file); // Write output file
     sopt.write_cert(cert_file); // Write certificate file
+    info.write_dbg(debug_file); // Write debug file
     return 0;
 }
