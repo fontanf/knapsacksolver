@@ -6,7 +6,10 @@ cc_library(
                 "part_solution_1.hpp",
                 "part_solution_2.hpp"
         ],
-        srcs = ["instance.cpp", "solution.cpp"],
+        srcs = [
+                "instance.cpp",
+                "solution.cpp"
+        ],
         deps = [
                 "@benchtools//:info",
         ],
