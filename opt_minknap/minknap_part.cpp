@@ -190,7 +190,8 @@ void remove_item(const Instance& ins, std::vector<StatePart>& l0,
 Solution knapsack::sopt_minknap_list_part(Instance& ins, Info& info,
         MinknapParams params, ItemPos k, Profit o)
 {
-    info.verbose("*** minknap (list, part) ***\n");
+    if (o == -1)
+        info.verbose("*** minknap (list, part " + std::to_string(k) + ") ***\n");
     info.verbose(
             "n " + std::to_string(ins.item_number()) + "/" + std::to_string(ins.total_item_number()) +
             " f " + std::to_string(ins.first_item()) +
