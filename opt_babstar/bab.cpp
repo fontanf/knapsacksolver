@@ -579,9 +579,7 @@ Solution knapsack::sopt_starknap(Instance& ins, Info& info, StarknapParams param
 
         // Try to add item k for k = j+1..n-1
         for (ItemPos k=node->j+1; k<n; ++k) {
-            std::cout << k << std::endl;
             ItemPos j_next = idx[k];
-            std::cout << j_next << std::endl;
             info.debug("k " + std::to_string(k) + " j_next " + std::to_string(j_next) + " " + ins.item(j_next).to_string());
 
             Weight x = (j_next >= b)? 1: -1;

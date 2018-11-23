@@ -45,8 +45,7 @@ std::string to_string(const std::pair<State, StateValue>& s)
 Profit knapsack::opt_balknap_list(Instance& ins, Info& info,
         BalknapParams params)
 {
-    if (info.verbose())
-        std::cout << "*** balknap (list) ***" << std::endl;
+    info.verbose("*** balknap (list) ***\n");
 
     info.debug("Sort items...\n");
     if (params.upper_bound == "b") {
@@ -62,8 +61,7 @@ Profit knapsack::opt_balknap_list(Instance& ins, Info& info,
     }
 
     // Compute lower bound
-    if (info.verbose())
-        std::cout << "Compute lower bound..." << std::flush;
+    info.verbose("Compute lower bound...");
     Profit lb = 0;
     if (params.lb_greedynlogn == 0) {
         Info info_tmp;
@@ -74,8 +72,7 @@ Profit knapsack::opt_balknap_list(Instance& ins, Info& info,
     } else {
         lb = ins.break_profit();
     }
-    if (info.verbose())
-        std::cout << " " << lb << std::endl;
+    info.verbose(" " + std::to_string(lb) + "\n");
 
     // Variable reduction
     if (params.upper_bound == "b") {
@@ -151,8 +148,7 @@ Profit knapsack::opt_balknap_list(Instance& ins, Info& info,
     map.insert({{w_bar,p_bar},{b,f}}); // s(w_bar,p_bar) = b
 
     // Recursion
-    if (info.verbose())
-        std::cout << "Recursion..." << std::endl;
+    info.verbose("Recursion...\n");
     for (ItemPos t=b; t<=l; ++t) {
         if (info.debug()) {
             info.debug("Map: " + std::to_string(map.size()) + "\n");
@@ -338,19 +334,16 @@ void update_bounds(const Instance& ins, Solution& sol_best, Profit& lb,
 {
     if (0 <= params.ub_surrogate && params.ub_surrogate <= nodes) {
         params.ub_surrogate = -1;
-        if (info.verbose())
-            std::cout << "SURROGATE..." << std::flush;
+        info.verbose("Surrogate...\n");
         Info info_tmp;
         so = ub_surrogate(ins, sol_best.profit(), info);
-        if (info.verbose())
-            std::cout << " K " << so.bound << " S " << so.multiplier << std::flush;
+        info.verbose(" k " + std::to_string(so.bound)
+                + " s " + std::to_string(so.multiplier));
         if (ub > so.ub) {
             ub = so.ub;
-            if (info.verbose())
-                std::cout << " " << ins.print_ub(ub) << std::endl;
+            info.verbose(" " + std::to_string(ub) + "\n");
         } else {
-            if (info.verbose())
-                std::cout << " NO IMPROVEMENT" << std::endl;
+            info.verbose(" no improvement\n");
         }
     }
 
@@ -358,42 +351,36 @@ void update_bounds(const Instance& ins, Solution& sol_best, Profit& lb,
         params.solve_sur = -1;
         if (sol_best.profit() == ub)
             return;
-        if (info.verbose())
-            std::cout << "SOLVE SURROGATE..." << std::endl;
+        info.verbose("Solve surrogate instance...\n");
         assert(so.bound != -1);
         Instance ins_sur(ins);
         ins_sur.surrogate(so.multiplier, so.bound, ins_sur.first_item());
+        info.verbose("<- End solve surrogate instance\n");
         Solution sol_sur = sopt_balknap_list_part(ins_sur, info, params, k, -1);
         if (ub > sol_sur.profit()) {
             ub = sol_sur.profit();
-            if (info.verbose())
-                std::cout << "END SOLVE SURROGATE " << ins.print_ub(ub) << std::flush;
+            info.verbose("Update upper bound " + std::to_string(ub) + "\n");
         }
-        if (info.verbose())
-            std::cout << " K " << sol_sur.item_number() << "/" << so.bound << std::flush;
+        info.debug("k " + std::to_string(sol_sur.item_number())
+                + "/" + std::to_string(so.bound) + "\n");
         if (sol_sur.item_number() == so.bound) {
             sol_best = sol_sur;
             lb = sol_best.profit();
-            if (info.verbose())
-                std::cout << " " << ins.print_lb(sol_best.profit()) << std::flush;
+            info.verbose("Update best solution " + std::to_string(sol_best.profit()));
         }
-        if (info.verbose())
-            std::cout << std::endl;
+        info.verbose("\n");
     }
 
     if (0 <= params.lb_greedynlogn && params.lb_greedynlogn <= nodes) {
         params.lb_greedynlogn = -1;
-        if (info.verbose())
-            std::cout << "GREEDYNLOGN..." << std::flush;
+        info.verbose("Run greedynlogn...");
         Info info_tmp;
         if (sol_best.update(sol_bestgreedynlogn(ins, info_tmp))) {
             if (sol_best.profit() > lb)
                 lb = sol_best.profit();
-            if (info.verbose())
-                std::cout << " " << ins.print_lb(sol_best.profit()) << std::endl;
+            info.verbose(" update best solution " + std::to_string(sol_best.profit()) + "\n");
         } else {
-            if (info.verbose())
-                std::cout << " NO IMPROVEMENT" << std::endl;
+            info.verbose(" no improvement\n");
         }
     }
 }
@@ -401,14 +388,14 @@ void update_bounds(const Instance& ins, Solution& sol_best, Profit& lb,
 Solution knapsack::sopt_balknap_list_part(Instance& ins, Info& info,
         BalknapParams params, ItemPos k, Profit o)
 {
-    DBG(std::cout << "BALKNAPLISTPART... OPT " << o << std::endl;)
-    DBG(std::cout << ins << std::endl;)
-
-    if (info.verbose())
-        std::cout << "F " << ins.first_item()
-            << " L " << ins.last_item()
-            << " N " << ins.item_number()
-            << std::endl;
+    if (o == -1)
+        info.verbose("**** balknap (list, part " + std::to_string(k) + ")***\n");
+    info.debug(
+            "n " + std::to_string(ins.item_number()) + "/" + std::to_string(ins.total_item_number()) +
+            " f " + std::to_string(ins.first_item()) +
+            " l " + std::to_string(ins.last_item()) +
+            " o " + std::to_string(o) +
+            "\n");
 
     // Sorting
     DBG(std::cout << "SORTING..." << std::endl;)
@@ -890,8 +877,7 @@ Solution knapsack::sopt_balknap_list_all(Instance& ins, Info& info,
     auto best_state = maps[0].begin();
 
     // Recursion
-    if (info.verbose())
-        std::cout << "Recursion..." << std::endl;
+    info.verbose("Recursion...\n");
     for (ItemPos t=b; t<=l; ++t) {
         ItemPos k = t - b + 1;
         if (info.debug()) {

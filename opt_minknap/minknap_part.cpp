@@ -184,28 +184,27 @@ void remove_item(const Instance& ins, std::vector<StatePart>& l0,
 
 #undef DBG
 
-#define DBG(x)
-//#define DBG(x) x
-
 Solution knapsack::sopt_minknap_list_part(Instance& ins, Info& info,
         MinknapParams params, ItemPos k, Profit o)
 {
     if (o == -1)
         info.verbose("*** minknap (list, part " + std::to_string(k) + ") ***\n");
-    info.verbose(
+    info.debug(
             "n " + std::to_string(ins.item_number()) + "/" + std::to_string(ins.total_item_number()) +
             " f " + std::to_string(ins.first_item()) +
             " l " + std::to_string(ins.last_item()) +
+            " o " + std::to_string(o) +
             "\n");
 
-    DBG(std::cout << "SORTING..." << std::endl;)
+    info.debug("Sort items...\n");
     ins.sort_partially();
     if (ins.break_item() == ins.last_item()+1) { // all items are in the break solution
+        info.debug("All items fit in the knapsack.\n");
         Solution sol = *ins.break_solution();
         return algorithm_end(sol, info);
     }
 
-    DBG(std::cout << "LB..." << std::flush;)
+    info.verbose("Compute lower bound...");
     Solution sol(ins);
     if (params.lb_greedynlogn == 0) {
         params.lb_greedynlogn = -1;
@@ -218,7 +217,7 @@ Solution knapsack::sopt_minknap_list_part(Instance& ins, Info& info,
     } else {
         sol = *ins.break_solution();
     }
-    DBG(std::cout << " " << ins.print_lb(sol.profit()) << std::endl;)
+    info.verbose(" " + std::to_string(sol.profit()) + "\n");
 
     Weight  c = ins.total_capacity();
     ItemPos n = ins.item_number();
@@ -226,14 +225,17 @@ Solution knapsack::sopt_minknap_list_part(Instance& ins, Info& info,
 
     // Trivial cases
     if (n == 0 || c == 0) {
+        info.debug("Empty instance.\n");
         if (ins.reduced_solution()->profit() > sol.profit())
             sol = *ins.reduced_solution();
         return algorithm_end(sol, info);
     } else if (n == 1) {
+        info.debug("Instance only contains one item.\n");
         Solution sol1 = *ins.reduced_solution();
         sol1.set(ins.first_item(), true);
         return algorithm_end((sol1.profit() > sol.profit())? sol1: sol, info);
     } else if (ins.break_item() == ins.last_item()+1) {
+        info.debug("All items fit in the knapsack.\n");
         if (ins.break_solution()->profit() > sol.profit())
             sol = *ins.break_solution();
         return algorithm_end(sol, info);
@@ -243,41 +245,54 @@ Solution knapsack::sopt_minknap_list_part(Instance& ins, Info& info,
     Profit p_bar = ins.break_solution()->profit();
     Info info_tmp;
     Profit u = (o != -1)? o: ub_dantzig(ins, info_tmp);
-    if (sol.profit() == u) // If UB == LB, then stop
+    if (sol.profit() == u) { // If UB == LB, then stop
+        info.debug("Lower bound equals upper bound.");
         return algorithm_end(sol, info);
+    }
 
     // Create memory table
-    DBG(std::cout << "K " << k << " F " << ins.first_item() << " B " << ins.break_item() << " L " << ins.last_item() << std::endl;)
     PartSolFactory2 psolf(k);
     std::vector<StatePart> l0 = {{w_bar, p_bar, 0}};
 
-    DBG(std::cout << "RECURSION..." << std::endl;)
+    info.verbose("Recursion...\n");
     ItemPos s = ins.break_item() - 1;
     ItemPos t = ins.break_item();
     StatePart best_state = l0.front();
+    StateIdx state_number = 1;
     while (!l0.empty()) {
-        DBG(std::cout << "STATES " << l0.size() << std::endl;)
-        DBG(std::cout << "F " << ins.first_item() << " S' " << ins.first_sorted_item() << " S " << s << " T " << t << " T' " << ins.last_sorted_item() << " L " << ins.last_item() << std::endl;)
+        info.debug("List of states size " + std::to_string(l0.size()) + "\n");
+        info.debug("f " + std::to_string(ins.first_item())
+                + " s " + std::to_string(ins.first_sorted_item())
+                + " t " + std::to_string(ins.last_sorted_item())
+                + " l " + std::to_string(ins.last_item()) + "\n");
         if (ins.int_right_size() > 0 && t+1 > ins.last_sorted_item())
             ins.sort_right(lb);
         if (t <= ins.last_sorted_item()) {
             add_item(ins, l0, s, t, lb, best_state, u, psolf);
+            state_number += l0.size();
             ++t;
         }
         if (lb == u)
             break;
 
-        DBG(std::cout << "STATES " << l0.size() << std::endl;)
-        DBG(std::cout << "F " << ins.first_item() << " S' " << ins.first_sorted_item() << " S " << s << " T " << t << " T' " << ins.last_sorted_item() << " L " << ins.last_item() << std::endl;)
+        info.debug("List of states size " + std::to_string(l0.size()) + "\n");
+        info.debug("f " + std::to_string(ins.first_item())
+                + " s " + std::to_string(ins.first_sorted_item())
+                + " t " + std::to_string(ins.last_sorted_item())
+                + " l " + std::to_string(ins.last_item()) + "\n");
         if (ins.int_left_size() > 0 && s-1 < ins.first_sorted_item())
             ins.sort_left(lb);
         if (s >= ins.first_sorted_item()) {
             remove_item(ins, l0, s, t, lb, best_state, u, psolf);
+            state_number += l0.size();
             --s;
         }
         if (lb == u)
             break;
     }
+
+    info.verbose("State number: " + Info::to_string(state_number) + "\n");
+    info.pt.put("Algorithm.StateNumber", state_number);
 
     if (best_state.p <= sol.profit())
         return algorithm_end(sol, info);
@@ -285,12 +300,11 @@ Solution knapsack::sopt_minknap_list_part(Instance& ins, Info& info,
 
     ins.set_first_item(s+1);
     ins.set_last_item(t-1);
-    DBG(std::cout << "PSOL " << psolf.print(best_state.sol) << std::endl;)
+    info.debug("psol " + psolf.print(best_state.sol) + "\n");
     ins.fix(psolf, best_state.sol);
-    //std::cout << "F " << ins.first_item() << " L " << ins.last_item() << std::endl;
-    DBG(std::cout << "MINKNAPPART... END" << std::endl;)
-    return knapsack::sopt_minknap_list_part(ins, info, params, k, best_state.p);
-}
 
-#undef DBG
+    Info info_tmp2;
+    sol = knapsack::sopt_minknap_list_part(ins, info_tmp2, params, k, best_state.p);
+    return algorithm_end(sol, info);
+}
 
