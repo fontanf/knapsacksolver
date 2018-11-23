@@ -710,10 +710,10 @@ end:
     ins.set_last_item(last_item);
     DBG(std::cout << ins << std::endl;)
     ins.fix(psolf, best_state.second.sol);
-    DBG(std::cout << ins << std::endl;)
 
-    DBG(std::cout << "BALKNAPLISTPART... END" << std::endl;)
-    return knapsack::sopt_balknap_list_part(ins, info,  params, k, best_state.first.pi);
+    Info info_tmp2;
+    sol = knapsack::sopt_balknap_list_part(ins, info_tmp2,  params, k, best_state.first.pi);
+    return algorithm_end(sol, info);
 }
 
 #undef DBG

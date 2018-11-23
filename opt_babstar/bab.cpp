@@ -530,6 +530,7 @@ Solution knapsack::sopt_starknap(Instance& ins, Info& info, StarknapParams param
         info.debug("\n");
     }
 
+    info.verbose("Branch...\n");
     NodeDP n0;
     n0.w = ins.break_solution()->weight();
     n0.p = ins.break_solution()->profit();

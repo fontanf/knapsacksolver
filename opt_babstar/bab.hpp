@@ -12,7 +12,7 @@ Solution sopt_babstar_dp(Instance& ins, Info& info);
 
 struct StarknapParams
 {
-    std::string upper_bound = "b";
+    std::string upper_bound = "t";
     StateIdx lb_greedy = 0;
     StateIdx lb_greedynlogn = -1;
     StateIdx lb_pairing = -1;

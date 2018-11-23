@@ -27,33 +27,44 @@ std::ostream& operator<<(std::ostream& os, const StatePart& s)
     return os;
 }
 
-void add_item(const Instance& ins, std::vector<StatePart>& l0,
-        ItemPos s, ItemPos t, Profit& lb, StatePart& best_state, Profit ub,
-        PartSolFactory2& psolf)
+struct MinknapData
+{
+    MinknapData(const Instance& ins): ins(ins) { }
+    const Instance& ins;
+    std::vector<StatePart> l0;
+    ItemPos s;
+    ItemPos t;
+    Profit lb;
+    StatePart best_state;
+    Profit ub;
+    PartSolFactory2 psolf;
+};
+
+void add_item(MinknapData& d)
 {
     DBG(std::cout << "ADD ITEM... S " << s << " T " << t << " LB " << lb << std::endl;)
-    psolf.add_item(t);
-    best_state.sol = psolf.remove(best_state.sol);
-    Weight c = ins.total_capacity();
-    Weight wt = ins.item(t).w;
-    Profit pt = ins.item(t).p;
-    ItemPos tx = (ins.int_right_size() > 0 && t == ins.last_sorted_item())?
-            ins.last_item()+1: t+1;
-    ItemPos sx = (ins.int_left_size() > 0 && s == ins.first_sorted_item())?
-            ins.first_item()-1: s;
+    d.psolf.add_item(d.t);
+    d.best_state.sol = d.psolf.remove(d.best_state.sol);
+    Weight c = d.ins.total_capacity();
+    Weight wt = d.ins.item(d.t).w;
+    Profit pt = d.ins.item(d.t).p;
+    ItemPos tx = (d.ins.int_right_size() > 0 && d.t == d.ins.last_sorted_item())?
+            d.ins.last_item()+1: d.t+1;
+    ItemPos sx = (d.ins.int_left_size() > 0 && d.s == d.ins.first_sorted_item())?
+            d.ins.first_item()-1: d.s;
     DBG(std::cout << "SX " << sx << " TX " << tx << std::endl;)
     std::vector<StatePart> l;
-    std::vector<StatePart>::iterator it = l0.begin();
-    std::vector<StatePart>::iterator it1 = l0.begin();
-    while (it != l0.end() || it1 != l0.end()) {
-        if (it == l0.end() || it->w > it1->w + wt) {
-            StatePart s1{it1->w+wt, it1->p+pt, psolf.add(it1->sol)};
+    std::vector<StatePart>::iterator it = d.l0.begin();
+    std::vector<StatePart>::iterator it1 = d.l0.begin();
+    while (it != d.l0.end() || it1 != d.l0.end()) {
+        if (it == d.l0.end() || it->w > it1->w + wt) {
+            StatePart s1{it1->w+wt, it1->p+pt, d.psolf.add(it1->sol)};
             DBG(std::cout << "STATE " << *it1 << " => " << s1 << std::flush;)
             if (l.empty() || s1.p > l.back().p) {
-                if (s1.w <= c && s1.p > lb) { // Update lower bound
-                    lb = s1.p;
-                    best_state = s1;
-                    if (lb == ub)
+                if (s1.w <= c && s1.p > d.lb) { // Update lower bound
+                    d.lb = s1.p;
+                    d.best_state = s1;
+                    if (d.lb == d.ub)
                         return;
                 }
                 if (!l.empty() && s1.w == l.back().w) {
@@ -61,10 +72,10 @@ void add_item(const Instance& ins, std::vector<StatePart>& l0,
                     DBG(std::cout << " OK" << std::endl;)
                 } else {
                     Profit ub = (s1.w <= c)?
-                        ub_dembo(ins, tx, s1.p, c-s1.w):
-                        ub_dembo_rev(ins, sx, s1.p, c-s1.w);
+                        ub_dembo(d.ins, tx, s1.p, c-s1.w):
+                        ub_dembo_rev(d.ins, sx, s1.p, c-s1.w);
                     DBG(std::cout << " UB " << ub << " LB " << lb << std::flush;)
-                    if (ub > lb) {
+                    if (ub > d.lb) {
                         l.push_back(s1);
                         DBG(std::cout << " OK" << std::endl;)
                     } else {
@@ -76,19 +87,19 @@ void add_item(const Instance& ins, std::vector<StatePart>& l0,
             }
             it1++;
         } else {
-            assert(it != l0.end());
+            assert(it != d.l0.end());
             DBG(std::cout << "STATE " << *it << std::flush;)
-            it->sol = psolf.remove(it->sol);
+            it->sol = d.psolf.remove(it->sol);
             if (l.empty() || it->p > l.back().p) {
                 if (!l.empty() && it->w == l.back().w) {
                     l.back() = *it;
                     DBG(std::cout << " OK" << std::endl;)
                 } else {
                     Profit ub = (it->w <= c)?
-                        ub_dembo(ins, tx, it->p, c-it->w):
-                        ub_dembo_rev(ins, sx, it->p, c-it->w);
+                        ub_dembo(d.ins, tx, it->p, c-it->w):
+                        ub_dembo_rev(d.ins, sx, it->p, c-it->w);
                     DBG(std::cout << " UB " << ub << " LB " << lb << std::flush;)
-                    if (ub > lb) {
+                    if (ub > d.lb) {
                         l.push_back(*it);
                         DBG(std::cout << " OK" << std::endl;)
                     } else {
@@ -101,42 +112,40 @@ void add_item(const Instance& ins, std::vector<StatePart>& l0,
             ++it;
         }
     }
-    l0 = std::move(l);
+    d.l0 = std::move(l);
     DBG(std::cout << "ADD ITEM... END" << std::endl;)
 }
 
-void remove_item(const Instance& ins, std::vector<StatePart>& l0,
-        ItemPos s, ItemPos t, Profit& lb, StatePart& best_state, Profit ub,
-        PartSolFactory2& psolf)
+void remove_item(MinknapData& d)
 {
     DBG(std::cout << "REMOVE ITEM... S " << s << " T " << t << " LB " << lb << std::endl;)
-    psolf.add_item(s);
-    best_state.sol = psolf.add(best_state.sol);
-    Weight c = ins.total_capacity();
-    Weight ws = ins.item(s).w;
-    Profit ps = ins.item(s).p;
-    ItemPos tx = (ins.int_right_size() > 0 && t == ins.last_sorted_item())?
-            ins.last_item()+1: t;
-    ItemPos sx = (ins.int_left_size() > 0 && s == ins.first_sorted_item())?
-            ins.first_item()-1: s-1;
+    d.psolf.add_item(d.s);
+    d.best_state.sol = d.psolf.add(d.best_state.sol);
+    Weight c = d.ins.total_capacity();
+    Weight ws = d.ins.item(d.s).w;
+    Profit ps = d.ins.item(d.s).p;
+    ItemPos tx = (d.ins.int_right_size() > 0 && d.t == d.ins.last_sorted_item())?
+            d.ins.last_item()+1: d.t;
+    ItemPos sx = (d.ins.int_left_size() > 0 && d.s == d.ins.first_sorted_item())?
+            d.ins.first_item()-1: d.s-1;
     DBG(std::cout << "SX " << sx << " TX " << tx << std::endl;)
     std::vector<StatePart> l;
-    std::vector<StatePart>::iterator it = l0.begin();
-    std::vector<StatePart>::iterator it1 = l0.begin();
-    while (it != l0.end() || it1 != l0.end()) {
-        if (it1 == l0.end() || it->w <= it1->w - ws) {
+    std::vector<StatePart>::iterator it = d.l0.begin();
+    std::vector<StatePart>::iterator it1 = d.l0.begin();
+    while (it != d.l0.end() || it1 != d.l0.end()) {
+        if (it1 == d.l0.end() || it->w <= it1->w - ws) {
             DBG(std::cout << "STATE " << *it;)
-            it->sol = psolf.add(it->sol);
+            it->sol = d.psolf.add(it->sol);
             if (l.empty() || it->p > l.back().p) {
                 if (!l.empty() && it->w == l.back().w) {
                     l.back() = *it;
                     DBG(std::cout << " OK" << std::endl;)
                 } else {
                     Profit ub = (it->w <= c)?
-                        ub_dembo(ins, tx, it->p, c-it->w):
-                        ub_dembo_rev(ins, sx, it->p, c-it->w);
+                        ub_dembo(d.ins, tx, it->p, c-it->w):
+                        ub_dembo_rev(d.ins, sx, it->p, c-it->w);
                     DBG(std::cout << " UB " << ub << " LB " << lb;)
-                    if (ub > lb) {
+                    if (ub > d.lb) {
                         l.push_back(*it);
                         DBG(std::cout << " OK" << std::endl;)
                     } else {
@@ -148,13 +157,13 @@ void remove_item(const Instance& ins, std::vector<StatePart>& l0,
             }
             ++it;
         } else {
-            StatePart s1{it1->w-ws, it1->p-ps, psolf.remove(it1->sol)};
+            StatePart s1{it1->w-ws, it1->p-ps, d.psolf.remove(it1->sol)};
             DBG(std::cout << "STATE " << *it1 << " => " << s1;)
             if (l.empty() || s1.p > l.back().p) {
-                if (s1.w <= c && s1.p > lb) { // Update lower bound
-                    lb = s1.p;
-                    best_state = s1;
-                    if (lb == ub)
+                if (s1.w <= c && s1.p > d.lb) { // Update lower bound
+                    d.lb = s1.p;
+                    d.best_state = s1;
+                    if (d.lb == d.ub)
                         return;
                 }
                 if (!l.empty() && s1.w == l.back().w) {
@@ -162,10 +171,10 @@ void remove_item(const Instance& ins, std::vector<StatePart>& l0,
                     DBG(std::cout << " OK" << std::endl;)
                 } else {
                     Profit ub = (s1.w <= c)?
-                        ub_dembo(ins, tx, s1.p, c-s1.w):
-                        ub_dembo_rev(ins, sx, s1.p, c-s1.w);
+                        ub_dembo(d.ins, tx, s1.p, c-s1.w):
+                        ub_dembo_rev(d.ins, sx, s1.p, c-s1.w);
                     DBG(std::cout << " UB " << ub << " LB " << lb;)
-                    if (ub > lb) {
+                    if (ub > d.lb) {
                         l.push_back(s1);
                         DBG(std::cout << " OK" << std::endl;)
                     } else {
@@ -178,7 +187,7 @@ void remove_item(const Instance& ins, std::vector<StatePart>& l0,
             it1++;
         }
     }
-    l0 = std::move(l);
+    d.l0 = std::move(l);
     DBG(std::cout << "REMOVE ITEM... END" << std::endl;)
 }
 
@@ -251,60 +260,63 @@ Solution knapsack::sopt_minknap_list_part(Instance& ins, Info& info,
     }
 
     // Create memory table
-    PartSolFactory2 psolf(k);
-    std::vector<StatePart> l0 = {{w_bar, p_bar, 0}};
+    MinknapData d(ins);
+    d.lb = lb;
+    d.ub = u;
+    d.psolf = PartSolFactory2(k);
+    d.l0.push_back({w_bar, p_bar, 0});
 
     info.verbose("Recursion...\n");
-    ItemPos s = ins.break_item() - 1;
-    ItemPos t = ins.break_item();
-    StatePart best_state = l0.front();
+    d.s = ins.break_item() - 1;
+    d.t = ins.break_item();
+    d.best_state = d.l0.front();
     StateIdx state_number = 1;
-    while (!l0.empty()) {
-        info.debug("List of states size " + std::to_string(l0.size()) + "\n");
+    while (!d.l0.empty()) {
+        info.debug("List of states size " + std::to_string(d.l0.size()) + "\n");
         info.debug("f " + std::to_string(ins.first_item())
                 + " s " + std::to_string(ins.first_sorted_item())
                 + " t " + std::to_string(ins.last_sorted_item())
                 + " l " + std::to_string(ins.last_item()) + "\n");
-        if (ins.int_right_size() > 0 && t+1 > ins.last_sorted_item())
+        if (ins.int_right_size() > 0 && d.t+1 > ins.last_sorted_item())
             ins.sort_right(lb);
-        if (t <= ins.last_sorted_item()) {
-            add_item(ins, l0, s, t, lb, best_state, u, psolf);
-            state_number += l0.size();
-            ++t;
+        if (d.t <= ins.last_sorted_item()) {
+            add_item(d);
+            state_number += d.l0.size();
+            ++d.t;
         }
-        if (lb == u)
+        if (d.lb == d.ub)
             break;
 
-        info.debug("List of states size " + std::to_string(l0.size()) + "\n");
+        info.debug("List of states size " + std::to_string(d.l0.size()) + "\n");
         info.debug("f " + std::to_string(ins.first_item())
                 + " s " + std::to_string(ins.first_sorted_item())
                 + " t " + std::to_string(ins.last_sorted_item())
                 + " l " + std::to_string(ins.last_item()) + "\n");
-        if (ins.int_left_size() > 0 && s-1 < ins.first_sorted_item())
+        if (ins.int_left_size() > 0 && d.s-1 < ins.first_sorted_item())
             ins.sort_left(lb);
-        if (s >= ins.first_sorted_item()) {
-            remove_item(ins, l0, s, t, lb, best_state, u, psolf);
-            state_number += l0.size();
-            --s;
+        if (d.s >= ins.first_sorted_item()) {
+            remove_item(d);
+            state_number += d.l0.size();
+            --d.s;
         }
-        if (lb == u)
+        if (d.lb == d.ub)
             break;
     }
 
     info.verbose("State number: " + Info::to_string(state_number) + "\n");
     info.pt.put("Algorithm.StateNumber", state_number);
 
-    if (best_state.p <= sol.profit())
+    if (d.best_state.p <= sol.profit())
         return algorithm_end(sol, info);
     assert(ins.check_opt(lb));
 
-    ins.set_first_item(s+1);
-    ins.set_last_item(t-1);
-    info.debug("psol " + psolf.print(best_state.sol) + "\n");
-    ins.fix(psolf, best_state.sol);
+    ins.set_first_item(d.s+1);
+    ins.set_last_item(d.t-1);
+    info.debug("psol " + d.psolf.print(d.best_state.sol) + "\n");
+    ins.fix(d.psolf, d.best_state.sol);
 
     Info info_tmp2;
-    sol = knapsack::sopt_minknap_list_part(ins, info_tmp2, params, k, best_state.p);
+    sol = knapsack::sopt_minknap_list_part(ins, info_tmp2, params, k, d.best_state.p);
     return algorithm_end(sol, info);
 }
 
