@@ -7,29 +7,23 @@
 #include "knapsack/ub_dantzig/dantzig.hpp"
 #include "knapsack/ub_surrogate/surrogate.hpp"
 
-#include <bitset>
-
 using namespace knapsack;
-
-#define DBG(x)
-//#define DBG(x) x
 
 struct StatePart
 {
     Weight w;
     Profit p;
     PartSol2 sol;
-};
 
-std::ostream& operator<<(std::ostream& os, const StatePart& s)
-{
-    os << "(" << s.w << " " << s.p << ")";
-    return os;
-}
+    std::string to_string()
+    {
+        return "(" + std::to_string(w) + " " + std::to_string(p) + ")";
+    }
+};
 
 struct MinknapData
 {
-    MinknapData(const Instance& ins): ins(ins) { }
+    MinknapData(const Instance& ins, Info& info): ins(ins), info(info) { }
     const Instance& ins;
     std::vector<StatePart> l0;
     ItemPos s;
@@ -38,11 +32,15 @@ struct MinknapData
     StatePart best_state;
     Profit ub;
     PartSolFactory2 psolf;
+    Info& info;
 };
 
 void add_item(MinknapData& d)
 {
-    DBG(std::cout << "ADD ITEM... S " << s << " T " << t << " LB " << lb << std::endl;)
+    d.info.debug("Add item... s " + std::to_string(d.s)
+            + " t " + std::to_string(d.t)
+            + " lb " + std::to_string(d.lb) + "\n");
+
     d.psolf.add_item(d.t);
     d.best_state.sol = d.psolf.remove(d.best_state.sol);
     Weight c = d.ins.total_capacity();
@@ -52,14 +50,14 @@ void add_item(MinknapData& d)
             d.ins.last_item()+1: d.t+1;
     ItemPos sx = (d.ins.int_left_size() > 0 && d.s == d.ins.first_sorted_item())?
             d.ins.first_item()-1: d.s;
-    DBG(std::cout << "SX " << sx << " TX " << tx << std::endl;)
+    d.info.debug("sx " + std::to_string(sx) + " tx " + std::to_string(tx) + "\n");
     std::vector<StatePart> l;
     std::vector<StatePart>::iterator it = d.l0.begin();
     std::vector<StatePart>::iterator it1 = d.l0.begin();
     while (it != d.l0.end() || it1 != d.l0.end()) {
         if (it == d.l0.end() || it->w > it1->w + wt) {
             StatePart s1{it1->w+wt, it1->p+pt, d.psolf.add(it1->sol)};
-            DBG(std::cout << "STATE " << *it1 << " => " << s1 << std::flush;)
+            d.info.debug("State " + it1->to_string() + " => " + s1.to_string());
             if (l.empty() || s1.p > l.back().p) {
                 if (s1.w <= c && s1.p > d.lb) { // Update lower bound
                     d.lb = s1.p;
@@ -69,56 +67,59 @@ void add_item(MinknapData& d)
                 }
                 if (!l.empty() && s1.w == l.back().w) {
                     l.back() = s1;
-                    DBG(std::cout << " OK" << std::endl;)
+                    d.info.debug(" ok\n");
                 } else {
                     Profit ub = (s1.w <= c)?
                         ub_dembo(d.ins, tx, s1.p, c-s1.w):
                         ub_dembo_rev(d.ins, sx, s1.p, c-s1.w);
-                    DBG(std::cout << " UB " << ub << " LB " << lb << std::flush;)
+                    d.info.debug(" ub " + std::to_string(ub) + " lb " + std::to_string(d.lb));
                     if (ub > d.lb) {
                         l.push_back(s1);
-                        DBG(std::cout << " OK" << std::endl;)
+                        d.info.debug(" ok\n");
                     } else {
-                        DBG(std::cout << " X" << std::endl;)
+                        d.info.debug(" ×\n");
                     }
                 }
             } else {
-                DBG(std::cout << " X" << std::endl;)
+                d.info.debug(" ×\n");
             }
             it1++;
         } else {
             assert(it != d.l0.end());
-            DBG(std::cout << "STATE " << *it << std::flush;)
+            d.info.debug("State " + it->to_string());
             it->sol = d.psolf.remove(it->sol);
             if (l.empty() || it->p > l.back().p) {
                 if (!l.empty() && it->w == l.back().w) {
                     l.back() = *it;
-                    DBG(std::cout << " OK" << std::endl;)
+                    d.info.debug(" ok\n");
                 } else {
                     Profit ub = (it->w <= c)?
                         ub_dembo(d.ins, tx, it->p, c-it->w):
                         ub_dembo_rev(d.ins, sx, it->p, c-it->w);
-                    DBG(std::cout << " UB " << ub << " LB " << lb << std::flush;)
+                    d.info.debug(" ub " + std::to_string(ub) + " lb " + std::to_string(d.lb));
                     if (ub > d.lb) {
                         l.push_back(*it);
-                        DBG(std::cout << " OK" << std::endl;)
+                        d.info.debug(" ok\n");
                     } else {
-                        DBG(std::cout << " X" << std::endl;)
+                        d.info.debug(" ×\n");
                     }
                 }
             } else {
-                DBG(std::cout << " X" << std::endl;)
+                d.info.debug(" ×\n");
             }
             ++it;
         }
     }
     d.l0 = std::move(l);
-    DBG(std::cout << "ADD ITEM... END" << std::endl;)
+    d.info.debug("Add item... end\n");
 }
 
 void remove_item(MinknapData& d)
 {
-    DBG(std::cout << "REMOVE ITEM... S " << s << " T " << t << " LB " << lb << std::endl;)
+    d.info.debug("Remove item... s " + std::to_string(d.s)
+            + " t " + std::to_string(d.t)
+            + " lb " + std::to_string(d.lb) + "\n");
+
     d.psolf.add_item(d.s);
     d.best_state.sol = d.psolf.add(d.best_state.sol);
     Weight c = d.ins.total_capacity();
@@ -128,37 +129,37 @@ void remove_item(MinknapData& d)
             d.ins.last_item()+1: d.t;
     ItemPos sx = (d.ins.int_left_size() > 0 && d.s == d.ins.first_sorted_item())?
             d.ins.first_item()-1: d.s-1;
-    DBG(std::cout << "SX " << sx << " TX " << tx << std::endl;)
+    d.info.debug("sx " + std::to_string(sx) + " tx " + std::to_string(tx) + "\n");
     std::vector<StatePart> l;
     std::vector<StatePart>::iterator it = d.l0.begin();
     std::vector<StatePart>::iterator it1 = d.l0.begin();
     while (it != d.l0.end() || it1 != d.l0.end()) {
         if (it1 == d.l0.end() || it->w <= it1->w - ws) {
-            DBG(std::cout << "STATE " << *it;)
+            d.info.debug("State " + it->to_string());
             it->sol = d.psolf.add(it->sol);
             if (l.empty() || it->p > l.back().p) {
                 if (!l.empty() && it->w == l.back().w) {
                     l.back() = *it;
-                    DBG(std::cout << " OK" << std::endl;)
+                    d.info.debug(" ok\n");
                 } else {
                     Profit ub = (it->w <= c)?
                         ub_dembo(d.ins, tx, it->p, c-it->w):
                         ub_dembo_rev(d.ins, sx, it->p, c-it->w);
-                    DBG(std::cout << " UB " << ub << " LB " << lb;)
+                    d.info.debug(" ub " + std::to_string(ub) + " lb " + std::to_string(d.lb));
                     if (ub > d.lb) {
                         l.push_back(*it);
-                        DBG(std::cout << " OK" << std::endl;)
+                        d.info.debug(" ok\n");
                     } else {
-                        DBG(std::cout << " X" << std::endl;)
+                        d.info.debug(" ×\n");
                     }
                 }
             } else {
-                DBG(std::cout << " X" << std::endl;)
+                d.info.debug(" ×\n");
             }
             ++it;
         } else {
             StatePart s1{it1->w-ws, it1->p-ps, d.psolf.remove(it1->sol)};
-            DBG(std::cout << "STATE " << *it1 << " => " << s1;)
+            d.info.debug("State " + it1->to_string() + " => " + s1.to_string());
             if (l.empty() || s1.p > l.back().p) {
                 if (s1.w <= c && s1.p > d.lb) { // Update lower bound
                     d.lb = s1.p;
@@ -168,30 +169,28 @@ void remove_item(MinknapData& d)
                 }
                 if (!l.empty() && s1.w == l.back().w) {
                     l.back() = s1;
-                    DBG(std::cout << " OK" << std::endl;)
+                    d.info.debug(" ok\n");
                 } else {
                     Profit ub = (s1.w <= c)?
                         ub_dembo(d.ins, tx, s1.p, c-s1.w):
                         ub_dembo_rev(d.ins, sx, s1.p, c-s1.w);
-                    DBG(std::cout << " UB " << ub << " LB " << lb;)
+                    d.info.debug(" ub " + std::to_string(ub) + " lb " + std::to_string(d.lb));
                     if (ub > d.lb) {
                         l.push_back(s1);
-                        DBG(std::cout << " OK" << std::endl;)
+                        d.info.debug(" ok\n");
                     } else {
-                        DBG(std::cout << " X" << std::endl;)
+                        d.info.debug(" ×\n");
                     }
                 }
             } else {
-                DBG(std::cout << " X" << std::endl;)
+                d.info.debug(" ×\n");
             }
             it1++;
         }
     }
     d.l0 = std::move(l);
-    DBG(std::cout << "REMOVE ITEM... END" << std::endl;)
+    d.info.debug("Remove item... end\n");
 }
-
-#undef DBG
 
 Solution knapsack::sopt_minknap_list_part(Instance& ins, Info& info,
         MinknapParams params, ItemPos k, Profit o)
@@ -260,7 +259,7 @@ Solution knapsack::sopt_minknap_list_part(Instance& ins, Info& info,
     }
 
     // Create memory table
-    MinknapData d(ins);
+    MinknapData d(ins, info);
     d.lb = lb;
     d.ub = u;
     d.psolf = PartSolFactory2(k);
