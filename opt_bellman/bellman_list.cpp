@@ -1,4 +1,4 @@
-#include "knapsack/opt_bellman/bellman_list.hpp"
+#include "knapsack/opt_bellman/bellman.hpp"
 
 #include "knapsack/ub_dembo/dembo.hpp"
 
@@ -8,24 +8,25 @@ struct State
 {
     Weight w;
     Profit p;
+
+    std::string to_string() const
+    {
+        return "(" + std::to_string(w) + "," + std::to_string(p) + ")";
+    }
 };
 
-std::ostream& operator<<(std::ostream& os, State& s)
+std::string to_string(std::vector<State>& l)
 {
-    os << "(" << s.w << "," << s.p << ")";
-    return os;
-}
-
-std::ostream& operator<<(std::ostream& os, std::vector<State>& l)
-{
+    std::string str;
     for (State& s: l)
-        os << s << " ";
-    return os;
+        str += s.to_string() + " ";
+    return str;
 }
 
 Profit knapsack::opt_bellman_list(Instance& ins, Info& info)
 {
-    (void)info;
+    info.verbose("*** bellman (list) ***\n");
+
     Weight  c = ins.capacity();
     ItemPos n = ins.total_item_number();
 
@@ -35,7 +36,6 @@ Profit knapsack::opt_bellman_list(Instance& ins, Info& info)
     Profit lb = 0;
     std::vector<State> l0{{0, 0}};
     for (ItemPos j=0; j<n; ++j) {
-        DBG(std::cout << "J " << j << std::endl;)
         Weight wj = ins.item(j).w;
         Profit pj = ins.item(j).p;
         std::vector<State> l{{0, 0}};
@@ -44,9 +44,7 @@ Profit knapsack::opt_bellman_list(Instance& ins, Info& info)
         while (it != l0.end() || it1 != l0.end()) {
             if (it == l0.end() || it->w > it1->w + wj) {
                 State s1{it1->w+wj, it1->p+pj};
-                DBG(std::cout << "STATE " << *it1 << " => " << s1;)
                 if (s1.w > c) {
-                    DBG(std::cout << " W>C" << std::endl;)
                     break;
                 }
                 if (s1.p > l.back().p) {
@@ -54,39 +52,30 @@ Profit knapsack::opt_bellman_list(Instance& ins, Info& info)
                         lb = s1.p;
                     if (s1.w == l.back().w) {
                         l.back() = s1;
-                        DBG(std::cout << " OK" << std::endl;)
                     } else {
                         Profit ub = ub_0(ins, j+1, s1.p, c-s1.w);
-                        DBG(std::cout << " UB " << ub;)
                         if (ub > lb) {
                             l.push_back(s1);
-                            DBG(std::cout << " OK" << std::endl;)
                         } else {
-                            DBG(std::cout << " X" << std::endl;)
                         }
                     }
                 } else {
-                    DBG(std::cout << " X" << std::endl;)
                 }
                 it1++;
             } else {
                 assert(it != l0.end());
-                DBG(std::cout << "STATE " << *it;)
                 if (it->p > l.back().p) {
                     if (it->w == l.back().w) {
                         l.back() = *it;
                     } else {
                         l.push_back(*it);
                     }
-                    DBG(std::cout << " OK" << std::endl;)
                 } else {
-                    DBG(std::cout << " X" << std::endl;)
                 }
                 ++it;
             }
         }
         l0 = std::move(l);
-        DBG(std::cout << "L " << l0 << std::endl;)
     }
 
     assert(ins.check_opt(lb));
@@ -97,28 +86,30 @@ Profit knapsack::opt_bellman_list(Instance& ins, Info& info)
 
 Solution knapsack::sopt_bellman_list_all(Instance& ins, Info& info)
 {
-    (void)info;
-    assert(false); // TODO
-    return Solution(ins);
+    info.verbose("*** bellman (list, all) ***\n");
+    Solution sol(ins);
+    info.verbose("Not yet implemented.\n");
+    return algorithm_end(sol, info);
 }
 
 /******************************************************************************/
 
 Solution knapsack::sopt_bellman_list_one(Instance& ins, Info& info)
 {
-    (void)info;
-    assert(false); // TODO
-    return Solution(ins);
+    info.verbose("*** bellman (list, one) ***\n");
+    Solution sol(ins);
+    info.verbose("Not yet implemented.\n");
+    return algorithm_end(sol, info);
 }
 
 /******************************************************************************/
 
 Solution knapsack::sopt_bellman_list_part(Instance& ins, Info& info, ItemPos k)
 {
-    (void)info;
-    (void)k;
-    assert(false); // TODO
-    return Solution(ins);
+    info.verbose("*** bellman (list, part " + std::to_string(k) + ") ***\n");
+    Solution sol(ins);
+    info.verbose("Not yet implemented.\n");
+    return algorithm_end(sol, info);
 }
 
 /******************************************************************************/
@@ -127,14 +118,12 @@ std::vector<State> opts_bellman_list(Instance& ins,
         ItemPos n1, ItemPos n2, Weight c, Info& info)
 {
     (void)info;
-    DBG(std::cout << "OPTSBELLMANLIST N1 " << n1 << " N2 " << n2 << " c " << c << std::endl;)
     if (c == 0)
         return {{0, 0}};
 
     Profit lb = 0;
     std::vector<State> l0{{0, 0}};
     for (ItemPos j=n1; j<=n2; ++j) {
-        DBG(std::cout << "J " << j << std::endl;)
         Weight wj = ins.item(j).w;
         Profit pj = ins.item(j).p;
         std::vector<State> l{{0, 0}};
@@ -143,9 +132,7 @@ std::vector<State> opts_bellman_list(Instance& ins,
         while (it != l0.end() || it1 != l0.end()) {
             if (it == l0.end() || it->w > it1->w + wj) {
                 State s1{it1->w+wj, it1->p+pj};
-                DBG(std::cout << "STATE " << *it1 << " => " << s1;)
                 if (s1.w > c) {
-                    DBG(std::cout << " W>C" << std::endl;)
                     break;
                 }
                 if (s1.p > l.back().p) {
@@ -153,40 +140,30 @@ std::vector<State> opts_bellman_list(Instance& ins,
                         lb = s1.p;
                     if (s1.w == l.back().w) {
                         l.back() = s1;
-                        DBG(std::cout << " OK" << std::endl;)
                     } else {
                         Profit ub = ub_0(ins, j+1, s1.p, c-s1.w);
-                        DBG(std::cout << " UB " << ub;)
                         if (ub >= lb) {
                             l.push_back(s1);
-                            DBG(std::cout << " OK" << std::endl;)
                         } else {
-                            DBG(std::cout << " X" << std::endl;)
                         }
                     }
                 } else {
-                    DBG(std::cout << " X" << std::endl;)
                 }
                 it1++;
             } else {
-                DBG(std::cout << "STATE " << *it;)
                 if (it->p > l.back().p) {
                     if (it->w == l.back().w) {
                         l.back() = *it;
                     } else {
                         l.push_back(*it);
                     }
-                    DBG(std::cout << " OK" << std::endl;)
                 } else {
-                    DBG(std::cout << " X" << std::endl;)
                 }
                 ++it;
             }
         }
         l0 = std::move(l);
-        DBG(std::cout << "L " << l0 << std::endl;)
     }
-    DBG(std::cout << "OPTSBELLMANLIST... END" << std::endl;)
     return l0;
 }
 
@@ -239,7 +216,6 @@ void sopt_bellman_list_rec_rec(Instance& ins,
         w2_opt = l2[i2_opt].w;
         p1_opt = l1[i1_opt].p;
         p2_opt = l2[i2_opt].p;
-        DBG(std::cout << "Z " << z_max << std::endl;)
     }
 
     if (k == n1) {
@@ -259,6 +235,8 @@ void sopt_bellman_list_rec_rec(Instance& ins,
 
 Solution knapsack::sopt_bellman_list_rec(Instance& ins, Info& info)
 {
+    info.verbose("*** bellman (list, rec) ***\n");
+
     ItemPos n = ins.item_number();
     Solution sol(ins);
 

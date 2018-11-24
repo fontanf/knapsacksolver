@@ -1,7 +1,10 @@
 cc_library(
         name = "libbellman",
-        hdrs = ["bellman_array.hpp", "bellman_list.hpp"],
-        srcs = ["bellman_array.cpp", "bellman_list.cpp"],
+        hdrs = ["bellman.hpp"],
+        srcs = [
+                "bellman_array.cpp",
+                "bellman_list.cpp"
+        ],
         deps = [
                 "//lib:cpp",
                 "//ub_dembo:libdembo",

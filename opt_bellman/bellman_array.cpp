@@ -1,4 +1,4 @@
-#include "knapsack/opt_bellman/bellman_array.hpp"
+#include "knapsack/opt_bellman/bellman.hpp"
 
 #include "knapsack/lib/part_solution_1.hpp"
 
@@ -22,11 +22,12 @@ void opts_bellman_array(const Instance& ins, std::vector<Profit>& values,
 Profit knapsack::opt_bellman_array(const Instance& ins, Info& info)
 {
     info.verbose("*** bellman (array) ***\n");
+
     Weight  c = ins.capacity();
     ItemPos n = ins.item_number();
     std::vector<Profit> values(c+1);
     opts_bellman_array(ins, values, 0, n-1, c);
-    assert(ins.check_opt(values[c]));
+
     return algorithm_end(values[c], info);
 }
 
@@ -74,7 +75,6 @@ Solution knapsack::sopt_bellman_array_all(const Instance& ins, Info& info)
         }
         j--;
     }
-    assert(ins.check_sol(sol));
     return algorithm_end(sol, info);
 }
 
@@ -92,12 +92,12 @@ Solution knapsack::sopt_bellman_array_one(const Instance& ins, Info& info)
         return algorithm_end(sol, info);
 
     std::vector<Profit> values(c+1); // Initialize memory table
-    ItemPos iter = 0;
+    ItemPos it = 0;
     Profit opt = -1;
     Profit opt_local = -1;
     while (sol.profit() != opt) {
-        iter++;
-        DBG(info.debug("it " + std::to_string(iter) + " n " + std::to_string(n) + " opt " + std::to_string(opt_local) + "\n");)
+        it++;
+        DBG(info.debug(STR1(it) + STR2(n) + STR2(opt_local) + "\n");)
 
         ItemPos last_item = -1;
 
@@ -114,7 +114,7 @@ Solution knapsack::sopt_bellman_array_one(const Instance& ins, Info& info)
                 values[c] = values[c-wj] + pj;
                 last_item = j;
                 if (values[c] == opt_local) {
-                    DBG(info.debug("Optimal value reached (" + std::to_string(j) + ")");)
+                    DBG(info.debug("Optimal value reached (" + STR1(j) + ")");)
                     goto end;
                 }
             }
@@ -124,7 +124,7 @@ Solution knapsack::sopt_bellman_array_one(const Instance& ins, Info& info)
                 if (values[w-wj] + pj > values[w]) {
                     values[w] = values[w-wj] + pj;
                     if (values[w] == opt_local) {
-                        DBG(info.debug("Optimal value reached (" + std::to_string(j) + ")");)
+                        DBG(info.debug("Optimal value reached (" + STR1(j) + ")");)
                         last_item = j;
                         goto end;
                     }
@@ -138,21 +138,20 @@ end:
         if (n == ins.item_number()) {
             opt = values[c];
             opt_local = opt;
-            DBG(info.debug("Opt " + std::to_string(opt));)
+            DBG(info.debug(STR1(opt));)
         }
 
         // Update solution and instance
-        DBG(info.debug(" add " + std::to_string(last_item));)
+        DBG(info.debug(STR4(add, last_item));)
         sol.set(last_item, true);
         c -= ins.item(last_item).w;
         opt_local -= ins.item(last_item).p;
         n = last_item;
-        DBG(info.debug(" p(S) " + std::to_string(sol.profit()) + "\n");)
+        DBG(info.debug(STR4(p(S), sol.profit()) + "\n");)
     }
 
-    info.verbose("Iterations: " + std::to_string(iter) + "\n");
-    info.pt.put("Algorithm.Iterations", iter);
-    assert(ins.check_sopt(sol));
+    info.verbose("Iterations: " + std::to_string(it) + "\n");
+    info.pt.put("Algorithm.Iterations", it);
     return algorithm_end(sol, info);
 }
 
@@ -172,12 +171,12 @@ Solution knapsack::sopt_bellman_array_part(const Instance& ins, Info& info, Item
 
     std::vector<Profit> values(c+1); // Initialize memory table
     std::vector<PartSol1> bisols(c+1);
-    ItemPos iter = 0;
+    ItemPos it = 0;
     Profit opt = -1;
     Profit opt_local = -1;
     while (sol.profit() != opt) {
-        iter++;
-        DBG(info.debug("it " + std::to_string(iter) + " n " + std::to_string(n) + " opt " + std::to_string(opt_local) + "\n");)
+        it++;
+        DBG(info.debug(STR1(it) + STR2(n) + STR2(opt_local) + "\n");)
 
         PartSolFactory1 psolf(k, n-1, 0, n-1);
         Weight w_opt = c;
@@ -197,7 +196,7 @@ Solution knapsack::sopt_bellman_array_part(const Instance& ins, Info& info, Item
                     values[w] = values[w-wj] + pj;
                     bisols[w] = psolf.add(bisols[w-wj], j);
                     if (values[w] == opt_local) {
-                        DBG(info.debug("Optimal value reached (" + std::to_string(j) + ")");)
+                        DBG(info.debug("Optimal value reached (" + STR1(j) + ")");)
                         w_opt = w;
                         goto end;
                     }
@@ -211,7 +210,7 @@ end:
         if (n == ins.item_number()) {
             opt = values[w_opt];
             opt_local = opt;
-            DBG(info.debug("Opt " + std::to_string(opt));)
+            DBG(info.debug(STR2(opt));)
         }
 
         DBG(info.debug(" partsol " + psolf.print(bisols[w_opt]));)
@@ -221,12 +220,11 @@ end:
         n -= psolf.size();
         c = ins.capacity() - sol.weight();
         opt_local = opt - sol.profit();
-        DBG(info.debug(" p(S) " + std::to_string(sol.profit()) + "\n");)
+        DBG(info.debug(STR4(p(S), sol.profit()) + "\n");)
     }
 
-    info.verbose("Iterations: " + std::to_string(iter) + "\n");
-    info.pt.put("Algorithm.Iterations", iter);
-    assert(ins.check_sopt(sol));
+    info.verbose("Iterations: " + std::to_string(it) + "\n");
+    info.pt.put("Algorithm.Iterations", it);
     return algorithm_end(sol, info);
 }
 
@@ -253,9 +251,9 @@ struct RecData
 
 void sopt_bellman_array_rec_rec(RecData& d)
 {
-    DBG(d.info.debug("Rec n1 " + std::to_string(d.n1) + " n2 " + std::to_string(d.n2) + " c " + std::to_string(d.c) + "\n");)
+    DBG(d.info.debug("Rec" + STR2(d.n1) + STR2(d.n2) + STR2(d.c) + "\n");)
     ItemPos k = (d.n1 + d.n2) / 2;
-    DBG(d.info.debug("k " + std::to_string(k) + "\n");)
+    DBG(d.info.debug(STR1(k) + "\n");)
     ItemPos n1 = d.n1;
     ItemPos n2 = d.n2;
     opts_bellman_array(d.ins, d.values1, d.n1, k, d.c);
@@ -276,12 +274,12 @@ void sopt_bellman_array_rec_rec(RecData& d)
         }
     }
     assert(z_max != -1);
-    DBG(d.info.debug("c1 " + std::to_string(c1_opt) + " c2 " + std::to_string(c2_opt) + "\n");)
+    DBG(d.info.debug(STR1(c1_opt) + STR2(c2_opt) + "\n");)
 
     if (k == n1) {
         DBG(d.info.debug("k == n1");)
         if (d.values1[c1_opt] == d.ins.item(n1).p) {
-            DBG(d.info.debug(" set " + std::to_string(n1));)
+            DBG(d.info.debug(STR4(set, n1));)
             d.sol_curr.set(n1, true);
         }
         DBG(d.info.debug("\n");)
@@ -290,13 +288,13 @@ void sopt_bellman_array_rec_rec(RecData& d)
         d.c  = c1_opt;
         DBG(d.info.debug("\n");)
         sopt_bellman_array_rec_rec(d);
-        DBG(d.info.debug("\n<- Rec n1 " + std::to_string(n1) + " n2 " + std::to_string(n2) + "\n");)
+        DBG(d.info.debug("\n<- Rec" + STR2(n1) + STR2(n2) + "\n");)
     }
 
     if (k+1 == n2) {
         DBG(d.info.debug("k+1 == n2");)
         if (z2_opt == d.ins.item(n2).p) {
-            DBG(d.info.debug(" set " + std::to_string(n2));)
+            DBG(d.info.debug(STR4(set, n2));)
             d.sol_curr.set(n2, true);
         }
         DBG(d.info.debug("\n");)
@@ -306,7 +304,7 @@ void sopt_bellman_array_rec_rec(RecData& d)
         d.c  = c2_opt;
         DBG(d.info.debug("\n");)
         sopt_bellman_array_rec_rec(d);
-        DBG(d.info.debug("\n<- Rec n1 " + std::to_string(n1) + " n2 " + std::to_string(n2) + "\n");)
+        DBG(d.info.debug("\n<- Rec" + STR2(n1) + STR2(n2) + "\n");)
     }
 }
 
@@ -327,7 +325,6 @@ Solution knapsack::sopt_bellman_array_rec(const Instance& ins, Info& info)
 
     RecData data(ins, info);
     sopt_bellman_array_rec_rec(data);
-    assert(ins.check_sopt(data.sol_curr));
     return algorithm_end(data.sol_curr, info);
 }
 

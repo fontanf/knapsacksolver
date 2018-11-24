@@ -1,5 +1,4 @@
-#include "knapsack/opt_bellman/bellman_array.hpp"
-#include "knapsack/opt_bellman/bellman_list.hpp"
+#include "knapsack/opt_bellman/bellman.hpp"
 
 using namespace knapsack;
 
