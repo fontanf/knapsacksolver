@@ -4,9 +4,6 @@
 
 using namespace knapsack;
 
-#define DBG(x)
-//#define DBG(x) x
-
 Solution knapsack::sopt_bab(Instance& ins, Info& info)
 {
     ItemIdx n = ins.item_number();
@@ -54,4 +51,3 @@ Solution knapsack::sopt_bab(Instance& ins, Info& info)
     }
 }
 
-#undef DBG

@@ -6,14 +6,9 @@
 
 using namespace knapsack;
 
-//#define DBG(x)
-#define DBG(x) x
-
 ItemIdx max_card(const Instance& ins)
 {
-    DBG(std::cout << "MAXCARD..." << std::endl;)
     if (ins.item_number() == 1) {
-        DBG(std::cout << "MAXCARD... END - 1 ITEM" << std::endl;)
         return 1;
     }
 
@@ -67,26 +62,11 @@ ItemIdx max_card(const Instance& ins)
         r -= ins.item(index[j]).w;
     }
 
-    DBG(
-    for (ItemPos j=ins.first_item(); j<k; ++j) {
-        if (ins.item(index[j]).w <= ins.item(index[k]).w)
-            continue;
-        std::cout << "J " << j << " " << index[j] << " " << ins.item(index[j]) << std::endl;
-        std::cout << "K " << k << " " << index[k] << " " << ins.item(index[k]) << std::endl;
-        assert(false);
-    }
-    for (ItemPos j=k+1; j<=ins.last_item(); ++j)
-        assert(ins.item(index[j]).w >= ins.item(index[k]).w);
-    )
-
-    DBG(std::cout << "K " << k << std::endl;)
-    DBG(std::cout << "MAXCARD... END" << std::endl;)
     return k;
 }
 
 ItemIdx min_card(const Instance& ins, Profit lb)
 {
-    DBG(std::cout << "MINCARD..." << std::endl;)
     lb -= ins.reduced_solution()->profit();
     if (ins.item_number() <= 1)
         return (ins.item(1).p <= lb)? 1: 0;
@@ -140,15 +120,6 @@ ItemIdx min_card(const Instance& ins, Profit lb)
         z += ins.item(index[j]).p;
     }
 
-    DBG(
-    for (ItemPos j=ins.first_item(); j<k-1; ++j)
-        assert(ins.item(index[j]).p >= ins.item(index[k]).p);
-    for (ItemPos j=k; j<=ins.last_item(); ++j)
-        assert(ins.item(index[j]).p <= ins.item(index[k]).p);
-    )
-
-    DBG(std::cout << "K " << k << std::endl;)
-    DBG(std::cout << "MINCARD... END" << std::endl;)
     return k;
 }
 
@@ -184,7 +155,6 @@ void ub_surrogate_solve(Instance& ins, ItemIdx k,
                     || ins.total_capacity() > INT_FAST64_MAX - s * k
                     || INT_FAST64_MAX / ins.total_item_number() < wmax+s
                     || wmax + s > wlim) {
-                DBG(std::cout << "S2 " << s2 << " => " << s-1 << std::endl;)
                 s2 = s - 1;
                 continue;
             } else {
@@ -196,7 +166,6 @@ void ub_surrogate_solve(Instance& ins, ItemIdx k,
             if (INT_FAST64_MAX / -s < k
                     || INT_FAST64_MAX / ins.total_item_number() < wabs
                     || wabs > wlim) {
-                DBG(std::cout << "S1 " << s1 << " => " << s+1 << std::endl;)
                 s1 = s + 1;
                 continue;
             } else {
@@ -209,26 +178,6 @@ void ub_surrogate_solve(Instance& ins, ItemIdx k,
         Info info_tmp;
         Profit p = ub_dantzig(ins, info_tmp);
         ItemPos b = ins.break_item();
-
-        DBG(std::cout
-                << "S1 " << s1 << " S " << s << " S2 " << s2
-                << " B "   << b
-                << " N "   << ins.item_number()
-                << " UB "  << p
-                << " GAP " << p - ins.optimum()
-                << std::endl;)
-            std::cout << ins << std::endl;
-        if (b <= ins.last_item())
-            DBG(std::cout
-                    << "F " << ins.first_item()
-                    << " K " << ins.break_solution()->item_number()
-                    << " PBAR " << ins.break_solution()->profit()
-                    << " R " << ins.break_capacity()
-                    << " PB " << ins.item(b).p
-                    << " WB " << ins.item(b).w
-                    << " C " << ins.capacity()
-                    << std::endl;)
-        assert(s_min < 0 || ins.capacity() > 0);
 
         if (p < out.ub) {
             out.ub         = p;
@@ -251,7 +200,6 @@ void ub_surrogate_solve(Instance& ins, ItemIdx k,
 
 SurrogateOut knapsack::ub_surrogate(const Instance& instance, Profit lb, Info& info)
 {
-    DBG(std::cout << "SURROGATERELAX..." << std::endl;)
     Instance ins(instance);
     ins.sort_partially();
     ItemPos b = ins.break_item();
@@ -260,14 +208,12 @@ SurrogateOut knapsack::ub_surrogate(const Instance& instance, Profit lb, Info& i
 
     // Trivial cases
     if (ins.item_number() == 0) {
-        DBG(std::cout << "SURROGATERELAX... END - NO ITEM" << std::endl;)
         algorithm_end(out.ub, info);
         return out;
     }
     Info info_tmp;
     out.ub = ub_dantzig(ins, info_tmp);
     if (ins.break_capacity() == 0 || b == ins.last_item() + 1) {
-        DBG(std::cout << "SURROGATERELAX... END - NO CAPACITY OR BREAK ITEM" << std::endl;)
         algorithm_end(out.ub, info);
         return out;
     }
@@ -280,17 +226,9 @@ SurrogateOut knapsack::ub_surrogate(const Instance& instance, Profit lb, Info& i
     Weight s_max = (INT_FAST64_MAX / pmax > wmax)?  pmax*wmax:  INT_FAST64_MAX;
     Weight s_min = (INT_FAST64_MAX / pmax > wmax)? -pmax*wmax: -INT_FAST64_MAX;
 
-    DBG(std::cout
-            << ins.print_lb(lb)
-            << " B "    << b
-            << " SMAX " << s_max
-            << std::endl;)
-
     if (max_card(ins) == b) {
         ub_surrogate_solve(ins, b, 0, s_max, out);
         info.pt.put("UB.Type", "max");
-        if (info.verbose())
-            std::cout << "MAXCARD" << std::endl;
     } else if (min_card(ins, lb) == b + 1) {
         ub_surrogate_solve(ins, b + 1, s_min, 0, out);
         if (out.ub < lb) {
@@ -298,8 +236,6 @@ SurrogateOut knapsack::ub_surrogate(const Instance& instance, Profit lb, Info& i
             out.ub = lb;
         }
         info.pt.put("UB.Type", "min");
-        if (info.verbose())
-            std::cout << "MINCARD" << std::endl;
     } else {
         SurrogateOut out2;
         out2.ub = out.ub;
@@ -308,21 +244,15 @@ SurrogateOut knapsack::ub_surrogate(const Instance& instance, Profit lb, Info& i
         if (out2.ub < lb) {
             out2.ub = lb;
         }
-        DBG(std::cout << "COMPUTE UB..." << std::endl;)
         if (out2.ub > out.ub) {
             out.ub         = out2.ub;
             out.multiplier = out2.multiplier;
             out.bound      = out2.bound;
         }
         info.pt.put("UB.Type", "maxmin");
-        if (info.verbose())
-            std::cout << "MAXCARD MINCARD" << std::endl;
     }
 
-    assert(ins.check_ub(out.ub));
-    DBG(std::cout << "SURROGATERELAX... END" << std::endl;)
     algorithm_end(out.ub, info);
     return out;
 }
 
-#undef DBG

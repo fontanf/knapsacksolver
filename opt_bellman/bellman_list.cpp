@@ -4,9 +4,6 @@
 
 using namespace knapsack;
 
-#define DBG(x)
-//#define DBG(x) x
-
 struct State
 {
     Weight w;
@@ -96,8 +93,6 @@ Profit knapsack::opt_bellman_list(Instance& ins, Info& info)
     return algorithm_end(lb, info);
 }
 
-#undef DBG
-
 /******************************************************************************/
 
 Solution knapsack::sopt_bellman_list_all(Instance& ins, Info& info)
@@ -127,9 +122,6 @@ Solution knapsack::sopt_bellman_list_part(Instance& ins, Info& info, ItemPos k)
 }
 
 /******************************************************************************/
-
-#define DBG(x)
-//#define DBG(x) x
 
 std::vector<State> opts_bellman_list(Instance& ins,
         ItemPos n1, ItemPos n2, Weight c, Info& info)
@@ -282,4 +274,3 @@ Solution knapsack::sopt_bellman_list_rec(Instance& ins, Info& info)
     return algorithm_end(sol, info);
 }
 
-#undef DBG

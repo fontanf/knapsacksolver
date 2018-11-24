@@ -25,11 +25,11 @@ cc_library(
 git_repository(
     name = "benchtools",
     remote = "https://github.com/fontanf/benchtools.git",
-    commit = "0c62be7232296a4c3d6f79399c1a668f10eac333",
+    commit = "2bc7474bd823aad58727fac895239ef02ab6d8e3",
 )
 
-#local_repository(
-        #name = "benchtools",
-        #path = "/home/fontanf/Dev/benchtools/",
-#)
+local_repository(
+    name = "benchtools_",
+    path = "/home/fontanf/Dev/benchtools/",
+)
 

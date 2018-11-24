@@ -2,16 +2,13 @@
 
 #include "knapsack/ub_dembo/dembo.hpp"
 
-#define DBG(x)
-//#define DBG(x) x
-
 #define INDEX(j,q) (j+1)*(ub+1) + (q)
 
 using namespace knapsack;
 
 Profit knapsack::opt_dpprofits_array(Instance& ins, Info& info)
 {
-    DBG(std::cout << "DPPROFITS..." << std::endl;)
+    info.verbose("*** dpprofits (array) ***\n");
 
     ItemIdx n = ins.item_number();
     Weight  c = ins.capacity();
@@ -41,8 +38,6 @@ Profit knapsack::opt_dpprofits_array(Instance& ins, Info& info)
     for (Profit q=0; q<=ub; ++q)
         if (values[q] <= c)
             opt = q;
-    assert(ins.check_opt(opt));
-    DBG(std::cout << "DPPROFITS... END" << std::endl;)
     return algorithm_end(opt, info);
 }
 
@@ -50,6 +45,8 @@ Profit knapsack::opt_dpprofits_array(Instance& ins, Info& info)
 
 Solution knapsack::sopt_dpprofits_array_all(Instance& ins, Info& info)
 {
+    info.verbose("*** dpprofits (array, all) ***\n");
+
     ItemIdx n = ins.item_number();
     Weight  c = ins.capacity();
     if (n == 0) {
@@ -85,7 +82,6 @@ Solution knapsack::sopt_dpprofits_array_all(Instance& ins, Info& info)
     for (Profit q=0; q<=ub; ++q)
         if (values[INDEX(n-1,q)] <= c)
             opt = q;
-    DBG(std::cout << "OPT: " << opt << std::endl;)
     assert(ins.check_opt(opt));
 
     // Retrieve optimal solution
@@ -94,7 +90,6 @@ Solution knapsack::sopt_dpprofits_array_all(Instance& ins, Info& info)
     Weight  w = values[INDEX(j,opt)];
     Solution sol = *ins.reduced_solution();
     while (w > 0) {
-        DBG(std::cout << q << " " << w << " " << j << std::endl;)
         Weight wj = ins.item(j).w;
         Profit pj = ins.item(j).p;
         Weight v0 = values[INDEX(j-1,q)];
@@ -138,4 +133,3 @@ Solution knapsack::sopt_dpprofits_array_rec(Instance& ins, Info& info)
     return Solution(ins);
 }
 
-#undef DBG
