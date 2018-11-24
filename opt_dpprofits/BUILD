@@ -1,7 +1,10 @@
 cc_library(
         name = "libdpprofits",
-        hdrs = ["dpprofits_array.hpp", "dpprofits_list.hpp"],
-        srcs = ["dpprofits_array.cpp", "dpprofits_list.cpp"],
+        hdrs = ["dpprofits.hpp"],
+        srcs = [
+                "dpprofits_array.cpp",
+                "dpprofits_list.cpp"
+        ],
         deps = [
                 "//lib:cpp",
                 "//ub_dembo:libdembo",

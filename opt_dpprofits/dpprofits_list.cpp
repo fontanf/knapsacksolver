@@ -1,49 +1,52 @@
-#include "knapsack/opt_dpprofits/dpprofits_list.hpp"
+#include "knapsack/opt_dpprofits/dpprofits.hpp"
 
 using namespace knapsack;
 
 Profit knapsack::opt_dpprofits_list(Instance& ins, Info& info)
 {
-    (void)info;
+    info.verbose("*** dpprofits (list) ***\n");
+    info.verbose("Not yet implemented.\n");
     (void)ins;
-    assert(false); // TODO
-    return 0;
+    return algorithm_end(0, info);
 }
 
 /******************************************************************************/
 
 Solution knapsack::sopt_dpprofits_list_all(Instance& ins, Info& info)
 {
-    (void)info;
-    assert(false); // TODO
-    return Solution(ins);
+    info.verbose("*** dpprofits (list, all) ***\n");
+    Solution sol(ins);
+    info.verbose("Not yet implemented.\n");
+    return algorithm_end(sol, info);
 }
 
 /******************************************************************************/
 
 Solution knapsack::sopt_dpprofits_list_one(Instance& ins, Info& info)
 {
-    (void)info;
-    assert(false); // TODO
-    return Solution(ins);
+    info.verbose("*** dpprofits (list, one) ***\n");
+    Solution sol(ins);
+    info.verbose("Not yet implemented.\n");
+    return algorithm_end(sol, info);
 }
 
 /******************************************************************************/
 
 Solution knapsack::sopt_dpprofits_list_part(Instance& ins, Info& info, ItemPos k)
 {
-    (void)info;
-    (void)k;
-    assert(false); // TODO
-    return Solution(ins);
+    info.verbose("*** dpprofits (list, part " + std::to_string(k) + ") ***\n");
+    Solution sol(ins);
+    info.verbose("Not yet implemented.\n");
+    return algorithm_end(sol, info);
 }
 
 /******************************************************************************/
 
 Solution knapsack::sopt_dpprofits_list_rec(Instance& ins, Info& info)
 {
-    (void)info;
-    assert(false); // TODO
-    return Solution(ins);
+    info.verbose("*** dpprofits (list, rec) ***\n");
+    Solution sol(ins);
+    info.verbose("Not yet implemented.\n");
+    return algorithm_end(sol, info);
 }
 

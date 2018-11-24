@@ -1,4 +1,4 @@
-#include "knapsack/opt_dpprofits/dpprofits_array.hpp"
+#include "knapsack/opt_dpprofits/dpprofits.hpp"
 
 #include "knapsack/ub_dembo/dembo.hpp"
 
@@ -109,27 +109,29 @@ Solution knapsack::sopt_dpprofits_array_all(Instance& ins, Info& info)
 
 Solution knapsack::sopt_dpprofits_array_one(Instance& ins, Info& info)
 {
-    (void)info;
-    assert(false); // TODO
-    return Solution(ins);
+    info.verbose("*** dpprofits (array, one) ***\n");
+    Solution sol(ins);
+    info.verbose("Not yet implemented.\n");
+    return algorithm_end(sol, info);
 }
 
 /******************************************************************************/
 
 Solution knapsack::sopt_dpprofits_array_part(Instance& ins, ItemPos k, Info& info)
 {
-    (void)info;
-    (void)k;
-    assert(false); // TODO
-    return Solution(ins);
+    info.verbose("*** dpprofits (array, part " + std::to_string(k) + ") ***\n");
+    Solution sol(ins);
+    info.verbose("Not yet implemented.\n");
+    return algorithm_end(sol, info);
 }
 
 /******************************************************************************/
 
 Solution knapsack::sopt_dpprofits_array_rec(Instance& ins, Info& info)
 {
-    (void)info;
-    assert(false); // TODO
-    return Solution(ins);
+    info.verbose("*** dpprofits (array, rec) ***\n");
+    Solution sol(ins);
+    info.verbose("Not yet implemented.\n");
+    return algorithm_end(sol, info);
 }
 
