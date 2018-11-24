@@ -1,7 +1,7 @@
 #include "knapsack/opt_bab/bab.hpp"
 #include "knapsack/opt_babstar/bab.hpp"
-#include "knapsack/opt_bellman/bellman_list.hpp"
-#include "knapsack/opt_bellman/bellman_array.hpp"
+#include "knapsack/opt_bellman/bellman.hpp"
+#include "knapsack/opt_dpprofits/dpprofits.hpp"
 #include "knapsack/opt_expknap/expknap.hpp"
 #include "knapsack/opt_balknap/balknap.hpp"
 #include "knapsack/opt_minknap/minknap.hpp"
@@ -27,46 +27,35 @@ int main(int argc, char *argv[])
     }
     */
 
-    //for (std::string t: {"u", "wc", "sc", "isc", "asc"}) {
-        //for (ItemIdx i=10; i<50; i++) {
-            //for (Weight r=5; r<=200; ++r) {
-                //for (int h=1; h<=100; ++h) {
-                    std::string t = "asc";
-                    ItemIdx i = 100;
-                    Weight r = 10000;
-                    int h = 58;
-                    std::cout << t << " " << i << " " << r << " " << h << std::endl;
-                    std::cout << std::endl;
-                    Instance ins = generate(t, i, r, h);
-                    //std::cout << ins << std::endl;
+    std::string t = "asc";
+    ItemIdx i = 150;
+    Weight r = 10000;
+    int h = 58;
+    std::cout << t << " " << i << " " << r << " " << h << std::endl;
+    std::cout << std::endl;
+    Instance ins = generate(t, i, r, h);
 
-                    Instance ins1(ins);
-                    Info info1;
-                    info1.set_verbose();
-                    Solution sopt1 = sopt_minknap_list_part(ins1, info1);
-                    //std::cout << sopt1.print_bin() << std::endl;
-                    //std::cout << sopt1.print_in() << std::endl;
+    Instance ins1(ins);
+    Info info1;
+    info1.set_verbose();
+    Solution sopt1 = sopt_minknap_list_part(ins1, info1);
 
-                    std::cout << std::endl;
+    std::cout << std::endl;
 
-                    Instance ins2(ins);
-                    Info info2;
-                    info2.set_verbose();
-                    //info2.set_debug();
-                    //info2.set_debuglive();
-                    Solution sopt2 = sopt_starknap(ins2, info2);
-                    //Solution sopt2 = sopt_balknap_list_all(ins2, info2);
-                    //if (sopt1.profit() != sopt2.profit()) {
-                        //std::cout << info2.debug_string << std::endl;
-                        //return 0;
-                    //}
+    Instance ins2(ins);
+    Info info2;
+    info2.set_verbose();
+    StarknapParams p;
+    p.upper_bound = "t";
+    p.lb_greedynlogn = 0;
+    Solution sopt2 = sopt_starknap(ins2, info2, p);
 
-                    std::cout << std::endl;
-                    std::cout << std::endl;
+    std::cout << std::endl;
 
-                //}
-            //}
-        //}
-    //}
+    Instance ins3(ins);
+    Info info3;
+    info3.set_verbose();
+    Solution sopt3 = sopt_expknap(ins2, info3);
+
     return 0;
 }

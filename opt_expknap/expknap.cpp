@@ -104,7 +104,6 @@ bool sopt_expknap_rec(Instance& ins,
     return improved;
 }
 
-
 Solution knapsack::sopt_expknap(Instance& ins, Info& info, ExpknapParams params)
 {
     info.verbose("*** expknap ***\n");
@@ -141,8 +140,10 @@ Solution knapsack::sopt_expknap(Instance& ins, Info& info, ExpknapParams params)
     SurrogateOut so;
     StateIdx node_number = 0;
     update_bounds(ins, sol_best, ub, so, params, node_number, info); // Update bounds
-    if (sol_best.profit() != ub) // If UB reached, then stop
+    if (sol_best.profit() != ub) { // If UB reached, then stop
+        info.verbose("Branch...\n");
         sopt_expknap_rec(ins, sol_curr, sol_best, ub, so, b-1, b, params, node_number, info);
+    }
 
     info.pt.put("Algorithm.NodeNumber", node_number);
     info.verbose("Node number: " + Info::to_string(node_number) + "\n");

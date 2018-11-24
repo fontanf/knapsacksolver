@@ -15,11 +15,8 @@ struct Node
     Profit ub;
     std::string to_string()
     {
-        return
-            "{id " + sol.print_in() +
-            " w " + std::to_string(sol.weight()) +
-            " p " + std::to_string(sol.profit()) +
-            " ub " + std::to_string(ub);
+        return "{id " + sol.print_in() +
+            STR4(w, sol.weight()) + STR4(p, sol.profit()) + STR2(ub);
     }
 };
 
@@ -94,7 +91,7 @@ Solution knapsack::sopt_babstar(Instance& ins, Info& info)
 
         // Try to add item k for k = j+1..n-1
         for (ItemPos k=node.j; k<n; ++k) {
-            DBG(STR1(k) + " " + info.debug(ins.item(k).to_string());)
+            DBG(info.debug(STR1(k) + " " + ins.item(k).to_string());)
 
             // Compare remaining capacity to minimum weight of all the
             // remaining items

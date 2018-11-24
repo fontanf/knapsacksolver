@@ -89,6 +89,7 @@ cc_binary(
                 "//opt_babstar:libbabstar",
                 "//opt_expknap:libexpknap",
                 "//opt_bellman:libbellman",
+                "//opt_dpprofits:libdpprofits",
                 "//opt_balknap:libbalknap",
                 "//opt_minknap:libminknap",
                 ":libgenerator",
