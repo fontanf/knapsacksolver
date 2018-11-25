@@ -200,6 +200,9 @@ void ub_surrogate_solve(Instance& ins, ItemIdx k,
 
 SurrogateOut knapsack::ub_surrogate(const Instance& instance, Profit lb, Info& info)
 {
+    info.verbose("*** surrogate relaxation ***\n");
+    std::string best = "";
+
     Instance ins(instance);
     ins.sort_partially();
     ItemPos b = ins.break_item();
@@ -228,14 +231,14 @@ SurrogateOut knapsack::ub_surrogate(const Instance& instance, Profit lb, Info& i
 
     if (max_card(ins) == b) {
         ub_surrogate_solve(ins, b, 0, s_max, out);
-        info.pt.put("UB.Type", "max");
+        best = "max";
     } else if (min_card(ins, lb) == b + 1) {
         ub_surrogate_solve(ins, b + 1, s_min, 0, out);
         if (out.ub < lb) {
             assert(ins.optimal_solution() == NULL || lb == ins.optimal_solution()->profit());
             out.ub = lb;
         }
-        info.pt.put("UB.Type", "min");
+        best = "min";
     } else {
         SurrogateOut out2;
         out2.ub = out.ub;
@@ -249,9 +252,11 @@ SurrogateOut knapsack::ub_surrogate(const Instance& instance, Profit lb, Info& i
             out.multiplier = out2.multiplier;
             out.bound      = out2.bound;
         }
-        info.pt.put("UB.Type", "maxmin");
+        best = "maxmin";
     }
 
+    info.verbose("Best bound: " + best);
+    info.pt.put("Algorithm.Best", best);
     algorithm_end(out.ub, info);
     return out;
 }

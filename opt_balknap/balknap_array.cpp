@@ -16,11 +16,16 @@ using namespace knapsack;
 
 Profit knapsack::opt_balknap_array(Instance& ins, Info& info, BalknapParams p)
 {
+    info.verbose("*** balknap (list) ***\n");
+
+    DBG(info.debug("Sort items...\n");)
     ins.sort_partially();
     if (ins.break_item() == ins.last_item()+1) { // all items are in the break solution
+        DBG(info.debug("All items fit in the knapsack.\n");)
         return algorithm_end(ins.break_profit(), info);
     }
 
+    info.verbose("Compute lower bound...");
     Profit lb = 0;
     if (p.lb_greedy == 0) {
         Info info_tmp;
@@ -28,11 +33,16 @@ Profit knapsack::opt_balknap_array(Instance& ins, Info& info, BalknapParams p)
     } else {
         lb = ins.break_solution()->profit();
     }
+    info.verbose(" " + std::to_string(lb) + "\n");
 
     ins.reduce1(lb, info);
     if (ins.capacity() < 0) {
+        DBG(info.debug("All items have been reduced.\n");)
         return algorithm_end(lb, info);
     }
+    DBG(info.debug("Reduced solution: " + ins.reduced_solution()->print_bin() + "\n");)
+    DBG(info.debug("Reduced solution: " + ins.reduced_solution()->print_in() + "\n");)
+
     Weight  c = ins.capacity();
     ItemPos f = ins.first_item();
     ItemPos l = ins.last_item();
@@ -41,10 +51,13 @@ Profit knapsack::opt_balknap_array(Instance& ins, Info& info, BalknapParams p)
 
     // Trivial cases
     if (n == 0 || c == 0) {
+        DBG(info.debug("Empty instance (after reduction).\n");)
         return algorithm_end(std::max(lb, p0), info);
     } else if (n == 1) {
+        DBG(info.debug("Instance only contains one item (after reduction).\n");)
         return algorithm_end(std::max(lb, p0 + ins.item(f).p), info);
     } else if (ins.break_item() == ins.last_item()+1) {
+        DBG(info.debug("All items fit in the knapsack (after reduction).\n");)
         return algorithm_end(std::max(lb, ins.break_solution()->profit()), info);
     }
 
@@ -56,14 +69,10 @@ Profit knapsack::opt_balknap_array(Instance& ins, Info& info, BalknapParams p)
     Profit pb    = ins.item(b).p;
     Weight r     = ins.break_capacity();
 
-    DBG(info.debug(
-            "n " + std::to_string(n) +
-            " c " + std::to_string(c) +
-            " f " + std::to_string(f) + " l " + std::to_string(l) +
-            "\n" +
-            "wbar " + std::to_string(w_bar) +
-            " pbar " + std::to_string(p_bar) +
-            "\n");)
+    DBG(info.debug("Break solution: " + ins.break_solution()->print_bin() + "\n");)
+    DBG(info.debug("Break solution: " + ins.break_solution()->print_in() + "\n");)
+    DBG(info.debug(STR1(n) + STR2(c) + STR2(f) + STR2(l) + "\n"
+                + STR1(w_bar) + STR2(p_bar) + "\n");)
 
     if (ins.break_solution()->profit() > lb) {
         DBG(info.debug("Update best solution.");)
@@ -72,13 +81,10 @@ Profit knapsack::opt_balknap_array(Instance& ins, Info& info, BalknapParams p)
 
     Profit z = lb - p0;
     Profit u = p_bar + r * pb / wb;
-    info.verbose(
-            "z " + std::to_string(z) +
-            " u " + std::to_string(u) +
-            " gap " + std::to_string(u - z) +
-            "\n");
+    info.verbose(STR1(lb) + STR2(u) + STR4(gap, u-lb) + "\n");
 
     if (z >= u) { // If UB == LB, then stop
+        DBG(info.debug("Lower bound equals upper bound.");)
         return algorithm_end(lb, info);
     }
 
@@ -112,6 +118,7 @@ Profit knapsack::opt_balknap_array(Instance& ins, Info& info, BalknapParams p)
     Profit p_tmp = p_bar + x_tmp - z - 1;
     s0[IDX1(w_tmp,p_tmp)] = b;
 
+    info.verbose("Recursion...\n");
     for (ItemPos t=b; t<=l; ++t) { // Recursion
         Weight wt = ins.item(t).w;
         Profit pt = ins.item(t).p;

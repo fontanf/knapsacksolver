@@ -1,7 +1,7 @@
 #include "knapsack/lib/tester.hpp"
 #include "knapsack/lib/generator.hpp"
 #include "knapsack/opt_minknap/minknap.hpp"
-#include "knapsack/opt_bellman/bellman_array.hpp"
+#include "knapsack/opt_bellman/bellman.hpp"
 
 using namespace knapsack;
 
@@ -31,8 +31,8 @@ std::vector<Profit (*)(Instance&)> tested_functions()
 TEST(Minknap, DataPisingerSmall)
 {
     test_pisinger(
-        {1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
-        {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12},
+        {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20},
+        {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20},
         {"u", "wc", "sc", "isc", "asc", "ss", "sw"},
     {tested_functions()});
 }
@@ -40,7 +40,7 @@ TEST(Minknap, DataPisingerSmall)
 TEST(Minknap, DataPisingerMedium)
 {
     test_pisinger(
-        {15, 20, 30, 40, 50},
+        {30, 40, 50},
         {10, 50, 100},
         {"u", "wc", "sc", "isc", "asc", "ss", "sw"},
     {tested_functions()});

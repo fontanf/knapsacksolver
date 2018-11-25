@@ -115,25 +115,15 @@ Profit knapsack::opt_balknap_list(Instance& ins, Info& info,
 
     DBG(info.debug("Break solution: " + ins.break_solution()->print_bin() + "\n");)
     DBG(info.debug("Break solution: " + ins.break_solution()->print_in() + "\n");)
-    DBG(info.debug(
-            "n " + std::to_string(n) +
-            " c " + std::to_string(c) +
-            " f " + std::to_string(f) + " l " + std::to_string(l) +
-            "\n" +
-            "wbar " + std::to_string(w_bar) +
-            " pbar " + std::to_string(p_bar) +
-            "\n");)
+    DBG(info.debug(STR1(n) + STR2(c) + STR2(f) + STR2(l) + "\n"
+                + STR1(w_bar) + STR2(p_bar) + "\n");)
 
     if (ins.break_solution()->profit() > lb) {
         DBG(info.debug("Update best solution.");)
         lb = ins.break_solution()->profit();
     }
 
-    info.verbose(
-            "lb " + std::to_string(lb) +
-            " ub " + std::to_string(u) +
-            " gap " + std::to_string(u - lb) +
-            "\n");
+    info.verbose(STR1(lb) + STR2(u) + STR4(gap, u-lb) + "\n");
 
     // If UB == LB, then stop
     if (lb >= u) {

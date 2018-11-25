@@ -2,7 +2,7 @@
 #include "knapsack/lib/generator.hpp"
 #include "knapsack/ub_surrogate/surrogate.hpp"
 #include "knapsack/opt_minknap/minknap.hpp"
-#include "knapsack/opt_bellman/bellman_array.hpp"
+#include "knapsack/opt_bellman/bellman.hpp"
 #include "knapsack/lb_greedy/greedy.hpp"
 
 using namespace knapsack;
