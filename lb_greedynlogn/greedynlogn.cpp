@@ -8,8 +8,7 @@ std::vector<Item> remove_dominated_items(std::vector<Item>& v)
 {
     std::vector<Item> t;
     for (Item item: v) {
-        if (t.size() == 0
-                || (item.w > t.back().w && item.p > t.back().p)) {
+        if (t.size() == 0 || (item.w > t.back().w && item.p > t.back().p)) {
             t.push_back(item);
         } else if (item.w == t.back().w && item.p > t.back().p) {
             t.back() = item;
@@ -22,14 +21,16 @@ Solution knapsack::sol_forwardgreedynlogn(const Instance& ins, Info& info)
 {
     info.verbose("*** forwardgreedynlogn ***\n");
 
+    Solution sol = *ins.break_solution();
+
+    // If all items fit in the knapsack or if the break solution doesn't
+    // contain any item, return sol.
     if (ins.break_item() == ins.total_item_number()
             || ins.break_item() == 0) {
-        Solution sol(ins);
         return algorithm_end(sol, info);
     }
 
-    Solution sol = *ins.break_solution();
-
+    // Sort taken and left items by weight.
     std::vector<Item> taken;
     std::vector<Item> left;
     for (ItemPos j=0; j<ins.total_item_number(); ++j) {
@@ -50,26 +51,27 @@ Solution knapsack::sol_forwardgreedynlogn(const Instance& ins, Info& info)
     std::vector<Item> t = remove_dominated_items(taken);
     std::vector<Item> l = remove_dominated_items(left);
 
+    // Find best exchange.
     Weight r = sol.remaining_capacity();
     Profit pmax = -1;
-    auto i1_max = t.end();
-    auto i2_max = l.end();
-    auto i2 = l.begin();
-    for (auto i1 = t.begin(); i1 != t.end(); ++i1) {
-        while (i2 != l.end() && i2->w <= i1->w + r)
-            i2++;
-        if (i2 == l.begin())
+    auto it_max = t.end();
+    auto il_max = l.end();
+    auto il = l.begin();
+    for (auto it = t.begin(); it != t.end(); ++it) {
+        while (il != l.end() && il->w <= it->w + r)
+            il++;
+        if (il == l.begin())
             continue;
-        Profit p = std::prev(i2)->p - i1->p;
+        Profit p = std::prev(il)->p - it->p;
         if (p > pmax) {
             pmax = p;
-            i1_max = i1;
-            i2_max = std::prev(i2);
+            it_max = it;
+            il_max = std::prev(il);
         }
     }
     if (pmax == -1) {
-        sol.set(i1_max->j, false);
-        sol.set(i2_max->j, true);
+        sol.set(it_max->j, false);
+        sol.set(il_max->j, true);
     }
 
     return algorithm_end(sol, info);
@@ -81,17 +83,19 @@ Solution knapsack::sol_backwardgreedynlogn(const Instance& ins, Info& info)
 {
     info.verbose("*** backwardgreedynlogn ***\n");
 
+    Solution sol0 = *ins.break_solution();
+
+    // If all items fit in the knapsack or if the break solution doesn't
+    // contain any item, return sol.
     if (ins.break_item() == ins.total_item_number()
             || ins.break_item() == 0) {
-        Solution sol(ins);
-        return algorithm_end(sol, info);
+        return algorithm_end(sol0, info);
     }
 
-    Solution sol = *ins.break_solution();
-    Solution sol0 = sol;
-
+    Solution sol = sol0;
     sol.set(ins.break_item(), true);
 
+    // Sort taken and left items by weight.
     std::vector<Item> taken;
     std::vector<Item> left;
     for (ItemPos j=0; j<ins.total_item_number(); ++j) {
@@ -112,32 +116,32 @@ Solution knapsack::sol_backwardgreedynlogn(const Instance& ins, Info& info)
     std::vector<Item> t = remove_dominated_items(taken);
     std::vector<Item> l = remove_dominated_items(left);
 
+    // Find best exchange.
     Weight r = sol.remaining_capacity();
-    assert(r < 0);
-    Profit pmax = -INT_FAST64_MIN;
-    auto i1_max = t.end();
-    auto i2_max = l.end();
-    auto i2 = l.begin();
-    for (auto i1 = t.begin(); i1 != t.end(); ++i1) {
-        if (i1->w <= -r)
+    Profit pmax = -ins.item(0).p;
+    auto it_max = t.end();
+    auto il_max = l.end();
+    auto il = l.begin();
+    for (auto it = t.begin(); it != t.end(); ++it) {
+        if (it->w <= -r)
             continue;
-        while (i2 != l.end() && i2->w <= i1->w + r)
-            i2++;
-        if (i2 == l.begin())
+        while (il != l.end() && il->w <= it->w + r)
+            il++;
+        if (il == l.begin())
             continue;
-        Profit p = std::prev(i2)->p - i1->p;
+        Profit p = std::prev(il)->p - it->p;
         if (p > pmax) {
             pmax = p;
-            i1_max = i1;
-            i2_max = std::prev(i2);
+            it_max = it;
+            il_max = std::prev(il);
         }
     }
 
-    if (pmax == -INT_FAST64_MIN) {
+    if (it_max == t.end()) {
         return algorithm_end(sol0, info);
     } else {
-        sol.set(i1_max->j, false);
-        sol.set(i2_max->j, true);
+        sol.set(it_max->j, false);
+        sol.set(il_max->j, true);
         return algorithm_end(sol, info);
     }
 
