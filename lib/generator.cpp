@@ -68,13 +68,21 @@ std::pair<Weight, Profit> item(GenerateData& data)
         std::uniform_int_distribution<int> d2(1, 1000);
         w = d1(data.g);
         p = d2(data.g);
+    } else if (data.type == "mstr") {
+        std::uniform_int_distribution<int> d(1, data.r);
+        w = d(data.g);
+        if (w % data.d == 0) {
+            p = w + data.k1;
+        } else {
+            p = w + data.k2;
+        }
     } else {
         assert(false);
     }
     return {w, p};
 }
 
-Instance generate_non_spanner(GenerateData& data)
+Instance generate_standard(GenerateData& data)
 {
     Instance ins(data.n, 0);
 
@@ -125,7 +133,7 @@ Instance knapsack::generate(GenerateData data)
     if (data.spanner) {
         return generate_spanner(data);
     } else {
-        return generate_non_spanner(data);
+        return generate_standard(data);
     }
 }
 
