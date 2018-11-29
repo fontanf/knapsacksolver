@@ -16,6 +16,24 @@
 
 using namespace knapsack;
 
+std::string GenerateData::to_string() const
+{
+    std::string s = STR1(n);
+    if (spanner) {
+        s += " t spanner," + type + STR2(v) + STR2(n);
+    } else {
+        s += " t " + type;
+    }
+    if (type != "sw")
+        s += STR2(r);
+    if (type == "mstr")
+        s += STR2(k1) + STR2(k2);
+    if (type == "mstr" || type == "pceil" || type == "circle")
+        s += STR2(d);
+    s += STR2(h) + STR2(seed);
+    return s;
+}
+
 void write_format_file(boost::filesystem::path dest, std::string str)
 {
     boost::filesystem::create_directories(dest);
@@ -25,12 +43,6 @@ void write_format_file(boost::filesystem::path dest, std::string str)
     f << str << std::endl;
     f.close();
 }
-
-class DistributionType
-{
-public:
-    virtual std::pair<Weight, Profit> item() = 0;
-};
 
 std::pair<Weight, Profit> item(GenerateData& data)
 {

@@ -55,7 +55,7 @@ TEST(Balknap, DataPisingerSmall)
     test_pisinger(
         {1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
         {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12},
-        {"u", "wc", "sc", "isc", "asc", "ss", "sw"},
+        {"u", "wc", "sc", "isc", "asc", "ss"},
     {tested_functions()});
 }
 
@@ -64,7 +64,7 @@ TEST(Balknap, DataPisingerMedium)
     test_pisinger(
         {15, 20, 30, 40, 50},
         {10, 50, 100},
-        {"u", "wc", "sc", "isc", "asc", "ss", "sw"},
+        {"u", "wc", "sc", "isc", "asc", "ss"},
         {tested_functions()});
 }
 

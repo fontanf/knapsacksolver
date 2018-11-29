@@ -27,13 +27,13 @@ int main(int argc, char *argv[])
     }
     */
 
-    std::string t = "asc";
-    ItemIdx i = 150;
-    Weight r = 10000;
-    int h = 58;
-    std::cout << t << " " << i << " " << r << " " << h << std::endl;
-    std::cout << std::endl;
-    Instance ins = generate(t, i, r, h, 0);
+    GenerateData data;
+    data.type = "asc";
+    data.n = 150;
+    data.r = 10000;
+    data.h = 58;
+    std::cout << data.to_string() << std::endl;
+    Instance ins = generate(data);
 
     Instance ins1(ins);
     Info info1;

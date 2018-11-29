@@ -49,8 +49,8 @@ public:
      */
     void write_cert(std::string file);
 
-    std::string print_bin() const;
-    std::string print_in() const;
+    std::string to_string_binary() const;
+    std::string to_string_items() const;
 
 private:
 

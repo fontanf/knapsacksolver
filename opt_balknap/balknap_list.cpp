@@ -86,8 +86,8 @@ Profit knapsack::opt_balknap_list(Instance& ins, Info& info,
         DBG(info.debug("All items have been reduced.\n");)
         return algorithm_end(lb, info);
     }
-    DBG(info.debug("Reduced solution: " + ins.reduced_solution()->print_bin() + "\n");)
-    DBG(info.debug("Reduced solution: " + ins.reduced_solution()->print_in() + "\n");)
+    DBG(info.debug("Reduced solution: " + ins.reduced_solution()->to_string_binary() + "\n");)
+    DBG(info.debug("Reduced solution: " + ins.reduced_solution()->to_string_items() + "\n");)
 
     Weight  c = ins.total_capacity();
     ItemPos f = ins.first_item();
@@ -113,8 +113,8 @@ Profit knapsack::opt_balknap_list(Instance& ins, Info& info,
     Info info_tmp;
     Profit u = ub_dantzig(ins, info_tmp);
 
-    DBG(info.debug("Break solution: " + ins.break_solution()->print_bin() + "\n");)
-    DBG(info.debug("Break solution: " + ins.break_solution()->print_in() + "\n");)
+    DBG(info.debug("Break solution: " + ins.break_solution()->to_string_binary() + "\n");)
+    DBG(info.debug("Break solution: " + ins.break_solution()->to_string_items() + "\n");)
     DBG(info.debug(STR1(n) + STR2(c) + STR2(f) + STR2(l) + "\n"
                 + STR1(w_bar) + STR2(p_bar) + "\n");)
 
@@ -463,8 +463,8 @@ Solution knapsack::sopt_balknap_list_part(Instance& ins, Info& info,
     if (sol.profit() == u) // If UB == LB, then stop
         return algorithm_end(sol, info);
 
-    DBG(info.debug("Break solution: " + ins.break_solution()->print_bin() + "\n");)
-    DBG(info.debug("Break solution: " + ins.break_solution()->print_in() + "\n");)
+    DBG(info.debug("Break solution: " + ins.break_solution()->to_string_binary() + "\n");)
+    DBG(info.debug("Break solution: " + ins.break_solution()->to_string_items() + "\n");)
     DBG(info.debug(
             "n " + std::to_string(n) +
             " c " + std::to_string(c) +
@@ -744,8 +744,8 @@ Solution knapsack::sopt_balknap_list_all(Instance& ins, Info& info,
         DBG(info.debug("All items have been reduced.\n");)
         return algorithm_end(sol, info);
     }
-    DBG(info.debug("Reduced solution: " + ins.reduced_solution()->print_bin() + "\n");)
-    DBG(info.debug("Reduced solution: " + ins.reduced_solution()->print_in() + "\n");)
+    DBG(info.debug("Reduced solution: " + ins.reduced_solution()->to_string_binary() + "\n");)
+    DBG(info.debug("Reduced solution: " + ins.reduced_solution()->to_string_items() + "\n");)
 
     Weight  c = ins.total_capacity();
     ItemPos f = ins.first_item();
@@ -778,8 +778,8 @@ Solution knapsack::sopt_balknap_list_all(Instance& ins, Info& info,
     Info info_tmp;
     Profit u = ub_dantzig(ins, info_tmp);
 
-    DBG(info.debug("Break solution: " + ins.break_solution()->print_bin() + "\n");)
-    DBG(info.debug("Break solution: " + ins.break_solution()->print_in() + "\n");)
+    DBG(info.debug("Break solution: " + ins.break_solution()->to_string_binary() + "\n");)
+    DBG(info.debug("Break solution: " + ins.break_solution()->to_string_items() + "\n");)
     DBG(info.debug(STR1(n) + STR2(c) + STR2(f) + STR2(l) + "\n" +
                 STR1(w_bar) + STR1(p_bar) + "\n");)
 

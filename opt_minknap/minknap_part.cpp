@@ -304,7 +304,6 @@ Solution knapsack::sopt_minknap_list_part(Instance& ins, Info& info,
 
     if (d.best_state.p <= sol.profit())
         return algorithm_end(sol, info);
-    assert(ins.check_opt(lb));
 
     ins.set_first_item(d.s+1);
     ins.set_last_item(d.t-1);

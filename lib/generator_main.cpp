@@ -24,8 +24,8 @@ int main(int argc, char *argv[])
         ("spanner,sp", "set spanner")
         (",m", po::value<Profit>(&data.m), "set m (for spanner instances)")
         (",v", po::value<Profit>(&data.v), "set v (for spanner instances)")
-        (",o", po::value<std::string>(&output_file)->required(), "set output file")
-        (",p", po::value<std::string>(&plot_file)->required(), "set output file")
+        (",o", po::value<std::string>(&output_file), "set output file")
+        (",p", po::value<std::string>(&plot_file), "set output file")
         ;
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -41,6 +41,7 @@ int main(int argc, char *argv[])
     }
     data.spanner = vm.count("spanner");
 
+    std::cout << data.to_string() << std::endl;
     Instance ins = generate(data);
 
     if (plot_file != "")

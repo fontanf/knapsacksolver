@@ -33,7 +33,7 @@ TEST(Minknap, DataPisingerSmall)
     test_pisinger(
         {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20},
         {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20},
-        {"u", "wc", "sc", "isc", "asc", "ss", "sw"},
+        {"u", "wc", "sc", "isc", "asc", "ss"},
     {tested_functions()});
 }
 
@@ -42,7 +42,7 @@ TEST(Minknap, DataPisingerMedium)
     test_pisinger(
         {30, 40, 50},
         {10, 50, 100},
-        {"u", "wc", "sc", "isc", "asc", "ss", "sw"},
+        {"u", "wc", "sc", "isc", "asc", "ss"},
     {tested_functions()});
 }
 

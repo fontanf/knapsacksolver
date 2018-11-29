@@ -23,6 +23,8 @@ struct GenerateData
     std::string type    = "u";
     Seed        seed    = 0;
     std::default_random_engine g;
+
+    std::string to_string() const;
 };
 
 Instance generate(GenerateData data);

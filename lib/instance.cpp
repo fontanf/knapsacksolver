@@ -24,7 +24,6 @@ Instance::Instance(ItemIdx n, Weight c):
     sol_red_ = new Solution(*this);
 }
 
-
 void Instance::add_item(Weight w, Profit p)
 {
     add_item(w, p, -1);
@@ -277,7 +276,7 @@ Profit Instance::check(boost::filesystem::path cert_file)
     return sol.profit();
 }
 
-////////////////////////////////////////////////////////////////////////////////
+/******************************************************************************/
 
 void Instance::sort()
 {
@@ -577,7 +576,7 @@ void Instance::surrogate(Weight multiplier, ItemIdx bound, ItemPos first)
     sort_partially();
 }
 
-////////////////////////////////////////////////////////////////////////////////
+/******************************************************************************/
 
 void Instance::reduce1(Profit lb, Info& info)
 {
@@ -736,7 +735,7 @@ void Instance::reduce2(Profit lb, Info& info)
             "\n");
 }
 
-////////////////////////////////////////////////////////////////////////////////
+/******************************************************************************/
 
 void Instance::set_first_item(ItemPos k)
 {
@@ -836,146 +835,16 @@ void Instance::fix(PartSolFactory2 psolf, PartSol2 psol)
 
 }
 
-////////////////////////////////////////////////////////////////////////////////
+/******************************************************************************/
 
 Profit Instance::optimum() const
 {
     if (optimal_solution() == NULL)
-        return 0;
+        return -1;
     return optimal_solution()->profit();
 }
 
-////////////////////////////////////////////////////////////////////////////////
-
-bool Instance::check_opt(Profit p) const
-{
-    if (optimal_solution() != NULL
-            && !sol_red_opt_
-            && p != optimum()) {
-        std::cout << "p " << p << " != OPT " << optimum() << std::endl;
-        return false;
-    }
-    return true;
-}
-
-bool Instance::check_sopt(const Solution& sol) const
-{
-    if (sol.weight() > total_capacity()) {
-        std::cout << "w(S) " << sol.weight() << " > c " << total_capacity() << std::endl;
-        return false;
-    }
-    if (optimal_solution() != NULL
-                && !sol_red_opt_
-                && sol.profit() != optimum()) {
-        std::cout << "p(S) " << sol.profit() << " != OPT " << optimum() << std::endl;
-        return false;
-    }
-
-    return true;
-}
-
-bool Instance::check_ub(Profit p) const
-{
-    if (optimal_solution() != NULL
-            && item_number() == total_item_number()
-            && p < optimum()) {
-        std::cout << "u " << p << " < OPT " << optimum() << std::endl;
-        return false;
-    }
-    return true;
-}
-
-bool Instance::check_lb(Profit p) const
-{
-    return (optimal_solution() == NULL
-            || item_number() != total_item_number()
-            || p <= optimum());
-}
-
-bool Instance::check_sol(const Solution& sol) const
-{
-    if (sol.weight() > total_capacity()) {
-        std::cout << "w(S) " << sol.weight() << " > c " << total_capacity() << std::endl;
-        return false;
-    }
-    if (optimal_solution() != NULL
-                && item_number() == total_item_number()
-                && sol.profit() > optimum()) {
-        std::cout << "p(S) " << sol.profit() << " > OPT " << optimum() << std::endl;
-        return false;
-    }
-    return true;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-std::string Instance::print_lb(Profit lb) const
-{
-    return (optimal_solution() == NULL)?
-        "LB " + std::to_string(lb):
-        "LB " + std::to_string(lb) + " GAP " + std::to_string(optimum() - lb);
-}
-
-std::string Instance::print_ub(Profit ub) const
-{
-    return (optimal_solution() == NULL)?
-        "UB " + std::to_string(ub):
-        "UB " + std::to_string(ub) + " GAP " + std::to_string(ub - optimum());
-}
-
-std::string Instance::print_opt(Profit opt) const
-{
-    return (optimal_solution() != NULL && optimum() != opt)?
-        "OPT " + std::to_string(opt) + " ERROR!":
-        "OPT " + std::to_string(opt);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-std::ostream& knapsack::operator<<(std::ostream& os, const Item& it)
-{
-    os
-        << "(J "   << std::setw(3) << it.j
-        << "     W " << std::setw(3) << it.w
-        << "     P " << std::setw(3) << it.p
-        << "     E " << std::setw(5) << std::fixed << std::setprecision(4) << (double)it.p/(double)it.w
-        << "     L " << it.l << ")";
-    return os;
-}
-
-std::ostream& knapsack::operator<<(std::ostream& os, const Interval& interval)
-{
-    os << "[" << interval.f << "," << interval.l << "]";
-    return os;
-}
-
-std::ostream& knapsack::operator<<(std::ostream& os, const Instance& instance)
-{
-    os
-        <<  "N "   << instance.item_number() << " C "   << instance.capacity()
-        << " OPT " << instance.optimum() << std::endl
-        << "F " << instance.first_item() << " L " << instance.last_item()
-        << std::endl;
-    if (instance.break_item_found())
-        os << "B " << instance.break_item() << " WSUM " << instance.break_weight() << " PSUM " << instance.break_profit() << std::endl;
-    for (ItemPos j=0; j<instance.total_item_number(); ++j) {
-        os << std::setw(3) << j << ": " << instance.item(j) << std::flush;
-        if (instance.break_solution() != NULL)
-            os << " B " << instance.break_solution()->contains(j);
-        if (instance.optimal_solution() != NULL)
-            os << " O " << instance.optimal_solution()->contains(j);
-        if (instance.reduced_solution() != NULL)
-            os << " R " << instance.reduced_solution()->contains(j);
-        if (instance.break_item_found() && j == instance.break_item())
-            os << " B";
-        if (j == instance.first_item())
-            os << " F";
-        if (j == instance.last_item())
-            os << " L";
-        os << std::endl;
-    }
-    return os;
-}
+/******************************************************************************/
 
 Solution knapsack::algorithm_end(const Solution& sol, Info& info)
 {
@@ -997,6 +866,63 @@ Profit knapsack::algorithm_end(Profit val, Info& info)
             "Value: " + std::to_string(val) + "\n" +
             "Time: " + std::to_string(t) + "\n");
     return val;
+}
+
+/******************************************************************************/
+
+std::ostream& knapsack::operator<<(std::ostream& os, const Item& it)
+{
+    os << it.j << "\t" << it.w << "\t" << it.p << "\t" << (double)it.p/(double)it.w
+        << "\t" << it.l;
+    return os;
+}
+
+std::ostream& knapsack::operator<<(std::ostream& os, const Instance& instance)
+{
+    os
+        <<  "n "   << instance.item_number() << " c "   << instance.capacity()
+        << " opt " << instance.optimum() << std::endl
+        << "f " << instance.first_item() << " l " << instance.last_item()
+        << std::endl;
+    if (instance.break_item_found())
+        os << "b " << instance.break_item()
+            << " wsum " << instance.break_weight()
+            << " psum " << instance.break_profit()
+            << std::endl;
+    os << "pos\tj\tw\tp\te\tl\tb\topt\tred\tb/f/l" << std::endl;
+    for (ItemPos j=0; j<instance.total_item_number(); ++j) {
+        os << j << "\t" << instance.item(j) << "\t";
+
+        if (instance.break_solution() != NULL) {
+            os << instance.break_solution()->contains(j);
+        } else {
+            os << " ";
+        }
+        os << "\t";
+
+        if (instance.optimal_solution() != NULL) {
+            os << instance.optimal_solution()->contains(j);
+        } else {
+            os << " ";
+        }
+        os << "\t";
+
+        if (instance.reduced_solution() != NULL) {
+            os << instance.reduced_solution()->contains(j);
+        } else {
+            os << " ";
+        }
+        os << "\t";
+
+        if (instance.break_item_found() && j == instance.break_item())
+            os << "b";
+        if (j == instance.first_item())
+            os << "f";
+        if (j == instance.last_item())
+            os << "l";
+        os << std::endl;
+    }
+    return os;
 }
 
 void Instance::plot(std::string filename)

@@ -10,7 +10,8 @@ using namespace knapsack;
 void executeProgram(std::string cmd)
 {
     std::cout << cmd << std::endl;
-    system(cmd.c_str());
+    int x = system(cmd.c_str());
+    (void)x;
 }
 
 void check_sopt(std::string prog, boost::filesystem::path input)
@@ -99,8 +100,14 @@ void knapsack::test_pisinger(
         for (Profit r: rs) {
             for (std::string type: types) {
                 for (int h=1; h<=100; h++) {
-                    std::cout << type << " " << n << " " << r << " " << h << std::endl;
-                    Instance ins = generate(type, n, r, h);
+                    GenerateData data;
+                    data.n = n;
+                    data.r = r;
+                    data.type = type;
+                    data.h = h;
+                    std::cout << data.to_string() << std::endl;
+                    Instance ins = generate(data);
+                    std::cout << ins << std::endl;
                     Profit opt = -1;
                     for (auto f: fs) {
                         Instance ins_tmp = ins;

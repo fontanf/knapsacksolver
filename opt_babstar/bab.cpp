@@ -15,7 +15,7 @@ struct Node
     Profit ub;
     std::string to_string()
     {
-        return "{id " + sol.print_in() +
+        return "{id " + sol.to_string_items() +
             STR4(w, sol.weight()) + STR4(p, sol.profit()) + STR2(ub);
     }
 };
@@ -400,7 +400,6 @@ Solution knapsack::sopt_babstar_dp(Instance& ins, Info& info)
     info.pt.put("Algorithm.QueueMaxSize", q_max_size);
     info.pt.put("Algorithm.QueueAverageSize", q_average_size / node_number);
 
-    assert(ins.check_sopt(sol_best));
     return algorithm_end(sol_best, info);
 }
 
@@ -452,8 +451,8 @@ Solution knapsack::sopt_starknap(Instance& ins, Info& info, StarknapParams param
         DBG(info.debug("All items have been reduced.\n");)
         return algorithm_end(sol, info);
     }
-    DBG(info.debug("Reduced solution: " + ins.reduced_solution()->print_bin() + "\n");)
-    DBG(info.debug("Reduced solution: " + ins.reduced_solution()->print_in() + "\n");)
+    DBG(info.debug("Reduced solution: " + ins.reduced_solution()->to_string_binary() + "\n");)
+    DBG(info.debug("Reduced solution: " + ins.reduced_solution()->to_string_items() + "\n");)
 
     Weight  c = ins.total_capacity();
     ItemPos f = ins.first_item();

@@ -34,16 +34,6 @@ struct Item
 {
     Item(ItemIdx j, Weight w, Profit p): j(j), w(w), p(p) { }
     Item(ItemIdx j, Weight w, Profit p, Label l): j(j), w(w), p(p), l(l) { }
-    Item& operator=(const Item& item)
-    {
-        if (this != &item) {
-            j = item.j;
-            w = item.w;
-            p = item.p;
-            l = item.l;
-        }
-        return *this;
-    }
     ItemIdx j = -1; // Index, 0 <= j < n, must be different for each item
     Weight  w = -1; // Weight, w >= 0
     Profit  p = -1; // Profit, p >= 0
@@ -51,13 +41,7 @@ struct Item
 
     std::string to_string() const
     {
-        return
-            "{j " + std::to_string(j) +
-            " w " + std::to_string(w) +
-            " p " + std::to_string(p) +
-            " e " + std::to_string((double)p/(double)w) +
-            " l " + std::to_string(l) +
-            "}";
+        return "{" + STR1(j) + STR2(w) + STR2(p) + STR4(e, (double)p/(double)w) + STR2(l) + "}";
     }
 };
 

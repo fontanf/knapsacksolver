@@ -40,8 +40,8 @@ Profit knapsack::opt_balknap_array(Instance& ins, Info& info, BalknapParams p)
         DBG(info.debug("All items have been reduced.\n");)
         return algorithm_end(lb, info);
     }
-    DBG(info.debug("Reduced solution: " + ins.reduced_solution()->print_bin() + "\n");)
-    DBG(info.debug("Reduced solution: " + ins.reduced_solution()->print_in() + "\n");)
+    DBG(info.debug("Reduced solution: " + ins.reduced_solution()->to_string_binary() + "\n");)
+    DBG(info.debug("Reduced solution: " + ins.reduced_solution()->to_string_items() + "\n");)
 
     Weight  c = ins.capacity();
     ItemPos f = ins.first_item();
@@ -69,8 +69,8 @@ Profit knapsack::opt_balknap_array(Instance& ins, Info& info, BalknapParams p)
     Profit pb    = ins.item(b).p;
     Weight r     = ins.break_capacity();
 
-    DBG(info.debug("Break solution: " + ins.break_solution()->print_bin() + "\n");)
-    DBG(info.debug("Break solution: " + ins.break_solution()->print_in() + "\n");)
+    DBG(info.debug("Break solution: " + ins.break_solution()->to_string_binary() + "\n");)
+    DBG(info.debug("Break solution: " + ins.break_solution()->to_string_items() + "\n");)
     DBG(info.debug(STR1(n) + STR2(c) + STR2(f) + STR2(l) + "\n"
                 + STR1(w_bar) + STR2(p_bar) + "\n");)
 
@@ -239,8 +239,8 @@ Solution knapsack::sopt_balknap_array_all(Instance& ins, Info& info,
         DBG(info.debug("All items have been reduced.\n");)
         return algorithm_end(sol, info);
     }
-    DBG(info.debug("Reduced solution: " + ins.reduced_solution()->print_bin() + "\n");)
-    DBG(info.debug("Reduced solution: " + ins.reduced_solution()->print_in() + "\n");)
+    DBG(info.debug("Reduced solution: " + ins.reduced_solution()->to_string_binary() + "\n");)
+    DBG(info.debug("Reduced solution: " + ins.reduced_solution()->to_string_items() + "\n");)
 
     Weight  c = ins.capacity();
     ItemPos f = ins.first_item();
@@ -278,8 +278,8 @@ Solution knapsack::sopt_balknap_array_all(Instance& ins, Info& info,
     Profit z     = sol.profit() - ins.reduced_solution()->profit();
     Profit u     = ins.break_profit() + r * pb / wb;
 
-    DBG(info.debug("Break solution: " + ins.break_solution()->print_bin() + "\n");)
-    DBG(info.debug("Break solution: " + ins.break_solution()->print_in() + "\n");)
+    DBG(info.debug("Break solution: " + ins.break_solution()->to_string_binary() + "\n");)
+    DBG(info.debug("Break solution: " + ins.break_solution()->to_string_items() + "\n");)
     DBG(info.debug(
             "n " + std::to_string(n) +
             " c " + std::to_string(c) +

@@ -116,7 +116,7 @@ std::ostream& knapsack::operator<<(std::ostream& os, const Solution& solution)
     return os;
 }
 
-std::string Solution::print_bin() const
+std::string Solution::to_string_binary() const
 {
     std::string s = "";
     for (ItemPos j=0; j<instance().total_item_number(); ++j)
@@ -124,7 +124,7 @@ std::string Solution::print_bin() const
     return s;
 }
 
-std::string Solution::print_in() const
+std::string Solution::to_string_items() const
 {
     std::string s = "";
     for (ItemPos j=0; j<instance().total_item_number(); ++j)
