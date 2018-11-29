@@ -3,6 +3,7 @@
 #include "knapsack/lib/instance.hpp"
 
 #include <random>
+#include <cmath>
 
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/filter/zlib.hpp>
@@ -71,11 +72,19 @@ std::pair<Weight, Profit> item(GenerateData& data)
     } else if (data.type == "mstr") {
         std::uniform_int_distribution<int> d(1, data.r);
         w = d(data.g);
-        if (w % data.d == 0) {
+        if (w % (Profit)data.d == 0) {
             p = w + data.k1;
         } else {
             p = w + data.k2;
         }
+    } else if (data.type == "pceil") {
+        std::uniform_int_distribution<int> d(1, data.r);
+        w = d(data.g);
+        p = data.d * ((w - 1) / data.d + 1);
+    } else if (data.type == "circle") {
+        std::uniform_int_distribution<int> d(1, data.r);
+        w = d(data.g);
+        p = data.d * sqrt(4*data.r*data.r - (w-2*data.r)*(w-2*data.r));
     } else {
         assert(false);
     }
