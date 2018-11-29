@@ -513,11 +513,11 @@ Solution knapsack::sopt_balknap_array_all(Instance& ins, Info& info,
 Solution knapsack::sopt_balknap_array_part(Instance& ins, Info& info,
         BalknapParams p, ItemPos k)
 {
-    (void)info;
+    info.verbose("*** balknap (array, part " + std::to_string(k) + ") ***\n");
     (void)p;
-    (void)k;
-    assert(false); // TODO
-    return Solution(ins);
+    Solution sol(ins);
+    info.verbose("Not yet implemented.\n");
+    return algorithm_end(sol, info);
 }
 
 
