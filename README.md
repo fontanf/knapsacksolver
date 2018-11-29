@@ -77,3 +77,15 @@ Algorithms:
   - `-r part` :heavy_check_mark: (with options `-n` :x: `-g` :x: `-p` :x: `-s` :x: `-k` :x:)
 - Primal-dual Branch-and-bound (`expknap`) `opt_expknap/main` :heavy_check_mark: (with options `-n` :x: `-g` :heavy_check_mark: `-s`  :heavy_check_mark: `-k` :heavy_check_mark:)
 
+
+## Instance generator
+
+```
+bazel build lib:generator_main
+./bazel-bin/lib/generator_main -n 1000 -t sw -r 1000 -o ./ins.txt -p ./ins.plot
+gnuplot
+gnuplot> set yrange[0:]
+gnuplot> set xrange[0:]
+gnuplot> plot 'ins.plot' u 1:2
+```
+
