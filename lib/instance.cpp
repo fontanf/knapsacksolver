@@ -999,3 +999,21 @@ Profit knapsack::algorithm_end(Profit val, Info& info)
     return val;
 }
 
+void Instance::plot(std::string filename)
+{
+    std::ofstream file(filename);
+    file << "w p" << std::endl;
+    for (ItemIdx i=0; i<item_number(); ++i)
+        file << item(i).w << " " << item(i).p << std::endl;
+    file.close();
+}
+
+void Instance::write(std::string filename)
+{
+    std::ofstream file(filename);
+    file << item_number() << " " << total_capacity() << std::endl << std::endl;
+    for (ItemIdx i=0; i<item_number(); ++i)
+        file << item(i).w << " " << item(i).p << std::endl;
+    file.close();
+}
+

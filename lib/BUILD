@@ -45,6 +45,12 @@ cc_library(
         include_prefix = "knapsack/lib/",
 )
 
+cc_binary(
+        name = "generator_main",
+        srcs = ["generator_main.cpp"],
+        deps = [":libgenerator"],
+)
+
 cc_library(
         name = "tester",
         hdrs = ["tester.hpp"],

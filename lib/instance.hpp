@@ -198,6 +198,9 @@ public:
     ItemPos ub_item(Item item) const;
 
 
+    void plot(std::string filename);
+    void write(std::string filename);
+
     /**
      * Return the profit of the certificate file.
      */
