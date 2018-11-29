@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
     int h = 58;
     std::cout << t << " " << i << " " << r << " " << h << std::endl;
     std::cout << std::endl;
-    Instance ins = generate(t, i, r, h);
+    Instance ins = generate(t, i, r, h, 0);
 
     Instance ins1(ins);
     Info info1;
