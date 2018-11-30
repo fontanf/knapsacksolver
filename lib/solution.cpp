@@ -78,11 +78,21 @@ void Solution::clear()
     std::fill(x_.begin(), x_.end(), 0);
 }
 
-bool Solution::update(const Solution& sol)
+bool Solution::update(const Solution& sol, Info& info, Cpt& solution_number)
 {
     if (sol.profit() <= profit() || sol.remaining_capacity() < 0)
         return false;
     *this = sol;
+    double t = info.elapsed_time();
+    std::string sol_str = "Solution" + std::to_string(solution_number);
+    info.pt.put(sol_str + ".Value", sol.profit());
+    info.pt.put(sol_str + ".Time", t);
+    info.verbose("--- Solution " + std::to_string(solution_number) + "\n"
+            "Value: " + std::to_string(sol.profit()) + "\n" +
+            "Time: " + std::to_string(t) + "\n");
+    solution_number++;
+    info.write_ini();
+    write_cert(info.cert_file());
     return true;
 }
 

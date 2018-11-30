@@ -28,10 +28,13 @@ int main(int argc, char *argv[])
     */
 
     GenerateData data;
-    data.type = "asc";
-    data.n = 150;
-    data.r = 10000;
-    data.h = 58;
+    data.spanner = true;
+    data.v = 50;
+    data.m = 50;
+    data.type = "sc";
+    data.n = 100000;
+    data.r = 1000;
+    data.h = 75;
     std::cout << data.to_string() << std::endl;
     Instance ins = generate(data);
 
@@ -45,17 +48,10 @@ int main(int argc, char *argv[])
     Instance ins2(ins);
     Info info2;
     info2.set_verbose();
-    StarknapParams p;
+    BalknapParams p;
     p.upper_bound = "t";
     p.lb_greedynlogn = 0;
-    Solution sopt2 = sopt_starknap(ins2, info2, p);
-
-    std::cout << std::endl;
-
-    Instance ins3(ins);
-    Info info3;
-    info3.set_verbose();
-    Solution sopt3 = sopt_expknap(ins2, info3);
+    Solution sopt2 = sopt_balknap_list_part(ins2, info2, p);
 
     return 0;
 }

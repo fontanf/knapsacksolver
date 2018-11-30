@@ -158,12 +158,18 @@ Solution knapsack::sol_bestgreedynlogn(const Instance& ins, Info& info)
     std::string best = "Greedy";
 
     Info info_tmp1;
-    if (sol.update(sol_forwardgreedynlogn(ins, info_tmp1)))
+    Solution sol_tmp1 = sol_forwardgreedynlogn(ins, info_tmp1);
+    if (sol_tmp1.profit() > sol.profit()) {
+        sol = sol_tmp1;
         best = "ForwardBest";
+    }
 
     Info info_tmp2;
-    if (sol.update(sol_backwardgreedynlogn(ins, info_tmp2)))
+    Solution sol_tmp2 = sol_backwardgreedynlogn(ins, info_tmp2);
+    if (sol_tmp2.profit() > sol.profit()) {
+        sol = sol_tmp2;
         best = "BackwardBest";
+    }
 
     info.verbose("Best solution from: " + best);
     info.pt.put("Algorithm.Best", best);

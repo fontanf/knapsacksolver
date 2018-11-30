@@ -362,7 +362,9 @@ void update_bounds(const Instance& ins, Solution& sol_best, Profit& lb,
         params.lb_greedynlogn = -1;
         info.verbose("Run greedynlogn...");
         Info info_tmp;
-        if (sol_best.update(sol_bestgreedynlogn(ins, info_tmp))) {
+        Solution sol_tmp = sol_bestgreedynlogn(ins, info_tmp);
+        if (sol_tmp.profit() > sol_best.profit()) {
+            sol_best = sol_tmp;
             if (sol_best.profit() > lb)
                 lb = sol_best.profit();
             info.verbose(" update best solution " + std::to_string(sol_best.profit()) + "\n");
@@ -376,7 +378,7 @@ Solution knapsack::sopt_balknap_list_part(Instance& ins, Info& info,
         BalknapParams params, ItemPos k, Profit o)
 {
     if (o == -1)
-        info.verbose("**** balknap (list, part " + std::to_string(k) + ")***\n");
+        info.verbose("**** balknap (list, part " + std::to_string(k) + ") ***\n");
     DBG(info.debug(
             "n " + std::to_string(ins.item_number()) + "/" + std::to_string(ins.total_item_number()) +
             " f " + std::to_string(ins.first_item()) +

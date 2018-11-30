@@ -20,7 +20,8 @@ Solution knapsack::sopt_bab(Instance& ins, Info& info)
         min_weight[i] = std::min(ins.item(i).w, min_weight[i+1]);
 
     Solution sol_best(ins);
-    StateIdx node_number = 0;
+    Cpt node_number = 0;
+    Cpt sol_number = 0;
     for (ItemIdx i=0; ; ++i) {
         // Leaf test
         if (i == n || sol_curr.remaining_capacity() < min_weight[i]) {
@@ -41,7 +42,7 @@ Solution knapsack::sopt_bab(Instance& ins, Info& info)
                     sol_curr.remaining_capacity() - ins.item(i).w)
                 > sol_best.profit()) {
             sol_curr.set(i, true);
-            sol_best.update(sol_curr); // Update best solution
+            sol_best.update(sol_curr, info, sol_number); // Update best solution
             node_number++;
         } else { // Remove item
             sol_curr.set(i, false);

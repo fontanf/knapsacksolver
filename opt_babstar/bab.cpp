@@ -53,9 +53,10 @@ Solution knapsack::sopt_babstar(Instance& ins, Info& info)
     )
 
     std::priority_queue<Node, std::vector<Node>, Compare> q;
-    StateIdx q_max_size = 0;
-    StateIdx q_average_size = 0;
-    StateIdx node_number = 0;
+    Cpt q_max_size = 0;
+    Cpt q_average_size = 0;
+    Cpt node_number = 0;
+    Cpt sol_number = 0;
 
     Solution sol_best(ins);
 
@@ -81,9 +82,7 @@ Solution knapsack::sopt_babstar(Instance& ins, Info& info)
         DBG(info.debug("Node " + node.to_string() + STR4(r, node.sol.remaining_capacity()) + "\n");)
 
         // Update best solution
-        if (sol_best.update(node.sol)) {
-            DBG(info.debug("Update best solution\n");)
-        }
+        sol_best.update(node.sol, info, sol_number);
 
         // Stop condition
         if (node.ub <= sol_best.profit())

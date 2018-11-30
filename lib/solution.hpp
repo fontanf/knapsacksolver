@@ -38,7 +38,7 @@ public:
     /**
      * Replace the current solution by "sol" if it is better.
      */
-    bool update(const Solution& sol);
+    bool update(const Solution& sol, Info& info, Cpt& solution_number);
 
     void update_from_partsol(const PartSolFactory1& psolf, PartSol1 psol);
     void update_from_partsol(const PartSolFactory2& psolf, PartSol2 psol);

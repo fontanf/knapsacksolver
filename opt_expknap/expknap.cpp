@@ -8,100 +8,123 @@
 
 using namespace knapsack;
 
-void update_bounds(const Instance& ins, Solution& sol_best, Profit& ub, SurrogateOut& so,
-        ExpknapParams& params, StateIdx nodes, Info& info)
+struct ExpknapRecData
 {
-    if (params.ub_surrogate == nodes) {
+    ExpknapRecData(Instance& ins, Info& info, ExpknapParams p):
+        ins(ins), sol_curr(*ins.break_solution()), sol_best(ins), info(info), params(p) {  }
+    Instance& ins;
+    Solution sol_curr;
+    Solution sol_best;
+    Info& info;
+    Profit u = -1;
+    SurrogateOut so;
+    ItemPos s;
+    ItemPos t;
+    ExpknapParams params;
+    Cpt node_number = 0;
+    Cpt sol_number = 0;
+};
+
+void update_bounds(ExpknapRecData& data)
+{
+    if (data.params.ub_surrogate == data.node_number) {
         Info info_tmp;
-        so = ub_surrogate(ins, sol_best.profit(), info_tmp);
-        if (ub > so.ub) {
-            ub = so.ub;
+        data.so = ub_surrogate(data.ins, data.sol_best.profit(), info_tmp);
+        if (data.u > data.so.ub) {
+            data.u = data.so.ub;
         } else {
         }
     }
 
-    if (params.solve_sur == nodes) {
-        if (sol_best.profit() == ub)
+    if (data.params.solve_sur == data.node_number) {
+        if (data.sol_best.profit() == data.u)
             return;
-        assert(params.ub_surrogate >= 0 && params.ub_surrogate <= params.solve_sur);
-        Instance ins_sur(ins);
-        ins_sur.surrogate(so.multiplier, so.bound);
-        params.ub_surrogate = -1;
-        params.solve_sur = -1;
-        Solution sol_sur = sopt_expknap(ins_sur, info, params);
-        if (ub > sol_sur.profit()) {
-            ub = sol_sur.profit();
+        assert(data.params.ub_surrogate >= 0);
+        assert(data.params.ub_surrogate <= data.params.solve_sur);
+        Instance ins_sur(data.ins);
+        ins_sur.surrogate(data.so.multiplier, data.so.bound);
+        data.params.ub_surrogate = -1;
+        data.params.solve_sur = -1;
+        Info info_tmp;
+        Solution sol_sur = sopt_expknap(ins_sur, info_tmp, data.params);
+        if (data.u > sol_sur.profit()) {
+            data.u = sol_sur.profit();
         }
-        if (sol_sur.item_number() == so.bound) {
-            sol_best = sol_sur;
+        if (sol_sur.item_number() == data.so.bound) {
+            data.sol_best = sol_sur;
         }
     }
 
-    if (params.lb_greedynlogn == nodes) {
+    if (data.params.lb_greedynlogn == data.node_number) {
         Info info_tmp;
-        if (sol_best.update(sol_bestgreedynlogn(ins, info_tmp))) {
+        Solution sol_tmp = sol_bestgreedynlogn(data.ins, info_tmp);
+        if (sol_tmp.profit() > data.sol_best.profit()) {
+            data.sol_best = sol_tmp;
         } else {
         }
     }
 }
 
-bool sopt_expknap_rec(Instance& ins,
-        Solution& sol_curr, Solution& sol_best, Profit& u, SurrogateOut& so,
-        ItemPos s, ItemPos t,
-        ExpknapParams& params, StateIdx& nodes, Info& info)
+void sopt_expknap_rec(ExpknapRecData& data)
 {
-    nodes++; // Increment node number
-    update_bounds(ins, sol_best, u, so, params, nodes, info); // Update bounds
+    data.node_number++; // Increment node number
+    DBG(
+       data.info.debug(
+            STR3(Node number, data.node_number)
+            + STR4(s, data.s) + STR4(t, data.t) + "\n");
+    )
 
-    bool improved = false;
-    if (sol_curr.remaining_capacity() >= 0) {
-        if (sol_best.update(sol_curr)) {
-            improved = true;
-        }
+    update_bounds(data); // Update bounds
+
+    ItemPos s = data.s;
+    ItemPos t = data.t;
+    if (data.sol_curr.remaining_capacity() >= 0) {
+        data.sol_best.update(data.sol_curr, data.info, data.sol_number);
         for (;;t++) {
             // If UB reached, then stop
-            if (sol_best.profit() == u)
-                return false;
+            if (data.sol_best.profit() == data.u)
+                return;
 
             // Expand
-            if (ins.int_right_size() > 0 && t > ins.last_sorted_item())
-                ins.sort_right(sol_best.profit());
+            if (data.ins.int_right_size() > 0 && t > data.ins.last_sorted_item())
+                data.ins.sort_right(data.sol_best.profit());
 
             // Bounding test
-            Profit ub = ub_dembo(ins, t, sol_curr);
-            if (ub <= sol_best.profit())
-                return improved;
+            Profit ub = ub_dembo(data.ins, t, data.sol_curr);
+            if (ub <= data.sol_best.profit())
+                return;
 
             // Recursive call
-            sol_curr.set(t, true); // Add item t
-            if (sopt_expknap_rec(ins, sol_curr, sol_best, u, so, s, t+1, params, nodes, info))
-                improved = true;
-            sol_curr.set(t, false); // Remove item t
+            data.sol_curr.set(t, true); // Add item t
+            data.s = s;
+            data.t = t+1;
+            sopt_expknap_rec(data);
+            data.sol_curr.set(t, false); // Remove item t
         }
     } else {
         for (;;s--) {
             // If UB reached, then stop
-            if (sol_best.profit() == u)
-                return false;
+            if (data.sol_best.profit() == data.u)
+                return;
 
             // Expand
-            if (ins.int_left_size() > 0 && s < ins.first_sorted_item())
-                ins.sort_left(sol_best.profit());
+            if (data.ins.int_left_size() > 0 && s < data.ins.first_sorted_item())
+                data.ins.sort_left(data.sol_best.profit());
 
             // Bounding test
-            Profit ub = ub_dembo_rev(ins, s, sol_curr);
-            if (ub <= sol_best.profit())
-                return improved;
+            Profit ub = ub_dembo_rev(data.ins, s, data.sol_curr);
+            if (ub <= data.sol_best.profit())
+                return;
 
             // Recursive call
-            sol_curr.set(s, false); // Remove item s
-            if (sopt_expknap_rec(ins, sol_curr, sol_best, u, so, s-1, t, params, nodes, info))
-                improved = true;
-            sol_curr.set(s, true); // Add item s
+            data.sol_curr.set(s, false); // Remove item s
+            data.s = s-1;
+            data.t = t;
+            sopt_expknap_rec(data);
+            data.sol_curr.set(s, true); // Add item s
         }
     }
     assert(false);
-    return improved;
 }
 
 Solution knapsack::sopt_expknap(Instance& ins, Info& info, ExpknapParams params)
@@ -121,32 +144,31 @@ Solution knapsack::sopt_expknap(Instance& ins, Info& info, ExpknapParams params)
         return algorithm_end(sol, info);
     }
 
-    Solution sol_curr = *ins.break_solution();
+    ExpknapRecData data(ins, info, params);
 
     Info info_tmp1;
-    Solution sol_best = sol_greedy(ins, info_tmp1);
-
+    data.sol_best = sol_greedy(ins, info_tmp1);
     Info info_tmp2;
-    Profit ub = ub_dantzig(ins, info_tmp2);
+    data.u = ub_dantzig(ins, info_tmp2);
 
     info.verbose(
-            "lb " + std::to_string(sol_best.profit()) +
-            " ub " + std::to_string(ub) +
-            " gap " + std::to_string(ub - sol_best.profit()) +
+            "lb " + std::to_string(data.sol_best.profit()) +
+            " ub " + std::to_string(data.u) +
+            " gap " + std::to_string(data.u - data.sol_best.profit()) +
             "\n");
 
     ItemPos b = ins.break_item();
 
-    SurrogateOut so;
-    StateIdx node_number = 0;
-    update_bounds(ins, sol_best, ub, so, params, node_number, info); // Update bounds
-    if (sol_best.profit() != ub) { // If UB reached, then stop
+    update_bounds(data); // Update bounds
+    if (data.sol_best.profit() != data.u) { // If UB reached, then stop
         info.verbose("Branch...\n");
-        sopt_expknap_rec(ins, sol_curr, sol_best, ub, so, b-1, b, params, node_number, info);
+        data.s = b-1;
+        data.t = b;
+        sopt_expknap_rec(data);
     }
 
-    info.pt.put("Algorithm.NodeNumber", node_number);
-    info.verbose("Node number: " + Info::to_string(node_number) + "\n");
-    return algorithm_end(sol_best, info);
+    info.pt.put("Algorithm.NodeNumber", data.node_number);
+    info.verbose("Node number: " + Info::to_string(data.node_number) + "\n");
+    return algorithm_end(data.sol_best, info);
 }
 

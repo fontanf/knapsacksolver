@@ -23,6 +23,7 @@ typedef int_fast64_t ItemIdx;
 typedef int_fast64_t ItemPos;
 typedef int_fast64_t StateIdx;
 typedef int_fast64_t Label;
+typedef int_fast64_t Cpt;
 
 class Solution;
 typedef int64_t PartSol1;
