@@ -4,7 +4,7 @@ cc_library(
                 "instance.hpp",
                 "solution.hpp",
                 "part_solution_1.hpp",
-                "part_solution_2.hpp"
+                "part_solution_2.hpp",
         ],
         srcs = [
                 "instance.cpp",
@@ -32,6 +32,19 @@ cc_library(
                 "solution.hpp"
         ],
         deps = ["@benchtools//:info",],
+        visibility = ["//visibility:public"],
+        include_prefix = "knapsack/lib/",
+)
+
+cc_library(
+        name = "libbounds",
+        hdrs = ["update_bounds.hpp"],
+        srcs = [],
+        deps = [
+                "//lib:cpp",
+                "//lb_greedynlogn:libgreedynlogn",
+                "//ub_surrogate:libsurrogate",
+        ],
         visibility = ["//visibility:public"],
         include_prefix = "knapsack/lib/",
 )

@@ -38,7 +38,9 @@ public:
     /**
      * Replace the current solution by "sol" if it is better.
      */
-    bool update(const Solution& sol, Info& info, Cpt& solution_number);
+    void update(const Solution& sol, Info& info, Cpt& solution_number, Profit ub=-1);
+    static void update_lb(Profit& lb, Profit lb_new, Info& info, Cpt& lb_number, Profit ub=-1);
+    static void update_ub(Profit& ub, Profit ub_new, Info& info, Cpt& ub_number, Profit lb=-1);
 
     void update_from_partsol(const PartSolFactory1& psolf, PartSol1 psol);
     void update_from_partsol(const PartSolFactory2& psolf, PartSol2 psol);
@@ -50,6 +52,7 @@ public:
     void write_cert(std::string file);
 
     std::string to_string_binary() const;
+    std::string to_string_binary_ordered() const;
     std::string to_string_items() const;
 
 private:

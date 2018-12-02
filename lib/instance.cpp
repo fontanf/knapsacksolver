@@ -1,7 +1,5 @@
 #include "knapsack/lib/instance.hpp"
 #include "knapsack/lib/solution.hpp"
-#include "knapsack/lib/part_solution_1.hpp"
-#include "knapsack/lib/part_solution_2.hpp"
 
 #include <sstream>
 #include <iomanip>
@@ -34,7 +32,6 @@ void Instance::add_item(Weight w, Profit p, Label l)
     ItemIdx j = items_.size();
     items_.push_back({j, w, p, l});
     l_ = j;
-    version_++;
     sol_opt_ = NULL;
     if (sol_red_ != NULL)
         sol_red_->resize(j+1);
@@ -45,24 +42,6 @@ void Instance::add_items(const std::vector<std::pair<Weight, Profit>>& wp)
 {
     for (auto i: wp)
         add_item(i.first, i.second);
-}
-
-const Item& Instance::max_weight_item()
-{
-    compute_max_items();
-    return j_wmax_;
-}
-
-const Item& Instance::max_profit_item()
-{
-    compute_max_items();
-    return j_pmax_;
-}
-
-const Item& Instance::max_efficiency_item()
-{
-    compute_max_items();
-    return j_emax_;
 }
 
 Instance::Instance(boost::filesystem::path filepath)
@@ -223,8 +202,6 @@ Instance::Instance(const Instance& ins)
     items_ = ins.items_;
     f_ = ins.f_;
     l_ = ins.l_;
-    version_ = ins.version_;
-    max_version_ = ins.max_version_;
 
     if (ins.optimal_solution() != NULL) {
         sol_opt_ = new Solution(*this);
@@ -276,6 +253,43 @@ Profit Instance::check(boost::filesystem::path cert_file)
     return sol.profit();
 }
 
+ItemPos Instance::max_efficiency_item() const
+{
+    ItemPos j_max = 0;
+    for (ItemPos j=0; j<total_item_number(); ++j)
+        if (item(j).p * item(j_max).w > item(j_max).p * item(j).w)
+            j_max = j;
+    return j_max;
+}
+
+ItemPos Instance::max_profit_item() const
+{
+    ItemPos j_max = 0;
+    for (ItemPos j=0; j<total_item_number(); ++j)
+        if (item(j).p > item(j_max).p)
+            j_max = j;
+    return j_max;
+}
+
+ItemPos Instance::max_weight_item() const
+{
+    ItemPos j_max = 0;
+    for (ItemPos j=0; j<total_item_number(); ++j)
+        if (item(j).w > item(j_max).w)
+            j_max = j;
+    return j_max;
+}
+
+std::vector<Weight> Instance::min_weights() const
+{
+    ItemIdx n = total_item_number();
+    std::vector<Weight> min_weight(n);
+    min_weight[n-1] = item(n-1).w;
+    for (ItemIdx i=n-2; i>=0; --i)
+        min_weight[i] = std::min(item(i).w, min_weight[i+1]);
+    return min_weight;
+}
+
 /******************************************************************************/
 
 void Instance::sort()
@@ -310,29 +324,6 @@ ItemPos Instance::ub_item(Item item) const
     if (s == isum_.begin()+l_+1)
         return l_+1;
     return s->j-1;
-}
-
-void Instance::compute_max_items()
-{
-    if (max_version_ == version_)
-        return;
-    max_version_ = version_;
-
-    j_wmax_ = {-1, -1, -1};        // Max weight item
-    j_wmin_ = {-1, c_orig_+1, -1}; // Min weight item
-    j_pmax_ = {-1, -1, -1};        // Max profit item
-    j_emax_ = {-1, 0, -1};         // Max efficiency item;
-
-    for (ItemPos j=f_; j<=l_; ++j) {
-        Profit p = item(j).p;
-        Weight w = item(j).w;
-        if (p * j_emax_.w > j_emax_.p * w)
-            j_emax_ = item(j);
-        if (p > j_pmax_.p)
-            j_pmax_ = item(j);
-        if (w > j_wmax_.w)
-            j_wmax_ = item(j);
-    }
 }
 
 void Instance::compute_break_item()
@@ -569,7 +560,6 @@ void Instance::surrogate(Weight multiplier, ItemIdx bound, ItemPos first)
         }
     }
     c_orig_ += multiplier * bound;
-    version_++;
 
     sorted_ = false;
     b_      = -1;
@@ -751,55 +741,21 @@ void Instance::set_last_item(ItemPos k)
     l_ = k;
 }
 
-void Instance::fix(PartSolFactory1 psolf, PartSol1 psol)
+bool Instance::update_sorted()
 {
-    ItemPos f = std::max(f_, psolf.x1());
-    ItemPos l = std::min(l_, psolf.x2());
-    std::vector<Item> not_fixed;
-    std::vector<Item> fixed_1;
-    std::vector<Item> fixed_0;
-    for (ItemPos j=f_; j<f; ++j)
-        not_fixed.push_back(item(j));
-    for (ItemPos j=f; j<=l; ++j) {
-        if (psolf.contains(psol, j)) {
-            fixed_1.push_back(item(j));
-            sol_red_->set(j, true);
-        } else {
-            fixed_0.push_back(item(j));
-        }
+    if (sorted_)
+        return true;
+    if (b_ == -1)
+        return false;
+    if (first_item() >= first_sorted_item() && last_item() <= last_sorted_item()) {
+        sorted_ = true;
+        return true;
     }
-    for (ItemPos j=l+1; j<=l_; ++j)
-        not_fixed.push_back(item(j));
-
-    ItemPos j = not_fixed.size();
-    ItemPos j1 = fixed_1.size();
-    ItemPos j0 = fixed_0.size();
-    std::copy(fixed_1.begin(), fixed_1.end(), items_.begin()+f_);
-    std::copy(not_fixed.begin(), not_fixed.end(), items_.begin()+f_+j1);
-    std::copy(fixed_0.begin(), fixed_0.end(), items_.begin()+f_+j1+j);
-
-    f_ += j1;
-    l_ -= j0;
-
-    remove_big_items();
-    if (sorted()) {
-        compute_break_item();
-        update_isum();
-    } else {
-        b_ = -1;
-    }
+    return false;
 }
 
-void Instance::fix(PartSolFactory2 psolf, PartSol2 psol)
+void Instance::fix(const std::vector<int> vec)
 {
-    std::vector<int> vec(total_item_number(), 0);
-    for (ItemPos j=0; j<psolf.size(); ++j) {
-        ItemPos idx = psolf.indices()[j];
-        if (idx == -1)
-            continue;
-        vec[psolf.indices()[j]] = (psolf.contains(psol, j))? 1: -1;
-    }
-
     std::vector<Item> not_fixed;
     std::vector<Item> fixed_1;
     std::vector<Item> fixed_0;
@@ -828,11 +784,9 @@ void Instance::fix(PartSolFactory2 psolf, PartSol2 psol)
     remove_big_items();
     if (sorted()) {
         compute_break_item();
-        update_isum();
     } else {
         b_ = -1;
     }
-
 }
 
 /******************************************************************************/

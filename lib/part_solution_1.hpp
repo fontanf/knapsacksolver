@@ -1,6 +1,7 @@
 #pragma once
 
 #include "knapsack/lib/instance.hpp"
+#include "knapsack/lib/solution.hpp"
 
 namespace knapsack
 {
@@ -10,7 +11,8 @@ class PartSolFactory1
 
 public:
 
-    PartSolFactory1(ItemPos size, ItemPos b, ItemPos f, ItemPos l): size_(size), b_(b), f_(f), l_(l)
+    PartSolFactory1(const Instance& ins, ItemPos size, ItemPos b, ItemPos f, ItemPos l):
+        instance_(ins), size_(size), b_(b), f_(f), l_(l)
     {
         if (l-f+1 < size) {
             x1_ = f;
@@ -76,8 +78,25 @@ public:
         return str;
     }
 
+    std::vector<int> vector(PartSol1& s) const
+    {
+        ItemPos f = std::max(instance_.first_item(), x1());
+        ItemPos l = std::min(instance_.last_item(), x2());
+        std::vector<int> vec(instance_.total_item_number(), 0);
+        for (ItemPos j=f; j<=l; ++j)
+            vec[j] = (contains(s, j))? 1: -1;
+        return vec;
+    }
+
+    void update_solution(PartSol1 psol, Solution& sol)
+    {
+        for (ItemPos j=x1(); j<=x2(); ++j)
+            sol.set(j, contains(psol, j));
+    }
+
 private:
 
+    const Instance& instance_;
     ItemPos size_;
     ItemPos b_;
     ItemPos f_;

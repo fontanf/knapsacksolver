@@ -99,33 +99,36 @@ void knapsack::test_pisinger(
     for (ItemIdx n: ns) {
         for (Profit r: rs) {
             for (std::string type: types) {
-                for (int h=1; h<=100; h++) {
-                    GenerateData data;
-                    data.n = n;
-                    data.r = r;
-                    data.type = type;
-                    data.h = h;
-                    std::cout << data.to_string() << std::endl;
-                    Instance ins = generate(data);
-                    std::cout << ins << std::endl;
-                    Profit opt = -1;
-                    for (auto f: fs) {
-                        Instance ins_tmp = ins;
-                        Profit val = f(ins_tmp);
-                        if (opt == -1)
-                            opt = val;
-                        if (test == 0) {
-                            EXPECT_EQ(val, opt);
-                            if (val != opt)
-                                return;
-                        } else if (test == 1) {
-                            EXPECT_GE(val, opt);
-                            if (val < opt)
-                                return;
-                        } else if (test == -1) {
-                            EXPECT_LE(val, opt);
-                            if (val > opt)
-                                return;
+                for (Seed seed: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}) {
+                    for (int h=1; h<=100; h++) {
+                        GenerateData data;
+                        data.n = n;
+                        data.r = r;
+                        data.type = type;
+                        data.h = h;
+                        data.seed = seed;
+                        std::cout << data.to_string() << std::endl;
+                        Instance ins = generate(data);
+                        std::cout << ins << std::endl;
+                        Profit opt = -1;
+                        for (auto f: fs) {
+                            Instance ins_tmp = ins;
+                            Profit val = f(ins_tmp);
+                            if (opt == -1)
+                                opt = val;
+                            if (test == 0) {
+                                EXPECT_EQ(val, opt);
+                                if (val != opt)
+                                    return;
+                            } else if (test == 1) {
+                                EXPECT_GE(val, opt);
+                                if (val < opt)
+                                    return;
+                            } else if (test == -1) {
+                                EXPECT_LE(val, opt);
+                                if (val > opt)
+                                    return;
+                            }
                         }
                     }
                 }

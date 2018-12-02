@@ -97,6 +97,10 @@ public:
     const Solution* optimal_solution() const { return sol_opt_; }
     Profit optimum() const;
 
+    ItemPos max_efficiency_item() const;
+    ItemPos max_weight_item() const;
+    ItemPos max_profit_item() const;
+    std::vector<Weight> min_weights() const;
 
     /*
      * Sort items according to non-increasing profit-to-weight ratio.
@@ -154,8 +158,9 @@ public:
      */
     void set_last_item(ItemPos k);
 
-    void fix(PartSolFactory1 bsolf, PartSol1 bsol);
-    void fix(PartSolFactory2 bsolf, PartSol2 bsol);
+    bool update_sorted();
+
+    void fix(const std::vector<int> vec);
 
     /**
      * Create an instance with capacitiy and weights divided, keeping the
@@ -175,13 +180,8 @@ public:
     Weight  break_weight()   const;
     Weight  break_capacity() const;
 
-    const Item& max_weight_item();
-    const Item& max_profit_item();
-    const Item& max_efficiency_item();
-
     const Item& isum(ItemPos j) const { assert(sorted()); return isum_[j]; }
     ItemPos ub_item(Item item) const;
-
 
     void plot(std::string filename);
     void write(std::string filename);
@@ -190,12 +190,6 @@ public:
      * Return the profit of the certificate file.
      */
     Profit check(boost::filesystem::path cert_file);
-
-    bool check_opt(Profit p) const;
-    bool check_sopt(const Solution& sol) const;
-    bool check_ub(Profit p) const;
-    bool check_lb(Profit p) const;
-    bool check_sol(const Solution& sol) const;
 
     /**
      * return "LB XXXX GAP XXXX" if optimal_solution() != NULL,
@@ -221,7 +215,6 @@ private:
     inline void swap(ItemPos j, ItemPos k) { Item tmp = items_[j]; items_[j] = items_[k]; items_[k] = tmp; };
     void update_isum();
     void compute_break_item();
-    void compute_max_items();
     /*
      * Remove items which weight is greater than the updated capacity
      */
@@ -238,14 +231,6 @@ private:
     std::vector<Item> items_;
     Weight c_orig_;
     Solution* sol_opt_ = NULL; // Optimal solution
-    int version_ = 0;
-
-    Item j_wmax_ = {-1, -1, -1}; // Max weight item
-    Item j_wmin_ = {-1, c_orig_+1, -1}; // Min weight item
-    Item j_pmax_ = {-1, -1, -1}; // Max profit item
-    Item j_emax_ = {-1, 0, -1};  // Max efficiency item;
-    int max_version_ = 0;
-
 
     ItemPos f_, l_, s_, t_;
     bool sorted_ = false;
