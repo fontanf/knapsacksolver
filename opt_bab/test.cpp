@@ -1,5 +1,4 @@
 #include "knapsack/lib/tester.hpp"
-#include "knapsack/lib/generator.hpp"
 #include "knapsack/opt_minknap/minknap.hpp"
 #include "knapsack/opt_bab/bab.hpp"
 
@@ -25,9 +24,9 @@ std::vector<Profit (*)(Instance&)> tested_functions()
 TEST(Minknap, DataPisingerSmall)
 {
     test_pisinger(
-        {1, 2, 5, 10, 15},
-        {10, 100},
-        {"u", "wc", "sc", "isc", "asc", "ss", "sw"},
+        {1, 2, 3, 4, 5, 6, 7, 8},
+        {1, 2, 4, 8, 16, 32, 64},
+        {"u", "wc", "sc", "isc", "asc", "ss"},
         {tested_functions()});
 }
 

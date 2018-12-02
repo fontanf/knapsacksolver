@@ -13,11 +13,8 @@ Solution knapsack::sopt_bab(Instance& ins, Info& info)
     if (n == 0)
         return algorithm_end(sol_curr, info);
 
-    // Compute min weight table
-    std::vector<Weight> min_weight(n);
-    min_weight[n-1] = ins.item(n-1).w;
-    for (ItemIdx i=n-2; i>=0; --i)
-        min_weight[i] = std::min(ins.item(i).w, min_weight[i+1]);
+    ItemPos j_max = ins.max_efficiency_item();
+    std::vector<Weight> min_weight = ins.min_weights();
 
     Solution sol_best(ins);
     Cpt node_number = 0;
@@ -28,7 +25,7 @@ Solution knapsack::sopt_bab(Instance& ins, Info& info)
             do { // Backtrack
                 i--;
                 if (i < 0) {
-                    info.verbose("Node number: " + Info::to_string(node_number) = "\n");
+                    info.verbose("Node number: " + Info::to_string(node_number) + "\n");
                     info.pt.put("Algorithm.NodeNumber", node_number);
                     return algorithm_end(sol_best, info);
                 }
@@ -39,10 +36,11 @@ Solution knapsack::sopt_bab(Instance& ins, Info& info)
                 && sol_curr.remaining_capacity() >= ins.item(i).w
                 && ub_0(ins, i+1, // Upper bound test
                     sol_curr.profit()             + ins.item(i).p,
-                    sol_curr.remaining_capacity() - ins.item(i).w)
+                    sol_curr.remaining_capacity() - ins.item(i).w, j_max)
                 > sol_best.profit()) {
             sol_curr.set(i, true);
-            sol_best.update(sol_curr, info, sol_number); // Update best solution
+            if (sol_curr.profit() > sol_best.profit())
+                sol_best.update(sol_curr, info, sol_number); // Update best solution
             node_number++;
         } else { // Remove item
             sol_curr.set(i, false);
