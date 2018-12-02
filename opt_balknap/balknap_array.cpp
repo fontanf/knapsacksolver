@@ -62,7 +62,7 @@ Profit knapsack::opt_balknap_array(Instance& ins, Info& info, BalknapParams p)
     }
 
     ItemPos b = ins.break_item();
-    Weight w_max = ins.max_weight_item().w;
+    Weight w_max = ins.item(ins.max_weight_item()).w;
     Weight w_bar = ins.break_weight();
     Profit p_bar = ins.break_profit();
     Weight wb    = ins.item(b).w;
@@ -204,7 +204,6 @@ Profit knapsack::opt_balknap_array(Instance& ins, Info& info, BalknapParams p)
         }
     }
     opt += p0;
-    assert(ins.check_opt(opt));
     return algorithm_end(opt, info);
 }
 
@@ -269,7 +268,7 @@ Solution knapsack::sopt_balknap_array_all(Instance& ins, Info& info,
     }
 
     ItemPos b    = ins.break_item();
-    Weight w_max = ins.max_weight_item().w;
+    Weight w_max = ins.item(ins.max_weight_item()).w;
     Weight w_bar = ins.break_weight();
     Profit p_bar = ins.break_profit();
     Weight wb    = ins.item(b).w;
@@ -442,7 +441,6 @@ Solution knapsack::sopt_balknap_array_all(Instance& ins, Info& info,
         DBG(info.debug("Optimal value equals lower bound.\n");)
         return algorithm_end(sol, info);
     }
-    assert(ins.check_opt(opt));
 
     // Retrieve optimal solution
     DBG(info.debug("Retrieve optimal solution.\n");)
@@ -504,7 +502,6 @@ Solution knapsack::sopt_balknap_array_all(Instance& ins, Info& info,
         pi  = pi_next;
     }
 
-    assert(ins.check_sopt(sol));
     return algorithm_end(sol, info);
 }
 

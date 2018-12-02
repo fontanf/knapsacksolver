@@ -4,6 +4,7 @@ cc_library(
         srcs = ["balknap_array.cpp", "balknap_list.cpp"],
         deps = [
                 "//lib:cpp",
+                "//lib:libbounds",
                 "//lb_greedy:libgreedy",
                 "//lb_greedynlogn:libgreedynlogn",
                 "//ub_dembo:libdembo",

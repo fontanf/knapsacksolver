@@ -5,7 +5,7 @@
 #include "knapsack/lb_greedynlogn/greedynlogn.hpp"
 #include "knapsack/ub_dembo/dembo.hpp"
 #include "knapsack/ub_dantzig/dantzig.hpp"
-#include "knapsack/ub_surrogate/surrogate.hpp"
+#include "knapsack/lib/update_bounds.hpp"
 
 #include <map>
 #include <bitset>
@@ -276,7 +276,6 @@ Profit knapsack::opt_balknap_list(Instance& ins, Info& info,
             info.debug(to_string(*s) + "\n");
     )
 
-    assert(ins.check_opt(lb));
     return algorithm_end(lb, info);
 }
 
@@ -315,65 +314,6 @@ std::ostream& operator<<(std::ostream& os, const std::pair<StatePart, StateValue
     return os;
 }
 
-void update_bounds(const Instance& ins, Solution& sol_best, Profit& lb,
-        Profit& ub, SurrogateOut& so,
-        BalknapParams& params, ItemPos k, StateIdx nodes, Info& info)
-{
-    if (0 <= params.ub_surrogate && params.ub_surrogate <= nodes) {
-        params.ub_surrogate = -1;
-        info.verbose("Surrogate...\n");
-        Info info_tmp;
-        so = ub_surrogate(ins, sol_best.profit(), info);
-        info.verbose(" k " + std::to_string(so.bound)
-                + " s " + std::to_string(so.multiplier));
-        if (ub > so.ub) {
-            ub = so.ub;
-            info.verbose(" " + std::to_string(ub) + "\n");
-        } else {
-            info.verbose(" no improvement\n");
-        }
-    }
-
-    if (0 <= params.solve_sur && params.solve_sur <= nodes) {
-        params.solve_sur = -1;
-        if (sol_best.profit() == ub)
-            return;
-        info.verbose("Solve surrogate instance...\n");
-        assert(so.bound != -1);
-        Instance ins_sur(ins);
-        ins_sur.surrogate(so.multiplier, so.bound, ins_sur.first_item());
-        info.verbose("<- End solve surrogate instance\n");
-        Solution sol_sur = sopt_balknap_list_part(ins_sur, info, params, k, -1);
-        if (ub > sol_sur.profit()) {
-            ub = sol_sur.profit();
-            info.verbose("Update upper bound " + std::to_string(ub) + "\n");
-        }
-        DBG(info.debug("k " + std::to_string(sol_sur.item_number())
-                + "/" + std::to_string(so.bound) + "\n");)
-        if (sol_sur.item_number() == so.bound) {
-            sol_best = sol_sur;
-            lb = sol_best.profit();
-            info.verbose("Update best solution " + std::to_string(sol_best.profit()));
-        }
-        info.verbose("\n");
-    }
-
-    if (0 <= params.lb_greedynlogn && params.lb_greedynlogn <= nodes) {
-        params.lb_greedynlogn = -1;
-        info.verbose("Run greedynlogn...");
-        Info info_tmp;
-        Solution sol_tmp = sol_bestgreedynlogn(ins, info_tmp);
-        if (sol_tmp.profit() > sol_best.profit()) {
-            sol_best = sol_tmp;
-            if (sol_best.profit() > lb)
-                lb = sol_best.profit();
-            info.verbose(" update best solution " + std::to_string(sol_best.profit()) + "\n");
-        } else {
-            info.verbose(" no improvement\n");
-        }
-    }
-}
-
 Solution knapsack::sopt_balknap_list_part(Instance& ins, Info& info,
         BalknapParams params, ItemPos k, Profit o)
 {
@@ -386,6 +326,17 @@ Solution knapsack::sopt_balknap_list_part(Instance& ins, Info& info,
             " o " + std::to_string(o) +
             "\n");)
 
+    Cpt lb_number = 0;
+    Cpt ub_number = 0;
+    Solution sol(ins);
+    Profit lb = 0;
+    Profit ub = -1;
+
+    if (o != -1) {
+        lb = o-1;
+        ub = o;
+    }
+
     // Sorting
     if (params.upper_bound == "b") {
         ins.sort_partially();
@@ -396,41 +347,50 @@ Solution knapsack::sopt_balknap_list_part(Instance& ins, Info& info,
     }
     // If all items fit in the knapsack then return break solution
     if (ins.break_item() == ins.last_item()+1) {
-        Solution sol = *ins.break_solution();
+        if (ins.break_solution()->profit() > sol.profit())
+            sol.update(*ins.break_solution(), info, lb_number, ub);
         return algorithm_end(sol, info);
     }
 
     // Compute initial lower bound
-    Solution sol(ins);
+    info.verbose("Compute initial lower bound...\n");
     if (params.lb_greedynlogn == 0) {
         params.lb_greedynlogn = -1;
         Info info_tmp;
-        sol = sol_bestgreedynlogn(ins, info_tmp);
+        Solution sol_tmp = sol_bestgreedynlogn(ins, info_tmp);
+        if (sol_tmp.profit() > lb) {
+            sol.update(sol_tmp, info, lb_number, ub);
+            lb = sol.profit();
+        }
     } else if (params.lb_greedy == 0) {
         params.lb_greedy = -1;
         Info info_tmp;
-        sol = sol_greedy(ins, info_tmp);
+        Solution sol_tmp = sol_greedy(ins, info_tmp);
+        if (sol_tmp.profit() > lb) {
+            sol.update(sol_tmp, info, lb_number, ub);
+            lb = sol.profit();
+        }
     } else {
-        sol = *ins.break_solution();
+        Solution sol_tmp = *ins.break_solution();
+        if (sol_tmp.profit() > lb) {
+            sol.update(sol_tmp, info, lb_number, ub);
+            lb = sol.profit();
+        }
     }
+    if (lb == ub)
+        return algorithm_end(sol, info);
 
     // Variable reduction
     // If we already know the optimal value, we can use opt-1 as lower bound
     // for the reduction.
-    Profit lb = (o != -1 && o > sol.profit())? o-1: sol.profit();
     if (params.upper_bound == "b") {
         ins.reduce1(lb, info);
-        // If the capacity is negative, then it means that sol was the optimal
-        // solution. Note that this is not possible if opt-1 has been used as
-        // lower bound for the reduction.
         if (ins.capacity() < 0)
             return algorithm_end(sol, info);
     } else if (params.upper_bound == "t") {
         ins.reduce2(lb, info);
         if (ins.capacity() < 0)
             return algorithm_end(sol, info);
-    } else {
-        assert(false);
     }
     Weight  c = ins.total_capacity();
     ItemPos f = ins.first_item();
@@ -442,57 +402,49 @@ Solution knapsack::sopt_balknap_list_part(Instance& ins, Info& info,
     // the solution used for the reduction.
     if (n == 0 || c == 0) {
         if (ins.reduced_solution()->profit() > sol.profit())
-            sol = *ins.reduced_solution();
+            sol.update(*ins.reduced_solution(), info, lb_number, ub);
         return algorithm_end(sol, info);
     } else if (n == 1) {
-        Solution sol1 = *ins.reduced_solution();
-        sol1.set(f, true);
-        if (sol1.profit() > sol.profit())
-            sol1 = sol;
+        Solution sol_tmp = *ins.reduced_solution();
+        sol_tmp.set(f, true);
+        if (sol_tmp.profit() > sol.profit())
+            sol.update(sol_tmp, info, lb_number, ub);
         return algorithm_end(sol, info);
     } else if (ins.break_item() == ins.last_item()+1) {
         if (ins.break_solution()->profit() > sol.profit())
-            sol = *ins.break_solution();
+            sol.update(*ins.break_solution(), info, lb_number, ub);
         return algorithm_end(sol, info);
     }
 
     ItemPos b    = ins.break_item();
     Weight w_bar = ins.break_solution()->weight();
     Profit p_bar = ins.break_solution()->profit();
+
     Info info_tmp;
-    Profit u = (o != -1)? o: ub_dantzig(ins, info_tmp);
-    SurrogateOut so;
-    if (sol.profit() == u) // If UB == LB, then stop
-        return algorithm_end(sol, info);
+    Profit ub_tmp = ub_dantzig(ins, info_tmp);
+    if (ub == -1 || ub_tmp < ub)
+        Solution::update_ub(ub, ub_tmp, info, ub_number, lb);
 
     DBG(info.debug("Break solution: " + ins.break_solution()->to_string_binary() + "\n");)
     DBG(info.debug("Break solution: " + ins.break_solution()->to_string_items() + "\n");)
     DBG(info.debug(
-            "n " + std::to_string(n) +
-            " c " + std::to_string(c) +
-            " f " + std::to_string(f) + " l " + std::to_string(l) +
-            "\n" +
-            "wbar " + std::to_string(w_bar) +
-            " pbar " + std::to_string(p_bar) +
-            "\n");)
+                STR1(n) + STR2(c) + STR2(f) + STR2(l) + "\n"
+                + STR1(w_bar) + STR2(p_bar) + "\n");)
 
-    if (ins.break_solution()->profit() > sol.profit()) {
-        DBG(info.debug("Update best solution.");)
-        sol = *ins.break_solution();
-    }
+    if (ins.break_solution()->profit() > lb)
+        sol.update(*ins.break_solution(), info, lb_number, ub);
 
-    info.verbose(
-            "lb " + std::to_string(sol.profit()) +
-            " ub " + std::to_string(u) +
-            " gap " + std::to_string(u - sol.profit()) +
-            "\n");
+    if (lb == ub) // If UB == LB, then stop
+        return algorithm_end(sol, info);
+
+    info.verbose("Recursion...\n");
 
     // Create memory table
     std::map<StatePart, StateValuePart, StatePart> map;
 
     // Initialization
     // Create first partial solution centered on the break item.
-    PartSolFactory1 psolf(k, b, f, l);
+    PartSolFactory1 psolf(ins, k, b, f, l);
     PartSol1 psol_init = 0;
     for (ItemPos j=f; j<b; ++j)
         psol_init = psolf.add(psol_init, j);
@@ -503,43 +455,55 @@ Solution knapsack::sopt_balknap_list_part(Instance& ins, Info& info,
     std::pair<StatePart, StateValuePart> best_state = {map.begin()->first, map.begin()->second};
     // Also keep last added item to improve the variable reduction at the end.
     ItemPos last_item = b-1;
-    // Update LB
-    if (best_state.first.pi > lb) {
-        lb = best_state.first.pi;
-        last_item = b;
-        if (lb == u)
-            goto end;
-    }
+
+    auto func = [&params, &k](Instance& ins) -> Solution {
+        Info info_tmp;
+        return sopt_balknap_list_part(ins, info_tmp, params, k);
+    };
+    UpdateBoundsSolData bounds_data(ins, info, sol, lb, ub, lb_number, ub_number);
+    bounds_data.cpt_greedynlogn = params.lb_greedynlogn;
+    bounds_data.cpt_ubsur       = params.ub_surrogate;
+    bounds_data.cpt_solvesur    = params.solve_sur;
+
 
     // Recursion
     for (ItemPos t=b; t<=l; ++t) {
         Weight wt = ins.item(t).w;
         Profit pt = ins.item(t).p;
 
-        update_bounds(ins, sol, lb, u, so, params, k, map.size(), info);
-        if (lb == u)
+        bounds_data.run(func, map.size());
+        if (lb == ub)
             goto end;
 
         // Bounding
-        // If the upper bound with the break item is used, then the upper bound
-        // is not smeller after each iteration. Thus we don't need to compute
-        // it.
-        // On the other hand, if the other upper bound is used, then it will
-        // be lower for feasible states.
-        if (params.upper_bound == "t") {
-            for (auto s = map.begin(); s != map.end() && s->first.mu <= c;) {
-                Profit pi = s->first.pi;
-                Weight mu = s->first.mu;
-                Profit ub = (mu <= c)?
+        Profit ub_t = 0;
+        for (auto s = map.begin(); s != map.end() && s->first.mu <= c;) {
+            Profit pi = s->first.pi;
+            Weight mu = s->first.mu;
+            Profit ub_local = 0;
+            if (params.upper_bound == "b") {
+                ub_local = (mu <= c)?
+                    ub_dembo(ins, b, pi, c-mu):
+                    ub_dembo_rev(ins, b, pi, c-mu);
+            } else if (params.upper_bound == "t") {
+                ub_local = (mu <= c)?
                     ub_dembo(ins, t, pi, c-mu):
                     ub_dembo_rev(ins, s->second.a, pi, c-mu);
-                if (ub < lb) {
-                    map.erase(s++);
-                } else {
-                    s++;
-                }
+            }
+            if (ub_local < lb) {
+                map.erase(s++);
+            } else {
+                if (ub_t < ub_local)
+                    ub_t = ub_local;
+                s++;
             }
         }
+        if (ub_t < ub) {
+            Solution::update_ub(ub, ub_t, info, ub_number, lb);
+            if (lb == ub)
+                goto end;
+        }
+
         // If there is no more states, the stop
         if (map.size() == 0)
             break;
@@ -557,30 +521,26 @@ Solution knapsack::sopt_balknap_list_part(Instance& ins, Info& info,
 
             // Update LB
             if (mu_ <= c && pi_ > lb) {
-                lb = pi_;
+                Solution::update_lb(lb, pi_, info, lb_number, ub);
                 best_state = s1;
                 last_item = t;
-                if (lb == u)
+                if (lb == ub)
                     goto end;
             }
 
             // Bounding
-            Profit ub = 0;
+            Profit ub_local = 0;
             if (params.upper_bound == "b") {
-                ub = (mu_ <= c)?
+                ub_local = (mu_ <= c)?
                     ub_dembo(ins, b, pi_, c-mu_):
                     ub_dembo_rev(ins, b, pi_, c-mu_);
             } else if (params.upper_bound == "t") {
-                ub = (mu_ <= c)?
+                ub_local = (mu_ <= c)?
                     ub_dembo(ins, t+1, pi_, c-mu_):
                     ub_dembo_rev(ins, s->second.a-1, pi_, c-mu_);
-            } else {
-                    assert(false);
             }
-            if (ub <= lb) {
+            if (ub_local <= lb)
                 continue;
-            } else {
-            }
 
             hint = map.insert(hint, s1);
             if (hint->second.a < s->second.a) {
@@ -604,30 +564,28 @@ Solution knapsack::sopt_balknap_list_part(Instance& ins, Info& info,
 
                 // Update LB
                 if (mu_ <= c && pi_ > lb) {
-                    lb = pi_;
+                    Solution::update_lb(lb, pi_, info, lb_number, ub);
                     best_state = s1;
                     last_item = t;
-                    if (lb == u)
+                    if (lb == ub)
                         goto end;
                 }
 
                 // Bounding
-                Profit ub = 0;
+                Profit ub_local = 0;
                 if (params.upper_bound == "b") {
-                    ub = (mu_ <= c)?
+                    ub_local = (mu_ <= c)?
                         ub_dembo(ins, b, pi_, c-mu_):
                         ub_dembo_rev(ins, b, pi_, c-mu_);
                 } else if (params.upper_bound == "t") {
-                    ub = (mu_ <= c)?
+                    ub_local = (mu_ <= c)?
                         ub_dembo(ins, t+1, pi_, c-mu_):
                         ub_dembo_rev(ins, j-1, pi_, c-mu_);
                 } else {
                     assert(false);
                 }
-                if (ub <= lb) {
+                if (ub_local <= lb)
                     continue;
-                } else {
-                }
 
                 auto res = map.insert(s1);
                 if (!res.second) {
@@ -650,10 +608,9 @@ end:
     // Reduce instance to items from best_state.second.a to last_item and remove
     // the items from the partial solution from the instance.
     // Then run the algorithm again.
-    assert(ins.check_opt(lb));
     ins.set_first_item(best_state.second.a);
     ins.set_last_item(last_item);
-    ins.fix(psolf, best_state.second.sol);
+    ins.fix(psolf.vector(best_state.second.sol));
 
     Info info_tmp2;
     sol = knapsack::sopt_balknap_list_part(ins, info_tmp2,  params, k, best_state.first.pi);
@@ -971,7 +928,6 @@ Solution knapsack::sopt_balknap_list_all(Instance& ins, Info& info,
     for (ItemPos k=0; k<=n-b; ++k)
         map_size += maps[k].size();
 
-    assert(ins.check_opt(lb));
     if (lb == sol.profit()) {
         DBG(info.debug("Optimal value equals lower bound.\n");)
         return algorithm_end(sol, info);
@@ -1015,7 +971,6 @@ Solution knapsack::sopt_balknap_list_all(Instance& ins, Info& info,
         s = s_next;
     }
 
-    assert(ins.check_sopt(sol));
     return algorithm_end(sol, info);
 }
 
