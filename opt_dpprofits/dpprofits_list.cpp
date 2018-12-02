@@ -2,7 +2,7 @@
 
 using namespace knapsack;
 
-Profit knapsack::opt_dpprofits_list(Instance& ins, Info& info)
+Profit knapsack::opt_dpprofits_list(const Instance& ins, Info& info)
 {
     info.verbose("*** dpprofits (list) ***\n");
     info.verbose("Not yet implemented.\n");
@@ -12,7 +12,7 @@ Profit knapsack::opt_dpprofits_list(Instance& ins, Info& info)
 
 /******************************************************************************/
 
-Solution knapsack::sopt_dpprofits_list_all(Instance& ins, Info& info)
+Solution knapsack::sopt_dpprofits_list_all(const Instance& ins, Info& info)
 {
     info.verbose("*** dpprofits (list, all) ***\n");
     Solution sol(ins);
@@ -22,7 +22,7 @@ Solution knapsack::sopt_dpprofits_list_all(Instance& ins, Info& info)
 
 /******************************************************************************/
 
-Solution knapsack::sopt_dpprofits_list_one(Instance& ins, Info& info)
+Solution knapsack::sopt_dpprofits_list_one(const Instance& ins, Info& info)
 {
     info.verbose("*** dpprofits (list, one) ***\n");
     Solution sol(ins);
@@ -32,7 +32,7 @@ Solution knapsack::sopt_dpprofits_list_one(Instance& ins, Info& info)
 
 /******************************************************************************/
 
-Solution knapsack::sopt_dpprofits_list_part(Instance& ins, Info& info, ItemPos k)
+Solution knapsack::sopt_dpprofits_list_part(const Instance& ins, Info& info, ItemPos k)
 {
     info.verbose("*** dpprofits (list, part " + std::to_string(k) + ") ***\n");
     Solution sol(ins);
@@ -42,7 +42,7 @@ Solution knapsack::sopt_dpprofits_list_part(Instance& ins, Info& info, ItemPos k
 
 /******************************************************************************/
 
-Solution knapsack::sopt_dpprofits_list_rec(Instance& ins, Info& info)
+Solution knapsack::sopt_dpprofits_list_rec(const Instance& ins, Info& info)
 {
     info.verbose("*** dpprofits (list, rec) ***\n");
     Solution sol(ins);

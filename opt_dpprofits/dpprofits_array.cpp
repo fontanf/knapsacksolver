@@ -6,7 +6,7 @@
 
 using namespace knapsack;
 
-Profit knapsack::opt_dpprofits_array(Instance& ins, Info& info)
+Profit knapsack::opt_dpprofits_array(const Instance& ins, Info& info)
 {
     info.verbose("*** dpprofits (array) ***\n");
 
@@ -16,7 +16,8 @@ Profit knapsack::opt_dpprofits_array(Instance& ins, Info& info)
         return algorithm_end(0, info);
 
     // Initialize memory table
-    Profit ub = ub_0(ins, 0, 0, ins.capacity());
+    ItemPos j_max = ins.max_efficiency_item();
+    Profit ub = ub_0(ins, 0, 0, ins.capacity(), j_max);
     std::vector<Weight> values(ub+1,c+1);
 
     // Compute optimal value
@@ -43,7 +44,7 @@ Profit knapsack::opt_dpprofits_array(Instance& ins, Info& info)
 
 /******************************************************************************/
 
-Solution knapsack::sopt_dpprofits_array_all(Instance& ins, Info& info)
+Solution knapsack::sopt_dpprofits_array_all(const Instance& ins, Info& info)
 {
     info.verbose("*** dpprofits (array, all) ***\n");
 
@@ -55,7 +56,8 @@ Solution knapsack::sopt_dpprofits_array_all(Instance& ins, Info& info)
     }
 
     // Initialize memory table
-    Profit ub = ub_0(ins, 0, 0, ins.capacity());
+    ItemPos j_max = ins.max_efficiency_item();
+    Profit ub = ub_0(ins, 0, 0, ins.capacity(), j_max);
     StateIdx values_size = (n+1)*(ub+1);
     std::vector<Weight> values(values_size);
 
@@ -82,7 +84,6 @@ Solution knapsack::sopt_dpprofits_array_all(Instance& ins, Info& info)
     for (Profit q=0; q<=ub; ++q)
         if (values[INDEX(n-1,q)] <= c)
             opt = q;
-    assert(ins.check_opt(opt));
 
     // Retrieve optimal solution
     ItemPos j = n-1;
@@ -101,13 +102,12 @@ Solution knapsack::sopt_dpprofits_array_all(Instance& ins, Info& info)
         }
         j--;
     }
-    assert(ins.check_sopt(sol));
     return algorithm_end(sol, info);
 }
 
 /******************************************************************************/
 
-Solution knapsack::sopt_dpprofits_array_one(Instance& ins, Info& info)
+Solution knapsack::sopt_dpprofits_array_one(const Instance& ins, Info& info)
 {
     info.verbose("*** dpprofits (array, one) ***\n");
     Solution sol(ins);
@@ -117,7 +117,7 @@ Solution knapsack::sopt_dpprofits_array_one(Instance& ins, Info& info)
 
 /******************************************************************************/
 
-Solution knapsack::sopt_dpprofits_array_part(Instance& ins, ItemPos k, Info& info)
+Solution knapsack::sopt_dpprofits_array_part(const Instance& ins, ItemPos k, Info& info)
 {
     info.verbose("*** dpprofits (array, part " + std::to_string(k) + ") ***\n");
     Solution sol(ins);
@@ -127,7 +127,7 @@ Solution knapsack::sopt_dpprofits_array_part(Instance& ins, ItemPos k, Info& inf
 
 /******************************************************************************/
 
-Solution knapsack::sopt_dpprofits_array_rec(Instance& ins, Info& info)
+Solution knapsack::sopt_dpprofits_array_rec(const Instance& ins, Info& info)
 {
     info.verbose("*** dpprofits (array, rec) ***\n");
     Solution sol(ins);
