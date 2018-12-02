@@ -79,7 +79,8 @@ void sopt_expknap_rec(ExpknapRecData& data)
     ItemPos s = data.s;
     ItemPos t = data.t;
     if (data.sol_curr.remaining_capacity() >= 0) {
-        data.sol_best.update(data.sol_curr, data.info, data.sol_number);
+        if (data.sol_curr.profit() > data.sol_best.profit())
+            data.sol_best.update(data.sol_curr, data.info, data.sol_number);
         for (;;t++) {
             // If UB reached, then stop
             if (data.sol_best.profit() == data.u)
