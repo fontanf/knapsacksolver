@@ -40,17 +40,8 @@ Solution knapsack::sopt_babstar(Instance& ins, Info& info)
         return algorithm_end(sol, info);
     }
 
-    // Compute min weight table
-    std::vector<Weight> min_weight(n);
-    min_weight[n-1] = ins.item(n-1).w;
-    for (ItemIdx i=n-2; i>=0; --i)
-        min_weight[i] = std::min(ins.item(i).w, min_weight[i+1]);
-    DBG(
-        info.debug("min weights:");
-        for (ItemIdx i=0; i<n; ++i)
-            info.debug(" " + std::to_string(min_weight[i]));
-        info.debug("\n");
-    )
+    ItemPos j_max = ins.max_efficiency_item();
+    std::vector<Weight> min_weight = ins.min_weights();
 
     std::priority_queue<Node, std::vector<Node>, Compare> q;
     Cpt q_max_size = 0;
@@ -82,7 +73,8 @@ Solution knapsack::sopt_babstar(Instance& ins, Info& info)
         DBG(info.debug("Node " + node.to_string() + STR4(r, node.sol.remaining_capacity()) + "\n");)
 
         // Update best solution
-        sol_best.update(node.sol, info, sol_number);
+        if (node.sol.profit() > sol_best.profit())
+            sol_best.update(node.sol, info, sol_number);
 
         // Stop condition
         if (node.ub <= sol_best.profit())
@@ -108,7 +100,7 @@ Solution knapsack::sopt_babstar(Instance& ins, Info& info)
             Solution sol = node.sol;
             sol.set(k, true);
 
-            Profit ub = ub_0(ins, k+1, sol.profit(), sol.remaining_capacity());
+            Profit ub = ub_0(ins, k+1, sol.profit(), sol.remaining_capacity(), j_max);
             if (ub < sol_best.profit()) {
                 DBG(info.debug( " ub is too small\n");)
                 continue;
@@ -269,15 +261,8 @@ Solution knapsack::sopt_babstar_dp(Instance& ins, Info& info)
     }
 
     // Compute min weight table
-    std::vector<Weight> min_weight(n);
-    min_weight[n-1] = ins.item(n-1).w;
-    for (ItemIdx i=n-2; i>=0; --i)
-        min_weight[i] = std::min(ins.item(i).w, min_weight[i+1]);
-    DBG(info.debug("min weights: ");
-        for (ItemIdx i=0; i<n; ++i)
-            info.debug(" " + std::to_string(min_weight[i]));
-        info.debug("\n");
-    )
+    ItemPos j_max = ins.max_efficiency_item();
+    std::vector<Weight> min_weight = ins.min_weights();
 
     std::set<NodeDP*, NodeDPCompare> q;
     StateIdx q_max_size = 0;
@@ -290,7 +275,7 @@ Solution knapsack::sopt_babstar_dp(Instance& ins, Info& info)
     n0.w = 0;
     n0.p = 0;
     n0.j = -1;
-    n0.ub = ub_0(ins, 0, 0, ins.capacity());
+    n0.ub = ub_0(ins, 0, 0, ins.capacity(), j_max);
     n0.father = NULL;
     q.insert(&n0);
     while (!q.empty()) {
@@ -351,7 +336,7 @@ Solution knapsack::sopt_babstar_dp(Instance& ins, Info& info)
 
             Weight w = node->w + ins.item(k).w;
             Profit p = node->p + ins.item(k).p;
-            Profit ub = ub_0(ins, k+1, p, ins.capacity() - w);
+            Profit ub = ub_0(ins, k+1, p, ins.capacity() - w, j_max);
             DBG(info.debug(STR2(w) + STR2(p) + STR2(ub));)
             if (ub <= sol_best.profit()) {
                 DBG(info.debug( " ub is too small\n");)
