@@ -180,7 +180,6 @@ public:
     Weight  break_weight()   const;
     Weight  break_capacity() const;
 
-    const Item& isum(ItemPos j) const { assert(sorted()); return isum_[j]; }
     ItemPos ub_item(Item item) const;
 
     void plot(std::string filename);
@@ -213,7 +212,8 @@ private:
     ItemPos partition(ItemPos f, ItemPos l);
     bool check();
     inline void swap(ItemPos j, ItemPos k) { Item tmp = items_[j]; items_[j] = items_[k]; items_[k] = tmp; };
-    void update_isum();
+    std::vector<Item> get_isum() const;
+    ItemPos ub_item(const std::vector<Item>& isum, Item item) const;
     void compute_break_item();
     /*
      * Remove items which weight is greater than the updated capacity
@@ -239,7 +239,6 @@ private:
     Solution* sol_red_   = NULL; // Reduced solution
     Solution* sol_break_ = NULL; // Break solution
     ItemPos b_ = -1; // Break item
-    std::vector<Item> isum_;
     bool sol_red_opt_ = false;
 };
 

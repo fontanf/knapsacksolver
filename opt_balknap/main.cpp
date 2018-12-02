@@ -21,13 +21,11 @@ int main(int argc, char *argv[])
         ("input-data,i", po::value<std::string>()->required(), "set input data (required)")
         ("output-file,o", po::value<std::string>(&output_file), "set output file")
         ("cert-file,c", po::value<std::string>(&cert_file), "set certificate output file")
-        ("memory,m", po::value<std::string>(&memory), "set algorithm")
-        ("retrieve,r", po::value<std::string>(&retrieve), "set algorithm")
-        ("upper-bound,u", po::value<std::string>(&p.upper_bound), "set upper bound")
-        ("greedynlogn,g", po::value<StateIdx>(&p.lb_greedynlogn), "")
-        ("pairing,p", po::value<StateIdx>(&p.lb_pairing), "")
-        ("surrogate,s", po::value<StateIdx>(&p.ub_surrogate), "")
-        ("solve-sur,k", po::value<StateIdx>(&p.solve_sur), "")
+        ("upper-bound,u", po::value<char>(&p.ub_type), "set upper bound")
+        ("greedynlogn,g", po::value<StateIdx>(&p.cpt_greedynlogn), "")
+        ("pairing,p", po::value<StateIdx>(&p.cpt_pairing), "")
+        ("surrogate,s", po::value<StateIdx>(&p.cpt_surrogate), "")
+        ("solve-sur,k", po::value<StateIdx>(&p.cpt_solve_sur), "")
         ("part-size,x", po::value<ItemPos>(&k), "")
         ("verbose,v",  "enable verbosity")
         ("debug,d", "enable live debugging")
@@ -47,39 +45,13 @@ int main(int argc, char *argv[])
     }
 
     Instance instance(vm["input-data"].as<std::string>());
-    Solution sopt(instance);
 
     Info info;
     info.set_verbose(vm.count("verbose"));
     info.set_debug(debug_file != "");
     info.set_debuglive(vm.count("debug"));
 
-    if (memory == "array") {
-        if (retrieve == "none") {
-            opt_balknap_array(instance, info, p);
-        } else if (retrieve == "all") {
-            sopt = sopt_balknap_array_all(instance, info, p);
-        } else if (retrieve == "part") {
-            sopt = sopt_balknap_array_part(instance, info, p, k);
-        } else {
-            assert(false);
-            return 1;
-        }
-    } else if (memory == "list") {
-        if (retrieve == "none") {
-            opt_balknap_list(instance, info, p);
-        } else if (retrieve == "all") {
-            sopt = sopt_balknap_list_all(instance, info, p);
-        } else if (retrieve == "part") {
-            sopt = sopt_balknap_list_part(instance, info, p, k);
-        } else {
-            assert(false);
-            return 1;
-        }
-    } else {
-        assert(false);
-        return 1;
-    }
+    Solution sopt = sopt_balknap(instance, info, p, k);
 
     info.write_ini(output_file); // Write output file
     sopt.write_cert(cert_file); // Write certificate file

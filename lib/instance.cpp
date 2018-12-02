@@ -215,7 +215,6 @@ Instance::Instance(const Instance& ins)
     *sol_red_ = *ins.reduced_solution();
     sol_red_opt_ = ins.sol_red_opt_;
     b_ = ins.b_;
-    isum_ = ins.isum_;
 }
 
 bool Instance::check()
@@ -303,25 +302,26 @@ void Instance::sort()
                 return i1.p * i2.w > i2.p * i1.w;});
 
     compute_break_item();
-    update_isum();
 }
 
-void Instance::update_isum()
+std::vector<Item> Instance::get_isum() const
 {
     assert(sorted());
-    isum_.clear();
-    isum_.reserve(total_item_number()+1);
-    isum_.push_back({0,0,0});
+    std::vector<Item> isum;
+    isum.reserve(total_item_number()+1);
+    isum.clear();
+    isum.push_back({0,0,0});
     for (ItemPos j=1; j<=total_item_number(); ++j)
-        isum_.push_back({j, isum_[j-1].w + item(j-1).w, isum_[j-1].p + item(j-1).p});
+        isum.push_back({j, isum[j-1].w + item(j-1).w, isum[j-1].p + item(j-1).p});
+    return isum;
 }
 
-ItemPos Instance::ub_item(Item item) const
+ItemPos Instance::ub_item(const std::vector<Item>& isum, Item item) const
 {
     assert(sorted());
-    auto s = std::upper_bound(isum_.begin()+f_, isum_.begin()+l_+1, item,
+    auto s = std::upper_bound(isum.begin()+f_, isum.begin()+l_+1, item,
             [](const Item& i1, const Item& i2) { return i1.w < i2.w;});
-    if (s == isum_.begin()+l_+1)
+    if (s == isum.begin()+l_+1)
         return l_+1;
     return s->j-1;
 }
@@ -628,6 +628,8 @@ void Instance::reduce2(Profit lb, Info& info)
     assert(sorted());
     sol_red_opt_ = (lb == optimum());
 
+    std::vector<Item> isum = get_isum();
+
     std::vector<Item> not_fixed;
     std::vector<Item> fixed_1;
     std::vector<Item> fixed_0;
@@ -636,20 +638,20 @@ void Instance::reduce2(Profit lb, Info& info)
     for (ItemPos j=f_; j<=b_; ++j) {
         DBG(info.debug(STR1(j) + " (" + item(j).to_string() + ")");)
         Item ubitem = {0, total_capacity() + item(j).w, 0};
-        ItemPos bb = ub_item(ubitem);
+        ItemPos bb = ub_item(isum, ubitem);
         DBG(info.debug(STR2(bb));)
         Profit ub = 0;
         if (bb == last_item() + 1) {
-            ub = isum(last_item()+1).p - item(j).p;
+            ub = isum[last_item()+1].p - item(j).p;
             DBG(info.debug(STR2(ub));)
         } else if (bb == last_item()) {
-            Profit ub1 = isum(bb  ).p - item(j).p;
-            Profit ub2 = isum(bb+1).p - item(j).p + ((total_capacity() + item(j).w - isum(bb+1).w) * item(bb-1).p + 1) / item(bb-1).w - 1;
+            Profit ub1 = isum[bb  ].p - item(j).p;
+            Profit ub2 = isum[bb+1].p - item(j).p + ((total_capacity() + item(j).w - isum[bb+1].w) * item(bb-1).p + 1) / item(bb-1).w - 1;
             ub = (ub1 > ub2)? ub1: ub2;
             DBG(info.debug(STR2(ub1) + STR2(ub2) + STR2(ub));)
         } else {
-            Profit ub1 = isum(bb  ).p - item(j).p + ((total_capacity() + item(j).w - isum(bb  ).w) * item(bb+1).p    ) / item(bb+1).w;
-            Profit ub2 = isum(bb+1).p - item(j).p + ((total_capacity() + item(j).w - isum(bb+1).w) * item(bb-1).p + 1) / item(bb-1).w - 1;
+            Profit ub1 = isum[bb  ].p - item(j).p + ((total_capacity() + item(j).w - isum[bb  ].w) * item(bb+1).p    ) / item(bb+1).w;
+            Profit ub2 = isum[bb+1].p - item(j).p + ((total_capacity() + item(j).w - isum[bb+1].w) * item(bb-1).p + 1) / item(bb-1).w - 1;
             ub = (ub1 > ub2)? ub1: ub2;
             DBG(info.debug(STR2(ub1) + STR2(ub2) + STR2(ub));)
         }
@@ -660,7 +662,7 @@ void Instance::reduce2(Profit lb, Info& info)
             if (capacity() < 0)
                 return;
         } else {
-            DBG(info.debug(" 0\n");)
+            DBG(info.debug(" ?\n");)
             if (j != b_)
                 not_fixed.push_back(item(j));
         }
@@ -671,24 +673,24 @@ void Instance::reduce2(Profit lb, Info& info)
         DBG(info.debug(STR1(j) + " (" + item(j).to_string() + ")");)
 
         Item ubitem = {0, total_capacity() - item(j).w, 0};
-        ItemPos bb = ub_item(ubitem);
+        ItemPos bb = ub_item(isum, ubitem);
         DBG(info.debug(STR2(bb));)
 
         Profit ub = 0;
         if (bb == last_item() + 1) {
-            ub = isum(last_item()+1).p + item(j).p;
+            ub = isum[last_item()+1].p + item(j).p;
             DBG(info.debug(STR2(ub));)
         } else if (bb == last_item()) {
-            Profit ub1 = isum(bb  ).p + item(j).p;
-            Profit ub2 = isum(bb+1).p + item(j).p + ((total_capacity() - item(j).w - isum(bb+1).w) * item(bb-1).p + 1) / item(bb-1).w - 1;
+            Profit ub1 = isum[bb  ].p + item(j).p;
+            Profit ub2 = isum[bb+1].p + item(j).p + ((total_capacity() - item(j).w - isum[bb+1].w) * item(bb-1).p + 1) / item(bb-1).w - 1;
             ub = (ub1 > ub2)? ub1: ub2;
             DBG(info.debug(STR2(ub1) + STR2(ub2) + STR2(ub));)
         } else if (bb == 0) {
             ub = ((total_capacity() + item(j).w) * item(bb).p) / item(bb).w;
             DBG(info.debug(STR2(ub));)
         } else {
-            Profit ub1 = isum(bb  ).p + item(j).p + ((total_capacity() - item(j).w - isum(bb  ).w) * item(bb+1).p) / item(bb+1).w;
-            Profit ub2 = isum(bb+1).p + item(j).p + ((total_capacity() - item(j).w - isum(bb+1).w) * item(bb-1).p + 1) / item(bb-1).w - 1;
+            Profit ub1 = isum[bb  ].p + item(j).p + ((total_capacity() - item(j).w - isum[bb  ].w) * item(bb+1).p) / item(bb+1).w;
+            Profit ub2 = isum[bb+1].p + item(j).p + ((total_capacity() - item(j).w - isum[bb+1].w) * item(bb-1).p + 1) / item(bb-1).w - 1;
             ub = (ub1 > ub2)? ub1: ub2;
             DBG(info.debug(STR2(ub1) + STR2(ub2) + STR2(ub));)
         }
@@ -716,7 +718,6 @@ void Instance::reduce2(Profit lb, Info& info)
 
     remove_big_items();
     compute_break_item();
-    update_isum();
 
     info.verbose("Reduction: " + std::to_string(lb) + " - " +
             "n " + std::to_string(item_number()) + "/" + std::to_string(total_item_number()) +

@@ -15,9 +15,7 @@ struct MinknapParams
     StateIdx solve_sur = -1;
 };
 
-Profit opt_minknap_list(Instance& ins, Info& info,
-        MinknapParams params = MinknapParams());
-Solution sopt_minknap_list_part(Instance& ins, Info& info,
+Solution sopt_minknap(Instance& ins, Info& info,
         MinknapParams params = MinknapParams(), ItemPos k = 64, Profit o = -1);
 
 }

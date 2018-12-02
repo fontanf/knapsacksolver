@@ -24,9 +24,11 @@ struct UpdateBoundsSolData
 
     const Instance& ins;
     Info& info;
-    Cpt cpt_ubsur;
-    Cpt cpt_solvesur;
-    Cpt cpt_greedynlogn;
+    Cpt cpt_ubsur = 2000;
+    Cpt cpt_solvesur = 2000;
+    Cpt cpt_greedynlogn = 0;
+    Cpt cpt_pairing = 10000;
+
     SurrogateOut so;
 
     Solution& sol_best;
@@ -95,8 +97,9 @@ struct UpdateBoundsData
     const Instance& ins;
     Info& info;
     Cpt cpt_ubsur;
-    Cpt cpt_solvesur;
+    Cpt cpt_solvesur = 2000;
     Cpt cpt_greedynlogn;
+    Cpt cpt_pairing;
     SurrogateOut so;
 
     Profit &lb;

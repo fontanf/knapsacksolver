@@ -11,7 +11,7 @@ TEST(BABSTAR, DataTests)
     knapsack::test(p.string(), "sopt");
 }
 
-Profit opt_minknap_list_test(Instance& ins) { Info info; return opt_minknap_list(ins, info); }
+Profit opt_minknap_test(Instance& ins) { Info info; return sopt_minknap(ins, info).profit(); }
 Profit opt_babstar_test(Instance& ins)      { Info info; return sopt_babstar(ins, info).profit(); }
 Profit opt_babstar_dp_test(Instance& ins)   { Info info; return sopt_babstar_dp(ins, info).profit(); }
 Profit opt_starknap_test(Instance& ins)     { Info info; return sopt_starknap(ins, info).profit(); }
@@ -19,7 +19,7 @@ Profit opt_starknap_test(Instance& ins)     { Info info; return sopt_starknap(in
 std::vector<Profit (*)(Instance&)> tested_functions()
 {
     return {
-        opt_minknap_list_test,
+        opt_minknap_test,
         opt_babstar_test,
         opt_babstar_dp_test,
         opt_starknap_test,

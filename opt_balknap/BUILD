@@ -1,7 +1,7 @@
 cc_library(
         name = "libbalknap",
         hdrs = ["balknap.hpp"],
-        srcs = ["balknap_array.cpp", "balknap_list.cpp"],
+        srcs = ["balknap.cpp"],
         deps = [
                 "//lib:cpp",
                 "//lib:libbounds",

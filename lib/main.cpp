@@ -15,17 +15,23 @@ int main(int argc, char *argv[])
     (void)argc;
     (void)argv;
 
-    /*
     {
-        Instance ins = generate("sc", 1000, 1000, 50);
+        GenerateData data;
+        data.n    = 2;
+        data.type = "u";
+        data.r    = 2;
+        data.h    = 1;
+        data.seed = 5;
+        Instance ins = generate(data);
         Info info;
         info.set_verbose();
-        //info.set_debug();
-        //info.set_debuglive();
-        Solution sopt2 = sopt_bellman_array_rec(ins, info);
+        info.set_debug();
+        info.set_debuglive();
+        BalknapParams p;
+        p.ub_type = 'b';
+        sopt_balknap(ins, info, p, 1);
         return 0;
     }
-    */
 
     GenerateData data;
     data.spanner = false;
@@ -36,21 +42,30 @@ int main(int argc, char *argv[])
     double t2 = 0;
 
     data.type = "sc";
-    data.n = 25;
+    data.n = 100;
     data.r = 100;
-    data.seed = 5;
+    data.seed = 0;
     for (data.h=1; data.h<=100; ++data.h) {
+        std::cout << data.h << std::endl;
         Instance ins = generate(data);
 
         Instance ins1(ins);
         Info info1;
-        Solution sopt1 = sopt_minknap_list_part(ins1, info1);
+        info1.set_verbose();
+        BalknapParams p1;
+        p1.ub_type = 't';
+        p1.cpt_greedynlogn = 0;
+        p1.cpt_surrogate = 0;
+        p1.cpt_solve_sur = -1;
+        sopt_balknap(ins1, info1, p1);
         t1 += info1.pt.get<double>("Solution.Time");
 
         Instance ins2(ins);
         Info info2;
-        Solution sopt2 = sopt_bellman_array_part(ins2, info2);
+        info2.set_verbose();
+        sopt_balknap(ins2, info2);
         t2 += info2.pt.get<double>("Solution.Time");
+        std::cout << std::endl;
     }
 
     std::cout << STR1(t1) << std::endl;

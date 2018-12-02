@@ -10,13 +10,13 @@ TEST(BranchAndBound, DataTests)
     knapsack::test(p.string(), "sopt");
 }
 
-Profit opt_minknap_list_test(Instance& ins) { Info info; return opt_minknap_list(ins, info); }
+Profit opt_minknap_test(Instance& ins) { Info info; return sopt_minknap(ins, info).profit(); }
 Profit opt_bab_test(Instance& ins)          { Info info; return sopt_bab(ins, info).profit(); }
 
 std::vector<Profit (*)(Instance&)> tested_functions()
 {
     return {
-        opt_minknap_list_test,
+        opt_minknap_test,
         opt_bab_test,
     };
 }

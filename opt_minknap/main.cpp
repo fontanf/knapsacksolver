@@ -20,7 +20,6 @@ int main(int argc, char *argv[])
         ("input-data,i", po::value<std::string>()->required(), "set input data (required)")
         ("output-file,o", po::value<std::string>(&output_file), "set output file")
         ("cert-file,c", po::value<std::string>(&cert_file), "set certificate output file")
-        ("retrieve,r", po::value<std::string>(&retrieve), "set algorithm")
         ("greedynlogn,g", po::value<StateIdx>(&p.lb_greedynlogn), "")
         ("pairing,p", po::value<StateIdx>(&p.lb_pairing), "")
         ("surrogate,s", po::value<StateIdx>(&p.ub_surrogate), "")
@@ -44,21 +43,13 @@ int main(int argc, char *argv[])
     }
 
     Instance instance(vm["input-data"].as<std::string>());
-    Solution sopt(instance);
 
     Info info;
     info.set_verbose(vm.count("verbose"));
     info.set_debug(debug_file != "");
     info.set_debuglive(vm.count("debug"));
 
-    if (retrieve == "none") {
-        opt_minknap_list(instance, info, p);
-    } else if (retrieve == "part") {
-        sopt = sopt_minknap_list_part(instance, info, p, k);
-    } else {
-        assert(false);
-        return 1;
-    }
+    Solution sopt = sopt_minknap(instance, info, p, k);
 
     info.write_ini(output_file); // Write output file
     sopt.write_cert(cert_file); // Write certificate file

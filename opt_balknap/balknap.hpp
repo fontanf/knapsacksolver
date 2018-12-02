@@ -8,26 +8,15 @@ namespace knapsack
 
 struct BalknapParams
 {
-    std::string upper_bound = "b";
-    StateIdx lb_greedy = 0;
-    StateIdx lb_greedynlogn = -1;
-    StateIdx lb_pairing = -1;
-    StateIdx ub_surrogate = -1;
-    StateIdx solve_sur = -1;
+    char ub_type        = 't';
+    Cpt cpt_greedy      = 0;
+    Cpt cpt_greedynlogn = -1;
+    Cpt cpt_surrogate   = 2000;
+    Cpt cpt_solve_sur   = 2000;
+    Cpt cpt_pairing     = 10000;
 };
 
-Profit opt_balknap_array(Instance& ins, Info& info,
-        BalknapParams params = BalknapParams());
-Solution sopt_balknap_array_all(Instance& ins, Info& info,
-        BalknapParams params = BalknapParams());
-Solution sopt_balknap_array_part(Instance& ins, Info& info,
-        BalknapParams params = BalknapParams(), ItemPos k = 64);
-
-Profit opt_balknap_list(Instance& ins, Info& info,
-        BalknapParams params = BalknapParams());
-Solution sopt_balknap_list_all(Instance& ins, Info& info,
-        BalknapParams params = BalknapParams());
-Solution sopt_balknap_list_part(Instance& ins, Info& info,
+Solution sopt_balknap(Instance& ins, Info& info,
         BalknapParams params = BalknapParams(), ItemPos k = 64, Profit ub = -1);
 
 }
