@@ -9,9 +9,10 @@ int main(int argc, char *argv[])
     // Parse program options
     std::string output_file = "";
     std::string cert_file = "";
+    std::string debug_file = "";
     std::string memory = "array";
     std::string retrieve = "all";
-    std::string debug_file = "";
+    ItemPos k = 64;
     po::options_description desc("Allowed options");
     desc.add_options()
         ("help,h", "produce help message")
@@ -20,6 +21,7 @@ int main(int argc, char *argv[])
         ("cert-file,c", po::value<std::string>(&cert_file), "set certificate output file")
         ("memory,m", po::value<std::string>(&memory), "set algorithm")
         ("retrieve,r", po::value<std::string>(&retrieve), "set algorithm")
+        ("part-size,x", po::value<ItemPos>(&k), "")
         ("verbose,v",  "enable verbosity")
         ("debug,d", "enable live debugging")
         ("debug-file", po::value<std::string>(&debug_file), "set debug file")
@@ -68,7 +70,7 @@ int main(int argc, char *argv[])
         } else if (retrieve == "one") {
             sopt = sopt_bellman_list_one(instance, info);
         } else if (retrieve == "part") {
-            sopt = sopt_bellman_list_part(instance, info, 64);
+            sopt = sopt_bellman_list_part(instance, info, k);
         } else if (retrieve == "rec") {
             sopt = sopt_bellman_list_rec(instance, info);
         } else {

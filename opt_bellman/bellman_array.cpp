@@ -178,7 +178,7 @@ Solution knapsack::sopt_bellman_array_part(const Instance& ins, Info& info, Item
         it++;
         DBG(info.debug(STR1(it) + STR2(n) + STR2(opt_local) + "\n");)
 
-        PartSolFactory1 psolf(k, n-1, 0, n-1);
+        PartSolFactory1 psolf(ins, k, n-1, 0, n-1);
         Weight w_opt = c;
 
         // Initialization
@@ -216,7 +216,7 @@ end:
         DBG(info.debug(" partsol " + psolf.print(bisols[w_opt]));)
 
         // Update solution and instance
-        sol.update_from_partsol(psolf, bisols[w_opt]);
+        psolf.update_solution(bisols[w_opt], sol);
         n -= psolf.size();
         c = ins.capacity() - sol.weight();
         opt_local = opt - sol.profit();
@@ -233,20 +233,20 @@ end:
 struct RecData
 {
     RecData(const Instance& ins, Info& info):
-        ins(ins), n1(0), n2(ins.item_number()-1),
-        c(ins.capacity()), sol_curr(ins), info(info)
+        ins(ins), info(info),
+        n1(0), n2(ins.item_number()-1), c(ins.capacity()), sol_curr(ins)
     {
         values1.resize(c+1);
         values2.resize(c+1);
     }
     const Instance& ins;
+    Info& info;
     ItemPos n1;
     ItemPos n2;
     Weight  c;
     Solution sol_curr;
     std::vector<Profit> values1;
     std::vector<Profit> values2;
-    Info& info;
 };
 
 void sopt_bellman_array_rec_rec(RecData& d)
