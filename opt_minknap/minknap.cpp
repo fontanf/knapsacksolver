@@ -193,7 +193,6 @@ Profit knapsack::opt_minknap_list(Instance& ins, Info& info, MinknapParams param
         }
     }
 
-    assert(ins.check_opt(lb));
     return algorithm_end(lb, info);
 }
 

@@ -1,7 +1,10 @@
 cc_library(
         name = "libminknap",
         hdrs = ["minknap.hpp"],
-        srcs = ["minknap.cpp", "minknap_part.cpp"],
+        srcs = [
+                "minknap.cpp",
+                "minknap_part.cpp",
+        ],
         deps = [
                 "//lib:cpp",
                 "//lb_greedy:libgreedy",

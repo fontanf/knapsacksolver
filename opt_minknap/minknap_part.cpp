@@ -23,17 +23,20 @@ struct StatePart
 
 struct MinknapData
 {
-    MinknapData(const Instance& ins, Info& info): ins(ins), info(info) { }
-    const Instance& ins;
-    std::vector<StatePart> l0;
+    MinknapData(Instance& ins, Info& info, ItemIdx k):
+        ins(ins), info(info), psolf(ins, k) { }
+    Instance& ins;
+    Info& info;
+    Profit lb;
+    Profit ub;
     ItemPos s;
     ItemPos t;
-    Profit lb;
-    StatePart best_state;
-    Profit ub;
+    std::vector<StatePart> l0;
     PartSolFactory2 psolf;
-    Info& info;
+    StatePart best_state;
     StateIdx distinct_state_number;
+    Cpt lb_number;
+    Cpt ub_number;
 };
 
 void add_item(MinknapData& d)
@@ -58,8 +61,9 @@ void add_item(MinknapData& d)
             DBG(d.info.debug("State " + it1->to_string() + " => " + s1.to_string());)
             if (l.empty() || s1.p > l.back().p) {
                 if (s1.w <= c && s1.p > d.lb) { // Update lower bound
-                    d.lb = s1.p;
+                    Solution::update_lb(d.lb, s1.p, d.info, d.lb_number, d.ub);
                     d.best_state = s1;
+                    assert(d.lb <= d.ub);
                     if (d.lb == d.ub)
                         return;
                 }
@@ -159,8 +163,9 @@ void remove_item(MinknapData& d)
             DBG(d.info.debug("State " + it1->to_string() + " => " + s1.to_string());)
             if (l.empty() || s1.p > l.back().p) {
                 if (s1.w <= c && s1.p > d.lb) { // Update lower bound
-                    d.lb = s1.p;
+                    Solution::update_lb(d.lb, s1.p, d.info, d.lb_number, d.ub);
                     d.best_state = s1;
+                    assert(d.lb <= d.ub);
                     if (d.lb == d.ub)
                         return;
                 }
@@ -196,122 +201,150 @@ Solution knapsack::sopt_minknap_list_part(Instance& ins, Info& info,
 {
     if (o == -1)
         info.verbose("*** minknap (list, part " + std::to_string(k) + ") ***\n");
-    //DBG(info.debug("n " + std::to_string(ins.item_number()) + "/" + std::to_string(ins.total_item_number()) + " f " + std::to_string(ins.first_item()) + " l " + std::to_string(ins.last_item()) + " o " + std::to_string(o) + "\n");)
 
-    //DBG(info.debug("Sort items...\n");)
+    MinknapData data(ins, info, k);
+    data.lb_number = 0;
+    data.ub_number = 0;
+    Solution sol(ins);
+    data.lb = 0;
+    data.ub = -1;
+
+    if (o != -1) {
+        data.lb = o-1;
+        data.ub = o;
+    }
+
     ins.sort_partially();
     if (ins.break_item() == ins.last_item()+1) { // all items are in the break solution
-        //DBG(info.debug("All items fit in the knapsack.\n");)
-        Solution sol = *ins.break_solution();
+        if (ins.break_solution()->profit() > sol.profit())
+            sol.update(*ins.break_solution(), info, data.lb_number, data.ub);
         return algorithm_end(sol, info);
     }
 
-    info.verbose("Compute lower bound...");
-    Solution sol(ins);
+    info.verbose("Compute lower bound...\n");
     if (params.lb_greedynlogn == 0) {
         params.lb_greedynlogn = -1;
         Info info_tmp;
-        sol = sol_bestgreedynlogn(ins, info_tmp);
-    } else if (params.lb_greedy == 0) {
-        params.lb_greedy = -1;
+        Solution sol_tmp = sol_bestgreedynlogn(ins, info_tmp);
+        if (sol_tmp.profit() > data.lb) {
+            sol.update(sol_tmp, info, data.lb_number, data.ub);
+            data.lb = sol.profit();
+        }
+    } else if (params.lb_greedy >= 0) {
         Info info_tmp;
-        sol = sol_greedy(ins, info_tmp);
+        Solution sol_tmp = sol_greedy(ins, info_tmp);
+        if (sol_tmp.profit() > data.lb) {
+            sol.update(sol_tmp, info, data.lb_number, data.ub);
+            data.lb = sol.profit();
+        }
     } else {
-        sol = *ins.break_solution();
+        Solution sol_tmp = *ins.break_solution();
+        if (sol_tmp.profit() > data.lb) {
+            sol.update(sol_tmp, info, data.lb_number, data.ub);
+            data.lb = sol.profit();
+        }
     }
-    info.verbose(" " + std::to_string(sol.profit()) + "\n");
+    if (data.lb == data.ub)
+        return algorithm_end(sol, info);
 
     Weight  c = ins.total_capacity();
     ItemPos n = ins.item_number();
-    Profit lb = (o != -1 && o > sol.profit())? o-1: sol.profit();
 
     // Trivial cases
     if (n == 0 || c == 0) {
-        //DBG(info.debug("Empty instance.\n");)
         if (ins.reduced_solution()->profit() > sol.profit())
-            sol = *ins.reduced_solution();
+            sol.update(*ins.reduced_solution(), info, data.lb_number, data.ub);
         return algorithm_end(sol, info);
     } else if (n == 1) {
-        //DBG(info.debug("Instance only contains one item.\n");)
-        Solution sol1 = *ins.reduced_solution();
-        sol1.set(ins.first_item(), true);
-        return algorithm_end((sol1.profit() > sol.profit())? sol1: sol, info);
+        Solution sol_tmp = *ins.reduced_solution();
+        sol_tmp.set(ins.first_item(), true);
+        if (sol_tmp.profit() > sol.profit())
+            sol.update(sol_tmp, info, data.lb_number, data.ub);
+        return algorithm_end(sol, info);
     } else if (ins.break_item() == ins.last_item()+1) {
-        //DBG(info.debug("All items fit in the knapsack.\n");)
         if (ins.break_solution()->profit() > sol.profit())
-            sol = *ins.break_solution();
+            sol.update(*ins.break_solution(), info, data.lb_number, data.ub);
         return algorithm_end(sol, info);
     }
 
     Weight w_bar = ins.break_solution()->weight();
     Profit p_bar = ins.break_solution()->profit();
+
     Info info_tmp;
-    Profit u = (o != -1)? o: ub_dantzig(ins, info_tmp);
-    if (sol.profit() == u) { // If UB == LB, then stop
-        //DBG(info.debug("Lower bound equals upper bound.");)
+    Profit ub_tmp = ub_dantzig(ins, info_tmp);
+    if (data.ub == -1 || ub_tmp < data.ub)
+        Solution::update_ub(data.ub, ub_tmp, info, data.ub_number, data.lb);
+
+    if (data.lb == data.ub) // If UB == LB, then stop
         return algorithm_end(sol, info);
-    }
 
     // Create memory table
-    MinknapData d(ins, info);
-    d.lb = lb;
-    d.ub = u;
-    d.psolf = PartSolFactory2(k);
-    d.l0.push_back({w_bar, p_bar, 0});
-
     info.verbose("Recursion...\n");
-    d.s = ins.break_item() - 1;
-    d.t = ins.break_item();
-    d.best_state = d.l0.front();
-    d.distinct_state_number = 1;
+    data.l0.push_back({w_bar, p_bar, 0});
+
+    data.s = ins.break_item() - 1;
+    data.t = ins.break_item();
+    data.best_state = data.l0.front();
+    data.distinct_state_number = 1;
     StateIdx state_number = 1;
-    while (!d.l0.empty()) {
-        //DBG(info.debug("List of states size " + std::to_string(d.l0.size()) + "\n");)
-        //DBG(info.debug("f " + std::to_string(ins.first_item())
-                    //+ " s " + std::to_string(ins.first_sorted_item())
-                    //+ " t " + std::to_string(ins.last_sorted_item())
-                    //+ " l " + std::to_string(ins.last_item()) + "\n");)
-        if (ins.int_right_size() > 0 && d.t+1 > ins.last_sorted_item())
-            ins.sort_right(lb);
-        if (d.t <= ins.last_sorted_item()) {
-            add_item(d);
-            state_number += d.l0.size();
-            ++d.t;
+    while (!data.l0.empty()) {
+        DBG(info.debug(
+                STR3(f, ins.first_item())
+                + STR4(f_, ins.first_sorted_item())
+                + STR4(s, data.s)
+                + STR4(t, data.t)
+                + STR4(t_, ins.last_sorted_item())
+                + STR4(l, ins.last_item()) + "\n");
+        )
+
+        if (ins.int_right_size() > 0 && data.t+1 > ins.last_sorted_item())
+            ins.sort_right(data.lb);
+        if (data.t <= ins.last_sorted_item() && data.t <= ins.last_item()) {
+            add_item(data);
+            state_number += data.l0.size();
+            ++data.t;
         }
-        if (d.lb == d.ub)
+        if (data.lb == data.ub)
             break;
 
-        //DBG(info.debug("List of states size " + std::to_string(d.l0.size()) + "\n");)
-        //DBG(info.debug("f " + std::to_string(ins.first_item())
-                    //+ " s " + std::to_string(ins.first_sorted_item())
-                    //+ " t " + std::to_string(ins.last_sorted_item())
-                    //+ " l " + std::to_string(ins.last_item()) + "\n");)
-        if (ins.int_left_size() > 0 && d.s-1 < ins.first_sorted_item())
-            ins.sort_left(lb);
-        if (d.s >= ins.first_sorted_item()) {
-            remove_item(d);
-            state_number += d.l0.size();
-            --d.s;
+        DBG(info.debug(
+                STR3(f, ins.first_item())
+                + STR4(f_, ins.first_sorted_item())
+                + STR4(s, data.s)
+                + STR4(t, data.t)
+                + STR4(t_, ins.last_sorted_item())
+                + STR4(l, ins.last_item()) + "\n");
+        )
+
+        if (ins.int_left_size() > 0 && data.s-1 < ins.first_sorted_item())
+            ins.sort_left(data.lb);
+        if (data.s >= ins.first_sorted_item() && data.s >= ins.first_item()) {
+            remove_item(data);
+            state_number += data.l0.size();
+            --data.s;
         }
-        if (d.lb == d.ub)
+        if (data.lb == data.ub)
             break;
     }
 
     info.verbose("Total state number: " + Info::to_string(state_number) + "\n");
-    info.verbose("Distinct state number: " + Info::to_string(d.distinct_state_number) + "\n");
+    info.verbose("Distinct state number: " + Info::to_string(data.distinct_state_number) + "\n");
     info.pt.put("Algorithm.TotalStateNumber", state_number);
-    info.pt.put("Algorithm.DistinctStateNumber", d.distinct_state_number);
+    info.pt.put("Algorithm.DistinctStateNumber", data.distinct_state_number);
 
-    if (d.best_state.p <= sol.profit())
+    if (data.best_state.p <= sol.profit())
         return algorithm_end(sol, info);
+    assert(data.best_state.p >= data.lb);
 
-    ins.set_first_item(d.s+1);
-    ins.set_last_item(d.t-1);
-    //DBG(info.debug("psol " + d.psolf.print(d.best_state.sol) + "\n");)
-    ins.fix(d.psolf, d.best_state.sol);
+    ins.set_first_item(data.s+1);
+    ins.set_last_item(data.t-1);
+    bool b = ins.update_sorted();
+    (void)b;
+    assert(b);
+    ins.fix(data.psolf.vector(data.best_state.sol));
 
     Info info_tmp2;
-    sol = knapsack::sopt_minknap_list_part(ins, info_tmp2, params, k, d.best_state.p);
+    sol = knapsack::sopt_minknap_list_part(ins, info, params, k, data.best_state.p);
     return algorithm_end(sol, info);
 }
 
