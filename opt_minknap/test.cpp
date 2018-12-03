@@ -30,8 +30,8 @@ std::vector<Profit (*)(Instance&)> tested_functions()
 TEST(Minknap, DataPisingerSmall)
 {
     test_pisinger(
-        {1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 14, 16, 20, 24, 28, 32},
-        {1, 2, 4, 8, 16, 32, 64, 128},
+        {1, 2, 4, 8, 16, 32},
+        {1, 2, 4, 8, 16, 32, 64},
         {"u", "wc", "sc", "isc", "asc", "ss"},
     {tested_functions()});
 }
