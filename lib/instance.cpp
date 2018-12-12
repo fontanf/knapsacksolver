@@ -837,8 +837,8 @@ std::ostream& knapsack::operator<<(std::ostream& os, const Instance& ins)
         << std::endl;
     if (ins.reduced_solution() != NULL)
         os
-            <<  "n "   << ins.item_number() << " c "   << ins.capacity()
-            << "f " << ins.first_item() << " l " << ins.last_item()
+            <<  "n " << ins.item_number() << " c " << ins.capacity()
+            << " f " << ins.first_item() << " l " << ins.last_item()
             << std::endl;
     if (ins.break_item_found())
         os << "b " << ins.break_item()
@@ -871,7 +871,6 @@ std::ostream& knapsack::operator<<(std::ostream& os, const Instance& ins)
         os << "\t" << std::flush;
 
         if (ins.reduced_solution() != NULL) {
-        std::cout << "toto" << std::endl;
             os << ins.reduced_solution()->contains(j);
         } else {
             os << " ";

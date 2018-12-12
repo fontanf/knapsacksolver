@@ -19,14 +19,17 @@ std::vector<Item> remove_dominated_items(std::vector<Item>& v)
 
 Solution knapsack::sol_forwardgreedynlogn(const Instance& ins, Info& info)
 {
+    LOG(info, LOG_FOLD_START << " forwardgreedynlogn b " << ins.break_item()
+            << " n " << ins.total_item_number() << std::endl;);
     VER(info, "*** forwardgreedynlogn ***" << std::endl);
 
     Solution sol = *ins.break_solution();
 
     // If all items fit in the knapsack or if the break solution doesn't
     // contain any item, return sol.
-    if (ins.break_item() == ins.total_item_number()
+    if (ins.break_item() >= ins.total_item_number() - 1
             || ins.break_item() == 0) {
+        LOG(info, LOG_FOLD_END << std::endl;);
         return algorithm_end(sol, info);
     }
 
@@ -69,11 +72,12 @@ Solution knapsack::sol_forwardgreedynlogn(const Instance& ins, Info& info)
             il_max = std::prev(il);
         }
     }
-    if (pmax == -1) {
+    if (pmax != -1) {
         sol.set(it_max->j, false);
         sol.set(il_max->j, true);
     }
 
+    LOG(info, LOG_FOLD_END << std::endl;);
     return algorithm_end(sol, info);
 }
 
@@ -81,14 +85,17 @@ Solution knapsack::sol_forwardgreedynlogn(const Instance& ins, Info& info)
 
 Solution knapsack::sol_backwardgreedynlogn(const Instance& ins, Info& info)
 {
+    LOG(info, LOG_FOLD_START << " backwardgreedynlogn b " << ins.break_item()
+            << " n " << ins.total_item_number() << std::endl;);
     VER(info, "*** backwardgreedynlogn ***" << std::endl);
 
     Solution sol0 = *ins.break_solution();
 
     // If all items fit in the knapsack or if the break solution doesn't
     // contain any item, return sol.
-    if (ins.break_item() == ins.total_item_number()
+    if (ins.break_item() >= ins.total_item_number() - 1
             || ins.break_item() == 0) {
+        LOG(info, LOG_FOLD_END << std::endl;);
         return algorithm_end(sol0, info);
     }
 
@@ -138,10 +145,12 @@ Solution knapsack::sol_backwardgreedynlogn(const Instance& ins, Info& info)
     }
 
     if (it_max == t.end()) {
+        LOG(info, LOG_FOLD_END << std::endl;);
         return algorithm_end(sol0, info);
     } else {
         sol.set(it_max->j, false);
         sol.set(il_max->j, true);
+        LOG(info, LOG_FOLD_END << std::endl;);
         return algorithm_end(sol, info);
     }
 
@@ -152,27 +161,29 @@ Solution knapsack::sol_backwardgreedynlogn(const Instance& ins, Info& info)
 Solution knapsack::sol_greedynlogn(const Instance& ins, Info& info)
 {
     VER(info, "*** greedynlogn ***" << std::endl);
+    LOG(info, LOG_FOLD_START << " greedynlogn" << std::endl;);
 
     Info info_tmp(info.logger);
     Solution sol = sol_greedy(ins, info_tmp);
-    std::string best = "Greedy";
+    std::string best = "greedy";
 
     Info info_tmp1(info.logger);
     Solution sol_tmp1 = sol_forwardgreedynlogn(ins, info_tmp1);
     if (sol_tmp1.profit() > sol.profit()) {
         sol = sol_tmp1;
-        best = "ForwardBest";
+        best = "forward";
     }
 
     Info info_tmp2(info.logger);
     Solution sol_tmp2 = sol_backwardgreedynlogn(ins, info_tmp2);
     if (sol_tmp2.profit() > sol.profit()) {
         sol = sol_tmp2;
-        best = "BackwardBest";
+        best = "backward";
     }
 
     VER(info, "Best solution from: " << best << std::endl);
     PUT(info, "Algorithm.Best", best);
+    LOG(info, LOG_FOLD_END << std::endl;);
     return algorithm_end(sol, info);
 }
 

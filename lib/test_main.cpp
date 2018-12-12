@@ -5,6 +5,8 @@
 #include "knapsack/opt_expknap/expknap.hpp"
 #include "knapsack/opt_balknap/balknap.hpp"
 #include "knapsack/opt_minknap/minknap.hpp"
+#include "knapsack/lb_greedy/greedy.hpp"
+#include "knapsack/lb_greedynlogn/greedynlogn.hpp"
 
 #include "knapsack/lib/tester.hpp"
 #include "knapsack/lib/generator.hpp"
@@ -16,19 +18,20 @@ int main(int argc, char *argv[])
     (void)argc;
     (void)argv;
 
-    //GenerateData data;
-    //data.n = 2;
-    //data.t = "u";
-    //data.r = 2;
-    //data.h = 1;
-    //data.s = 5;
-    //Instance ins = generate(data);
+    GenerateData data;
+    data.n = 3;
+    data.t = "u";
+    data.r = 2;
+    data.h = 1;
+    data.s = 5;
+    Instance ins = generate(data);
 
-    Instance ins = test_instance(1);
+    //Instance ins = test_instance(1);
 
-    Logger logger;
+    Logger logger("", true);
     Info info(logger, true);
-    sopt_astar_dp(ins, info);
+    ins.sort_partially();
+    sol_greedynlogn(ins, info);
     return 0;
 }
 
