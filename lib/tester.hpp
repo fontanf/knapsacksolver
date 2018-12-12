@@ -84,7 +84,7 @@ Instance test_instance(Cpt i)
 }
 
 enum TestType { OPT, LB, UB };
-enum InstacesType { TEST, SMALL };
+enum InstacesType { TEST, SMALL, MEDIUM };
 
 void test(InstacesType it, std::vector<Profit (*)(Instance&)> fs, TestType tt = OPT);
 

@@ -19,10 +19,10 @@ int main(int argc, char *argv[])
     (void)argv;
 
     GenerateData data;
-    data.n = 3;
-    data.t = "u";
-    data.r = 2;
-    data.h = 1;
+    data.n = 50;
+    data.t = "ss";
+    data.r = 100;
+    data.h = 100;
     data.s = 5;
     Instance ins = generate(data);
 
@@ -31,7 +31,8 @@ int main(int argc, char *argv[])
     Logger logger("", true);
     Info info(logger, true);
     ins.sort_partially();
-    sol_greedynlogn(ins, info);
+    MinknapParams p;
+    sopt_minknap(ins, info, p, 3);
     return 0;
 }
 

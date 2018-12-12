@@ -17,6 +17,7 @@ std::vector<Profit (*)(Instance&)> f = {
         opt_minknap_3_test,
 };
 
-TEST(minknap, TEST)  { test(TEST, f); }
-TEST(minknap, SMALL) { test(SMALL, f); }
+TEST(minknap, TEST)   { test(TEST, f); }
+TEST(minknap, SMALL)  { test(SMALL, f); }
+TEST(minknap, MEDIUM) { test(MEDIUM, f); }
 

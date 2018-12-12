@@ -103,6 +103,52 @@ private:
     Seed s = -1;
 };
 
+class PisingerInstances: public Instances
+{
+
+public:
+
+    PisingerInstances(ItemIdx n, Weight r, Seed s_max, std::vector<std::string> ts):
+        n(n), r(r), s_max(s_max), ts(ts) {  }
+
+    Instance next()
+    {
+        s += 1;
+        if (s > s_max) {
+            s = 0;
+            h += 1;
+            if (h > 100) {
+                h = 1;
+                ti += 1;
+                if (ti >= (Cpt)ts.size()) {
+                    return Instance(0, 0);
+                }
+            }
+        }
+
+        GenerateData data;
+        data.n = n;
+        data.r = r;
+        data.t = ts[ti];
+        data.h = h;
+        data.s = s;
+
+        std::cout << "data " << data << std::endl;
+        return generate(data);
+    }
+
+private:
+
+    ItemIdx n = 10;
+    Weight r = 10;
+    Seed s_max = 10;
+    Cpt h = 1;
+    Seed s = -1;
+    std::vector<std::string> ts;
+    Cpt ti = 0;
+
+};
+
 void test(Instances& inss, std::vector<Profit (*)(Instance&)> fs, TestType tt)
 {
     Instance ins(0, 0);
@@ -125,6 +171,9 @@ void knapsack::test(InstacesType it, std::vector<Profit (*)(Instance&)> fs, Test
     } else if (it == SMALL) {
         SmallInstances si;
         test(si, fs, tt);
+    } else if (it == MEDIUM) {
+        PisingerInstances pi(50, 100, 5, {"u", "wc", "sc", "isc", "asc", "ss"});
+        test(pi, fs, tt);
     }
 }
 
