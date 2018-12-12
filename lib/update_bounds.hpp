@@ -41,10 +41,11 @@ struct UpdateBoundsSolData
     void run(Func func, Cpt cpt) {
         // Compute Surrogate relaxation Upper bound
         if (0 <= cpt_ubsur && cpt_ubsur <= cpt) {
-            info.verbose("Surrogate...\n");
+            VER(info, "Surrogate..." << std::endl);
             cpt_ubsur = -1;
-            Info info_tmp;
-            so = ub_surrogate(ins, sol_best.profit(), info_tmp);
+            info.set_put_off();
+            so = ub_surrogate(ins, sol_best.profit(), info);
+            info.set_put_back();
             if (ub > so.ub)
                 Solution::update_ub(ub, so.ub, info, ub_number, lb);
         }
@@ -73,10 +74,11 @@ struct UpdateBoundsSolData
 
         // Compute Greedynlogn
         if (0 <= cpt_greedynlogn && cpt_greedynlogn <= cpt) {
-            info.verbose("Run greedynlogn...");
+            VER(info, "Run greedynlogn..." << std::endl);
             cpt_greedynlogn = -1;
-            Info info_tmp;
-            Solution sol_tmp = sol_bestgreedynlogn(ins, info_tmp);
+            info.set_put_off();
+            Solution sol_tmp = sol_greedynlogn(ins, info);
+            info.set_put_back();
             if (sol_tmp.profit() > lb) {
                 sol_best.update(sol_tmp, info, sol_number, ub);
                 lb = sol_best.profit();
@@ -111,10 +113,11 @@ struct UpdateBoundsData
     void run(Func func, Cpt cpt) {
         // Compute Surrogate relaxation Upper bound
         if (0 <= cpt_ubsur && cpt_ubsur <= cpt) {
-            info.verbose("Surrogate...\n");
+            VER(info, "Surrogate..." << std::endl);
             cpt_ubsur = -1;
-            Info info_tmp;
-            so = ub_surrogate(ins, lb, info_tmp);
+            info.set_put_off();
+            so = ub_surrogate(ins, lb, info);
+            info.set_put_back();
             if (ub > so.ub)
                 Solution::update_ub(ub, so.ub, info, ub_number, lb);
         }
@@ -142,10 +145,10 @@ struct UpdateBoundsData
 
         // Compute Greedynlogn
         if (0 <= cpt_greedynlogn && cpt_greedynlogn <= cpt) {
-            info.verbose("Run greedynlogn...");
+            VER(info, "Run greedynlogn..." << std::endl);
             cpt_greedynlogn = -1;
-            Info info_tmp;
-            Solution sol = sol_bestgreedynlogn(ins, info_tmp);
+            Info info_tmp(info.logger);
+            Solution sol = sol_greedynlogn(ins, info_tmp);
             if (sol.profit() > lb)
                 Solution::update_lb(lb, sol.profit(), info, lb_number, ub);
         }

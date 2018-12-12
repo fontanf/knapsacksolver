@@ -123,7 +123,7 @@ ItemIdx min_card(const Instance& ins, Profit lb)
     return k;
 }
 
-void ub_surrogate_solve(Instance& ins, ItemIdx k,
+void ub_surrogate_solve(Instance& ins, Info& info, ItemIdx k,
         Weight s_min, Weight s_max, SurrogateOut& out)
 {
     out.bound = k;
@@ -175,7 +175,7 @@ void ub_surrogate_solve(Instance& ins, ItemIdx k,
         }
 
         ins.surrogate(s-s_prec, k, first);
-        Info info_tmp;
+        Info info_tmp(info.logger);
         Profit p = ub_dantzig(ins, info_tmp);
         ItemPos b = ins.break_item();
 
@@ -200,7 +200,7 @@ void ub_surrogate_solve(Instance& ins, ItemIdx k,
 
 SurrogateOut knapsack::ub_surrogate(const Instance& instance, Profit lb, Info& info)
 {
-    info.verbose("*** surrogate relaxation ***\n");
+    VER(info, "*** surrogate relaxation ***" << std::endl);
     std::string best = "";
 
     Instance ins(instance);
@@ -214,7 +214,7 @@ SurrogateOut knapsack::ub_surrogate(const Instance& instance, Profit lb, Info& i
         algorithm_end(out.ub, info);
         return out;
     }
-    Info info_tmp;
+    Info info_tmp(info.logger);
     out.ub = ub_dantzig(ins, info_tmp);
     if (ins.break_capacity() == 0 || b == ins.last_item() + 1) {
         algorithm_end(out.ub, info);
@@ -230,10 +230,10 @@ SurrogateOut knapsack::ub_surrogate(const Instance& instance, Profit lb, Info& i
     Weight s_min = (INT_FAST64_MAX / pmax > wmax)? -pmax*wmax: -INT_FAST64_MAX;
 
     if (max_card(ins) == b) {
-        ub_surrogate_solve(ins, b, 0, s_max, out);
+        ub_surrogate_solve(ins, info, b, 0, s_max, out);
         best = "max";
     } else if (min_card(ins, lb) == b + 1) {
-        ub_surrogate_solve(ins, b + 1, s_min, 0, out);
+        ub_surrogate_solve(ins, info, b + 1, s_min, 0, out);
         if (out.ub < lb) {
             assert(ins.optimal_solution() == NULL || lb == ins.optimal_solution()->profit());
             out.ub = lb;
@@ -242,8 +242,8 @@ SurrogateOut knapsack::ub_surrogate(const Instance& instance, Profit lb, Info& i
     } else {
         SurrogateOut out2;
         out2.ub = out.ub;
-        ub_surrogate_solve(ins, b,     0,     s_max, out);
-        ub_surrogate_solve(ins, b + 1, s_min, 0,     out2);
+        ub_surrogate_solve(ins, info, b,     0,     s_max, out);
+        ub_surrogate_solve(ins, info, b + 1, s_min, 0,     out2);
         if (out2.ub < lb) {
             out2.ub = lb;
         }
@@ -255,8 +255,8 @@ SurrogateOut knapsack::ub_surrogate(const Instance& instance, Profit lb, Info& i
         best = "maxmin";
     }
 
-    info.verbose("Best bound: " + best);
-    info.pt.put("Algorithm.Best", best);
+    VER(info, "Best bound: " << best << std::endl);
+    PUT(info, "Algorithm.Best", best);
     algorithm_end(out.ub, info);
     return out;
 }

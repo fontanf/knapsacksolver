@@ -4,7 +4,7 @@ using namespace knapsack;
 
 Profit knapsack::ub_dantzig(const Instance& ins, Info& info)
 {
-    info.verbose("*** dantzig ***\n");
+    VER(info, "*** dantzig ***" << std::endl);
     assert(ins.break_item_found());
 
     ItemPos b = ins.break_item();

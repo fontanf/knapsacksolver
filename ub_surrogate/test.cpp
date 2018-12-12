@@ -1,38 +1,28 @@
 #include "knapsack/lib/tester.hpp"
-#include "knapsack/lib/generator.hpp"
-#include "knapsack/ub_surrogate/surrogate.hpp"
 #include "knapsack/opt_minknap/minknap.hpp"
-#include "knapsack/opt_bellman/bellman.hpp"
+#include "knapsack/ub_surrogate/surrogate.hpp"
 #include "knapsack/lb_greedy/greedy.hpp"
+#include "knapsack/lb_greedynlogn/greedynlogn.hpp"
 
 using namespace knapsack;
 
-Profit opt_bellman_array_test(Instance &ins) { Info info; return opt_bellman_array(ins, info); }
-Profit opt_bellman_array_all_test(Instance &ins) { Info info; return sopt_bellman_array_all(ins, info).profit(); }
-
+Profit opt_minknap_test(Instance& ins)  { Logger logger; Info info(logger, true); return sopt_minknap(ins, info).profit(); }
 Profit ub_surrogate_test(Instance& ins)
 {
+    Logger logger;
+    Info info(logger, true);
+    Info info_tmp(info.logger);
+    //Profit lb = sol_greedynlogn(ins, info_tmp).profit();
     ins.sort_partially();
-    Info info_tmp;
-    Solution sol = sol_greedy(ins, info_tmp);
-    Info info;
-    return ub_surrogate(ins, sol.profit(), info).ub;
+    Profit lb = sol_greedy(ins, info_tmp).profit();
+    return ub_surrogate(ins, lb, info).ub;
 }
 
-std::vector<Profit (*)(Instance&)> tested_functions()
-{
-    return {
-        opt_bellman_array_test,
+std::vector<Profit (*)(Instance&)> f = {
+        opt_minknap_test,
         ub_surrogate_test,
-    };
-}
+};
 
-TEST(SR, DataPisingerSmall)
-{
-    test_pisinger(
-        {1, 2, 4, 8, 16, 32},
-        {1, 2, 4, 8, 16, 32, 64},
-        {"u", "wc", "sc", "isc", "asc", "ss"},
-        {tested_functions()}, 1);
-}
+TEST(Bellman, TEST)  { test(TEST, f, UB); }
+TEST(Bellman, SMALL) { test(SMALL, f, UB); }
 

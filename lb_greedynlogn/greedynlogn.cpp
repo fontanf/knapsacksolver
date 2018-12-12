@@ -19,7 +19,7 @@ std::vector<Item> remove_dominated_items(std::vector<Item>& v)
 
 Solution knapsack::sol_forwardgreedynlogn(const Instance& ins, Info& info)
 {
-    info.verbose("*** forwardgreedynlogn ***\n");
+    VER(info, "*** forwardgreedynlogn ***" << std::endl);
 
     Solution sol = *ins.break_solution();
 
@@ -81,7 +81,7 @@ Solution knapsack::sol_forwardgreedynlogn(const Instance& ins, Info& info)
 
 Solution knapsack::sol_backwardgreedynlogn(const Instance& ins, Info& info)
 {
-    info.verbose("*** backwardgreedynlogn ***\n");
+    VER(info, "*** backwardgreedynlogn ***" << std::endl);
 
     Solution sol0 = *ins.break_solution();
 
@@ -149,30 +149,30 @@ Solution knapsack::sol_backwardgreedynlogn(const Instance& ins, Info& info)
 
 /******************************************************************************/
 
-Solution knapsack::sol_bestgreedynlogn(const Instance& ins, Info& info)
+Solution knapsack::sol_greedynlogn(const Instance& ins, Info& info)
 {
-    info.verbose("*** bestgreedynlogn ***\n");
+    VER(info, "*** greedynlogn ***" << std::endl);
 
-    Info info_tmp;
+    Info info_tmp(info.logger);
     Solution sol = sol_greedy(ins, info_tmp);
     std::string best = "Greedy";
 
-    Info info_tmp1;
+    Info info_tmp1(info.logger);
     Solution sol_tmp1 = sol_forwardgreedynlogn(ins, info_tmp1);
     if (sol_tmp1.profit() > sol.profit()) {
         sol = sol_tmp1;
         best = "ForwardBest";
     }
 
-    Info info_tmp2;
+    Info info_tmp2(info.logger);
     Solution sol_tmp2 = sol_backwardgreedynlogn(ins, info_tmp2);
     if (sol_tmp2.profit() > sol.profit()) {
         sol = sol_tmp2;
         best = "BackwardBest";
     }
 
-    info.verbose("Best solution from: " + best);
-    info.pt.put("Algorithm.Best", best);
+    VER(info, "Best solution from: " << best << std::endl);
+    PUT(info, "Algorithm.Best", best);
     return algorithm_end(sol, info);
 }
 

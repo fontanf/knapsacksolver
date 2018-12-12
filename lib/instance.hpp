@@ -39,11 +39,6 @@ struct Item
     Weight  w = -1; // Weight, w >= 0
     Profit  p = -1; // Profit, p >= 0
     Label   l = -1; // Label, this parameter is not used in this package
-
-    std::string to_string() const
-    {
-        return "{" + STR1(j) + STR2(w) + STR2(p) + STR4(e, (double)p/(double)w) + STR2(l) + "}";
-    }
 };
 
 struct Interval

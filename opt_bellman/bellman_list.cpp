@@ -25,9 +25,9 @@ std::string to_string(std::vector<State>& l)
 
 Profit knapsack::opt_bellman_list(const Instance& ins, Info& info)
 {
-    info.verbose("*** bellman (list) ***\n");
+    VER(info, "*** bellman (list) ***" << std::endl);
 
-    Weight  c = ins.capacity();
+    Weight  c = ins.total_capacity();
     ItemPos n = ins.total_item_number();
     ItemPos j_max = ins.max_efficiency_item();
 
@@ -86,9 +86,9 @@ Profit knapsack::opt_bellman_list(const Instance& ins, Info& info)
 
 Solution knapsack::sopt_bellman_list_all(const Instance& ins, Info& info)
 {
-    info.verbose("*** bellman (list, all) ***\n");
+    VER(info, "*** bellman (list, all) ***" << std::endl);
     Solution sol(ins);
-    info.verbose("Not yet implemented.\n");
+    VER(info, "Not yet implemented." << std::endl);
     return algorithm_end(sol, info);
 }
 
@@ -96,9 +96,9 @@ Solution knapsack::sopt_bellman_list_all(const Instance& ins, Info& info)
 
 Solution knapsack::sopt_bellman_list_one(const Instance& ins, Info& info)
 {
-    info.verbose("*** bellman (list, one) ***\n");
+    VER(info, "*** bellman (list, one) ***" << std::endl);
     Solution sol(ins);
-    info.verbose("Not yet implemented.\n");
+    VER(info, "Not yet implemented." << std::endl);
     return algorithm_end(sol, info);
 }
 
@@ -106,9 +106,9 @@ Solution knapsack::sopt_bellman_list_one(const Instance& ins, Info& info)
 
 Solution knapsack::sopt_bellman_list_part(const Instance& ins, Info& info, ItemPos k)
 {
-    info.verbose("*** bellman (list, part " + std::to_string(k) + ") ***\n");
+    VER(info, "*** bellman (list, part " << k << ") ***" << std::endl);
     Solution sol(ins);
-    info.verbose("Not yet implemented.\n");
+    VER(info, "Not yet implemented." << std::endl);
     return algorithm_end(sol, info);
 }
 
@@ -132,8 +132,11 @@ struct BellmanListRecData
 
 std::vector<State> opts_bellman_list(BellmanListRecData& data)
 {
-    if (data.c == 0)
+    LOG(data.info, LOG_FOLD_START << " solve n1 " << data.n1 << " n2 " << data.n2 << " c " << data.c << std::endl);
+    if (data.c == 0) {
+        LOG(data.info, LOG_FOLD_END << std::endl);
         return {{0, 0}};
+    }
 
     Profit lb = 0;
     std::vector<State> l0{{0, 0}};
@@ -178,6 +181,7 @@ std::vector<State> opts_bellman_list(BellmanListRecData& data)
         }
         l0 = std::move(l);
     }
+    LOG(data.info, LOG_FOLD_END << std::endl);
     return l0;
 }
 
@@ -187,7 +191,7 @@ void sopt_bellman_list_rec_rec(BellmanListRecData& data)
     ItemPos n2 = data.n2;
     ItemPos k = (data.n1 + data.n2) / 2;
 
-    DBG(data.info.debug(STR1(n1) + STR2(n2) + STR2(k) + STR4(c, data.c) + "\n");)
+    LOG(data.info, LOG_FOLD_START << " rec n1 " << n1 << " n2 " << n2 << " k " << k << " c " << data.c << std::endl);
 
     Weight w1_opt = 0;
     Weight w2_opt = 0;
@@ -238,9 +242,9 @@ void sopt_bellman_list_rec_rec(BellmanListRecData& data)
         p1_opt = l1[i1_opt].p;
         p2_opt = l2[i2_opt].p;
 
-        DBG(data.info.debug(STR1(z_max) + "\n" +
-                STR1(w1_opt) + STR2(p1_opt) + "\n" +
-                STR1(w1_opt) + STR2(p2_opt) + "\n");)
+        LOG(data.info, "z_max " << z_max << std::endl );
+        LOG(data.info, "w1_opt " << w1_opt << " p1_opt " << p1_opt << std::endl );
+        LOG(data.info, "w2_opt " << w2_opt << " p2_opt " << p2_opt << std::endl );
     }
 
     if (k == n1) {
@@ -262,24 +266,29 @@ void sopt_bellman_list_rec_rec(BellmanListRecData& data)
         data.c  = w2_opt;
         sopt_bellman_list_rec_rec(data);
     }
+    LOG(data.info, LOG_FOLD_END << std::endl);
 }
 
 Solution knapsack::sopt_bellman_list_rec(const Instance& ins, Info& info)
 {
-    info.verbose("*** bellman (list, rec) ***\n");
+    LOG(info, LOG_FOLD_START << " *** bellman (list, rec) ***" << std::endl);
+    VER(info, "*** bellman (list, rec) ***" << std::endl);
 
     ItemPos n = ins.item_number();
     Solution sol(ins);
 
-    if (n == 0)
+    if (n == 0) {
+        LOG(info, LOG_FOLD_END << std::endl);
         return algorithm_end(sol, info);
-    if (n == 1) {
+    } else if (n == 1) {
         sol.set(0, true);
+        LOG(info, LOG_FOLD_END << std::endl);
         return algorithm_end(sol, info);
     }
 
     BellmanListRecData data(ins, info);
     sopt_bellman_list_rec_rec(data);
+    LOG(info, LOG_FOLD_END << std::endl);
     return algorithm_end(data.sol_curr, info);
 }
 

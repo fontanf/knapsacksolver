@@ -8,16 +8,16 @@ using namespace knapsack;
 
 Profit knapsack::opt_dpprofits_array(const Instance& ins, Info& info)
 {
-    info.verbose("*** dpprofits (array) ***\n");
+    VER(info, "*** dpprofits (array) ***" << std::endl);
 
     ItemIdx n = ins.item_number();
-    Weight  c = ins.capacity();
+    Weight  c = ins.total_capacity();
     if (n == 0)
         return algorithm_end(0, info);
 
     // Initialize memory table
     ItemPos j_max = ins.max_efficiency_item();
-    Profit ub = ub_0(ins, 0, 0, ins.capacity(), j_max);
+    Profit ub = ub_0(ins, 0, 0, ins.total_capacity(), j_max);
     std::vector<Weight> values(ub+1,c+1);
 
     // Compute optimal value
@@ -46,10 +46,10 @@ Profit knapsack::opt_dpprofits_array(const Instance& ins, Info& info)
 
 Solution knapsack::sopt_dpprofits_array_all(const Instance& ins, Info& info)
 {
-    info.verbose("*** dpprofits (array, all) ***\n");
+    VER(info, "*** dpprofits (array, all) ***" << std::endl);
 
     ItemIdx n = ins.item_number();
-    Weight  c = ins.capacity();
+    Weight  c = ins.total_capacity();
     if (n == 0) {
         Solution sol(ins);
         return algorithm_end(sol, info);
@@ -57,7 +57,7 @@ Solution knapsack::sopt_dpprofits_array_all(const Instance& ins, Info& info)
 
     // Initialize memory table
     ItemPos j_max = ins.max_efficiency_item();
-    Profit ub = ub_0(ins, 0, 0, ins.capacity(), j_max);
+    Profit ub = ub_0(ins, 0, 0, ins.total_capacity(), j_max);
     StateIdx values_size = (n+1)*(ub+1);
     std::vector<Weight> values(values_size);
 
@@ -89,12 +89,12 @@ Solution knapsack::sopt_dpprofits_array_all(const Instance& ins, Info& info)
     ItemPos j = n-1;
     Profit  q = opt;
     Weight  w = values[INDEX(j,opt)];
-    Solution sol = *ins.reduced_solution();
+    Solution sol(ins);
     while (w > 0) {
         Weight wj = ins.item(j).w;
         Profit pj = ins.item(j).p;
         Weight v0 = values[INDEX(j-1,q)];
-        Weight v1 = (q < pj)? ins.capacity() + 1: values[INDEX(j-1,q-pj)] + wj;
+        Weight v1 = (q < pj)? ins.total_capacity() + 1: values[INDEX(j-1,q-pj)] + wj;
         if (v1 < v0) {
             q -= pj;
             w -= wj;
@@ -109,19 +109,19 @@ Solution knapsack::sopt_dpprofits_array_all(const Instance& ins, Info& info)
 
 Solution knapsack::sopt_dpprofits_array_one(const Instance& ins, Info& info)
 {
-    info.verbose("*** dpprofits (array, one) ***\n");
+    VER(info, "*** dpprofits (array, one) ***" << std::endl);
     Solution sol(ins);
-    info.verbose("Not yet implemented.\n");
+    VER(info, "Not yet implemented." << std::endl);
     return algorithm_end(sol, info);
 }
 
 /******************************************************************************/
 
-Solution knapsack::sopt_dpprofits_array_part(const Instance& ins, ItemPos k, Info& info)
+Solution knapsack::sopt_dpprofits_array_part(const Instance& ins, Info& info, ItemPos k)
 {
-    info.verbose("*** dpprofits (array, part " + std::to_string(k) + ") ***\n");
+    VER(info, "*** dpprofits (array, part " << k << ") ***" << std::endl);
     Solution sol(ins);
-    info.verbose("Not yet implemented.\n");
+    VER(info, "Not yet implemented." << std::endl);
     return algorithm_end(sol, info);
 }
 
@@ -129,9 +129,9 @@ Solution knapsack::sopt_dpprofits_array_part(const Instance& ins, ItemPos k, Inf
 
 Solution knapsack::sopt_dpprofits_array_rec(const Instance& ins, Info& info)
 {
-    info.verbose("*** dpprofits (array, rec) ***\n");
+    VER(info, "*** dpprofits (array, rec) ***" << std::endl);
     Solution sol(ins);
-    info.verbose("Not yet implemented.\n");
+    VER(info, "Not yet implemented." << std::endl);
     return algorithm_end(sol, info);
 }
 

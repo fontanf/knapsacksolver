@@ -1,76 +1,132 @@
-#include "knapsack/opt_bab/bab.hpp"
-#include "knapsack/opt_babstar/bab.hpp"
 #include "knapsack/opt_bellman/bellman.hpp"
 #include "knapsack/opt_dpprofits/dpprofits.hpp"
-#include "knapsack/opt_expknap/expknap.hpp"
+#include "knapsack/opt_bab/bab.hpp"
+#include "knapsack/opt_astar/astar.hpp"
 #include "knapsack/opt_balknap/balknap.hpp"
 #include "knapsack/opt_minknap/minknap.hpp"
-
-#include "knapsack/lib/generator.hpp"
+#include "knapsack/opt_expknap/expknap.hpp"
+#include "knapsack/lb_greedy/greedy.hpp"
+#include "knapsack/lb_greedynlogn/greedynlogn.hpp"
+#include "knapsack/ub_dantzig/dantzig.hpp"
+#include "knapsack/ub_surrogate/surrogate.hpp"
 
 using namespace knapsack;
 
 int main(int argc, char *argv[])
 {
-    (void)argc;
-    (void)argv;
+    namespace po = boost::program_options;
 
-    {
-        GenerateData data;
-        data.n    = 2;
-        data.type = "u";
-        data.r    = 2;
-        data.h    = 1;
-        data.seed = 5;
-        Instance ins = generate(data);
-        Info info;
-        info.set_verbose();
-        info.set_debug();
-        info.set_debuglive();
+    // Parse program options
+    std::string algorithm = "bellman";
+    std::string output_file = "";
+    std::string cert_file = "";
+    std::string log_file = "";
+
+    ItemPos k = 64;
+
+    po::options_description desc("Allowed options");
+    desc.add_options()
+        ("help,h", "produce help message")
+        ("algorithm,a", po::value<std::string>()->required(), "set algorithm")
+        ("input-data,i", po::value<std::string>()->required(), "set input data (required)")
+        ("output-file,o", po::value<std::string>(&output_file), "set output file")
+        ("cert-file,c", po::value<std::string>(&cert_file), "set certificate output file")
+        ("part-size,x", po::value<ItemPos>(&k), "")
+        ("verbose,v", "enable verbosity")
+        ("log2stderr", "write log in stderr")
+        ("logfile,l", po::value<std::string>(&log_file), "set log file")
+        ;
+    po::variables_map vm;
+    po::store(po::parse_command_line(argc, argv, desc), vm);
+    if (vm.count("help")) {
+        std::cout << desc << std::endl;;
+        return 1;
+    }
+    try {
+        po::notify(vm);
+    } catch (po::required_option e) {
+        std::cout << desc << std::endl;;
+        return 1;
+    }
+
+    Instance ins(vm["input-data"].as<std::string>());
+    Solution sopt(ins);
+
+    Logger logger(log_file, vm.count("log2stderr"));
+    Info info(logger, vm.count("verbose"));
+
+    if (algorithm == "bellman_array") { // bellman
+        opt_bellman_array(ins, info);
+    } else if (algorithm == "bellman_array_all") {
+        sopt = sopt_bellman_array_all(ins, info);
+    } else if (algorithm == "bellman_array_one") {
+        sopt = sopt_bellman_array_one(ins, info);
+    } else if (algorithm == "bellman_array_part") {
+        sopt = sopt_bellman_array_part(ins, info, 64);
+    } else if (algorithm == "bellman_array_rec") {
+        sopt = sopt_bellman_array_rec(ins, info);
+    } else if (algorithm == "bellman_list") {
+        opt_bellman_list(ins, info);
+    } else if (algorithm == "bellman_list_all") {
+        sopt = sopt_bellman_list_all(ins, info);
+    } else if (algorithm == "bellman_list_one") {
+        sopt = sopt_bellman_list_one(ins, info);
+    } else if (algorithm == "bellman_list_part") {
+        sopt = sopt_bellman_list_part(ins, info, k);
+    } else if (algorithm == "bellman_list_rec") {
+        sopt = sopt_bellman_list_rec(ins, info);
+    } else if (algorithm == "dpprofits_array") { // dpprofits
+        opt_dpprofits_array(ins, info);
+    } else if (algorithm == "dpprofits_array_all") {
+        sopt = sopt_dpprofits_array_all(ins, info);
+    } else if (algorithm == "dpprofits_array_one") {
+        sopt = sopt_dpprofits_array_one(ins, info);
+    } else if (algorithm == "dpprofits_array_part") {
+        sopt = sopt_dpprofits_array_part(ins, info, 64);
+    } else if (algorithm == "dpprofits_array_rec") {
+        sopt = sopt_dpprofits_array_rec(ins, info);
+    } else if (algorithm == "dpprofits_list") {
+        opt_dpprofits_list(ins, info);
+    } else if (algorithm == "dpprofits_list_all") {
+        sopt = sopt_dpprofits_list_all(ins, info);
+    } else if (algorithm == "dpprofits_list_one") {
+        sopt = sopt_dpprofits_list_one(ins, info);
+    } else if (algorithm == "dpprofits_list_part") {
+        sopt = sopt_dpprofits_list_part(ins, info);
+    } else if (algorithm == "dpprofits_list_rec") {
+        sopt = sopt_dpprofits_list_rec(ins, info);
+    } else if (algorithm == "bab") { // bab
+        sopt = sopt_bab(ins, info);
+    } else if (algorithm == "astar") { // astar
+        sopt = sopt_astar(ins, info);
+    } else if (algorithm == "expknap") { // expknap
+        ExpknapParams p;
+        sopt = sopt_expknap(ins, info, p);
+    } else if (algorithm == "balknap") { // balknap
         BalknapParams p;
-        p.ub_type = 'b';
-        sopt_balknap(ins, info, p, 1);
-        return 0;
+        sopt = sopt_balknap(ins, info, p, k);
+    } else if (algorithm == "minknap") { // minknap
+        MinknapParams p;
+        sopt = sopt_minknap(ins, info, p, k);
+    } else if (algorithm == "greedy") { // greedy
+        ins.sort_partially();
+        sopt = sol_greedy(ins, info);
+    } else if (algorithm == "greedynlogn") { // greedynlogn
+        sopt = sol_greedynlogn(ins, info);
+    } else if (algorithm == "greedynlogn_for") {
+        sopt = sol_forwardgreedynlogn(ins, info);
+    } else if (algorithm == "greedynlogn_back") {
+        sopt = sol_backwardgreedynlogn(ins, info);
+    } else if (algorithm == "dantzig") { // dantzig
+        ub_dantzig(ins, info);
+    } else if (algorithm == "surrelax") { // surrelax
+        ins.sort_partially();
+        Solution sol = sol_greedynlogn(ins, info);
+        ub_surrogate(ins, sol.profit(), info);
     }
 
-    GenerateData data;
-    data.spanner = false;
-    data.v = 50;
-    data.m = 50;
-
-    double t1 = 0;
-    double t2 = 0;
-
-    data.type = "sc";
-    data.n = 100;
-    data.r = 100;
-    data.seed = 0;
-    for (data.h=1; data.h<=100; ++data.h) {
-        std::cout << data.h << std::endl;
-        Instance ins = generate(data);
-
-        Instance ins1(ins);
-        Info info1;
-        info1.set_verbose();
-        BalknapParams p1;
-        p1.ub_type = 't';
-        p1.cpt_greedynlogn = 0;
-        p1.cpt_surrogate = 0;
-        p1.cpt_solve_sur = -1;
-        sopt_balknap(ins1, info1, p1);
-        t1 += info1.pt.get<double>("Solution.Time");
-
-        Instance ins2(ins);
-        Info info2;
-        info2.set_verbose();
-        sopt_balknap(ins2, info2);
-        t2 += info2.pt.get<double>("Solution.Time");
-        std::cout << std::endl;
-    }
-
-    std::cout << STR1(t1) << std::endl;
-    std::cout << STR1(t2) << std::endl;
-
+    info.write_ini(output_file); // Write output file
+    sopt.write_cert(cert_file); // Write certificate file
     return 0;
 }
 

@@ -13,14 +13,14 @@ int main(int argc, char *argv[])
     po::options_description desc("Allowed options");
     desc.add_options()
         ("help,h", "produce help message")
-        (",t", po::value<std::string>(&data.type)->required(), "set instance type (u, wc, sc, isc, asc, ss, sw, mstr, pceil, circle)")
+        (",t", po::value<std::string>(&data.t)->required(), "set instance type (u, wc, sc, isc, asc, ss, sw, mstr, pceil, circle)")
         (",n", po::value<ItemIdx>(&data.n)->required(), "set item number")
         (",r", po::value<Profit>(&data.r), "set R")
         ("ka,", po::value<Profit>(&data.k1), "set k1 (for mstr instances)")
         ("kb,", po::value<Profit>(&data.k2), "set k2 (for mstr instances)")
         (",d", po::value<double>(&data.d), "set d (for mstr (6), pceil (3) and circle (3/2) instances)")
         (",h", po::value<int>(&data.h), "set h")
-        (",s", po::value<Seed>(&data.seed), "set seed")
+        (",s", po::value<Seed>(&data.s), "set seed")
         ("spanner,sp", "set spanner")
         (",m", po::value<Profit>(&data.m), "set m (for spanner instances)")
         (",v", po::value<Profit>(&data.v), "set v (for spanner instances)")
@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
     }
     data.spanner = vm.count("spanner");
 
-    std::cout << data.to_string() << std::endl;
+    std::cout << data << std::endl;
     Instance ins = generate(data);
 
     if (plot_file != "")

@@ -20,12 +20,12 @@ struct GenerateData
     ItemIdx     n       = 1000;
     Profit      r       = 1000;
     int         h       = 50;
-    std::string type    = "u";
-    Seed        seed    = 0;
+    std::string t       = "u";
+    Seed        s       = 0;
     std::default_random_engine g;
-
-    std::string to_string() const;
 };
+
+std::ostream& operator<<(std::ostream& os, const GenerateData& data);
 
 Instance generate(GenerateData data);
 

@@ -7,19 +7,10 @@ cc_library(
         include_prefix = "knapsack/lb_greedy/",
 )
 
-cc_binary(
-        name = "main",
-        srcs = ["main.cpp"],
-        deps = [":libgreedy"],
-)
-
 cc_test(
         name = "test",
         srcs = ["test.cpp"],
-        deps = [
-                ":libgreedy",
-                "@googletest//:gtest_main",
-        ],
-        timeout = "short",
+        deps = ["//lib:tester", "//lb_greedy:libgreedy", "//opt_minknap:libminknap"],
+        timeout = "moderate",
 )
 

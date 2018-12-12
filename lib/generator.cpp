@@ -16,22 +16,22 @@
 
 using namespace knapsack;
 
-std::string GenerateData::to_string() const
+std::ostream& knapsack::operator<<(std::ostream& os, const GenerateData& data)
 {
-    std::string s = STR1(n);
-    if (spanner) {
-        s += " t spanner," + type + STR2(v) + STR2(n);
+    os << "n " << data.n;
+    if (data.spanner) {
+        os << " t spanner," << data.t << " v " << data.v << " n " << data.m;
     } else {
-        s += " t " + type;
+        os << " t " << data.t;
     }
-    if (type != "sw")
-        s += STR2(r);
-    if (type == "mstr")
-        s += STR2(k1) + STR2(k2);
-    if (type == "mstr" || type == "pceil" || type == "circle")
-        s += STR2(d);
-    s += STR2(h) + STR2(seed);
-    return s;
+    if (data.t != "sw")
+        os << " r " << data.r;
+    if (data.t == "mstr")
+        os << " k1 " << data.k1 << " k2 " << data.k2;
+    if (data.t == "mstr" || data.t == "pceil" || data.t == "circle")
+        os << " d " << data.d;
+    os << " h " << data.h << " s " << data.s << std::endl;
+    return os;
 }
 
 void write_format_file(boost::filesystem::path dest, std::string str)
@@ -48,40 +48,40 @@ std::pair<Weight, Profit> item(GenerateData& data)
 {
     Weight w = -1;
     Profit p = -1;
-    if (data.type == "u") {
+    if (data.t == "u") {
         std::uniform_int_distribution<int> d(1,data.r);
         w = d(data.g);
         p = d(data.g);
-    } else if (data.type == "wc") {
+    } else if (data.t == "wc") {
         std::uniform_int_distribution<int> d1(1, data.r);
         std::uniform_int_distribution<int> d2(-(data.r+1)/10, data.r/10);
         w = d1(data.g);
         do {
             p = w + d2(data.g);
         } while (p <= 0);
-    } else if (data.type == "sc") {
+    } else if (data.t == "sc") {
         std::uniform_int_distribution<int> d(1, data.r);
         w = d(data.g);
         p = w + data.r/10;
-    } else if (data.type == "isc") {
+    } else if (data.t == "isc") {
         std::uniform_int_distribution<int> d(1, data.r);
         p = d(data.g);
         w = p + data.r/10;
-    } else if (data.type == "asc") {
+    } else if (data.t == "asc") {
         std::uniform_int_distribution<int> d1(1,data.r);
         std::uniform_int_distribution<int> d2(-(data.r+1)/500, data.r/500);
         w = d1(data.g);
         p = w + data.r/10 + d2(data.g);
-    } else if (data.type == "ss") {
+    } else if (data.t == "ss") {
         std::uniform_int_distribution<int> d(1, data.r);
         w = d(data.g);
         p = w;
-    } else if (data.type == "sw") {
+    } else if (data.t == "sw") {
         std::uniform_int_distribution<int> d1(100000, 100100);
         std::uniform_int_distribution<int> d2(1, 1000);
         w = d1(data.g);
         p = d2(data.g);
-    } else if (data.type == "mstr") {
+    } else if (data.t == "mstr") {
         std::uniform_int_distribution<int> d(1, data.r);
         w = d(data.g);
         if (w % (Profit)data.d == 0) {
@@ -89,11 +89,11 @@ std::pair<Weight, Profit> item(GenerateData& data)
         } else {
             p = w + data.k2;
         }
-    } else if (data.type == "pceil") {
+    } else if (data.t == "pceil") {
         std::uniform_int_distribution<int> d(1, data.r);
         w = d(data.g);
         p = data.d * ((w - 1) / data.d + 1);
-    } else if (data.type == "circle") {
+    } else if (data.t == "circle") {
         std::uniform_int_distribution<int> d(1, data.r);
         w = d(data.g);
         p = data.d * sqrt(4*data.r*data.r - (w-2*data.r)*(w-2*data.r));
@@ -150,7 +150,7 @@ Instance generate_spanner(GenerateData& data)
 
 Instance knapsack::generate(GenerateData data)
 {
-    data.g.seed(data.seed);
+    data.g.seed(data.s);
     if (data.spanner) {
         return generate_spanner(data);
     } else {

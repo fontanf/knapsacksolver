@@ -13,20 +13,10 @@ cc_library(
         include_prefix = "knapsack/opt_expknap/",
 )
 
-cc_binary(
-        name = "main",
-        srcs = ["main.cpp"],
-        deps = [":libexpknap"],
-)
-
 cc_test(
         name = "test",
         srcs = ["test.cpp"],
-        deps = ["//lib:tester"],
-        data = [
-                ":main",
-                "//data_tests:data",
-        ],
-        timeout = "short",
+        deps = ["//lib:tester", "//opt_expknap:libexpknap", "//opt_minknap:libminknap"],
+        timeout = "moderate",
 )
 

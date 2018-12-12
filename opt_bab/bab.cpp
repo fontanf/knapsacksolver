@@ -6,7 +6,7 @@ using namespace knapsack;
 
 Solution knapsack::sopt_bab(Instance& ins, Info& info)
 {
-    info.verbose("*** bab ***\n");
+    VER(info, "*** bab ***" << std::endl);
 
     ItemIdx n = ins.item_number();
     Solution sol_curr(ins);
@@ -25,8 +25,8 @@ Solution knapsack::sopt_bab(Instance& ins, Info& info)
             do { // Backtrack
                 i--;
                 if (i < 0) {
-                    info.verbose("Node number: " + Info::to_string(node_number) + "\n");
-                    info.pt.put("Algorithm.NodeNumber", node_number);
+                    VER(info, "Node number: " << node_number << std::endl);
+                    PUT(info, "Algorithm.NodeNumber", node_number);
                     return algorithm_end(sol_best, info);
                 }
             } while (!sol_curr.contains(i));

@@ -4,7 +4,7 @@ using namespace knapsack;
 
 Solution knapsack::sol_greedy(const Instance& ins, Info& info)
 {
-    info.verbose("*** greedy ***\n");
+    VER(info, "*** greedy ***" << std::endl);
     assert(ins.break_item_found());
 
     Solution sol = *ins.break_solution();
@@ -45,8 +45,8 @@ Solution knapsack::sol_greedy(const Instance& ins, Info& info)
         }
     }
 
-    info.verbose("Best algorithm: " + best_algo + "\n");
-    info.pt.put("Algorithm.Best", best_algo);
+    VER(info, "Best algorithm: " << best_algo << std::endl);
+    PUT(info, "Algorithm.Best", best_algo);
 
     return algorithm_end(sol, info);
 }

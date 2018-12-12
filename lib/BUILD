@@ -37,19 +37,6 @@ cc_library(
 )
 
 cc_library(
-        name = "libbounds",
-        hdrs = ["update_bounds.hpp"],
-        srcs = [],
-        deps = [
-                "//lib:cpp",
-                "//lb_greedynlogn:libgreedynlogn",
-                "//ub_surrogate:libsurrogate",
-        ],
-        visibility = ["//visibility:public"],
-        include_prefix = "knapsack/lib/",
-)
-
-cc_library(
         name = "libgenerator",
         hdrs = ["generator.hpp"],
         srcs = ["generator.cpp"],
@@ -105,13 +92,33 @@ cc_binary(
                 "//ub_dembo:libdembo",
                 "//ub_surrogate:libsurrogate",
                 "//opt_bab:libbab",
-                "//opt_babstar:libbabstar",
+                "//opt_astar:libastar",
                 "//opt_expknap:libexpknap",
                 "//opt_bellman:libbellman",
                 "//opt_dpprofits:libdpprofits",
                 "//opt_balknap:libbalknap",
                 "//opt_minknap:libminknap",
                 ":libgenerator",
+        ],
+)
+
+cc_binary(
+        name = "test_main",
+        srcs = ["test_main.cpp"],
+        deps = [
+                "//lb_greedy:libgreedy",
+                "//lb_greedynlogn:libgreedynlogn",
+                "//ub_dembo:libdembo",
+                "//ub_surrogate:libsurrogate",
+                "//opt_bab:libbab",
+                "//opt_astar:libastar",
+                "//opt_expknap:libexpknap",
+                "//opt_bellman:libbellman",
+                "//opt_dpprofits:libdpprofits",
+                "//opt_balknap:libbalknap",
+                "//opt_minknap:libminknap",
+                ":libgenerator",
+                ":tester",
         ],
 )
 

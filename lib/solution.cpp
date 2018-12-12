@@ -81,21 +81,18 @@ void Solution::update(const Solution& sol, Info& info, Cpt& solution_number, Pro
     *this = sol;
     double t = info.elapsed_time();
     std::string sol_str = "Solution" + std::to_string(solution_number);
-    info.pt.put(sol_str + ".Value", sol.profit());
-    info.pt.put(sol_str + ".Time", t);
+    PUT(info, sol_str + ".Value", sol.profit());
+    PUT(info, sol_str + ".Time", t);
 
-    if (info.verbose()) {
-        std::string s = STR3(--- Lower bound, solution_number) + STR4(- Value:, sol.profit());
-        if (ub != -1)
-            s += STR4(- Gap:, ub - sol.profit());
-        s += STR4(- Time:, t) + "\n";
-        info.verbose(s);
-    }
+    VER(info, "--- Lower bound " << solution_number << " - Value: " << sol.profit());
+    if (ub != -1)
+        VER(info, " gap " << ub - sol.profit());
+    VER(info, " - Time " << t << std::endl);
 
     solution_number++;
-    if (!info.write_only_at_the_end()) {
+    if (!info.only_write_at_the_end) {
         info.write_ini();
-        write_cert(info.cert_file());
+        write_cert(info.cert_file);
     }
 }
 
@@ -105,44 +102,36 @@ void Solution::update_ub(Profit& ub, Profit ub_new, Info& info, Cpt& ub_number, 
     ub = ub_new;
     double t = info.elapsed_time();
     std::string sol_str = "UB" + std::to_string(ub_number);
-    info.pt.put(sol_str + ".Value", ub);
-    info.pt.put(sol_str + ".Time", t);
+    PUT(info, sol_str + ".Value", ub);
+    PUT(info, sol_str + ".Time", t);
 
-    if (info.verbose()) {
-        std::string s = STR3(--- Upper bound, ub_number) + STR4(- Value:, ub);
-        if (lb != -1)
-            s += STR4(- Gap:, ub - lb);
-        s += STR4(- Time:, t) + "\n";
-        info.verbose(s);
-    }
+    VER(info, "--- Upper bound " << ub_number << " - Value: " << ub);
+    if (lb != -1)
+        VER(info, " gap " << ub - lb);
+    VER(info, " - Time " << t << std::endl);
 
     ub_number++;
-    if (!info.write_only_at_the_end()) {
+    if (!info.only_write_at_the_end)
         info.write_ini();
-    }
 }
 
-void Solution::update_lb(Profit& lb, Profit lb_new, Info& info, Cpt& solution_number, Profit ub)
+void Solution::update_lb(Profit& lb, Profit lb_new, Info& info, Cpt& lb_number, Profit ub)
 {
     assert(lb_new > lb);
     lb = lb_new;
     double t = info.elapsed_time();
-    std::string sol_str = "Solution" + std::to_string(solution_number);
-    info.pt.put(sol_str + ".Value", lb);
-    info.pt.put(sol_str + ".Time", t);
+    std::string sol_str = "Solution" + std::to_string(lb_number);
+    PUT(info, sol_str + ".Value", lb);
+    PUT(info, sol_str + ".Time", t);
 
-    if (info.verbose()) {
-        std::string s = STR3(--- Lower bound, solution_number) + STR4(- Value:, lb);
-        if (ub != -1)
-            s += STR4(- Gap:, ub - lb);
-        s += STR4(- Time:, t) + "\n";
-        info.verbose(s);
-    }
+    VER(info, "--- Lower bound " << lb_number << " - Value: " << lb);
+    if (ub != -1)
+        VER(info, " gap " << ub - lb);
+    VER(info, " - Time " << t << std::endl);
 
-    solution_number++;
-    if (!info.write_only_at_the_end()) {
+    lb_number++;
+    if (!info.only_write_at_the_end)
         info.write_ini();
-    }
 }
 
 void Solution::write_cert(std::string file)

@@ -10,19 +10,10 @@ cc_library(
         include_prefix = "knapsack/lb_greedynlogn/",
 )
 
-cc_binary(
-        name = "main",
-        srcs = ["main.cpp"],
-        deps = [":libgreedynlogn"],
-)
-
 cc_test(
         name = "test",
         srcs = ["test.cpp"],
-        deps = [
-                ":libgreedynlogn",
-                "@googletest//:gtest_main",
-        ],
-        timeout = "short",
+        deps = ["//lib:tester", "//lb_greedynlogn:libgreedynlogn", "//opt_minknap:libminknap"],
+        timeout = "moderate",
 )
 

@@ -4,7 +4,6 @@ cc_library(
         srcs = ["balknap.cpp"],
         deps = [
                 "//lib:cpp",
-                "//lib:libbounds",
                 "//lb_greedy:libgreedy",
                 "//lb_greedynlogn:libgreedynlogn",
                 "//ub_dembo:libdembo",
@@ -14,24 +13,10 @@ cc_library(
         include_prefix = "knapsack/opt_balknap/",
 )
 
-cc_binary(
-        name = "main",
-        srcs = ["main.cpp"],
-        deps = [":libbalknap"],
-)
-
 cc_test(
         name = "test",
         srcs = ["test.cpp"],
-        deps = [
-                "//lib:tester",
-                ":libbalknap",
-                "//lib:libgenerator",
-                "//opt_minknap:libminknap",
-        ],
-        data = [
-                ":main",
-                "//data_tests:data",
-        ],
-        timeout = "long",
+        deps = ["//lib:tester", "//opt_balknap:libbalknap", "//opt_minknap:libminknap"],
+        timeout = "moderate",
 )
+

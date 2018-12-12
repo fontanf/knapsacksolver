@@ -6,9 +6,9 @@
 namespace knapsack
 {
 
-Solution sopt_babstar(Instance& ins, Info& info);
+Solution sopt_astar(Instance& ins, Info& info);
 
-Solution sopt_babstar_dp(Instance& ins, Info& info);
+Solution sopt_astar_dp(Instance& ins, Info& info);
 
 struct StarknapParams
 {

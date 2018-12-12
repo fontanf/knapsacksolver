@@ -7,8 +7,3 @@ cc_library(
         include_prefix = "knapsack/ub_dantzig/",
 )
 
-cc_binary(
-        name = "main",
-        srcs = ["main.cpp"],
-        deps = [":libdantzig"],
-)

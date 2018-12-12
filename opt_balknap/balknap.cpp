@@ -5,7 +5,6 @@
 #include "knapsack/lb_greedynlogn/greedynlogn.hpp"
 #include "knapsack/ub_dembo/dembo.hpp"
 #include "knapsack/ub_dantzig/dantzig.hpp"
-#include "knapsack/lib/update_bounds.hpp"
 
 #include <map>
 #include <bitset>
@@ -49,13 +48,7 @@ Solution knapsack::sopt_balknap(Instance& ins, Info& info,
         BalknapParams params, ItemPos k, Profit o)
 {
     if (o == -1)
-        info.verbose("**** balknap (" + std::to_string(k) + ") ***\n");
-    DBG(info.debug(
-            "n " + std::to_string(ins.item_number()) + "/" + std::to_string(ins.total_item_number()) +
-            " f " + std::to_string(ins.first_item()) +
-            " l " + std::to_string(ins.last_item()) +
-            " o " + std::to_string(o) +
-            "\n");)
+        VER(info, "**** balknap (" << k << ") ***" << std::endl;);
 
     Cpt lb_number = 0;
     Cpt ub_number = 0;
@@ -82,18 +75,18 @@ Solution knapsack::sopt_balknap(Instance& ins, Info& info,
     }
 
     // Compute initial lower bound
-    info.verbose("Compute initial lower bound...\n");
+    VER(info, "Compute initial lower bound..." << std::endl);
     if (params.cpt_greedynlogn == 0) {
         params.cpt_greedynlogn = -1;
-        Info info_tmp;
-        Solution sol_tmp = sol_bestgreedynlogn(ins, info_tmp);
+        Info info_tmp(info.logger);
+        Solution sol_tmp = sol_greedynlogn(ins, info_tmp);
         if (sol_tmp.profit() > lb) {
             sol.update(sol_tmp, info, lb_number, ub);
             lb = sol.profit();
         }
     } else if (params.cpt_greedy == 0) {
         params.cpt_greedy = -1;
-        Info info_tmp;
+        Info info_tmp(info.logger);
         Solution sol_tmp = sol_greedy(ins, info_tmp);
         if (sol_tmp.profit() > lb) {
             sol.update(sol_tmp, info, lb_number, ub);
@@ -149,16 +142,10 @@ Solution knapsack::sopt_balknap(Instance& ins, Info& info,
     Weight w_bar = ins.break_solution()->weight();
     Profit p_bar = ins.break_solution()->profit();
 
-    Info info_tmp;
+    Info info_tmp(info.logger);
     Profit ub_tmp = ub_dantzig(ins, info_tmp);
     if (ub == -1 || ub_tmp < ub)
         Solution::update_ub(ub, ub_tmp, info, ub_number, lb);
-
-    DBG(info.debug("Break solution: " + ins.break_solution()->to_string_binary() + "\n");)
-    DBG(info.debug("Break solution: " + ins.break_solution()->to_string_items() + "\n");)
-    DBG(info.debug(
-                STR1(n) + STR2(c) + STR2(f) + STR2(l) + "\n"
-                + STR1(w_bar) + STR2(p_bar) + "\n");)
 
     if (ins.break_solution()->profit() > lb)
         sol.update(*ins.break_solution(), info, lb_number, ub);
@@ -166,7 +153,7 @@ Solution knapsack::sopt_balknap(Instance& ins, Info& info,
     if (lb == ub) // If UB == LB, then stop
         return algorithm_end(sol, info);
 
-    info.verbose("Recursion...\n");
+    VER(info, "Recursion..." << std::endl);
 
     // Create memory table
     std::map<StatePart, StateValuePart, StatePart> map;
@@ -185,22 +172,12 @@ Solution knapsack::sopt_balknap(Instance& ins, Info& info,
     // Also keep last added item to improve the variable reduction at the end.
     ItemPos last_item = b-1;
 
-    auto func = [&params, &k](Instance& ins) -> Solution {
-        Info info_tmp;
-        return sopt_balknap(ins, info_tmp, params, k);
-    };
-    UpdateBoundsSolData bounds_data(ins, info, sol, lb, ub, lb_number, ub_number);
-    bounds_data.cpt_greedynlogn = params.cpt_greedynlogn;
-    bounds_data.cpt_ubsur       = params.cpt_surrogate;
-    bounds_data.cpt_solvesur    = params.cpt_solve_sur;
-
-
     // Recursion
     for (ItemPos t=b; t<=l; ++t) {
         Weight wt = ins.item(t).w;
         Profit pt = ins.item(t).p;
 
-        bounds_data.run(func, map.size());
+        //bounds_data.run(func, map.size());
         if (lb == ub)
             goto end;
 
@@ -339,8 +316,8 @@ end:
     ins.set_last_item(last_item);
     ins.fix(psolf.vector(best_state.second.sol));
 
-    Info info_tmp2;
-    sol = knapsack::sopt_balknap(ins, info_tmp2,  params, k, best_state.first.pi);
+    Info info_tmp3(info.logger);
+    sol = knapsack::sopt_balknap(ins, info_tmp3, params, k, best_state.first.pi);
     return algorithm_end(sol, info);
 }
 

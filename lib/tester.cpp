@@ -3,136 +3,128 @@
 #include "knapsack/lib/solution.hpp"
 #include "knapsack/lib/generator.hpp"
 
-#include <thread>
+#include <boost/coroutine2/all.hpp>
 
 using namespace knapsack;
 
-void executeProgram(std::string cmd)
+bool test(const Instance& ins, std::vector<Profit (*)(Instance&)> fs, TestType tt)
 {
-    std::cout << cmd << std::endl;
-    int x = system(cmd.c_str());
-    (void)x;
-}
-
-void check_sopt(std::string prog, boost::filesystem::path input)
-{
-    Instance instance(input);
-    Profit opt = instance.optimum();
-
-    std::string output_file = "output_file.ini";
-    std::string cert_file   = "cert_file.txt";
-    std::string cmd = prog
-        + " -i" + input.string()
-        + " -o" + output_file
-        + " -c" + cert_file;
-    std::thread worker_rec(executeProgram, cmd);
-    worker_rec.join();
-
-    EXPECT_EQ(boost::filesystem::exists(output_file), true);
-    if (!boost::filesystem::exists(output_file))
-        return;
-
-    EXPECT_EQ(boost::filesystem::exists(cert_file), true);
-    if (!boost::filesystem::exists(cert_file))
-        return;
-
-    boost::property_tree::ptree pt;
-    boost::property_tree::ini_parser::read_ini(output_file, pt);
-    EXPECT_EQ(pt.get<Profit>("Solution.Value"), opt);
-    EXPECT_EQ(instance.check(cert_file), opt);
-
-    boost::filesystem::remove(output_file);
-    boost::filesystem::remove(cert_file);
-}
-
-void check_opt(std::string prog, boost::filesystem::path input)
-{
-    Instance instance(input);
-    Profit opt = instance.optimum();
-
-    std::string output_file = "output_file.ini";
-    std::string cmd = prog
-        + " -i" + input.string()
-        + " -o" + output_file;
-    std::thread worker_rec(executeProgram, cmd);
-    worker_rec.join();
-
-    EXPECT_EQ(boost::filesystem::exists(output_file), true);
-    if (!boost::filesystem::exists(output_file))
-        return;
-
-    boost::property_tree::ptree pt;
-    boost::property_tree::ini_parser::read_ini(output_file, pt);
-    EXPECT_EQ(pt.get<Profit>("Solution.Value"), opt);
-
-    boost::filesystem::remove(output_file);
-}
-
-void knapsack::test(std::string exec, std::string test)
-{
-    boost::filesystem::path data_dir = boost::filesystem::current_path();
-    data_dir /= boost::filesystem::path("data_tests");
-
-    boost::filesystem::directory_iterator end_itr;
-    for (boost::filesystem::directory_iterator itr(data_dir); itr != end_itr; ++itr) {
-        if (itr->path().filename() == "FORMAT.txt")
-            continue;
-        if (itr->path().filename() == "BUILD")
-            continue;
-        if (itr->path().extension() != ".txt")
-            continue;
-        if (test == "sopt") {
-            check_sopt(exec, itr->path());
-        } else if (test == "opt") {
-            check_opt(exec, itr->path());
+    std::cout << ins << std::endl;
+    Profit opt = ins.optimum();
+    for (auto f: fs) {
+        Instance ins_tmp = ins;
+        Profit val = f(ins_tmp);
+        if (opt == -1)
+            opt = val;
+        if (tt == OPT) {
+            EXPECT_EQ(val, opt);
+            if (val != opt)
+                return false;
+        } else if (tt == UB) {
+            EXPECT_GE(val, opt);
+            if (val < opt)
+                return false;
+        } else if (tt == LB) {
+            EXPECT_LE(val, opt);
+            if (val > opt)
+                return false;
         }
     }
+    return true;
 }
 
-void knapsack::test_pisinger(
-        std::vector<ItemIdx> ns,
-        std::vector<Profit> rs,
-        std::vector<std::string> types,
-        std::vector<Profit (*)(Instance&)> fs,
-        int test)
+class Instances
 {
-    for (ItemIdx n: ns) {
-        for (Profit r: rs) {
-            for (std::string type: types) {
-                for (Seed seed: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}) {
-                    for (int h=1; h<=100; h++) {
-                        GenerateData data;
-                        data.n = n;
-                        data.r = r;
-                        data.type = type;
-                        data.h = h;
-                        data.seed = seed;
-                        std::cout << data.to_string() << std::endl;
-                        Instance ins = generate(data);
-                        std::cout << ins << std::endl;
-                        Profit opt = -1;
-                        for (auto f: fs) {
-                            Instance ins_tmp = ins;
-                            Profit val = f(ins_tmp);
-                            if (opt == -1)
-                                opt = val;
-                            if (test == 0) {
-                                EXPECT_EQ(val, opt);
-                                if (val != opt)
-                                    return;
-                            } else if (test == 1) {
-                                EXPECT_GE(val, opt);
-                                if (val < opt)
-                                    return;
-                            } else if (test == -1) {
-                                EXPECT_LE(val, opt);
-                                if (val > opt)
-                                    return;
-                            }
-                        }
-                    }
+public:
+    virtual Instance next() = 0;
+};
+
+class TestInstances: public Instances
+{
+
+public:
+
+    Instance next()
+    {
+        i++;
+        std::cout << "i " << i << std::endl;
+        return test_instance(i);
+    }
+
+private:
+
+    Cpt i = 0;
+
+};
+
+class SmallInstances: public Instances
+{
+
+public:
+
+    Instance next()
+    {
+        s += 1;
+        if (s > s_max) {
+            s = 0;
+            h += 1;
+            if (h > h_max) {
+                h = 1;
+                r += 1;
+                if (r > r_max) {
+                    r = 2;
+                    n += 1;
+                    if (n > n_max)
+                        return Instance(0, 0);
                 }
             }
         }
+
+        GenerateData data;
+        data.n = n;
+        data.r = r;
+        data.t = "u";
+        data.h = h;
+        data.s = s;
+
+        std::cout << "data " << data << std::endl;
+        return generate(data);
+    }
+
+private:
+
+    ItemIdx n_max = 10;
+    Weight r_max = 10;
+    Cpt h_max = 100;
+    Seed s_max = 10;
+    ItemIdx n = 1;
+    Weight r = 2;
+    Cpt h = 1;
+    Seed s = -1;
+};
+
+void test(Instances& inss, std::vector<Profit (*)(Instance&)> fs, TestType tt)
+{
+    Instance ins(0, 0);
+    do {
+        ins = inss.next();
+        bool b = test(ins, fs, tt);
+        if (!b) {
+            std::cout << "error" << std::endl;
+            return;
+        }
+    } while (ins.item_number() != 0);
+    std::cout << "end" << std::endl;
+}
+
+void knapsack::test(InstacesType it, std::vector<Profit (*)(Instance&)> fs, TestType tt)
+{
+    if (it == TEST) {
+        TestInstances ti;
+        test(ti, fs, tt);
+    } else if (it == SMALL) {
+        SmallInstances si;
+        test(si, fs, tt);
     }
 }
+

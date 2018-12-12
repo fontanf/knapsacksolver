@@ -13,23 +13,10 @@ cc_library(
         include_prefix = "knapsack/opt_minknap/",
 )
 
-cc_binary(
-        name = "main",
-        srcs = ["main.cpp"],
-        deps = [":libminknap"],
-)
-
 cc_test(
         name = "test",
         srcs = ["test.cpp"],
-        deps = [
-                ":libminknap",
-                "//lib:tester",
-                "//opt_bellman:libbellman",
-        ],
-        data = [
-                ":main",
-                "//data_tests:data",
-        ],
+        deps = ["//lib:tester", "//opt_minknap:libminknap", "//opt_bellman:libbellman"],
         timeout = "moderate",
 )
+

@@ -1,4 +1,4 @@
-#include "knapsack/opt_babstar/bab.hpp"
+#include "knapsack/opt_astar/astar.hpp"
 
 #include "knapsack/lb_greedy/greedy.hpp"
 #include "knapsack/lb_greedynlogn/greedynlogn.hpp"
@@ -13,12 +13,18 @@ struct Node
     Solution sol;
     ItemPos j;
     Profit ub;
-    std::string to_string()
-    {
-        return "{id " + sol.to_string_items() +
-            STR4(w, sol.weight()) + STR4(p, sol.profit()) + STR2(ub);
-    }
 };
+
+std::ostream& operator<<(std::ostream& os, const Node& n)
+{
+    os << "{id " << n.sol.to_string_items() 
+       << " w " << n.sol.weight()
+       << " p " << n.sol.profit()
+       << " u " << n.ub
+       << "}"
+       << std::flush;
+    return os;
+}
 
 class Compare
 {
@@ -29,14 +35,14 @@ public:
     }
 };
 
-Solution knapsack::sopt_babstar(Instance& ins, Info& info)
+Solution knapsack::sopt_astar(Instance& ins, Info& info)
 {
-    info.verbose("*** babstar ***\n");
+    VER(info, "*** babstar ***" << std::endl);
 
     ItemIdx n = ins.item_number();
     Solution sol(ins);
     if (n == 0) {
-        DBG(info.debug("Empty instance.");)
+        LOG(info, "Empty instance.");
         return algorithm_end(sol, info);
     }
 
@@ -61,16 +67,15 @@ Solution knapsack::sopt_babstar(Instance& ins, Info& info)
         q_average_size += q.size();
 
         // Debug traces
-        DBG(info.debug("\n" +
-            STR3("Node number", node_number) +
-            STR4("pbest", sol_best.profit()) + "\n" +
-            STR3("Queue size ", q.size()) + "\n");
-        )
+        LOG(info, std::endl
+                << "node number" << node_number
+                << " pbest " << sol_best.profit() << std::endl
+                << "queue size " << q.size() << std::endl);
 
         // Get node
         Node node = q.top();
         q.pop();
-        DBG(info.debug("Node " + node.to_string() + STR4(r, node.sol.remaining_capacity()) + "\n");)
+        LOG(info, "node " << node << " r " << node.sol.remaining_capacity() << std::endl);
 
         // Update best solution
         if (node.sol.profit() > sol_best.profit())
@@ -82,18 +87,18 @@ Solution knapsack::sopt_babstar(Instance& ins, Info& info)
 
         // Try to add item k for k = j+1..n-1
         for (ItemPos k=node.j; k<n; ++k) {
-            DBG(info.debug(STR1(k) + " " + ins.item(k).to_string());)
+            LOG(info, "k " << k << " " << ins.item(k));
 
             // Compare remaining capacity to minimum weight of all the
             // remaining items
             if (node.sol.remaining_capacity() < min_weight[k]) {
-                DBG(info.debug(" no remaining item can fit\n");)
+                LOG(info, " no remaining item can fit" << std::endl);
                 break;
             }
 
             // Check if item k fits in remaining capacity
             if (node.sol.remaining_capacity() < ins.item(k).w) {
-                DBG(info.debug( " item cannot fit\n");)
+                LOG(info, " item cannot fit" << std::endl);
                 continue;
             }
 
@@ -102,27 +107,26 @@ Solution knapsack::sopt_babstar(Instance& ins, Info& info)
 
             Profit ub = ub_0(ins, k+1, sol.profit(), sol.remaining_capacity(), j_max);
             if (ub < sol_best.profit()) {
-                DBG(info.debug( " ub is too small\n");)
+                LOG(info, " ub is too small" << std::endl);
                 continue;
             } else {
-                DBG(info.debug("\n");)
+                LOG(info, std::endl);
             }
 
             // Create new node and add it to the queue
             Node n{sol, k+1, ub};
-            DBG(info.debug("Add node " + n.to_string() + "\n");)
+            LOG(info, "add node " << n << std::endl);
             q.push(n);
         }
 
     }
 
-    info.verbose(
-        "Node number: " + Info::to_string(node_number) + "\n" +
-        "Queue max size: " + std::to_string(q_max_size) + "\n" +
-        "Queue average size: " + std::to_string(q_average_size / node_number) + "\n");
-    info.pt.put("Algorithm.NodeNumber", node_number);
-    info.pt.put("Algorithm.QueueMaxSize", q_max_size);
-    info.pt.put("Algorithm.QueueAverageSize", q_average_size / node_number);
+    VER(info, "Node number: " << node_number << std::endl);
+    VER(info, "Queue max size: " << q_max_size << std::endl);
+    VER(info, "Queue average size: " << q_average_size / node_number << std::endl);
+    PUT(info, "Algorithm.NodeNumber", node_number);
+    PUT(info, "Algorithm.QueueMaxSize", q_max_size);
+    PUT(info, "Algorithm.QueueAverageSize", q_average_size / node_number);
 
     return algorithm_end(sol_best, info);
 }
@@ -220,11 +224,9 @@ struct NodeDP
         NodeDP* c_prec = this;
         while (c != NULL) {
             if (c->w <= ww && c->p >= pp && c->j <= jj) {
-                DBG(info.debug("Node is dominated by node " + c->to_string() + "\n");)
                 return true;
             }
             if (ww < c->w && pp > c->p && jj < c->j) {
-                DBG(info.debug("Cut node " + c->to_string() + "\n");)
                 if (c == child) {
                     cut_child(q, info);
                 } else {
@@ -249,14 +251,13 @@ bool NodeDPCompare::operator()(NodeDP* n1, NodeDP* n2)
     return n1 < n2;
 }
 
-Solution knapsack::sopt_babstar_dp(Instance& ins, Info& info)
+Solution knapsack::sopt_astar_dp(Instance& ins, Info& info)
 {
-    info.verbose("*** babstar with dp ***\n");
+    VER(info, "*** babstar with dp ***" << std::endl);
     ItemIdx n = ins.item_number();
     Solution sol(ins);
 
     if (n == 0) {
-        DBG(info.debug("Empty instance.\n");)
         return algorithm_end(sol, info);
     }
 
@@ -275,7 +276,7 @@ Solution knapsack::sopt_babstar_dp(Instance& ins, Info& info)
     n0.w = 0;
     n0.p = 0;
     n0.j = -1;
-    n0.ub = ub_0(ins, 0, 0, ins.capacity(), j_max);
+    n0.ub = ub_0(ins, 0, 0, ins.total_capacity(), j_max);
     n0.father = NULL;
     q.insert(&n0);
     while (!q.empty()) {
@@ -285,25 +286,13 @@ Solution knapsack::sopt_babstar_dp(Instance& ins, Info& info)
         q_average_size += q.size();
         node_number++;
 
-        // Debug traces
-        DBG(info.debug("\n" +
-            STR3("Node number", node_number) +
-            STR4("pbest", sol_best.profit()) + "\n" +
-            "Tree\n" + n0.to_string_all() + "\n" +
-            STR3("Queue size", q.size()) + " - q:\n");
-            for (NodeDP* n: q)
-                info.debug(n->to_string() + "\n");
-        )
-
         // Get node
         NodeDP* node = *q.begin();
         q.erase(q.begin());
-        Weight r = ins.capacity() - node->w; // remaining capacity
-        DBG(info.debug("Node " + node->to_string() + STR2(r) + "\n");)
+        Weight r = ins.total_capacity() - node->w; // remaining capacity
 
         // Update best solution
         if (node->p > sol_best.profit()) {
-            DBG(info.debug("Update best solution\n");)
             Solution sol(ins);
             NodeDP* node_tmp = node;
             while (node_tmp->j != -1) {
@@ -319,30 +308,23 @@ Solution knapsack::sopt_babstar_dp(Instance& ins, Info& info)
 
         // Try to add item k for k = j+1..n-1
         for (ItemPos k=node->j+1; k<n; ++k) {
-            DBG(info.debug(STR1(k) + " " + ins.item(k).to_string());)
-
             // Compare remaining capacity to minimum weight of all the
             // remaining items
             if (r < min_weight[k]) {
-                DBG(info.debug(" no remaining item can fit\n");)
                 break;
             }
 
             // Check if item k fits in remaining capacity
             if (r < ins.item(k).w) {
-                DBG(info.debug( " item cannot fit\n");)
                 continue;
             }
 
             Weight w = node->w + ins.item(k).w;
             Profit p = node->p + ins.item(k).p;
-            Profit ub = ub_0(ins, k+1, p, ins.capacity() - w, j_max);
-            DBG(info.debug(STR2(w) + STR2(p) + STR2(ub));)
+            Profit ub = ub_0(ins, k+1, p, ins.total_capacity() - w, j_max);
             if (ub <= sol_best.profit()) {
-                DBG(info.debug( " ub is too small\n");)
                 continue;
             } else {
-                DBG(info.debug("\n");)
             }
 
             // Is the new node dominated by another already seen node?
@@ -366,23 +348,19 @@ Solution knapsack::sopt_babstar_dp(Instance& ins, Info& info)
                 tmp->brother = n;
             }
 
-            DBG(info.debug("Add node " + n->to_string() + "\n");)
             q.insert(n);
         }
 
     }
 
-    DBG(info.debug("End of the search.\n");)
-
     n0.cut_child(q, info);
 
-    info.verbose(
-        "Node number: " + Info::to_string(node_number) + "\n" +
-        "Queue max size: " + std::to_string(q_max_size) + "\n" +
-        "Queue average size: " + std::to_string(q_average_size / node_number) + "\n");
-    info.pt.put("Algorithm.NodeNumber", node_number);
-    info.pt.put("Algorithm.QueueMaxSize", q_max_size);
-    info.pt.put("Algorithm.QueueAverageSize", q_average_size / node_number);
+    VER(info, "Node number: " << node_number << std::endl);
+    VER(info, "Queue max size: " << q_max_size << std::endl);
+    VER(info, "Queue average size: " << q_average_size / node_number << std::endl);
+    PUT(info, "Algorithm.NodeNumber", node_number);
+    PUT(info, "Algorithm.QueueMaxSize", q_max_size);
+    PUT(info, "Algorithm.QueueAverageSize", q_average_size / node_number);
 
     return algorithm_end(sol_best, info);
 }
@@ -391,10 +369,9 @@ Solution knapsack::sopt_babstar_dp(Instance& ins, Info& info)
 
 Solution knapsack::sopt_starknap(Instance& ins, Info& info, StarknapParams params)
 {
-    info.verbose("*** starknap ***\n");
+    VER(info, "*** starknap ***" << std::endl);
     Solution sol(ins);
 
-    DBG(info.debug("Sort items...\n");)
     if (params.upper_bound == "b") {
         ins.sort_partially();
     } else if (params.upper_bound == "t") {
@@ -403,22 +380,21 @@ Solution knapsack::sopt_starknap(Instance& ins, Info& info, StarknapParams param
         assert(false);
     }
     if (ins.break_item() == ins.last_item()+1) { // all items are in the break solution
-        DBG(info.debug("All items fit in the knapsack.\n");)
         Solution sol = *ins.break_solution();
         return algorithm_end(sol, info);
     }
 
-    info.verbose("Compute lower bound...");
+    VER(info, "Compute lower bound..." << std::endl);
     if (params.lb_greedynlogn == 0) {
-        Info info_tmp;
-        sol = sol_bestgreedynlogn(ins, info_tmp);
+        Info info_tmp(info.logger);
+        sol = sol_greedynlogn(ins, info_tmp);
     } else if (params.lb_greedy == 0) {
-        Info info_tmp;
+        Info info_tmp(info.logger);
         sol = sol_greedy(ins, info_tmp);
     } else {
         sol = *ins.break_solution();
     }
-    info.verbose(" " + std::to_string(sol.profit()) + "\n");
+    VER(info, " " << sol.profit() << std::endl);
 
     // Variable reduction
     if (params.upper_bound == "b") {
@@ -432,11 +408,8 @@ Solution knapsack::sopt_starknap(Instance& ins, Info& info, StarknapParams param
         // If the capacity is negative, then it means that sol was the optimal
         // solution. Note that this is not possible if opt-1 has been used as
         // lower bound for the reduction.
-        DBG(info.debug("All items have been reduced.\n");)
         return algorithm_end(sol, info);
     }
-    DBG(info.debug("Reduced solution: " + ins.reduced_solution()->to_string_binary() + "\n");)
-    DBG(info.debug("Reduced solution: " + ins.reduced_solution()->to_string_items() + "\n");)
 
     Weight  c = ins.total_capacity();
     ItemPos f = ins.first_item();
@@ -444,19 +417,16 @@ Solution knapsack::sopt_starknap(Instance& ins, Info& info, StarknapParams param
 
     // Trivial cases
     if (n == 0 || c == 0) {
-        DBG(info.debug("Empty instance (after reduction).\n");)
         if (ins.reduced_solution()->profit() > sol.profit())
             sol = *ins.reduced_solution();
         return algorithm_end(sol, info);
     } else if (n == 1) {
-        DBG(info.debug("Instance only contains one item (after reduction).\n");)
         Solution sol1 = *ins.reduced_solution();
         sol1.set(f, true);
         if (sol1.profit() > sol.profit())
             sol = sol1;
         return algorithm_end(sol, info);
     } else if (ins.break_item() == ins.last_item()+1) {
-        DBG(info.debug("All items fit in the knapsack (after reduction).\n");)
         if (ins.break_solution()->profit() > sol.profit())
             sol = *ins.break_solution();
         return algorithm_end(sol, info);
@@ -493,21 +463,8 @@ Solution knapsack::sopt_starknap(Instance& ins, Info& info, StarknapParams param
             x = true;
         }
     }
-    DBG(info.debug("idx: ");
-        for (ItemIdx j=0; j<n; ++j)
-            info.debug(" " + std::to_string(idx[j]));
-        info.debug("\n");
-        info.debug("t: ");
-        for (ItemIdx j=0; j<n; ++j)
-            info.debug(" " + std::to_string(tidx[j]));
-        info.debug("\n");
-        info.debug("s: ");
-        for (ItemIdx j=0; j<n; ++j)
-            info.debug(" " + std::to_string(sidx[j]));
-        info.debug("\n");
-    )
 
-    info.verbose("Branch...\n");
+    VER(info, "Branch..." << std::endl);
     NodeDP n0;
     n0.w = ins.break_solution()->weight();
     n0.p = ins.break_solution()->profit();
@@ -522,24 +479,12 @@ Solution knapsack::sopt_starknap(Instance& ins, Info& info, StarknapParams param
         q_average_size += q.size();
         node_number++;
 
-        // Debug traces
-        DBG(info.debug("\n" +
-            STR3("Node number", node_number) +
-            STR4("pbest", sol.profit()) + "\n" +
-            "Tree\n" + n0.to_string_all() + "\n" +
-            STR4("Queue size", q.size()) + " - q:\n");
-            for (NodeDP* n: q)
-                info.debug(n->to_string() + "\n");
-        )
-
         // Get node
         NodeDP* node = *q.begin();
         q.erase(q.begin());
-        DBG(info.debug("Node " + node->to_string() + STR4(r, ins.capacity() - node->w) + "\n");)
 
         // Update best solution
         if (node->w <= c && node->p > sol.profit()) {
-            DBG(info.debug("Update best solution\n");)
             Solution sol_tmp = *ins.break_solution();
             NodeDP* node_tmp = node;
             while (node_tmp->j != -1) {
@@ -556,7 +501,6 @@ Solution knapsack::sopt_starknap(Instance& ins, Info& info, StarknapParams param
         // Try to add item k for k = j+1..n-1
         for (ItemPos k=node->j+1; k<n; ++k) {
             ItemPos j_next = idx[k];
-            DBG(info.debug(STR1(k) + STR2(j_next) + " " + ins.item(j_next).to_string());)
 
             Weight x = (j_next >= b)? 1: -1;
             Weight w = node->w + x*ins.item(j_next).w;
@@ -573,12 +517,9 @@ Solution knapsack::sopt_starknap(Instance& ins, Info& info, StarknapParams param
             } else {
                     assert(false);
             }
-            DBG(info.debug(STR2(w) + STR2(p) + STR2(ub));)
             if (ub <= sol.profit()) {
-                DBG(info.debug( " ub is too small\n");)
                 continue;
             } else {
-                DBG(info.debug("\n");)
             }
 
             // Is the new node dominated by another already seen node?
@@ -602,24 +543,22 @@ Solution knapsack::sopt_starknap(Instance& ins, Info& info, StarknapParams param
                 tmp->brother = n;
             }
 
-            DBG(info.debug("Add node " + n->to_string() + "\n");)
             q.insert(n);
         }
 
     }
 
-    DBG(info.debug("End of the search.\n");)
+    LOG(info, "End of the search" << std::endl);
 
     if (n0.child != NULL)
         n0.cut_child(q, info);
 
-    info.verbose(
-        "Node number: " + Info::to_string(node_number) + "\n" +
-        "Queue max size: " + std::to_string(q_max_size) + "\n" +
-        "Queue average size: " + std::to_string(q_average_size / node_number) + "\n");
-    info.pt.put("Algorithm.NodeNumber", node_number);
-    info.pt.put("Algorithm.QueueMaxSize", q_max_size);
-    info.pt.put("Algorithm.QueueAverageSize", q_average_size / node_number);
+    VER(info, "Node number: " << node_number << std::endl);
+    VER(info, "Queue max size: " << q_max_size << std::endl);
+    VER(info, "Queue average size: " << q_average_size / node_number << std::endl);
+    PUT(info, "Algorithm.NodeNumber", node_number);
+    PUT(info, "Algorithm.QueueMaxSize", q_max_size);
+    PUT(info, "Algorithm.QueueAverageSize", q_average_size / node_number);
 
     return algorithm_end(sol, info);
 }
