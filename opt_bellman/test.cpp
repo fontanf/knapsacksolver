@@ -35,6 +35,6 @@ std::vector<Profit (*)(Instance&)> f {
         opt_bellman_list_rec_test,
 };
 
-TEST(Bellman, TEST)  { test(TEST, f); }
-TEST(Bellman, SMALL) { test(SMALL, f); }
+TEST(bellman, TEST)  { test(TEST, f); }
+TEST(bellman, SMALL) { test(SMALL, f); }
 

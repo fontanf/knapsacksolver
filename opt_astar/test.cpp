@@ -14,6 +14,6 @@ std::vector<Profit (*)(Instance&)> f = {
         opt_astar_dp_test,
 };
 
-TEST(Bellman, TEST)  { test(TEST, f); }
-TEST(Bellman, SMALL) { test(SMALL, f); }
+TEST(astar, TEST)  { test(TEST, f); }
+TEST(astar, SMALL) { test(SMALL, f); }
 

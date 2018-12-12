@@ -12,6 +12,6 @@ std::vector<Profit (*)(Instance&)> f = {
         opt_greedy_test,
 };
 
-TEST(Bellman, TEST)  { test(TEST, f, LB); }
-TEST(Bellman, SMALL) { test(SMALL, f, LB); }
+TEST(greedy, TEST)  { test(TEST, f, LB); }
+TEST(greedy, SMALL) { test(SMALL, f, LB); }
 

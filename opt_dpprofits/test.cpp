@@ -41,6 +41,6 @@ std::vector<Profit (*)(Instance&)> tested_functions()
     };
 }
 
-TEST(Bellman, TEST)  { test(TEST, tested_functions()); }
-TEST(Bellman, SMALL) { test(SMALL, tested_functions()); }
+TEST(dpprofits, TEST)  { test(TEST, tested_functions()); }
+TEST(dpprofits, SMALL) { test(SMALL, tested_functions()); }
 

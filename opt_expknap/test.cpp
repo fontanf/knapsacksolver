@@ -12,6 +12,6 @@ std::vector<Profit (*)(Instance&)> f = {
         opt_expknap_test,
 };
 
-TEST(Bellman, TEST)  { test(TEST, f); }
-TEST(Bellman, SMALL) { test(SMALL, f); }
+TEST(expknap, TEST)  { test(TEST, f); }
+TEST(expknap, SMALL) { test(SMALL, f); }
 

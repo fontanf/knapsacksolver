@@ -12,6 +12,6 @@ std::vector<Profit (*)(Instance&)> f = {
         opt_bab_test,
 };
 
-TEST(Bellman, TEST)  { test(TEST, f); }
-TEST(Bellman, SMALL) { test(SMALL, f); }
+TEST(bab, TEST)  { test(TEST, f); }
+TEST(bab, SMALL) { test(SMALL, f); }
 

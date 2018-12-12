@@ -23,6 +23,6 @@ std::vector<Profit (*)(Instance&)> f = {
         ub_surrogate_test,
 };
 
-TEST(Bellman, TEST)  { test(TEST, f, UB); }
-TEST(Bellman, SMALL) { test(SMALL, f, UB); }
+TEST(surrogate, TEST)  { test(TEST, f, UB); }
+TEST(surrogate, SMALL) { test(SMALL, f, UB); }
 

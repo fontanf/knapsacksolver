@@ -22,6 +22,6 @@ std::vector<Profit (*)(Instance&)> f = {
         opt_balknap_3_t_test,
 };
 
-TEST(Bellman, TEST)  { test(TEST, f); }
-TEST(Bellman, SMALL) { test(SMALL, f); }
+TEST(balknap, TEST)  { test(TEST, f); }
+TEST(balknap, SMALL) { test(SMALL, f); }
 
