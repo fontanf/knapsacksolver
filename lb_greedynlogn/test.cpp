@@ -5,9 +5,9 @@
 using namespace knapsack;
 
 Profit opt_minknap_test(Instance& ins)             { Logger logger; Info info(logger, true); return sopt_minknap(ins, info).profit(); }
-Profit opt_forwardgreedynlogn_test(Instance& ins)  { Logger logger; Info info(logger, true); ins.sort_partially(); return sol_forwardgreedynlogn(ins, info).profit(); }
-Profit opt_backwardgreedynlogn_test(Instance& ins) { Logger logger; Info info(logger, true); ins.sort_partially(); return sol_backwardgreedynlogn(ins, info).profit(); }
-Profit opt_greedynlogn_test(Instance& ins)         { Logger logger; Info info(logger, true); ins.sort_partially(); return sol_greedynlogn(ins, info).profit(); }
+Profit opt_forwardgreedynlogn_test(Instance& ins)  { Logger logger; Info info(logger, true); ins.sort_partially(info); return sol_forwardgreedynlogn(ins, info).profit(); }
+Profit opt_backwardgreedynlogn_test(Instance& ins) { Logger logger; Info info(logger, true); ins.sort_partially(info); return sol_backwardgreedynlogn(ins, info).profit(); }
+Profit opt_greedynlogn_test(Instance& ins)         { Logger logger; Info info(logger, true); ins.sort_partially(info); return sol_greedynlogn(ins, info).profit(); }
 
 std::vector<Profit (*)(Instance&)> f = {
         opt_minknap_test,

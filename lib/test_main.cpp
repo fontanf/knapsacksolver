@@ -19,21 +19,23 @@ int main(int argc, char *argv[])
     (void)argc;
     (void)argv;
 
-    GenerateData data;
-    data.n = 5;
-    data.t = "sc";
-    data.r = 10;
-    data.h = 1;
-    data.s = 3;
-    Instance ins = generate(data);
-    std::cout << ins << std::endl;
+    //GenerateData data;
+    //data.n = 5;
+    //data.t = "sc";
+    //data.r = 10;
+    //data.h = 1;
+    //data.s = 3;
+    //Instance ins = generate(data);
 
     //Instance ins = test_instance(1);
 
-    Logger logger("log.txt");
+    Instance ins(3, 3);
+    ins.add_items({{2,1}, {2,2}, {3,3}});
+    std::cout << ins << std::endl;
+
+    Logger logger("log.txt", true);
     Info info(logger, true);
-    ins.sort_partially();
-    ub_surrogate(ins, 0, info);
+    ins.sort_partially(info, -1);
     return 0;
 }
 

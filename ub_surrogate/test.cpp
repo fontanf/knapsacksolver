@@ -13,7 +13,7 @@ Profit ub_surrogate_test(Instance& ins)
     Info info(logger, true);
     Info info_tmp(info.logger);
     //Profit lb = sol_greedynlogn(ins, info_tmp).profit();
-    ins.sort_partially();
+    ins.sort_partially(info);
     Profit lb = sol_greedy(ins, info_tmp).profit();
     return ub_surrogate(ins, lb, info).ub;
 }

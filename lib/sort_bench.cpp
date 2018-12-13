@@ -19,11 +19,15 @@ int main(int argc, char *argv[])
     ins_eff.add_items(wp);
     ins_peff.add_items(wp);
 
-    std::cout << "Conmplete sorting" << std::endl;
-    ins_eff.sort();
+    Logger logger;
 
+    Info info_1(logger);
+    std::cout << "Conmplete sorting" << std::endl;
+    ins_eff.sort(info_1);
+
+    Info info_2(logger);
     std::cout << "Partial sorting" << std::endl;
-    ins_eff.sort_partially();
+    ins_eff.sort_partially(info_2);
 
     return 0;
 }

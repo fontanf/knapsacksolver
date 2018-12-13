@@ -183,7 +183,7 @@ void ub_surrogate_solve(Instance& ins, Info& info, ItemIdx k,
             }
         }
 
-        ins.surrogate(s-s_prec, k, first);
+        ins.surrogate(info, s-s_prec, k, first);
         LOG(info, LOG_FOLD_START << " " << ins << LOG_FOLD_END << std::endl);
         Info info_tmp(info.logger);
         Profit p = ub_dantzig(ins, info_tmp);
@@ -209,7 +209,7 @@ void ub_surrogate_solve(Instance& ins, Info& info, ItemIdx k,
         s_prec = s;
         LOG(info, LOG_FOLD_END << std::endl);
     }
-    ins.surrogate(-s, k, first);
+    ins.surrogate(info, -s, k, first);
     assert(ins.first_item() == first);
     LOG(info, LOG_FOLD_END << std::endl);
 }
@@ -221,7 +221,7 @@ SurrogateOut knapsack::ub_surrogate(const Instance& instance, Profit lb, Info& i
     std::string best = "";
 
     Instance ins(instance);
-    ins.sort_partially();
+    ins.sort_partially(info);
     ItemPos b = ins.break_item();
 
     SurrogateOut out;

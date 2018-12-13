@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
         MinknapParams p;
         sopt = sopt_minknap(ins, info, p, k);
     } else if (algorithm == "greedy") { // greedy
-        ins.sort_partially();
+        ins.sort_partially(info);
         sopt = sol_greedy(ins, info);
     } else if (algorithm == "greedynlogn") { // greedynlogn
         sopt = sol_greedynlogn(ins, info);
@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
     } else if (algorithm == "dantzig") { // dantzig
         ub_dantzig(ins, info);
     } else if (algorithm == "surrelax") { // surrelax
-        ins.sort_partially();
+        ins.sort_partially(info);
         Info info_tmp(info.logger);
         Solution sol = sol_greedynlogn(ins, info_tmp);
         ub_surrogate(ins, sol.profit(), info);

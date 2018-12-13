@@ -373,9 +373,9 @@ Solution knapsack::sopt_starknap(Instance& ins, Info& info, StarknapParams param
     Solution sol(ins);
 
     if (params.upper_bound == "b") {
-        ins.sort_partially();
+        ins.sort_partially(info);
     } else if (params.upper_bound == "t") {
-        ins.sort();
+        ins.sort(info);
     } else {
         assert(false);
     }
