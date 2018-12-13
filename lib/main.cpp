@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
     namespace po = boost::program_options;
 
     // Parse program options
-    std::string algorithm = "bellman";
+    std::string algorithm = "bellman_array";
     std::string output_file = "";
     std::string cert_file = "";
     std::string log_file = "";
@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
     po::options_description desc("Allowed options");
     desc.add_options()
         ("help,h", "produce help message")
-        ("algorithm,a", po::value<std::string>()->required(), "set algorithm")
+        ("algorithm,a", po::value<std::string>(&algorithm)->required(), "set algorithm")
         ("input-data,i", po::value<std::string>()->required(), "set input data (required)")
         ("output-file,o", po::value<std::string>(&output_file), "set output file")
         ("cert-file,c", po::value<std::string>(&cert_file), "set certificate output file")

@@ -30,7 +30,7 @@ std::ostream& knapsack::operator<<(std::ostream& os, const GenerateData& data)
         os << " k1 " << data.k1 << " k2 " << data.k2;
     if (data.t == "mstr" || data.t == "pceil" || data.t == "circle")
         os << " d " << data.d;
-    os << " h " << data.h << " s " << data.s << std::endl;
+    os << " h " << data.h << " s " << data.s;
     return os;
 }
 

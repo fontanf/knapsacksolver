@@ -48,12 +48,6 @@ Instance::Instance(boost::filesystem::path filepath)
         assert(false);
     }
 
-    boost::filesystem::path FORMAT = filepath.parent_path() / "FORMAT.txt";
-    if (!boost::filesystem::exists(FORMAT)) {
-        std::cout << FORMAT << ": file not found." << std::endl;
-        assert(false);
-    }
-
     name_ = filepath.stem().string();
     std::stringstream data;
     if (filepath.extension() == ".txt") {
@@ -72,20 +66,27 @@ Instance::Instance(boost::filesystem::path filepath)
         assert(false);
     }
 
-    boost::filesystem::fstream file(FORMAT, std::ios_base::in);
-    std::getline(file, format_);
-    if        (format_ == "knapsack_standard") {
+
+    boost::filesystem::path FORMAT = filepath.parent_path() / "FORMAT.txt";
+    if (!boost::filesystem::exists(FORMAT)) {
+        format_ = "knapsack_standard";
+    } else {
+        boost::filesystem::fstream file(FORMAT, std::ios_base::in);
+        std::getline(file, format_);
+    }
+
+    if (format_ == "knapsack_standard") {
         read_standard(data);
-        boost::filesystem::path sol = filepath;
-        sol += ".sol";
-        if (boost::filesystem::exists(sol))
-            read_standard_solution(sol);
+        //boost::filesystem::path sol = filepath;
+        //sol += ".sol";
+        //if (boost::filesystem::exists(sol))
+        //read_standard_solution(sol);
     } else if (format_ == "subsetsum_standard") {
         read_subsetsum_standard(data);
-        boost::filesystem::path sol = filepath;
-        sol += ".sol";
-        if (boost::filesystem::exists(sol))
-            read_standard_solution(sol);
+        //boost::filesystem::path sol = filepath;
+        //sol += ".sol";
+        //if (boost::filesystem::exists(sol))
+        //read_standard_solution(sol);
     } else if (format_ == "knapsack_pisinger") {
         read_pisinger(data);
     } else {
