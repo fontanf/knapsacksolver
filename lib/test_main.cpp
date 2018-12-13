@@ -7,6 +7,7 @@
 #include "knapsack/opt_minknap/minknap.hpp"
 #include "knapsack/lb_greedy/greedy.hpp"
 #include "knapsack/lb_greedynlogn/greedynlogn.hpp"
+#include "knapsack/ub_surrogate/surrogate.hpp"
 
 #include "knapsack/lib/tester.hpp"
 #include "knapsack/lib/generator.hpp"
@@ -19,20 +20,20 @@ int main(int argc, char *argv[])
     (void)argv;
 
     GenerateData data;
-    data.n = 50;
-    data.t = "ss";
-    data.r = 100;
-    data.h = 100;
-    data.s = 5;
+    data.n = 5;
+    data.t = "sc";
+    data.r = 10;
+    data.h = 1;
+    data.s = 3;
     Instance ins = generate(data);
+    std::cout << ins << std::endl;
 
     //Instance ins = test_instance(1);
 
-    Logger logger("", true);
+    Logger logger("log.txt");
     Info info(logger, true);
     ins.sort_partially();
-    MinknapParams p;
-    sopt_minknap(ins, info, p, 3);
+    ub_surrogate(ins, 0, info);
     return 0;
 }
 

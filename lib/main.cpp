@@ -121,7 +121,8 @@ int main(int argc, char *argv[])
         ub_dantzig(ins, info);
     } else if (algorithm == "surrelax") { // surrelax
         ins.sort_partially();
-        Solution sol = sol_greedynlogn(ins, info);
+        Info info_tmp(info.logger);
+        Solution sol = sol_greedynlogn(ins, info_tmp);
         ub_surrogate(ins, sol.profit(), info);
     }
 
