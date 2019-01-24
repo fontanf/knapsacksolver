@@ -28,13 +28,13 @@ int main(int argc, char *argv[])
     desc.add_options()
         ("help,h", "produce help message")
         ("algorithm,a", po::value<std::string>(&algorithm)->required(), "set algorithm")
-        ("input-data,i", po::value<std::string>()->required(), "set input data (required)")
-        ("output-file,o", po::value<std::string>(&output_file), "set output file")
-        ("cert-file,c", po::value<std::string>(&cert_file), "set certificate output file")
+        ("input,i", po::value<std::string>()->required(), "set input file (required)")
+        ("output,o", po::value<std::string>(&output_file), "set output file")
+        ("cert,c", po::value<std::string>(&cert_file), "set certificate file")
         ("part-size,x", po::value<ItemPos>(&k), "")
-        ("verbose,v", "enable verbosity")
+        ("verbose,v", "")
         ("log2stderr", "write log in stderr")
-        ("logfile,l", po::value<std::string>(&log_file), "set log file")
+        ("log,l", po::value<std::string>(&log_file), "set log file")
         ;
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    Instance ins(vm["input-data"].as<std::string>());
+    Instance ins(vm["input"].as<std::string>());
     Solution sopt(ins);
 
     Logger logger(log_file, vm.count("log2stderr"));
