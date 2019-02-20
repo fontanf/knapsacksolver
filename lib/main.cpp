@@ -18,10 +18,11 @@ int main(int argc, char *argv[])
 
     // Parse program options
     std::string algorithm = "bellman_array";
-    std::string output_file = "";
+    std::string instance_filepath = "";
+    std::string output_filepath = "";
     std::string format = "";
-    std::string cert_file = "";
-    std::string log_file = "";
+    std::string cert_filepath = "";
+    std::string log_filepath = "";
 
     ItemPos k = 64;
 
@@ -29,14 +30,14 @@ int main(int argc, char *argv[])
     desc.add_options()
         ("help,h", "produce help message")
         ("algorithm,a", po::value<std::string>(&algorithm)->required(), "set algorithm")
-        ("input,i", po::value<std::string>()->required(), "set input file (required)")
+        ("input,i", po::value<std::string>(&instance_filepath)->required(), "set input file (required)")
         ("format,f", po::value<std::string>(&format), "set input file format (default: default)")
-        ("output,o", po::value<std::string>(&output_file), "set output file")
-        ("cert,c", po::value<std::string>(&cert_file), "set certificate file")
+        ("output,o", po::value<std::string>(&output_filepath), "set output file")
+        ("cert,c", po::value<std::string>(&cert_filepath), "set certificate file")
         ("part-size,x", po::value<ItemPos>(&k), "")
         ("verbose,v", "")
         ("log2stderr", "write log in stderr")
-        ("log,l", po::value<std::string>(&log_file), "set log file")
+        ("log,l", po::value<std::string>(&log_filepath), "set log file")
         ;
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -51,10 +52,15 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    Instance ins(vm["input"].as<std::string>(), format);
+    if (!boost::filesystem::exists(instance_filepath)) {
+        std::cerr << instance_filepath << ": file not found." << std::endl;
+        return 1;
+    }
+
+    Instance ins(instance_filepath, format);
     Solution sopt(ins);
 
-    Logger logger(log_file, vm.count("log2stderr"));
+    Logger logger(log_filepath, vm.count("log2stderr"));
     Info info(logger, vm.count("verbose"));
 
     if (algorithm == "bellman_array") { // bellman
@@ -128,8 +134,8 @@ int main(int argc, char *argv[])
         ub_surrogate(ins, sol.profit(), info);
     }
 
-    info.write_ini(output_file); // Write output file
-    sopt.write_cert(cert_file); // Write certificate file
+    info.write_ini(output_filepath); // Write output file
+    sopt.write_cert(cert_filepath); // Write certificate file
     return 0;
 }
 

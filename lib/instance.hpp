@@ -70,7 +70,7 @@ public:
     /**
      * Create instance from file.
      */
-    Instance(boost::filesystem::path filename, std::string format);
+    Instance(std::string filename, std::string format, bool bzip2=false);
 
     /**
      * Copy constructor
@@ -187,7 +187,7 @@ public:
     /**
      * Return the profit of the certificate file.
      */
-    Profit check(boost::filesystem::path cert_file);
+    Profit check(std::string cert_file);
 
     /**
      * return "LB XXXX GAP XXXX" if optimal_solution() != NULL,
@@ -206,7 +206,7 @@ private:
     void read_standard(std::stringstream& data);
     void read_subsetsum_standard(std::stringstream& data);
     void read_pisinger(std::stringstream& data);
-    void read_standard_solution(boost::filesystem::path filepath);
+    void read_standard_solution(std::string filepath);
 
     std::pair<ItemPos, ItemPos> partition(ItemPos f, ItemPos l, Info& info);
     bool check();
