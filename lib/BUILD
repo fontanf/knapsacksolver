@@ -37,7 +37,7 @@ cc_library(
 )
 
 cc_library(
-        name = "libgenerator",
+        name = "generator",
         hdrs = ["generator.hpp"],
         srcs = ["generator.cpp"],
         deps = ["//lib:cpp"],
@@ -48,7 +48,7 @@ cc_library(
 cc_binary(
         name = "generator_main",
         srcs = ["generator_main.cpp"],
-        deps = [":libgenerator"],
+        deps = [":generator"],
 )
 
 cc_library(
@@ -57,7 +57,7 @@ cc_library(
         srcs = ["tester.cpp"],
         deps = [
                 ":cpp", 
-                ":libgenerator",
+                ":generator",
                 "@googletest//:gtest_main",
         ],
         visibility = ["//visibility:public"],
@@ -69,10 +69,8 @@ cc_test(
         srcs = ["test.cpp"],
         deps = [
                 ":cpp",
-                "//lb_greedy:libgreedy",
+                "//lb_greedy:greedy",
                 "@googletest//:gtest_main",
-        ],
-        data = [
         ],
         timeout = "long",
 )
@@ -87,18 +85,18 @@ cc_binary(
         name = "main",
         srcs = ["main.cpp"],
         deps = [
-                "//lb_greedy:libgreedy",
-                "//lb_greedynlogn:libgreedynlogn",
-                "//ub_dembo:libdembo",
-                "//ub_surrogate:libsurrogate",
-                "//opt_bab:libbab",
-                "//opt_astar:libastar",
-                "//opt_expknap:libexpknap",
-                "//opt_bellman:libbellman",
-                "//opt_dpprofits:libdpprofits",
-                "//opt_balknap:libbalknap",
-                "//opt_minknap:libminknap",
-                ":libgenerator",
+                "//lb_greedy:greedy",
+                "//lb_greedynlogn:greedynlogn",
+                "//ub_dembo:dembo",
+                "//ub_surrogate:surrogate",
+                "//opt_bab:bab",
+                "//opt_astar:astar",
+                "//opt_expknap:expknap",
+                "//opt_bellman:bellman",
+                "//opt_dpprofits:dpprofits",
+                "//opt_balknap:balknap",
+                "//opt_minknap:minknap",
+                ":generator",
         ],
 )
 
@@ -106,18 +104,18 @@ cc_binary(
         name = "test_main",
         srcs = ["test_main.cpp"],
         deps = [
-                "//lb_greedy:libgreedy",
-                "//lb_greedynlogn:libgreedynlogn",
-                "//ub_dembo:libdembo",
-                "//ub_surrogate:libsurrogate",
-                "//opt_bab:libbab",
-                "//opt_astar:libastar",
-                "//opt_expknap:libexpknap",
-                "//opt_bellman:libbellman",
-                "//opt_dpprofits:libdpprofits",
-                "//opt_balknap:libbalknap",
-                "//opt_minknap:libminknap",
-                ":libgenerator",
+                "//lb_greedy:greedy",
+                "//lb_greedynlogn:greedynlogn",
+                "//ub_dembo:dembo",
+                "//ub_surrogate:surrogate",
+                "//opt_bab:bab",
+                "//opt_astar:astar",
+                "//opt_expknap:expknap",
+                "//opt_bellman:bellman",
+                "//opt_dpprofits:dpprofits",
+                "//opt_balknap:balknap",
+                "//opt_minknap:minknap",
+                ":generator",
                 ":tester",
         ],
 )

@@ -1,13 +1,13 @@
 cc_library(
-        name = "libminknap",
+        name = "minknap",
         hdrs = ["minknap.hpp"],
         srcs = ["minknap.cpp"],
         deps = [
                 "//lib:cpp",
-                "//lb_greedy:libgreedy",
-                "//lb_greedynlogn:libgreedynlogn",
-                "//ub_dembo:libdembo",
-                "//ub_surrogate:libsurrogate",
+                "//lb_greedy:greedy",
+                "//lb_greedynlogn:greedynlogn",
+                "//ub_dembo:dembo",
+                "//ub_surrogate:surrogate",
         ],
         visibility = ["//visibility:public"],
         include_prefix = "knapsack/opt_minknap/",
@@ -16,7 +16,11 @@ cc_library(
 cc_test(
         name = "test",
         srcs = ["test.cpp"],
-        deps = ["//lib:tester", "//opt_minknap:libminknap", "//opt_bellman:libbellman"],
+        deps = [
+                "//lib:tester",
+                "//opt_minknap:minknap",
+                "//opt_bellman:bellman"
+        ],
         timeout = "moderate",
 )
 

@@ -1,5 +1,5 @@
 cc_library(
-        name = "libdantzig",
+        name = "dantzig",
         hdrs = ["dantzig.hpp"],
         srcs = ["dantzig.cpp"],
         deps = ["//lib:cpp"],

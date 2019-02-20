@@ -1,5 +1,5 @@
 cc_library(
-        name = "libgreedy",
+        name = "greedy",
         hdrs = ["greedy.hpp"],
         srcs = ["greedy.cpp"],
         deps = ["//lib:cpp"],
@@ -10,7 +10,11 @@ cc_library(
 cc_test(
         name = "test",
         srcs = ["test.cpp"],
-        deps = ["//lib:tester", "//lb_greedy:libgreedy", "//opt_minknap:libminknap"],
+        deps = [
+                "//lib:tester",
+                "//lb_greedy:greedy",
+                "//opt_minknap:minknap",
+        ],
         timeout = "moderate",
 )
 

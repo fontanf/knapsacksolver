@@ -1,5 +1,5 @@
 cc_library(
-        name = "libdembo",
+        name = "dembo",
         hdrs = ["dembo.hpp"],
         srcs = ["dembo.cpp"],
         deps = ["//lib:hpp"],

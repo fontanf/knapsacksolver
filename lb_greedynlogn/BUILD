@@ -1,10 +1,10 @@
 cc_library(
-        name = "libgreedynlogn",
+        name = "greedynlogn",
         hdrs = ["greedynlogn.hpp"],
         srcs = ["greedynlogn.cpp"],
         deps = [
                 "//lib:cpp",
-                "//lb_greedy:libgreedy",
+                "//lb_greedy:greedy",
         ],
         visibility = ["//visibility:public"],
         include_prefix = "knapsack/lb_greedynlogn/",
@@ -13,7 +13,11 @@ cc_library(
 cc_test(
         name = "test",
         srcs = ["test.cpp"],
-        deps = ["//lib:tester", "//lb_greedynlogn:libgreedynlogn", "//opt_minknap:libminknap"],
+        deps = [
+                "//lib:tester",
+                "//lb_greedynlogn:greedynlogn",
+                "//opt_minknap:minknap"
+        ],
         timeout = "moderate",
 )
 
