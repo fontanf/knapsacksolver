@@ -17,13 +17,13 @@
 namespace knapsack
 {
 
-typedef int_fast64_t Profit;
-typedef int_fast64_t Weight;
-typedef int_fast64_t ItemIdx;
-typedef int_fast64_t ItemPos;
-typedef int_fast64_t StateIdx;
-typedef int_fast64_t Label;
-typedef int_fast64_t Cpt;
+typedef int64_t Profit;
+typedef int64_t Weight;
+typedef int64_t ItemIdx;
+typedef int64_t ItemPos;
+typedef int64_t StateIdx;
+typedef int64_t Label;
+typedef int64_t Cpt;
 
 class Solution;
 typedef int64_t PartSol1;
