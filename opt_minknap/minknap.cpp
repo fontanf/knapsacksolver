@@ -215,7 +215,7 @@ Solution knapsack::sopt_minknap(Instance& ins, Info& info,
         data.ub = o;
     }
 
-    ins.sort_partially();
+    ins.sort_partially(info);
     if (ins.break_item() == ins.last_item()+1) { // all items are in the break solution
         if (ins.break_solution()->profit() > sol.profit())
             sol.update(*ins.break_solution(), info, data.lb_number, data.ub);
@@ -334,7 +334,7 @@ Solution knapsack::sopt_minknap(Instance& ins, Info& info,
     bool b = ins.update_sorted();
     (void)b;
     assert(b);
-    ins.fix(data.psolf.vector(data.best_state.sol));
+    ins.fix(info, data.psolf.vector(data.best_state.sol));
 
     Info info_tmp2(info.logger);
     sol = knapsack::sopt_minknap(ins, info_tmp2, params, k, data.best_state.p);

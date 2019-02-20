@@ -19,8 +19,9 @@ int main(int argc, char *argv[])
         ("ka,", po::value<Profit>(&data.k1), "set k1 (for mstr instances)")
         ("kb,", po::value<Profit>(&data.k2), "set k2 (for mstr instances)")
         (",d", po::value<double>(&data.d), "set d (for mstr (6), pceil (3) and circle (3/2) instances)")
-        (",h", po::value<int>(&data.h), "set h")
+        (",H", po::value<int>(&data.h), "set h")
         (",s", po::value<Seed>(&data.s), "set seed")
+        ("reduce,R", "set reduce")
         ("spanner,sp", "set spanner")
         (",m", po::value<Profit>(&data.m), "set m (for spanner instances)")
         (",v", po::value<Profit>(&data.v), "set v (for spanner instances)")
@@ -40,6 +41,7 @@ int main(int argc, char *argv[])
         return 1;
     }
     data.spanner = vm.count("spanner");
+    data.reduce  = vm.count("reduce");
 
     std::cout << data << std::endl;
     Instance ins = generate(data);

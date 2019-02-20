@@ -63,9 +63,9 @@ Solution knapsack::sopt_balknap(Instance& ins, Info& info,
 
     // Sorting
     if (params.ub_type == 'b') {
-        ins.sort_partially();
+        ins.sort_partially(info);
     } else if (params.ub_type == 't') {
-        ins.sort();
+        ins.sort(info);
     }
     // If all items fit in the knapsack then return break solution
     if (ins.break_item() == ins.last_item()+1) {
@@ -314,7 +314,7 @@ end:
     // Then run the algorithm again.
     ins.set_first_item(best_state.second.a);
     ins.set_last_item(last_item);
-    ins.fix(psolf.vector(best_state.second.sol));
+    ins.fix(info, psolf.vector(best_state.second.sol));
 
     Info info_tmp3(info.logger);
     sol = knapsack::sopt_balknap(ins, info_tmp3, params, k, best_state.first.pi);

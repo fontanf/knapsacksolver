@@ -1,6 +1,7 @@
 #include "knapsack/lib/generator.hpp"
 
 #include "knapsack/lib/instance.hpp"
+#include "knapsack/opt_minknap/minknap.hpp"
 
 #include <random>
 #include <cmath>
@@ -30,7 +31,7 @@ std::ostream& knapsack::operator<<(std::ostream& os, const GenerateData& data)
         os << " k1 " << data.k1 << " k2 " << data.k2;
     if (data.t == "mstr" || data.t == "pceil" || data.t == "circle")
         os << " d " << data.d;
-    os << " h " << data.h << " s " << data.s << std::endl;
+    os << " h " << data.h << " s " << data.s;
     return os;
 }
 
@@ -68,10 +69,17 @@ std::pair<Weight, Profit> item(GenerateData& data)
         p = d(data.g);
         w = p + data.r/10;
     } else if (data.t == "asc") {
-        std::uniform_int_distribution<int> d1(1,data.r);
+        std::uniform_int_distribution<int> d1(1, data.r);
         std::uniform_int_distribution<int> d2(-(data.r+1)/500, data.r/500);
         w = d1(data.g);
         p = w + data.r/10 + d2(data.g);
+    } else if (data.t == "asc2") {
+        std::uniform_int_distribution<int> d1(1, data.r);
+        std::normal_distribution<double> d2(0, data.r/100);
+        w = d1(data.g);
+        p = w + d2(data.g);
+        if (p < 1)
+            p = 1;
     } else if (data.t == "ss") {
         std::uniform_int_distribution<int> d(1, data.r);
         w = d(data.g);
@@ -150,11 +158,27 @@ Instance generate_spanner(GenerateData& data)
 
 Instance knapsack::generate(GenerateData data)
 {
+    Instance ins(0, 0);
     data.g.seed(data.s);
     if (data.spanner) {
-        return generate_spanner(data);
+        ins = generate_spanner(data);
     } else {
-        return generate_standard(data);
+        ins = generate_standard(data);
     }
+    if (data.reduce) {
+        Instance ins_tmp1(ins);
+
+        Logger logger;
+        Info info(logger, true);
+        Solution sopt = sopt_minknap(ins_tmp1, info);
+
+        ins.sort(info);
+        ins.reduce2(sopt.profit(), info);
+        Instance ins_tmp(ins.item_number(), ins.capacity());
+        for (ItemIdx j=ins.first_item(); j<=ins.last_item(); ++j)
+            ins_tmp.add_item(ins.item(j).w, ins.item(j).w);
+        ins = ins_tmp;
+    }
+    return ins;
 }
 

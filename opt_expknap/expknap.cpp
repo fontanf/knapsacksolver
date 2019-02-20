@@ -42,7 +42,7 @@ void update_bounds(ExpknapRecData& data)
         assert(data.params.ub_surrogate >= 0);
         assert(data.params.ub_surrogate <= data.params.solve_sur);
         Instance ins_sur(data.ins);
-        ins_sur.surrogate(data.so.multiplier, data.so.bound);
+        ins_sur.surrogate(data.info, data.so.multiplier, data.so.bound);
         data.params.ub_surrogate = -1;
         data.params.solve_sur = -1;
         Info info_tmp(data.info.logger);
@@ -134,7 +134,7 @@ Solution knapsack::sopt_expknap(Instance& ins, Info& info, ExpknapParams params)
         return algorithm_end(sol, info);
     }
 
-    ins.sort_partially();
+    ins.sort_partially(info);
     if (ins.break_item() == ins.last_item()+1) {
         LOG(info, "All items fit in the knapsack." << std::endl);
         Solution sol = *ins.break_solution();

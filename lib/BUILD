@@ -40,7 +40,7 @@ cc_library(
         name = "generator",
         hdrs = ["generator.hpp"],
         srcs = ["generator.cpp"],
-        deps = ["//lib:cpp"],
+        deps = ["//lib:cpp", "//opt_minknap:minknap"],
         visibility = ["//visibility:public"],
         include_prefix = "knapsack/lib/",
 )

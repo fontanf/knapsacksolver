@@ -24,6 +24,7 @@ typedef int64_t ItemPos;
 typedef int64_t StateIdx;
 typedef int64_t Label;
 typedef int64_t Cpt;
+typedef double Effciency;
 
 class Solution;
 typedef int64_t PartSol1;
@@ -39,6 +40,7 @@ struct Item
     Weight  w = -1; // Weight, w >= 0
     Profit  p = -1; // Profit, p >= 0
     Label   l = -1; // Label, this parameter is not used in this package
+    Effciency efficiency() const { return (double)p/(double)w; }
 };
 
 struct Interval
@@ -100,7 +102,7 @@ public:
     /*
      * Sort items according to non-increasing profit-to-weight ratio.
      */
-    void sort();
+    void sort(Info& info);
     bool sorted() const { return sorted_; }
 
     /**
@@ -110,7 +112,7 @@ public:
      * described in "A Minimal Algorithm for the 0-1 Knapsack Problem"
      * (Pisinger, 1997).
      */
-    void sort_partially();
+    void sort_partially(Info& info, ItemIdx limit=128);
     void sort_right(Profit lb);
     void sort_left(Profit lb);
     ItemPos int_right_size() const { return int_right_.size(); }
@@ -155,7 +157,7 @@ public:
 
     bool update_sorted();
 
-    void fix(const std::vector<int> vec);
+    void fix(Info& info, const std::vector<int> vec);
 
     /**
      * Create an instance with capacitiy and weights divided, keeping the
@@ -166,8 +168,8 @@ public:
     void divide_profits_floor(Profit divisor);
     void divide_profits_ceil(Profit divisor);
 
-    void surrogate(Weight multiplier, ItemIdx bound, ItemPos first);
-    void surrogate(Weight multiplier, ItemIdx bound);
+    void surrogate(Info& info, Weight multiplier, ItemIdx bound, ItemPos first);
+    void surrogate(Info& info, Weight multiplier, ItemIdx bound);
 
     const Solution* break_solution()   const { return sol_break_; }
     ItemPos break_item()     const { assert(b_ >= first_item() && b_ <= last_item() + 1); return b_; }
@@ -179,6 +181,8 @@ public:
 
     void plot(std::string filename);
     void write(std::string filename);
+    void plot_reduced(std::string filename);
+    void write_reduced(std::string filename);
 
     /**
      * Return the profit of the certificate file.
@@ -204,16 +208,16 @@ private:
     void read_pisinger(std::stringstream& data);
     void read_standard_solution(boost::filesystem::path filepath);
 
-    ItemPos partition(ItemPos f, ItemPos l);
+    std::pair<ItemPos, ItemPos> partition(ItemPos f, ItemPos l, Info& info);
     bool check();
     inline void swap(ItemPos j, ItemPos k) { Item tmp = items_[j]; items_[j] = items_[k]; items_[k] = tmp; };
     std::vector<Item> get_isum() const;
     ItemPos ub_item(const std::vector<Item>& isum, Item item) const;
-    void compute_break_item();
+    void compute_break_item(Info& info);
     /*
      * Remove items which weight is greater than the updated capacity
      */
-    void remove_big_items();
+    void remove_big_items(Info& info);
 
 
     /*
@@ -245,3 +249,4 @@ Solution algorithm_end(const Solution& sol, Info& info);
 Profit   algorithm_end(Profit val, Info& info);
 
 }
+

@@ -48,12 +48,6 @@ Instance::Instance(boost::filesystem::path filepath)
         assert(false);
     }
 
-    boost::filesystem::path FORMAT = filepath.parent_path() / "FORMAT.txt";
-    if (!boost::filesystem::exists(FORMAT)) {
-        std::cout << FORMAT << ": file not found." << std::endl;
-        assert(false);
-    }
-
     name_ = filepath.stem().string();
     std::stringstream data;
     if (filepath.extension() == ".txt") {
@@ -72,20 +66,27 @@ Instance::Instance(boost::filesystem::path filepath)
         assert(false);
     }
 
-    boost::filesystem::fstream file(FORMAT, std::ios_base::in);
-    std::getline(file, format_);
-    if        (format_ == "knapsack_standard") {
+
+    boost::filesystem::path FORMAT = filepath.parent_path() / "FORMAT.txt";
+    if (!boost::filesystem::exists(FORMAT)) {
+        format_ = "knapsack_standard";
+    } else {
+        boost::filesystem::fstream file(FORMAT, std::ios_base::in);
+        std::getline(file, format_);
+    }
+
+    if (format_ == "knapsack_standard") {
         read_standard(data);
-        boost::filesystem::path sol = filepath;
-        sol += ".sol";
-        if (boost::filesystem::exists(sol))
-            read_standard_solution(sol);
+        //boost::filesystem::path sol = filepath;
+        //sol += ".sol";
+        //if (boost::filesystem::exists(sol))
+        //read_standard_solution(sol);
     } else if (format_ == "subsetsum_standard") {
         read_subsetsum_standard(data);
-        boost::filesystem::path sol = filepath;
-        sol += ".sol";
-        if (boost::filesystem::exists(sol))
-            read_standard_solution(sol);
+        //boost::filesystem::path sol = filepath;
+        //sol += ".sol";
+        //if (boost::filesystem::exists(sol))
+        //read_standard_solution(sol);
     } else if (format_ == "knapsack_pisinger") {
         read_pisinger(data);
     } else {
@@ -249,6 +250,8 @@ Profit Instance::check(boost::filesystem::path cert_file)
     return sol.profit();
 }
 
+/******************************************************************************/
+
 ItemPos Instance::max_efficiency_item() const
 {
     ItemPos j_max = 0;
@@ -286,23 +289,6 @@ std::vector<Weight> Instance::min_weights() const
     return min_weight;
 }
 
-/******************************************************************************/
-
-void Instance::sort()
-{
-    if (sorted())
-        return;
-    if (sol_red_ == NULL)
-        sol_red_ = new Solution(*this);
-    sorted_ = true;
-    if (item_number() > 1)
-        std::sort(items_.begin()+first_item(), items_.begin()+last_item()+1,
-                [](const Item& i1, const Item& i2) {
-                return i1.p * i2.w > i2.p * i1.w;});
-
-    compute_break_item();
-}
-
 std::vector<Item> Instance::get_isum() const
 {
     assert(sorted());
@@ -315,6 +301,27 @@ std::vector<Item> Instance::get_isum() const
     return isum;
 }
 
+/******************************************************************************/
+
+void Instance::sort(Info& info)
+{
+    LOG(info, LOG_FOLD_START << " sort" << std::endl);
+    if (sorted()) {
+        LOG(info, LOG_FOLD_END << std::endl);
+        return;
+    }
+    if (sol_red_ == NULL)
+        sol_red_ = new Solution(*this);
+    sorted_ = true;
+    if (item_number() > 1)
+        std::sort(items_.begin()+first_item(), items_.begin()+last_item()+1,
+                [](const Item& i1, const Item& i2) {
+                return i1.p * i2.w > i2.p * i1.w;});
+
+    compute_break_item(info);
+    LOG(info, LOG_FOLD_END << std::endl);
+}
+
 ItemPos Instance::ub_item(const std::vector<Item>& isum, Item item) const
 {
     assert(sorted());
@@ -325,8 +332,9 @@ ItemPos Instance::ub_item(const std::vector<Item>& isum, Item item) const
     return s->j-1;
 }
 
-void Instance::compute_break_item()
+void Instance::compute_break_item(Info& info)
 {
+    LOG(info, LOG_FOLD_START << " compute_break_item" << std::endl);
     if (sol_break_ == NULL) {
         sol_break_ = new Solution(*reduced_solution());
     } else {
@@ -337,6 +345,10 @@ void Instance::compute_break_item()
             break;
         sol_break_->set(b_, true);
     }
+    LOG(info, sol_break_->to_string_items() << std::endl);
+    LOG(info, sol_break_->to_string_binary() << std::endl);
+    LOG(info, "b_ " << b_ << std::endl);
+    LOG(info, LOG_FOLD_END << std::endl);
 }
 
 Profit Instance::break_profit() const
@@ -359,7 +371,7 @@ Weight Instance::capacity() const
     return total_capacity() - reduced_solution()->weight();
 }
 
-void Instance::remove_big_items()
+void Instance::remove_big_items(Info& info)
 {
     if (sorted()) {
         std::vector<Item> not_fixed;
@@ -394,32 +406,56 @@ void Instance::remove_big_items()
                 l_--;
             }
         }
-        sort_partially();
+        sort_partially(info);
     }
 }
 
-ItemPos Instance::partition(ItemPos f, ItemPos l)
+std::pair<ItemPos, ItemPos> Instance::partition(ItemPos f, ItemPos l, Info& info)
 {
+    LOG(info, LOG_FOLD_START << " partition f " << f << " l " << l << std::endl);
     ItemPos pivot = f + 1 + rand() % (l - f); // Select pivot
+    Weight w = item(pivot).w;
+    Profit p = item(pivot).p;
+    LOG(info, "pivot " << pivot
+            << " w_pivot " << w << "p_pivot " << p
+            << " e_pivot " << item(pivot).efficiency() << std::endl);
 
     // Partition
     swap(pivot, l);
     ItemPos j = f;
-    for (ItemPos k=f; k<l; ++k) {
-        if (item(k).p*item(l).w <= item(l).p*item(k).w)
-            continue;
-        swap(k, j);
-        j++;
+    while (j <= l) {
+        if (item(j).p*w > p*item(j).w) {
+            swap(j, f);
+            f++;
+            j++;
+        } else if (item(j).p*w < p*item(j).w) {
+            swap(j, l);
+            l--;
+        } else {
+            j++;
+        }
     }
-    swap(j, l);
 
-    return j;
+    // | | | | | | | | | | | | | | | | | | | | |
+    //          f       j           l
+    // -------|                       |-------
+    // > pivot                         < pivot
+
+    LOG(info, "f " << f << " l " << l << std::endl);
+
+    LOG(info, LOG_FOLD_END << std::endl);
+    return {f,l};
 }
 
-void Instance::sort_partially()
+void Instance::sort_partially(Info& info, ItemIdx limit)
 {
-    if (break_item_found())
+    LOG(info, LOG_FOLD_START << " sort_partially limit " << limit << std::endl);
+
+    if (break_item_found()) {
+        LOG(info, LOG_FOLD_END << std::endl);
         return;
+    }
+
     if (sol_red_ == NULL)
         sol_red_ = new Solution(*this);
 
@@ -431,7 +467,8 @@ void Instance::sort_partially()
         ItemPos l = last_item();
         Weight c = capacity();
         while (f < l) {
-            if (l - f < 128) {
+            LOG(info, "f " << f << " l " << l << std::endl);
+            if (l - f < limit) {
                 std::sort(items_.begin()+f, items_.begin()+l+1,
                         [](const Item& i1, const Item& i2) {
                         return i1.p * i2.w > i2.p * i1.w;});
@@ -447,39 +484,41 @@ void Instance::sort_partially()
                     int_right_.push_back({b+1, l});
                 break;
             }
-            //std::cout << "F " << f << " L " << l << std::flush;
-            ItemPos j = partition(f, l);
-            //std::cout << " J " << j << std::flush;
+
+            std::pair<ItemPos, ItemPos> fl = partition(f, l, info);
             ItemPos w = 0;
-            for (ItemPos k=f; k<j; ++k)
+            for (ItemPos k=f; k<fl.first; ++k)
                 w += item(k).w;
-            //std::cout << " W " << w << " C " << c << std::flush;
-            if (w + item(j).w <= c) {
-                //std::cout << " =>" << std::endl;
-                c -= (w + item(j).w);
-                if (f <= j)
-                    int_left_.push_back({f, j});
-                f = j+1;
-            } else if (w > c) {
-                //std::cout << " <=" << std::endl;
-                if (j <= l)
-                    int_right_.push_back({j, l});
-                l = j-1;
-            } else {
-                //std::cout << " =" << std::endl;
-                if (f <= j-1)
-                    int_left_.push_back({f, j-1});
-                if (j+1 <= l)
-                    int_right_.push_back({j+1, l});
+
+            if (w > c) {
+                if (fl.second+1 <= l)
+                    int_right_.push_back({fl.second+1, l});
+                l = fl.first-1;
+                continue;
+            }
+
+            for (ItemPos k=fl.first; k<=fl.second; ++k)
+                w += item(k).w;
+            if (w >= c) {
+                if (f <= fl.first-1)
+                    int_left_.push_back({f, fl.first-1});
+                if (fl.second+1 <= l)
+                    int_right_.push_back({fl.second+1, l});
                 break;
+            } else {
+                c -= w;
+                if (f <= fl.first-1)
+                    int_left_.push_back({f, fl.first-1});
+                f = fl.second+1;
             }
         }
     }
 
-    compute_break_item();
+    compute_break_item(info);
 
     s_ = b_;
     t_ = b_;
+    LOG(info, LOG_FOLD_END << std::endl);
 }
 
 void Instance::sort_right(Profit lb)
@@ -528,12 +567,14 @@ void Instance::sort_left(Profit lb)
         f_ = s_;
 }
 
-void Instance::surrogate(Weight multiplier, ItemIdx bound)
+/******************************************************************************/
+
+void Instance::surrogate(Info& info, Weight multiplier, ItemIdx bound)
 {
-    surrogate(multiplier, bound, first_item());
+    surrogate(info, multiplier, bound, first_item());
 }
 
-void Instance::surrogate(Weight multiplier, ItemIdx bound, ItemPos first)
+void Instance::surrogate(Info& info, Weight multiplier, ItemIdx bound, ItemPos first)
 {
     sol_break_->clear();
     if (sol_opt_ != NULL) {
@@ -557,7 +598,7 @@ void Instance::surrogate(Weight multiplier, ItemIdx bound, ItemPos first)
 
     sorted_ = false;
     b_      = -1;
-    sort_partially();
+    sort_partially(info);
 }
 
 /******************************************************************************/
@@ -607,8 +648,8 @@ void Instance::reduce1(Profit lb, Info& info)
         j--;
     }
 
-    remove_big_items();
-    compute_break_item();
+    remove_big_items(info);
+    compute_break_item(info);
 
     VER(info, "Reduction: " << lb << " - "
             << "n " << item_number() << "/" << total_item_number()
@@ -710,8 +751,8 @@ void Instance::reduce2(Profit lb, Info& info)
     f_ += j1;
     l_ -= j0;
 
-    remove_big_items();
-    compute_break_item();
+    remove_big_items(info);
+    compute_break_item(info);
 
     VER(info, "Reduction: " << lb << " - "
             << "n " << item_number() << "/" << total_item_number()
@@ -751,7 +792,7 @@ bool Instance::update_sorted()
     return false;
 }
 
-void Instance::fix(const std::vector<int> vec)
+void Instance::fix(Info& info, const std::vector<int> vec)
 {
     std::vector<Item> not_fixed;
     std::vector<Item> fixed_1;
@@ -778,9 +819,9 @@ void Instance::fix(const std::vector<int> vec)
     f_ += j1;
     l_ -= j0;
 
-    remove_big_items();
+    remove_big_items(info);
     if (sorted()) {
-        compute_break_item();
+        compute_break_item(info);
     } else {
         b_ = -1;
     }
@@ -823,8 +864,7 @@ Profit knapsack::algorithm_end(Profit val, Info& info)
 
 std::ostream& knapsack::operator<<(std::ostream& os, const Item& it)
 {
-    os << it.j << "\t" << it.w << "\t" << it.p << "\t" << (double)it.p/(double)it.w
-        << "\t" << it.l;
+    os << it.j << " " << it.w << " " << it.p << " " << it.efficiency() << " " << it.l;
     return os;
 }
 
@@ -853,7 +893,7 @@ std::ostream& knapsack::operator<<(std::ostream& os, const Instance& ins)
             << it.j << "\t"
             << it.w << "\t"
             << it.p << "\t"
-            << std::setprecision(2) << (double)it.p/(double)it.w << "\t"
+            << std::setprecision(2) << it.efficiency() << "\t"
             << it.l << "\t";
 
         if (ins.break_solution() != NULL) {
@@ -900,8 +940,26 @@ void Instance::plot(std::string filename)
 void Instance::write(std::string filename)
 {
     std::ofstream file(filename);
-    file << item_number() << " " << total_capacity() << std::endl << std::endl;
-    for (ItemIdx i=0; i<item_number(); ++i)
+    file << total_item_number() << " " << total_capacity() << std::endl << std::endl;
+    for (ItemIdx i=0; i<total_item_number(); ++i)
+        file << item(i).w << " " << item(i).p << std::endl;
+    file.close();
+}
+
+void Instance::plot_reduced(std::string filename)
+{
+    std::ofstream file(filename);
+    file << "w p" << std::endl;
+    for (ItemIdx i=f_; i<=l_; ++i)
+        file << item(i).w << " " << item(i).p << std::endl;
+    file.close();
+}
+
+void Instance::write_reduced(std::string filename)
+{
+    std::ofstream file(filename);
+    file << item_number() << " " << capacity() << std::endl << std::endl;
+    for (ItemIdx i=f_; i<=l_; ++i)
         file << item(i).w << " " << item(i).p << std::endl;
     file.close();
 }

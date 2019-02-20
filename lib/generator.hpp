@@ -22,6 +22,9 @@ struct GenerateData
     int         h       = 50;
     std::string t       = "u";
     Seed        s       = 0;
+
+    bool reduce         = false;
+
     std::default_random_engine g;
 };
 

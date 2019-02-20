@@ -19,7 +19,9 @@ TEST(Instance, Sort)
             {10, 5},
             {10, 12},
             {10, 20}});
-    instance.sort();
+    Logger logger;
+    Info info(logger);
+    instance.sort(info);
 
     EXPECT_EQ(instance.item(4).p, 5);
     EXPECT_EQ(instance.item(3).p, 10);
@@ -47,13 +49,15 @@ TEST(Instance, SortPartially)
             {7, 1},
             {8, 1},
             {9, 1}});
-    instance.sort_partially();
+    Logger logger;
+    Info info(logger);
+    instance.sort_partially(info);
     EXPECT_EQ(instance.item(instance.break_item()).j, 2);
 }
 
 TEST(Instance, SortPartially2)
 {
-    Instance instance(9, 6);
+    Instance instance(9, 5);
     instance.add_items({ // break item b = 3 (1, 3)
             {1, 1},
             {9, 1},
@@ -64,143 +68,91 @@ TEST(Instance, SortPartially2)
             {4, 1},
             {5, 1},
             {6, 1}});
-    instance.sort_partially();
-    EXPECT_EQ(instance.item(instance.break_item()).j, 6);
+    Logger logger;
+    Info info(logger);
+    instance.sort_partially(info);
+    EXPECT_EQ(instance.item(instance.break_item()).j, 4);
 }
 
 TEST(Instance, SortPartially3)
 {
-    for (ItemIdx n = 0; n <= 1000; ++n) {
-        std::vector<std::pair<Weight, Profit>> wp;
-        Weight c = 0;
-        for (ItemIdx i=0; i<n; ++i) {
-            wp.push_back({i, 1});
-            c += i;
-        }
-        c /= 2;
-        c += 10;
-        std::cout << "N " << n << " C " << c << std::endl;
-        std::random_shuffle(wp.begin(), wp.end());
+    std::default_random_engine g(0);
+    for (Cpt n=1; n<=1000; ++n) {
+        std::uniform_int_distribution<int> d1(1, n);
+        for (Cpt h=1; h<100; ++h) {
+            Weight wmax = d1(g);
+            std::uniform_int_distribution<int> d2(1, wmax);
+            Instance ins(n, 0);
+            Weight wsum = 0;
+            for (ItemIdx j=0; j<n; ++j) {
+                Weight w = d2(g);
+                Profit p = d2(g);
+                ins.add_item(w, p);
+                wsum += w;
+            }
+            ins.set_capacity(std::max(wmax, (h * wsum) / 100));
 
-        Instance instance_eff(n, c);
-        Instance instance_peff(n, c);
-        instance_eff.add_items(wp);
-        instance_peff.add_items(wp);
-        instance_eff.sort();
-        instance_peff.sort_partially();
-        EXPECT_EQ(
-                instance_eff.break_item(),
-                instance_peff.break_item());
-        EXPECT_EQ(
-                instance_eff.break_profit(),
-                instance_peff.break_profit());
-        EXPECT_EQ(
-                instance_eff.break_weight(),
-                instance_peff.break_weight());
-        EXPECT_EQ(
-                instance_eff.break_capacity(),
-                instance_peff.break_capacity());
+            std::cout << "n " << ins.total_item_number()
+                << " c " << ins.total_capacity() << std::endl;
+            std::cout << "{";
+            for (ItemIdx j=0; j<ins.total_item_number(); ++j) {
+                std::cout << "{" << ins.item(j).w << "," << ins.item(j).p << "}";
+                if (j != ins.total_item_number() - 1)
+                    std::cout << ", ";
+            }
+            std::cout << "}" << std::endl;
+
+            Logger logger;
+            Info info_tmp(logger);
+            ins.sort_partially(info_tmp, 2);
+
+            Solution sol(ins);
+            ItemPos b = ins.break_item();
+
+            if (b == ins.total_item_number()) {
+                continue;
+            }
+
+            if (ins.break_solution()->remaining_capacity() == 0) {
+                continue;
+            }
+
+            Weight wb = ins.item(b).w;
+            Profit pb = ins.item(b).p;
+
+            std::cout << "b " << b << " wb " << wb << " pb " << pb << std::endl;
+            for (ItemPos j=0; j<ins.break_item(); ++j) {
+                EXPECT_GE(ins.item(j).p*wb, ins.item(j).w*pb);
+                if (ins.item(j).p*wb < ins.item(j).w*pb) {
+                    std::cout << ins << std::endl;
+                    return;
+                }
+            }
+            for (ItemPos j=ins.break_item(); j<ins.total_item_number(); ++j) {
+                EXPECT_LE(ins.item(j).p*wb, ins.item(j).w*pb);
+                if (ins.item(j).p*wb > ins.item(j).w*pb) {
+                    std::cout << ins << std::endl;
+                    return;
+                }
+            }
+
+            EXPECT_LE(ins.break_solution()->weight(), ins.total_capacity());
+            if (ins.break_solution()->weight() > ins.total_capacity()){
+                std::cout << ins << std::endl;
+                return;
+            }
+
+            EXPECT_GT(ins.break_solution()->weight() + ins.item(b).w,
+                    ins.total_capacity());
+            if (ins.break_solution()->weight() + ins.item(b).w
+                    <= ins.total_capacity()) {
+                std::cout << "w_bar " << ins.break_solution()->weight() << std::endl;
+                std::cout << "w_b   " << ins.item(b).w << std::endl;
+                std::cout << ins << std::endl;
+                return ;
+            }
+
+        }
     }
 }
 
-//TEST(Instance, ReductionSmallCoeff)
-//{
-    //auto data_dir = boost::filesystem::current_path();
-    //data_dir /= "external";
-    //data_dir /= "knapsack_instances_pisinger";
-    //data_dir /= "smallcoeff";
-    //const boost::regex my_filter("knapPI_.*_.*_1000");
-    //boost::filesystem::directory_iterator end_itr;
-    //for (boost::filesystem::directory_iterator i(data_dir); i != end_itr; ++i) {
-        //std::cout << i->path() << std::endl;
-        //boost::smatch what;
-        //if(!boost::regex_match(i->path().filename().string(), what, my_filter))
-            //continue;
-        //for (boost::filesystem::directory_iterator ii(i->path()); ii != end_itr; ++ii) {
-            //std::cout << "FILE " << ii->path() << std::endl;
-            //assert(boost::filesystem::exists(ii->path()));
-            //if (ii->path().filename() == "FORMAT.txt")
-                //continue;
-            //{
-                //Instance instance(ii->path().string());
-                //instance.sort_partially();
-                //Solution sol = sol_greedy(instance);
-                //instance.reduce1(sol.profit(), true);
-            //}
-            //{
-                //Instance instance(ii->path().string());
-                //instance.sort();
-                //Solution sol = sol_greedy(instance);
-                //instance.reduce2(sol.profit(), true);
-            //}
-        //}
-    //}
-//}
-
-//TEST(Instance, ReductionLargeCoeff)
-//{
-    //auto data_dir = boost::filesystem::current_path();
-    //data_dir /= "external";
-    //data_dir /= "knapsack_instances_pisinger";
-    //data_dir /= "largecoeff";
-    //const boost::regex my_filter("knapPI_.*_50_.*");
-    //boost::filesystem::directory_iterator end_itr;
-    //for (boost::filesystem::directory_iterator i(data_dir); i != end_itr; ++i) {
-        //std::cout << i->path() << std::endl;
-        //boost::smatch what;
-        //if(!boost::regex_match(i->path().filename().string(), what, my_filter))
-            //continue;
-        //for (boost::filesystem::directory_iterator ii(i->path()); ii != end_itr; ++ii) {
-            //std::cout << "FILE " << ii->path() << std::endl;
-            //assert(boost::filesystem::exists(ii->path()));
-            //if (ii->path().filename() == "FORMAT.txt")
-                //continue;
-            //{
-                //Instance instance(ii->path().string());
-                //instance.sort_partially();
-                //Solution sol = sol_greedy(instance);
-                //instance.reduce1(sol.profit());
-            //}
-            //{
-                //Instance instance(ii->path().string());
-                //instance.sort();
-                //Solution sol = sol_greedy(instance);
-                //instance.reduce2(sol.profit());
-            //}
-        //}
-    //}
-//}
-
-//TEST(Instance, ReductionHardInstances)
-//{
-    //auto data_dir = boost::filesystem::current_path();
-    //data_dir /= "external";
-    //data_dir /= "knapsack_instances_pisinger";
-    //data_dir /= "hardinstances";
-    //const boost::regex my_filter("knapPI_.*_100_.*");
-    //boost::filesystem::directory_iterator end_itr;
-    //for (boost::filesystem::directory_iterator i(data_dir); i != end_itr; ++i) {
-        //std::cout << i->path() << std::endl;
-        //boost::smatch what;
-        //if(!boost::regex_match(i->path().filename().string(), what, my_filter))
-            //continue;
-        //for (boost::filesystem::directory_iterator ii(i->path()); ii != end_itr; ++ii) {
-            //std::cout << "FILE " << ii->path() << std::endl;
-            //assert(boost::filesystem::exists(ii->path()));
-            //if (ii->path().filename() == "FORMAT.txt")
-                //continue;
-            //{
-                //Instance instance(ii->path().string());
-                //instance.sort_partially();
-                //Solution sol = sol_greedy(instance);
-                //instance.reduce1(sol.profit());
-            //}
-            //{
-                //Instance instance(ii->path().string());
-                //instance.sort();
-                //Solution sol = sol_greedy(instance);
-                //instance.reduce2(sol.profit());
-            //}
-        //}
-    //}
-//}
