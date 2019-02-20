@@ -83,6 +83,7 @@ def FlagsForFile( filename, **kwargs ):
   # CHANGE THIS LIST OF FLAGS. YES, THIS IS THE DROID YOU HAVE BEEN LOOKING FOR.
 
   flags = [
+    "-fopenmp",
     '-Wall',
     '-Wextra',
     '-Werror',
@@ -91,6 +92,7 @@ def FlagsForFile( filename, **kwargs ):
     '-I', './bazel-knapsack/external/benchtools/',
     '-I', './bazel-knapsack/external/googletest/',
     '-I', './bazel-knapsack/external/',
+    '-I', '/usr/lib/gcc/x86_64-linux-gnu/7.3.0/include/',
   ]
 
   data = kwargs['client_data']
