@@ -1,1 +1,0 @@
-knapsack_standard
