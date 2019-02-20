@@ -35,16 +35,6 @@ std::ostream& knapsack::operator<<(std::ostream& os, const GenerateData& data)
     return os;
 }
 
-void write_format_file(boost::filesystem::path dest, std::string str)
-{
-    boost::filesystem::create_directories(dest);
-    boost::filesystem::path format = dest / "FORMAT.txt";
-    std::ofstream f;
-    f.open(format.string());
-    f << str << std::endl;
-    f.close();
-}
-
 std::pair<Weight, Profit> item(GenerateData& data)
 {
     Weight w = -1;
