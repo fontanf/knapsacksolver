@@ -70,7 +70,7 @@ public:
     /**
      * Create instance from file.
      */
-    Instance(boost::filesystem::path filename);
+    Instance(boost::filesystem::path filename, std::string format);
 
     /**
      * Copy constructor

@@ -19,6 +19,7 @@ int main(int argc, char *argv[])
     // Parse program options
     std::string algorithm = "bellman_array";
     std::string output_file = "";
+    std::string format = "";
     std::string cert_file = "";
     std::string log_file = "";
 
@@ -29,6 +30,7 @@ int main(int argc, char *argv[])
         ("help,h", "produce help message")
         ("algorithm,a", po::value<std::string>(&algorithm)->required(), "set algorithm")
         ("input,i", po::value<std::string>()->required(), "set input file (required)")
+        ("format,f", po::value<std::string>(&format), "set input file format (default: default)")
         ("output,o", po::value<std::string>(&output_file), "set output file")
         ("cert,c", po::value<std::string>(&cert_file), "set certificate file")
         ("part-size,x", po::value<ItemPos>(&k), "")
@@ -49,7 +51,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    Instance ins(vm["input"].as<std::string>());
+    Instance ins(vm["input"].as<std::string>(), format);
     Solution sopt(ins);
 
     Logger logger(log_file, vm.count("log2stderr"));

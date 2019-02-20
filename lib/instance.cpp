@@ -41,10 +41,11 @@ void Instance::add_items(const std::vector<std::pair<Weight, Profit>>& wp)
         add_item(i.first, i.second);
 }
 
-Instance::Instance(boost::filesystem::path filepath)
+Instance::Instance(boost::filesystem::path filepath, std::string format):
+    format_(format)
 {
     if (!boost::filesystem::exists(filepath)) {
-        std::cout << filepath << ": file not found." << std::endl;
+        std::cerr << filepath << ": file not found." << std::endl;
         assert(false);
     }
 
@@ -62,17 +63,8 @@ Instance::Instance(boost::filesystem::path filepath)
         boost::iostreams::copy(in, data);
         file.close();
     } else {
-        std::cout << filepath.extension() << ": extension unknown." << std::endl;
+        std::cerr << filepath.extension() << ": extension unknown." << std::endl;
         assert(false);
-    }
-
-
-    boost::filesystem::path FORMAT = filepath.parent_path() / "FORMAT.txt";
-    if (!boost::filesystem::exists(FORMAT)) {
-        format_ = "knapsack_standard";
-    } else {
-        boost::filesystem::fstream file(FORMAT, std::ios_base::in);
-        std::getline(file, format_);
     }
 
     if (format_ == "knapsack_standard") {
@@ -90,7 +82,7 @@ Instance::Instance(boost::filesystem::path filepath)
     } else if (format_ == "knapsack_pisinger") {
         read_pisinger(data);
     } else {
-        std::cout << format_ << ": Unknown instance format." << std::endl;
+        std::cerr << format_ << ": Unknown format." << std::endl;
         assert(false);
     }
 }
