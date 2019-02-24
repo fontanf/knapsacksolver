@@ -20,24 +20,26 @@ int main(int argc, char *argv[])
     std::string algorithm = "bellman_array";
     std::string instance_filepath = "";
     std::string output_filepath = "";
-    std::string format = "";
+    std::string format = "knapsack_standard";
     std::string cert_filepath = "";
     std::string log_filepath = "";
+    int log_levelmax = 999;
 
     ItemPos k = 64;
 
     po::options_description desc("Allowed options");
     desc.add_options()
         ("help,h", "produce help message")
-        ("algorithm,a", po::value<std::string>(&algorithm)->required(), "set algorithm")
+        ("algorithm,a", po::value<std::string>(&algorithm), "set algorithm")
         ("input,i", po::value<std::string>(&instance_filepath)->required(), "set input file (required)")
-        ("format,f", po::value<std::string>(&format), "set input file format (default: default)")
+        ("format,f", po::value<std::string>(&format), "set input file format (default: knapsack_standard)")
         ("output,o", po::value<std::string>(&output_filepath), "set output file")
         ("cert,c", po::value<std::string>(&cert_filepath), "set certificate file")
         ("part-size,x", po::value<ItemPos>(&k), "")
         ("verbose,v", "")
-        ("log2stderr", "write log in stderr")
         ("log,l", po::value<std::string>(&log_filepath), "set log file")
+        ("loglevelmax", po::value<int>(&log_levelmax), "set log max level")
+        ("log2stderr", "write log in stderr")
         ;
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -60,7 +62,7 @@ int main(int argc, char *argv[])
     Instance ins(instance_filepath, format);
     Solution sopt(ins);
 
-    Logger logger(log_filepath, vm.count("log2stderr"));
+    Logger logger(log_filepath, vm.count("log2stderr"), log_levelmax);
     Info info(logger, vm.count("verbose"));
 
     if (algorithm == "bellman_array") { // bellman

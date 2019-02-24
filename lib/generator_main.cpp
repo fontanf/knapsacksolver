@@ -22,11 +22,11 @@ int main(int argc, char *argv[])
         (",H", po::value<int>(&data.h), "set h")
         (",s", po::value<Seed>(&data.s), "set seed")
         ("reduce,R", "set reduce")
-        ("spanner,sp", "set spanner")
+        ("spanner,S", "set spanner")
         (",m", po::value<Profit>(&data.m), "set m (for spanner instances)")
         (",v", po::value<Profit>(&data.v), "set v (for spanner instances)")
         (",o", po::value<std::string>(&output_file), "set output file")
-        (",p", po::value<std::string>(&plot_file), "set output file")
+        (",p", po::value<std::string>(&plot_file), "set plot file")
         ;
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);

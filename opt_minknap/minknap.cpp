@@ -42,7 +42,7 @@ struct MinknapData
 
 void add_item(MinknapData& d)
 {
-    LOG(d.info, LOG_FOLD_START << " Add item... s " << d.s << " t " << d.t << " lb " << d.lb << std::endl);
+    LOG_FOLD_START(d.info, "Add item... s " << d.s << " t " << d.t << " lb " << d.lb << std::endl);
     d.psolf.add_item(d.t);
     d.best_state.sol = d.psolf.remove(d.best_state.sol);
     Weight c = d.ins.total_capacity();
@@ -116,12 +116,12 @@ void add_item(MinknapData& d)
         }
     }
     d.l0 = std::move(l);
-    LOG(d.info, LOG_FOLD_END << std::endl);
+    LOG_FOLD_END(d.info, "");
 }
 
 void remove_item(MinknapData& d)
 {
-    LOG(d.info, LOG_FOLD_START << " Remove item... s " << d.s << " t " << d.t << " lb " << d.lb << std::endl);
+    LOG_FOLD_START(d.info, "Remove item... s " << d.s << " t " << d.t << " lb " << d.lb << std::endl);
     d.psolf.add_item(d.s);
     d.best_state.sol = d.psolf.add(d.best_state.sol);
     Weight c = d.ins.total_capacity();
@@ -194,7 +194,7 @@ void remove_item(MinknapData& d)
         }
     }
     d.l0 = std::move(l);
-    LOG(d.info, LOG_FOLD_END << std::endl);
+    LOG_FOLD_END(d.info, "");
 }
 
 Solution knapsack::sopt_minknap(Instance& ins, Info& info,

@@ -284,9 +284,9 @@ std::vector<Item> Instance::get_isum() const
 
 void Instance::sort(Info& info)
 {
-    LOG(info, LOG_FOLD_START << " sort" << std::endl);
+    LOG_FOLD_START(info, "sort" << std::endl);
     if (sorted()) {
-        LOG(info, LOG_FOLD_END << std::endl);
+        LOG_FOLD_END(info, "");
         return;
     }
     if (sol_red_ == NULL)
@@ -298,7 +298,7 @@ void Instance::sort(Info& info)
                 return i1.p * i2.w > i2.p * i1.w;});
 
     compute_break_item(info);
-    LOG(info, LOG_FOLD_END << std::endl);
+    LOG_FOLD_END(info, "");
 }
 
 ItemPos Instance::ub_item(const std::vector<Item>& isum, Item item) const
@@ -313,7 +313,7 @@ ItemPos Instance::ub_item(const std::vector<Item>& isum, Item item) const
 
 void Instance::compute_break_item(Info& info)
 {
-    LOG(info, LOG_FOLD_START << " compute_break_item" << std::endl);
+    LOG_FOLD_START(info, "compute_break_item" << std::endl);
     if (sol_break_ == NULL) {
         sol_break_ = new Solution(*reduced_solution());
     } else {
@@ -327,7 +327,7 @@ void Instance::compute_break_item(Info& info)
     LOG(info, sol_break_->to_string_items() << std::endl);
     LOG(info, sol_break_->to_string_binary() << std::endl);
     LOG(info, "b_ " << b_ << std::endl);
-    LOG(info, LOG_FOLD_END << std::endl);
+    LOG_FOLD_END(info, "");
 }
 
 Profit Instance::break_profit() const
@@ -391,7 +391,7 @@ void Instance::remove_big_items(Info& info)
 
 std::pair<ItemPos, ItemPos> Instance::partition(ItemPos f, ItemPos l, Info& info)
 {
-    LOG(info, LOG_FOLD_START << " partition f " << f << " l " << l << std::endl);
+    LOG_FOLD_START(info, "partition f " << f << " l " << l << std::endl);
     ItemPos pivot = f + 1 + rand() % (l - f); // Select pivot
     Weight w = item(pivot).w;
     Profit p = item(pivot).p;
@@ -422,16 +422,16 @@ std::pair<ItemPos, ItemPos> Instance::partition(ItemPos f, ItemPos l, Info& info
 
     LOG(info, "f " << f << " l " << l << std::endl);
 
-    LOG(info, LOG_FOLD_END << std::endl);
+    LOG_FOLD_END(info, "");
     return {f,l};
 }
 
 void Instance::sort_partially(Info& info, ItemIdx limit)
 {
-    LOG(info, LOG_FOLD_START << " sort_partially limit " << limit << std::endl);
+    LOG_FOLD_START(info, "sort_partially limit " << limit << std::endl);
 
     if (break_item_found()) {
-        LOG(info, LOG_FOLD_END << std::endl);
+        LOG_FOLD_END(info, "");
         return;
     }
 
@@ -497,7 +497,7 @@ void Instance::sort_partially(Info& info, ItemIdx limit)
 
     s_ = b_;
     t_ = b_;
-    LOG(info, LOG_FOLD_END << std::endl);
+    LOG_FOLD_END(info, "");
 }
 
 void Instance::sort_right(Profit lb)
@@ -584,7 +584,7 @@ void Instance::surrogate(Info& info, Weight multiplier, ItemIdx bound, ItemPos f
 
 void Instance::reduce1(Profit lb, Info& info)
 {
-    LOG(info, LOG_FOLD_START << " reduce1 - lb " << lb << " b_ " << b_ << std::endl;);
+    LOG_FOLD_START(info, "reduce1 - lb " << lb << " b_ " << b_ << std::endl;);
 
     assert(break_item_found());
     assert(b_ != l_+1);
@@ -636,12 +636,12 @@ void Instance::reduce1(Profit lb, Info& info)
             << " c " << ((double)capacity()    / (double)total_capacity()) << std::endl);
     LOG(info, "n " << item_number() << "/" << total_item_number() << std::endl);
     LOG(info, "c " << capacity() << "/" << total_capacity() << std::endl);
-    LOG(info, LOG_FOLD_END << std::endl);
+    LOG_FOLD_END(info, "");
 }
 
 void Instance::reduce2(Profit lb, Info& info)
 {
-    LOG(info, LOG_FOLD_START << " Reduce 2: lb " << lb << " b_ " << b_ << std::endl);
+    LOG_FOLD_START(info, "Reduce 2: lb " << lb << " b_ " << b_ << std::endl);
     assert(sorted());
 
     std::vector<Item> isum = get_isum();
@@ -739,7 +739,7 @@ void Instance::reduce2(Profit lb, Info& info)
             << " c " << ((double)capacity()    / (double)total_capacity()) << std::endl);
     LOG(info, "n " << item_number() << "/" << total_item_number() << std::endl);
     LOG(info, "c " << capacity() << "/" << total_capacity() << std::endl);
-    LOG(info, LOG_FOLD_END << std::endl);
+    LOG_FOLD_END(info, "");
 }
 
 /******************************************************************************/

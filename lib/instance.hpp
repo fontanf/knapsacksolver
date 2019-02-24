@@ -1,6 +1,6 @@
 #pragma once
 
-#include "info.hpp"
+#include "benchtools/info.hpp"
 
 #include <cstdint>
 #include <random>

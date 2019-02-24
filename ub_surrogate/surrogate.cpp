@@ -8,7 +8,7 @@ using namespace knapsack;
 
 ItemIdx max_card(const Instance& ins, Info& info)
 {
-    LOG(info, LOG_FOLD_START << " max_card" << std::endl);
+    LOG_FOLD_START(info, "max_card" << std::endl);
     if (ins.item_number() == 1) {
         return 1;
     }
@@ -63,13 +63,13 @@ ItemIdx max_card(const Instance& ins, Info& info)
         r -= ins.item(index[j]).w;
     }
 
-    LOG(info, LOG_FOLD_END << std::endl);
+    LOG_FOLD_END(info, "");
     return k;
 }
 
 ItemIdx min_card(const Instance& ins, Info& info, Profit lb)
 {
-    LOG(info, LOG_FOLD_START << " min_card" << std::endl);
+    LOG_FOLD_START(info, "min_card" << std::endl);
 
     lb -= ins.reduced_solution()->profit();
     if (ins.item_number() <= 1)
@@ -124,14 +124,14 @@ ItemIdx min_card(const Instance& ins, Info& info, Profit lb)
         z += ins.item(index[j]).p;
     }
 
-    LOG(info, LOG_FOLD_END << std::endl);
+    LOG_FOLD_END(info, "");
     return k;
 }
 
 void ub_surrogate_solve(Instance& ins, Info& info, ItemIdx k,
         Weight s_min, Weight s_max, SurrogateOut& out)
 {
-    LOG(info, LOG_FOLD_START << " ub_surrogate_solve k " << k << " s_min " << s_min << " s_max " << s_max << std::endl);
+    LOG_FOLD_START(info, "ub_surrogate_solve k " << k << " s_min " << s_min << " s_max " << s_max << std::endl);
     out.bound = k;
     ItemPos first = ins.first_item();
     Weight  s_prec = 0;
@@ -154,7 +154,7 @@ void ub_surrogate_solve(Instance& ins, Info& info, ItemIdx k,
 
     while (s1 <= s2) {
         s = (s1 + s2) / 2;
-        LOG(info, LOG_FOLD_START << " s1 " << s1 << " s " << s << " s2 " << s2 << std::endl);
+        LOG_FOLD_START(info, "s1 " << s1 << " s " << s << " s2 " << s2 << std::endl);
 
         // Avoid INT overflow
         if (s_min == 0 && s != 0) {
@@ -163,7 +163,7 @@ void ub_surrogate_solve(Instance& ins, Info& info, ItemIdx k,
                     || INT_FAST64_MAX / ins.total_item_number() < wmax+s
                     || wmax + s > wlim) {
                 s2 = s - 1;
-                LOG(info, LOG_FOLD_END << std::endl);
+                LOG_FOLD_END(info, "");
                 continue;
             } else {
                 wmax += s - s_prec;
@@ -175,7 +175,7 @@ void ub_surrogate_solve(Instance& ins, Info& info, ItemIdx k,
                     || INT_FAST64_MAX / ins.total_item_number() < wabs
                     || wabs > wlim) {
                 s1 = s + 1;
-                LOG(info, LOG_FOLD_END << std::endl);
+                LOG_FOLD_END(info, "");
                 continue;
             } else {
                 wmax += s - s_prec;
@@ -184,7 +184,7 @@ void ub_surrogate_solve(Instance& ins, Info& info, ItemIdx k,
         }
 
         ins.surrogate(info, s-s_prec, k, first);
-        LOG(info, LOG_FOLD_START << " " << ins << LOG_FOLD_END << std::endl);
+        LOG_FOLD(info, ins);
         Info info_tmp(info.logger);
         Profit p = ub_dantzig(ins, info_tmp);
         ItemPos b = ins.break_item();
@@ -197,7 +197,7 @@ void ub_surrogate_solve(Instance& ins, Info& info, ItemIdx k,
         }
 
         if (b == k && ins.break_capacity() == 0) {
-            LOG(info, LOG_FOLD_END << std::endl);
+            LOG_FOLD_END(info, "");
             break;
         }
 
@@ -207,16 +207,16 @@ void ub_surrogate_solve(Instance& ins, Info& info, ItemIdx k,
             s2 = s - 1;
         }
         s_prec = s;
-        LOG(info, LOG_FOLD_END << std::endl);
+        LOG_FOLD_END(info, "");
     }
     ins.surrogate(info, -s, k, first);
     assert(ins.first_item() == first);
-    LOG(info, LOG_FOLD_END << std::endl);
+    LOG_FOLD_END(info, "");
 }
 
 SurrogateOut knapsack::ub_surrogate(const Instance& instance, Profit lb, Info& info)
 {
-    LOG(info, LOG_FOLD_START << " surrogate relaxation lb " << lb << std::endl);
+    LOG_FOLD_START(info, "surrogate relaxation lb " << lb << std::endl);
     VER(info, "*** surrogate relaxation ***" << std::endl);
     std::string best = "";
 
@@ -229,14 +229,14 @@ SurrogateOut knapsack::ub_surrogate(const Instance& instance, Profit lb, Info& i
     // Trivial cases
     if (ins.item_number() == 0) {
         algorithm_end(out.ub, info);
-        LOG(info, LOG_FOLD_END << std::endl);
+        LOG_FOLD_END(info, "");
         return out;
     }
     Info info_tmp(info.logger);
     out.ub = ub_dantzig(ins, info_tmp);
     if (ins.break_capacity() == 0 || b == ins.last_item() + 1) {
         algorithm_end(out.ub, info);
-        LOG(info, LOG_FOLD_END << std::endl);
+        LOG_FOLD_END(info, "");
         return out;
     }
 
@@ -277,7 +277,7 @@ SurrogateOut knapsack::ub_surrogate(const Instance& instance, Profit lb, Info& i
     VER(info, "Best bound: " << best << std::endl);
     PUT(info, "Algorithm.Best", best);
     algorithm_end(out.ub, info);
-    LOG(info, LOG_FOLD_END << std::endl);
+    LOG_FOLD_END(info, "");
     return out;
 }
 
