@@ -22,7 +22,6 @@ typedef int64_t Weight;
 typedef int64_t ItemIdx;
 typedef int64_t ItemPos;
 typedef int64_t StateIdx;
-typedef int64_t Label;
 typedef int64_t Cpt;
 typedef double Effciency;
 
@@ -35,11 +34,9 @@ class PartSolFactory2;
 struct Item
 {
     Item(ItemIdx j, Weight w, Profit p): j(j), w(w), p(p) { }
-    Item(ItemIdx j, Weight w, Profit p, Label l): j(j), w(w), p(p), l(l) { }
     ItemIdx j = -1; // Index, 0 <= j < n, must be different for each item
     Weight  w = -1; // Weight, w >= 0
     Profit  p = -1; // Profit, p >= 0
-    Label   l = -1; // Label, this parameter is not used in this package
     Effciency efficiency() const { return (double)p/(double)w; }
 };
 
@@ -63,7 +60,6 @@ public:
      */
     Instance(ItemIdx n, Weight c);
     void add_item(Weight w, Profit p);
-    void add_item(Weight w, Profit p, Label l);
     void add_items(const std::vector<std::pair<Weight, Profit>>& wp);
     void set_capacity(Weight c) { c_orig_ = c; }
 

@@ -23,13 +23,8 @@ Instance::Instance(ItemIdx n, Weight c):
 
 void Instance::add_item(Weight w, Profit p)
 {
-    add_item(w, p, -1);
-}
-
-void Instance::add_item(Weight w, Profit p, Label l)
-{
     ItemIdx j = items_.size();
-    items_.push_back({j, w, p, l});
+    items_.push_back({j, w, p});
     l_ = j;
     sol_opt_ = NULL;
     sol_break_ = NULL;
@@ -843,7 +838,7 @@ Profit knapsack::algorithm_end(Profit val, Info& info)
 
 std::ostream& knapsack::operator<<(std::ostream& os, const Item& it)
 {
-    os << it.j << " " << it.w << " " << it.p << " " << it.efficiency() << " " << it.l;
+    os << it.j << " " << it.w << " " << it.p << " " << it.efficiency();
     return os;
 }
 
@@ -864,44 +859,50 @@ std::ostream& knapsack::operator<<(std::ostream& os, const Instance& ins)
             << " wsum " << ins.break_weight()
             << " psum " << ins.break_profit()
             << std::endl;
-    os << "pos\tj\tw\tp\te\tl\tb\topt\tred\tb/f/l" << std::endl;
+
+    os << std::left << std::setw(8) << "pos";
+    os << std::left << std::setw(8) << "j";
+    os << std::left << std::setw(12) << "w";
+    os << std::left << std::setw(12) << "p";
+    os << std::left << std::setw(12) << "eff";
+    os << std::left << std::setw(4) << "b";
+    os << std::left << std::setw(4) << "opt";
+    os << std::left << std::setw(4) << "red";
+    os << std::left << std::setw(8) << "b/f/l";
+    os << std::endl;
+
     for (ItemPos j=0; j<ins.total_item_number(); ++j) {
         const Item& it = ins.item(j);
-        os
-            << j << "\t"
-            << it.j << "\t"
-            << it.w << "\t"
-            << it.p << "\t"
-            << std::setprecision(2) << it.efficiency() << "\t"
-            << it.l << "\t";
+        os << std::left << std::setw(8) << j;
+        os << std::left << std::setw(8) << it.j;
+        os << std::left << std::setw(12) << it.w;
+        os << std::left << std::setw(12) << it.p;
+        os << std::left << std::setw(12) << it.efficiency();
 
-        if (ins.break_solution() != NULL) {
-            os << ins.break_solution()->contains(j);
-        } else {
-            os << " ";
-        }
-        os << "\t" << std::flush;
+        os << std::left << std::setw(4);
+        if (ins.break_solution() != NULL)
+             os << ins.break_solution()->contains(j);
 
+        os << std::left << std::setw(4);
         if (ins.optimal_solution() != NULL) {
             os << ins.optimal_solution()->contains(j);
         } else {
-            os << " ";
+            os << ".";
         }
-        os << "\t" << std::flush;
 
+        os << std::left << std::setw(4);
         if (ins.reduced_solution() != NULL) {
             os << ins.reduced_solution()->contains(j);
         } else {
-            os << " ";
+            os << ".";
         }
-        os << "\t" << std::flush;
 
         if (ins.break_item_found() && j == ins.break_item())
-            os << "b" << std::flush;
+            os << "b";
         if (j == ins.first_item())
-            os << "f" << std::flush;
+            os << "f";
         if (j == ins.last_item())
-            os << "l" << std::flush;
+            os << "l";
         os << std::endl;
     }
     return os;
