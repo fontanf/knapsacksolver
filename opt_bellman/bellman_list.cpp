@@ -8,19 +8,18 @@ struct State
 {
     Weight w;
     Profit p;
-
-    std::string to_string() const
-    {
-        return "(" + std::to_string(w) + "," + std::to_string(p) + ")";
-    }
 };
 
-std::string to_string(std::vector<State>& l)
+std::ostream& operator<<(std::ostream& os, const State& s)
 {
-    std::string str;
-    for (State& s: l)
-        str += s.to_string() + " ";
-    return str;
+    os << "(" << s.w <<  "," << s.p << ")";
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const std::vector<State>& l)
+{
+    std::copy(l.begin(), l.end(), std::ostream_iterator<State>(os, " "));
+    return os;
 }
 
 Profit knapsack::opt_bellman_list(const Instance& ins, Info& info)
@@ -35,19 +34,18 @@ Profit knapsack::opt_bellman_list(const Instance& ins, Info& info)
         return algorithm_end(0, info);
 
     Profit lb = 0;
-    std::vector<State> l0{{0, 0}};
+    std::vector<State> l0{{.w = 0, .p = 0}};
     for (ItemPos j=0; j<n; ++j) {
         Weight wj = ins.item(j).w;
         Profit pj = ins.item(j).p;
-        std::vector<State> l{{0, 0}};
+        std::vector<State> l{{.w = 0, .p = 0}};
         std::vector<State>::iterator it  = l0.begin();
         std::vector<State>::iterator it1 = l0.begin();
         while (it != l0.end() || it1 != l0.end()) {
             if (it == l0.end() || it->w > it1->w + wj) {
-                State s1{it1->w+wj, it1->p+pj};
-                if (s1.w > c) {
+                State s1{.w = it1->w + wj, .p = it1->p + pj};
+                if (s1.w > c)
                     break;
-                }
                 if (s1.p > l.back().p) {
                     if (s1.p > lb) // Update lower bound
                         lb = s1.p;
@@ -55,12 +53,9 @@ Profit knapsack::opt_bellman_list(const Instance& ins, Info& info)
                         l.back() = s1;
                     } else {
                         Profit ub = ub_0(ins, j+1, s1.p, c-s1.w, j_max);
-                        if (ub > lb) {
+                        if (ub > lb)
                             l.push_back(s1);
-                        } else {
-                        }
                     }
-                } else {
                 }
                 it1++;
             } else {
@@ -71,7 +66,6 @@ Profit knapsack::opt_bellman_list(const Instance& ins, Info& info)
                     } else {
                         l.push_back(*it);
                     }
-                } else {
                 }
                 ++it;
             }
@@ -80,36 +74,6 @@ Profit knapsack::opt_bellman_list(const Instance& ins, Info& info)
     }
 
     return algorithm_end(lb, info);
-}
-
-/******************************************************************************/
-
-Solution knapsack::sopt_bellman_list_all(const Instance& ins, Info& info)
-{
-    VER(info, "*** bellman (list, all) ***" << std::endl);
-    Solution sol(ins);
-    VER(info, "Not yet implemented." << std::endl);
-    return algorithm_end(sol, info);
-}
-
-/******************************************************************************/
-
-Solution knapsack::sopt_bellman_list_one(const Instance& ins, Info& info)
-{
-    VER(info, "*** bellman (list, one) ***" << std::endl);
-    Solution sol(ins);
-    VER(info, "Not yet implemented." << std::endl);
-    return algorithm_end(sol, info);
-}
-
-/******************************************************************************/
-
-Solution knapsack::sopt_bellman_list_part(const Instance& ins, Info& info, ItemPos k)
-{
-    VER(info, "*** bellman (list, part " << k << ") ***" << std::endl);
-    Solution sol(ins);
-    VER(info, "Not yet implemented." << std::endl);
-    return algorithm_end(sol, info);
 }
 
 /******************************************************************************/

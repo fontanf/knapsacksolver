@@ -105,33 +105,3 @@ Solution knapsack::sopt_dpprofits_array_all(const Instance& ins, Info& info)
     return algorithm_end(sol, info);
 }
 
-/******************************************************************************/
-
-Solution knapsack::sopt_dpprofits_array_one(const Instance& ins, Info& info)
-{
-    VER(info, "*** dpprofits (array, one) ***" << std::endl);
-    Solution sol(ins);
-    VER(info, "Not yet implemented." << std::endl);
-    return algorithm_end(sol, info);
-}
-
-/******************************************************************************/
-
-Solution knapsack::sopt_dpprofits_array_part(const Instance& ins, Info& info, ItemPos k)
-{
-    VER(info, "*** dpprofits (array, part " << k << ") ***" << std::endl);
-    Solution sol(ins);
-    VER(info, "Not yet implemented." << std::endl);
-    return algorithm_end(sol, info);
-}
-
-/******************************************************************************/
-
-Solution knapsack::sopt_dpprofits_array_rec(const Instance& ins, Info& info)
-{
-    VER(info, "*** dpprofits (array, rec) ***" << std::endl);
-    Solution sol(ins);
-    VER(info, "Not yet implemented." << std::endl);
-    return algorithm_end(sol, info);
-}
-

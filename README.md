@@ -65,10 +65,9 @@ For those algorithms, if required, the Upper bound used is neccessarly `U0`.
 
 - Dynamic programming with Bellman recursion `opt_bellman/main -m array -r all`
   - `-m array`:` -r none` :heavy_check_mark: `-r all` :heavy_check_mark: `-r one` :heavy_check_mark: `-r part` :heavy_check_mark: `-r rec` :heavy_check_mark:
-  - `-m list`: `-r none` :heavy_check_mark: `-r all` :x: `-r one` :x: `-r part` :x: `-r rec` :heavy_check_mark:
+  - `-m list`: `-r none` :heavy_check_mark: `-r rec` :heavy_check_mark:
 - Dynamic programming by Profits `opt_dpprofits/main -m array -r all`
-  - `-m array`: `-r none` :heavy_check_mark: `-r all` :heavy_check_mark: `-r one` :x: `-r part` :x: `-r rec` :x:
-  - `-m list`: `-r none` :x: `-r all` :x: `-r one` :x: `-r part` :x: `-r rec` :x:
+  - `-m array`: `-r none` :heavy_check_mark: `-r all` :heavy_check_mark:
 - Primal Branch-and-bound `opt_bab/main` :heavy_check_mark:
 
 ### Exact algorithms with partial or complete sorting as pre-processing
