@@ -82,7 +82,7 @@ Furthermore, some `combo` improvements may here be used with the other algorithm
 - Option `-k X`: surrogate instance will be solved at Xth node / if state number goes over X
 
 Algorithms:
-- Balanced Dynamic programming `opt_balknap/main -u t`. The list implementation requires a map. Therefore, its asymptotical complexity is slightly greater than the one with an array. However, the possiblity of combining the dynamic programming with bouding makes it more performant. Two versions are still implemented. Options `-u` can be set to `b` (partial sorting, Dembo Upper bound with break item) or `t` (complete sorting, better Upper Bound) :heavy_check_mark: (with options `-n` :x: `-g` :heavy_check_mark: `-p` :x: `-s` :heavy_check_mark: `-k` :heavy_check_mark:)
+- Balanced Dynamic programming `opt_balknap/main -u t`. The list implementation requires a map. Therefore, its asymptotical complexity is slightly greater than the one with an array. However, the possiblity of combining the dynamic programming with bouding makes it more performant. Two versions are still implemented. Options `-u` can be set to `b` (partial sorting, Dembo Upper bound with break item) or `t` (complete sorting, better Upper Bound) :heavy_check_mark: (with options `-n` :x: `-g` :heavy_check_mark: `-s` :heavy_check_mark: `-k` :heavy_check_mark:)
 - Primal-dual Dynamic programming (only with list) (`minknap`, `combo`) :heavy_check_mark: (with options `-n` :x: `-g` :x: `-p` :x: `-s` :x: `-k` :x:)
 - Primal-dual Branch-and-bound (`expknap`) `opt_expknap/main` :heavy_check_mark: (with options `-n` :x: `-g` :heavy_check_mark: `-s`  :heavy_check_mark: `-k` :heavy_check_mark:)
 

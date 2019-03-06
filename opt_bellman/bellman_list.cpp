@@ -4,21 +4,21 @@
 
 using namespace knapsack;
 
-struct State
+struct BellmanState
 {
     Weight w;
     Profit p;
 };
 
-std::ostream& operator<<(std::ostream& os, const State& s)
+std::ostream& operator<<(std::ostream& os, const BellmanState& s)
 {
     os << "(" << s.w <<  "," << s.p << ")";
     return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const std::vector<State>& l)
+std::ostream& operator<<(std::ostream& os, const std::vector<BellmanState>& l)
 {
-    std::copy(l.begin(), l.end(), std::ostream_iterator<State>(os, " "));
+    std::copy(l.begin(), l.end(), std::ostream_iterator<BellmanState>(os, " "));
     return os;
 }
 
@@ -34,16 +34,16 @@ Profit knapsack::opt_bellman_list(const Instance& ins, Info& info)
         return algorithm_end(0, info);
 
     Profit lb = 0;
-    std::vector<State> l0{{.w = 0, .p = 0}};
+    std::vector<BellmanState> l0{{.w = 0, .p = 0}};
     for (ItemPos j=0; j<n; ++j) {
         Weight wj = ins.item(j).w;
         Profit pj = ins.item(j).p;
-        std::vector<State> l{{.w = 0, .p = 0}};
-        std::vector<State>::iterator it  = l0.begin();
-        std::vector<State>::iterator it1 = l0.begin();
+        std::vector<BellmanState> l{{.w = 0, .p = 0}};
+        std::vector<BellmanState>::iterator it  = l0.begin();
+        std::vector<BellmanState>::iterator it1 = l0.begin();
         while (it != l0.end() || it1 != l0.end()) {
             if (it == l0.end() || it->w > it1->w + wj) {
-                State s1{.w = it1->w + wj, .p = it1->p + pj};
+                BellmanState s1{.w = it1->w + wj, .p = it1->p + pj};
                 if (s1.w > c)
                     break;
                 if (s1.p > l.back().p) {
@@ -94,7 +94,7 @@ struct BellmanListRecData
     ItemPos j_max;
 };
 
-std::vector<State> opts_bellman_list(BellmanListRecData& data)
+std::vector<BellmanState> opts_bellman_list(BellmanListRecData& data)
 {
     LOG_FOLD_START(data.info, "solve n1 " << data.n1 << " n2 " << data.n2 << " c " << data.c << std::endl);
     if (data.c == 0) {
@@ -103,16 +103,16 @@ std::vector<State> opts_bellman_list(BellmanListRecData& data)
     }
 
     Profit lb = 0;
-    std::vector<State> l0{{0, 0}};
+    std::vector<BellmanState> l0{{0, 0}};
     for (ItemPos j=data.n1; j<=data.n2; ++j) {
         Weight wj = data.ins.item(j).w;
         Profit pj = data.ins.item(j).p;
-        std::vector<State> l{{0, 0}};
-        std::vector<State>::iterator it = l0.begin();
-        std::vector<State>::iterator it1 = l0.begin();
+        std::vector<BellmanState> l{{0, 0}};
+        std::vector<BellmanState>::iterator it = l0.begin();
+        std::vector<BellmanState>::iterator it1 = l0.begin();
         while (it != l0.end() || it1 != l0.end()) {
             if (it == l0.end() || it->w > it1->w + wj) {
-                State s1{it1->w+wj, it1->p+pj};
+                BellmanState s1{it1->w+wj, it1->p+pj};
                 if (s1.w > data.c) {
                     break;
                 }
@@ -165,10 +165,10 @@ void sopt_bellman_list_rec_rec(BellmanListRecData& data)
     {
         data.n1 = n1;
         data.n2 = k;
-        std::vector<State> l1 = opts_bellman_list(data);
+        std::vector<BellmanState> l1 = opts_bellman_list(data);
         data.n1 = k+1;
         data.n2 = n2;
-        std::vector<State> l2 = opts_bellman_list(data);
+        std::vector<BellmanState> l2 = opts_bellman_list(data);
 
         Profit z_max  = 0;
         Weight i1_opt = 0;

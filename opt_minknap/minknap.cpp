@@ -9,14 +9,14 @@
 
 using namespace knapsack;
 
-struct StatePart
+struct MinknapState
 {
     Weight w;
     Profit p;
     PartSol2 sol;
 };
 
-std::ostream& operator<<(std::ostream& os, const StatePart& s)
+std::ostream& operator<<(std::ostream& os, const MinknapState& s)
 {
     os << "(" << s.w << " " << s.p << ")";
     return os;
@@ -32,9 +32,9 @@ struct MinknapData
     Profit ub;
     ItemPos s;
     ItemPos t;
-    std::vector<StatePart> l0;
+    std::vector<MinknapState> l0;
     PartSolFactory2 psolf;
-    StatePart best_state;
+    MinknapState best_state;
     StateIdx distinct_state_number;
     Cpt lb_number;
     Cpt ub_number;
@@ -53,12 +53,12 @@ void add_item(MinknapData& d)
     ItemPos sx = (d.ins.int_left_size() > 0 && d.s == d.ins.first_sorted_item())?
             d.ins.first_item()-1: d.s;
     LOG(d.info, "sx " << sx << " tx " << tx << std::endl);
-    std::vector<StatePart> l;
-    std::vector<StatePart>::iterator it = d.l0.begin();
-    std::vector<StatePart>::iterator it1 = d.l0.begin();
+    std::vector<MinknapState> l;
+    std::vector<MinknapState>::iterator it = d.l0.begin();
+    std::vector<MinknapState>::iterator it1 = d.l0.begin();
     while (it != d.l0.end() || it1 != d.l0.end()) {
         if (it == d.l0.end() || it->w > it1->w + wt) {
-            StatePart s1{it1->w+wt, it1->p+pt, d.psolf.add(it1->sol)};
+            MinknapState s1{it1->w+wt, it1->p+pt, d.psolf.add(it1->sol)};
             LOG(d.info, "State " << *it1 << " => " << s1);
             if (l.empty() || s1.p > l.back().p) {
                 if (s1.w <= c && s1.p > d.lb) { // Update lower bound
@@ -132,9 +132,9 @@ void remove_item(MinknapData& d)
     ItemPos sx = (d.ins.int_left_size() > 0 && d.s == d.ins.first_sorted_item())?
             d.ins.first_item()-1: d.s-1;
     LOG(d.info, "sx " << sx << " tx " << tx << std::endl);
-    std::vector<StatePart> l;
-    std::vector<StatePart>::iterator it = d.l0.begin();
-    std::vector<StatePart>::iterator it1 = d.l0.begin();
+    std::vector<MinknapState> l;
+    std::vector<MinknapState>::iterator it = d.l0.begin();
+    std::vector<MinknapState>::iterator it1 = d.l0.begin();
     while (it != d.l0.end() || it1 != d.l0.end()) {
         if (it1 == d.l0.end() || it->w <= it1->w - ws) {
             LOG(d.info, "State " << *it);
@@ -160,7 +160,7 @@ void remove_item(MinknapData& d)
             }
             ++it;
         } else {
-            StatePart s1{it1->w-ws, it1->p-ps, d.psolf.remove(it1->sol)};
+            MinknapState s1{it1->w-ws, it1->p-ps, d.psolf.remove(it1->sol)};
             LOG(d.info, "State " << *it1 << " => " << s1);
             if (l.empty() || s1.p > l.back().p) {
                 if (s1.w <= c && s1.p > d.lb) { // Update lower bound

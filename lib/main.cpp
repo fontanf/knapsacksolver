@@ -77,34 +77,12 @@ int main(int argc, char *argv[])
         sopt = sopt_bellman_array_rec(ins, info);
     } else if (algorithm == "bellman_list") {
         opt_bellman_list(ins, info);
-    } else if (algorithm == "bellman_list_all") {
-        sopt = sopt_bellman_list_all(ins, info);
-    } else if (algorithm == "bellman_list_one") {
-        sopt = sopt_bellman_list_one(ins, info);
-    } else if (algorithm == "bellman_list_part") {
-        sopt = sopt_bellman_list_part(ins, info, k);
     } else if (algorithm == "bellman_list_rec") {
         sopt = sopt_bellman_list_rec(ins, info);
     } else if (algorithm == "dpprofits_array") { // dpprofits
         opt_dpprofits_array(ins, info);
     } else if (algorithm == "dpprofits_array_all") {
         sopt = sopt_dpprofits_array_all(ins, info);
-    } else if (algorithm == "dpprofits_array_one") {
-        sopt = sopt_dpprofits_array_one(ins, info);
-    } else if (algorithm == "dpprofits_array_part") {
-        sopt = sopt_dpprofits_array_part(ins, info, 64);
-    } else if (algorithm == "dpprofits_array_rec") {
-        sopt = sopt_dpprofits_array_rec(ins, info);
-    } else if (algorithm == "dpprofits_list") {
-        opt_dpprofits_list(ins, info);
-    } else if (algorithm == "dpprofits_list_all") {
-        sopt = sopt_dpprofits_list_all(ins, info);
-    } else if (algorithm == "dpprofits_list_one") {
-        sopt = sopt_dpprofits_list_one(ins, info);
-    } else if (algorithm == "dpprofits_list_part") {
-        sopt = sopt_dpprofits_list_part(ins, info);
-    } else if (algorithm == "dpprofits_list_rec") {
-        sopt = sopt_dpprofits_list_rec(ins, info);
     } else if (algorithm == "bab") { // bab
         sopt = sopt_bab(ins, info);
     } else if (algorithm == "astar") { // astar

@@ -11,11 +11,11 @@
 
 using namespace knapsack;
 
-struct StatePart
+struct BalknapState
 {
     Weight mu;
     Profit pi;
-    bool operator()(const StatePart& s1, const StatePart& s2)
+    bool operator()(const BalknapState& s1, const BalknapState& s2)
     {
         if (s1.mu != s2.mu)
             return s1.mu < s2.mu;
@@ -25,14 +25,14 @@ struct StatePart
     }
 };
 
-struct StateValuePart
+struct BalknapValue
 {
     ItemPos a;
     ItemPos a_prec;
     PartSol1 sol;
 };
 
-std::ostream& operator<<(std::ostream& os, const std::pair<StatePart, StateValuePart>& s)
+std::ostream& operator<<(std::ostream& os, const std::pair<BalknapState, BalknapValue>& s)
 {
     os
         << "(" << s.first.mu
@@ -156,7 +156,7 @@ Solution knapsack::sopt_balknap(Instance& ins, Info& info,
     VER(info, "Recursion..." << std::endl);
 
     // Create memory table
-    std::map<StatePart, StateValuePart, StatePart> map;
+    std::map<BalknapState, BalknapValue, BalknapState> map;
 
     // Initialization
     // Create first partial solution centered on the break item.
@@ -168,7 +168,7 @@ Solution knapsack::sopt_balknap(Instance& ins, Info& info,
     map.insert({{w_bar,p_bar},{b,f,psol_init}});
 
     // Best state. Note that it is not a pointer
-    std::pair<StatePart, StateValuePart> best_state = {map.begin()->first, map.begin()->second};
+    std::pair<BalknapState, BalknapValue> best_state = {map.begin()->first, map.begin()->second};
     // Also keep last added item to improve the variable reduction at the end.
     ItemPos last_item = b-1;
 
@@ -219,7 +219,7 @@ Solution knapsack::sopt_balknap(Instance& ins, Info& info,
         auto hint = s;
         hint--;
         while (s != map.begin() && (--s)->first.mu <= c) {
-            std::pair<StatePart, StateValuePart> s1 = {
+            std::pair<BalknapState, BalknapValue> s1 = {
                 {s->first.mu + wt, s->first.pi + pt},
                 {s->second.a, f, psolf.add(s->second.sol, t)}};
             Weight mu_ = s1.first.mu;
@@ -264,7 +264,7 @@ Solution knapsack::sopt_balknap(Instance& ins, Info& info,
             for (ItemPos j = s->second.a_prec; j < s->second.a; ++j) {
                 Weight mu_ = s->first.mu - ins.item(j).w;
                 Profit pi_ = s->first.pi - ins.item(j).p;
-                std::pair<StatePart, StateValuePart> s1 = {
+                std::pair<BalknapState, BalknapValue> s1 = {
                     {mu_, pi_},
                     {j, f, psolf.remove(s->second.sol, j)}};
 
