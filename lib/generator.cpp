@@ -160,7 +160,7 @@ Instance knapsack::generate(GenerateData data)
 
         Logger logger;
         Info info(logger, true);
-        Solution sopt = sopt_minknap(ins_tmp1, info);
+        Solution sopt = Minknap(ins_tmp1, MinknapParams()).run(info);
 
         ins.sort(info);
         ins.reduce2(sopt.profit(), info);

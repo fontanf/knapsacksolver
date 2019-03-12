@@ -4,17 +4,60 @@
 
 using namespace knapsack;
 
+Profit opt_bellman_array_test(Instance& ins)
+{
+    Logger logger;
+    Info info(logger, true);
+    return opt_bellman_array(ins, info);
+}
 
-Profit opt_bellman_array_test(Instance& ins) { Logger logger; Info info(logger, true); return opt_bellman_array(ins, info); }
-Profit opt_minknap_1_test(Instance& ins)     { Logger logger; Info info(logger, true); return sopt_minknap(ins, info, MinknapParams(), 1).profit(); }
-Profit opt_minknap_2_test(Instance& ins)     { Logger logger; Info info(logger, true); return sopt_minknap(ins, info, MinknapParams(), 2).profit(); }
-Profit opt_minknap_3_test(Instance& ins)     { Logger logger; Info info(logger, true); return sopt_minknap(ins, info, MinknapParams(), 3).profit(); }
+Profit opt_minknap_1_test(Instance& ins)
+{
+    Logger logger;
+    //Logger logger("", true);
+    Info info(logger, true);
+    auto p = MinknapParams::pure();
+    p.k = 1;
+    return Minknap(ins, p).run(info).profit();
+}
+
+Profit opt_minknap_2_test(Instance& ins)
+{
+    Logger logger;
+    //Logger logger("", true);
+    Info info(logger, true);
+    auto p = MinknapParams::pure();
+    p.k = 2;
+    return Minknap(ins, p).run(info).profit();
+}
+
+Profit opt_minknap_3_test(Instance& ins)
+{
+    Logger logger;
+    //Logger logger("", true);
+    Info info(logger, true);
+    auto p = MinknapParams::pure();
+    p.k = 3;
+    return Minknap(ins, p).run(info).profit();
+}
+
+Profit opt_minknap_combocore_test(Instance& ins)
+{
+    Logger logger;
+    //Logger logger("", true);
+    Info info(logger, true);
+    auto p = MinknapParams::pure();
+    p.k = 3;
+    p.combo_core = true;
+    return Minknap(ins, p).run(info).profit();
+}
 
 std::vector<Profit (*)(Instance&)> f = {
         opt_bellman_array_test,
         opt_minknap_1_test,
         opt_minknap_2_test,
         opt_minknap_3_test,
+        opt_minknap_combocore_test,
 };
 
 TEST(minknap, TEST)   { test(TEST, f); }

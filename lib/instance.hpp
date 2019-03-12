@@ -90,16 +90,39 @@ public:
     const Solution* optimal_solution() const { return sol_opt_; }
     Profit optimum() const;
 
-    ItemPos max_efficiency_item() const;
-    ItemPos max_weight_item() const;
-    ItemPos max_profit_item() const;
+    ItemPos max_efficiency_item(Info& info) const;
+    ItemPos before_break_item(Info& info) const;
+    ItemPos max_weight_item(Info& info) const;
+    ItemPos min_weight_item(Info& info) const;
+    ItemPos max_profit_item(Info& info) const;
+    ItemPos min_profit_item(Info& info) const;
+    /*
+     * Item of highest profit that can be added to the break solution once item
+     * b - 1 has been removed.
+     */
+    ItemPos gamma1(Info& info) const;
+    /*
+     * Item of lowest profit which has to be removed from the break solution so
+     * that item b can be added.
+     */
+    ItemPos gamma2(Info& info) const;
+    /*
+     * Item of highest profit that can be added to the break solution.
+     */
+    ItemPos beta1(Info& info) const;
+    /*
+     * Item of lowest profit which has to be removed from the break solution so
+     * that item b and b + 1 can be added.
+     */
+    ItemPos beta2(Info& info) const;
     std::vector<Weight> min_weights() const;
 
     /*
      * Sort items according to non-increasing profit-to-weight ratio.
      */
     void sort(Info& info);
-    bool sorted() const { return sorted_; }
+    int sort_type() const { return sort_type_; }
+    void set_sort_type(int type) { sort_type_ = type; }
 
     /**
      * Sort items partially according to non-increasing profit-to-weight
@@ -109,13 +132,25 @@ public:
      * (Pisinger, 1997).
      */
     void sort_partially(Info& info, ItemIdx limit=128);
+
     void sort_right(Profit lb);
     void sort_left(Profit lb);
     ItemPos int_right_size() const { return int_right_.size(); }
     ItemPos int_left_size()  const { return int_left_.size();  }
     ItemPos first_sorted_item() const { return s_; }
-    ItemPos last_sorted_item()  const { return t_; }
-    bool break_item_found() const { return (b_ != -1); }
+    ItemPos  last_sorted_item()  const { return t_; }
+    const std::vector<Interval>& int_right() const { return int_right_; }
+    const std::vector<Interval>& int_left()  const { return int_left_; }
+    std::pair<ItemPos, ItemPos> bound_items_add(ItemPos s, ItemPos t, Info& info) const;
+    std::pair<ItemPos, ItemPos> bound_items_rem(ItemPos s, ItemPos t, Info& info) const;
+    /**
+     * Compute improved initial core. See "Dynamic Programming and Strong
+     * Bounds for the 0-1 Knapsack Problem", 3. The Initial Core (Martello,
+     * 1999).
+     */
+    void init_combo_core(Info& info);
+    ItemPos first_initial_core_item() const { return s_init_; }
+    ItemPos  last_initial_core_item() const { return t_init_; }
 
     /**
      * Apply variable reduction. See "Knapsack Problem", Chap 3.2:
@@ -145,13 +180,11 @@ public:
     /**
      * Reduce item f..j-1, and add them to the reduced solution
      */
-    void set_first_item(ItemPos k);
+    void set_first_item(ItemPos k, Info& info);
     /**
      * Reduce items j+1..l (there are not added in the reduced solution)
      */
     void set_last_item(ItemPos k);
-
-    bool update_sorted();
 
     void fix(Info& info, const std::vector<int> vec);
 
@@ -168,7 +201,7 @@ public:
     void surrogate(Info& info, Weight multiplier, ItemIdx bound);
 
     const Solution* break_solution()   const { return sol_break_; }
-    ItemPos break_item()     const { assert(b_ >= first_item() && b_ <= last_item() + 1); return b_; }
+    ItemPos break_item()     const { return (sort_type_ >= 1)? b_: -1; }
     Profit  break_profit()   const;
     Weight  break_weight()   const;
     Weight  break_capacity() const;
@@ -207,6 +240,13 @@ private:
     std::pair<ItemPos, ItemPos> partition(ItemPos f, ItemPos l, Info& info);
     bool check();
     inline void swap(ItemPos j, ItemPos k) { Item tmp = items_[j]; items_[j] = items_[k]; items_[k] = tmp; };
+
+    /*
+     * Move item j to the initial core and carefully update int_right_ and
+     * int_left_.
+     */
+    void add_item_to_initial_core(ItemPos j, Info& info);
+
     std::vector<Item> get_isum() const;
     ItemPos ub_item(const std::vector<Item>& isum, Item item) const;
     void compute_break_item(Info& info);
@@ -227,8 +267,26 @@ private:
     Weight c_orig_;
     Solution* sol_opt_ = NULL; // Optimal solution
 
-    ItemPos f_, l_, s_, t_;
-    bool sorted_ = false;
+    // First and last items. Items moved before f_ or after l_ have their value
+    // fixed in the reduced solution.
+    ItemPos f_ = -1;
+    ItemPos l_ = -1;
+
+    // Core. Items between s_ and t_ are sorted by their efficiency.
+    ItemPos s_ = -1;
+    ItemIdx t_ = -1;
+
+    // Initial core.
+    ItemPos s_init_ = -1;
+    ItemPos t_init_ = -1;
+
+    /**
+     * 0: not sorted
+     * 1: partially sorted
+     * 2: fully sorted
+     */
+    int sort_type_ = 0;
+
     std::vector<Interval> int_right_, int_left_;
 
     Solution* sol_red_   = NULL; // Reduced solution

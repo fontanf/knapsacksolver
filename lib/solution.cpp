@@ -75,65 +75,6 @@ void Solution::clear()
     std::fill(x_.begin(), x_.end(), 0);
 }
 
-void Solution::update(const Solution& sol, Info& info, Cpt& solution_number, Profit ub)
-{
-    assert(sol.profit() > profit() && sol.remaining_capacity() >= 0);
-    *this = sol;
-    double t = info.elapsed_time();
-    std::string sol_str = "Solution" + std::to_string(solution_number);
-    PUT(info, sol_str + ".Value", sol.profit());
-    PUT(info, sol_str + ".Time", t);
-
-    VER(info, "--- Lower bound " << solution_number << " - Value: " << sol.profit());
-    if (ub != -1)
-        VER(info, " gap " << ub - sol.profit());
-    VER(info, " - Time " << t << std::endl);
-
-    solution_number++;
-    if (!info.only_write_at_the_end) {
-        info.write_ini();
-        write_cert(info.cert_file);
-    }
-}
-
-void Solution::update_ub(Profit& ub, Profit ub_new, Info& info, Cpt& ub_number, Profit lb)
-{
-    assert(ub == -1 || ub_new < ub);
-    ub = ub_new;
-    double t = info.elapsed_time();
-    std::string sol_str = "UB" + std::to_string(ub_number);
-    PUT(info, sol_str + ".Value", ub);
-    PUT(info, sol_str + ".Time", t);
-
-    VER(info, "--- Upper bound " << ub_number << " - Value: " << ub);
-    if (lb != -1)
-        VER(info, " gap " << ub - lb);
-    VER(info, " - Time " << t << std::endl);
-
-    ub_number++;
-    if (!info.only_write_at_the_end)
-        info.write_ini();
-}
-
-void Solution::update_lb(Profit& lb, Profit lb_new, Info& info, Cpt& lb_number, Profit ub)
-{
-    assert(lb_new > lb);
-    lb = lb_new;
-    double t = info.elapsed_time();
-    std::string sol_str = "Solution" + std::to_string(lb_number);
-    PUT(info, sol_str + ".Value", lb);
-    PUT(info, sol_str + ".Time", t);
-
-    VER(info, "--- Lower bound " << lb_number << " - Value: " << lb);
-    if (ub != -1)
-        VER(info, " gap " << ub - lb);
-    VER(info, " - Time " << t << std::endl);
-
-    lb_number++;
-    if (!info.only_write_at_the_end)
-        info.write_ini();
-}
-
 void Solution::write_cert(std::string file)
 {
     if (file != "") {
@@ -171,9 +112,13 @@ std::string Solution::to_string_binary_ordered() const
 std::string Solution::to_string_items() const
 {
     std::string s = "";
-    for (ItemPos j=0; j<instance().total_item_number(); ++j)
-        if (x_[j])
-            s += std::to_string(j) + ",";
+    for (ItemPos j=0; j<instance().total_item_number(); ++j) {
+        if (x_[j]) {
+            if (!s.empty())
+                s += ",";
+            s += std::to_string(j);
+        }
+    }
     return s;
 }
 

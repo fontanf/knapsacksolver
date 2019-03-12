@@ -4,11 +4,14 @@ using namespace knapsack;
 
 Solution knapsack::sol_greedy(const Instance& ins, Info& info)
 {
+    LOG_FOLD_START(info, "sol_greedy" << std::endl);
     VER(info, "*** greedy ***" << std::endl);
-    assert(ins.break_item_found());
+
+    assert(ins.sort_type() >= 1);
 
     Solution sol = *ins.break_solution();
     std::string best_algo = "Break";
+    LOG(info, "break " << sol.profit() << std::endl);
     ItemPos b = ins.break_item();
 
     if (b < ins.last_item()) {
@@ -48,6 +51,7 @@ Solution knapsack::sol_greedy(const Instance& ins, Info& info)
     VER(info, "Best algorithm: " << best_algo << std::endl);
     PUT(info, "Algorithm.Best", best_algo);
 
+    LOG_FOLD_END(info, "sol_greedy " << sol.profit());
     return algorithm_end(sol, info);
 }
 

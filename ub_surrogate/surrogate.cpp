@@ -243,8 +243,8 @@ SurrogateOut knapsack::ub_surrogate(const Instance& instance, Profit lb, Info& i
     // Compte s_min and s_max
     // s_min and s_max should ideally be (-)pmax*wmax, but this may cause
     // overflow
-    Weight wmax = ins.item(ins.max_weight_item()).w;
-    Profit pmax = ins.item(ins.max_profit_item()).p;
+    Weight wmax = ins.item(ins.max_weight_item(info)).w;
+    Profit pmax = ins.item(ins.max_profit_item(info)).p;
     Weight s_max = (INT_FAST64_MAX / pmax > wmax)?  pmax*wmax:  INT_FAST64_MAX;
     Weight s_min = (INT_FAST64_MAX / pmax > wmax)? -pmax*wmax: -INT_FAST64_MAX;
 

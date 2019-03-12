@@ -35,13 +35,6 @@ public:
     void clear();
     void resize(ItemIdx n) { x_.resize(n, 0); }
 
-    /**
-     * Replace the current solution by "sol" if it is better.
-     */
-    void update(const Solution& sol, Info& info, Cpt& solution_number, Profit ub=-1);
-    static void update_lb(Profit& lb, Profit lb_new, Info& info, Cpt& lb_number, Profit ub=-1);
-    static void update_ub(Profit& ub, Profit ub_new, Info& info, Cpt& ub_number, Profit lb=-1);
-
     void update_from_partsol(const PartSolFactory1& psolf, PartSol1 psol);
     void update_from_partsol(const PartSolFactory2& psolf, PartSol2 psol);
 

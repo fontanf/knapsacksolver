@@ -14,10 +14,11 @@ struct BalknapParams
     Cpt cpt_surrogate   = 2000;
     Cpt cpt_solve_sur   = 2000;
     Cpt cpt_pairing     = 10000;
+    ItemPos k           = 64;
 };
 
 Solution sopt_balknap(Instance& ins, Info& info,
-        BalknapParams params = BalknapParams(), ItemPos k = 64, Profit ub = -1);
+        BalknapParams params = BalknapParams(), Profit ub = -1);
 
 }
 

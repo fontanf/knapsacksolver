@@ -6,7 +6,7 @@
 
 using namespace knapsack;
 
-Profit opt_minknap_test(Instance& ins)  { Logger logger; Info info(logger, true); return sopt_minknap(ins, info).profit(); }
+Profit opt_minknap_test(Instance& ins) { Logger logger; Info info(logger, true); return Minknap(ins, MinknapParams()).run(info).profit(); }
 Profit ub_surrogate_test(Instance& ins)
 {
     Logger logger;

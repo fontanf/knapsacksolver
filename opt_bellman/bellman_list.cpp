@@ -28,7 +28,7 @@ Profit knapsack::opt_bellman_list(const Instance& ins, Info& info)
 
     Weight  c = ins.total_capacity();
     ItemPos n = ins.total_item_number();
-    ItemPos j_max = ins.max_efficiency_item();
+    ItemPos j_max = ins.max_efficiency_item(info);
 
     if (n == 0 || c == 0)
         return algorithm_end(0, info);
@@ -84,7 +84,7 @@ struct BellmanListRecData
         ins(ins), info(info),
         n1(0), n2(ins.total_item_number()-1), c(ins.total_capacity()),
         sol_curr(ins),
-        j_max(ins.max_efficiency_item()) {  }
+        j_max(ins.max_efficiency_item(info)) {  }
     const Instance& ins;
     Info& info;
     ItemPos n1;

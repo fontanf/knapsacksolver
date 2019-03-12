@@ -95,7 +95,8 @@ int main(int argc, char *argv[])
         sopt = sopt_balknap(ins, info, p, k);
     } else if (algorithm == "minknap") { // minknap
         MinknapParams p;
-        sopt = sopt_minknap(ins, info, p, k);
+        p.k = k;
+        sopt = Minknap(ins, p).run(info);
     } else if (algorithm == "greedy") { // greedy
         ins.sort_partially(info);
         sopt = sol_greedy(ins, info);

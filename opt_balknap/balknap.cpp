@@ -35,27 +35,34 @@ struct BalknapValue
 std::ostream& operator<<(std::ostream& os, const std::pair<BalknapState, BalknapValue>& s)
 {
     os
-        << "(" << s.first.mu
-        << " " << s.first.pi
-        << " " << s.second.a
-        << " " << s.second.a_prec
+        << "(mu " << s.first.mu
+        << " pi " << s.first.pi
+        << " a " << s.second.a
+        << " ap " << s.second.a_prec
         //<< " s " << std::bitset<16>(s.second.sol)
         << ")";
     return os;
 }
 
 Solution knapsack::sopt_balknap(Instance& ins, Info& info,
-        BalknapParams params, ItemPos k, Profit o)
+        BalknapParams params, Profit o)
 {
+    LOG_FOLD_START(info, "balknap k " << params.k << std::endl);
     if (o == -1)
-        VER(info, "**** balknap (" << k << ") ***" << std::endl;);
+        VER(info, "**** balknap (" << params.k << ") ***" << std::endl;);
 
-    Cpt lb_number = 0;
-    Cpt ub_number = 0;
     Solution sol(ins);
+    if (ins.item_number() == 0 || ins.capacity() == 0) {
+        LOG_FOLD_END(info, "no item or null capacity");
+        if (ins.reduced_solution() != NULL && ins.reduced_solution()->profit() > sol.profit()) {
+            return algorithm_end(*ins.reduced_solution(), info);
+        } else {
+            return algorithm_end(sol, info);
+        }
+    }
+
     Profit lb = 0;
     Profit ub = -1;
-
     if (o != -1) {
         lb = o-1;
         ub = o;
@@ -70,49 +77,48 @@ Solution knapsack::sopt_balknap(Instance& ins, Info& info,
     // If all items fit in the knapsack then return break solution
     if (ins.break_item() == ins.last_item()+1) {
         if (ins.break_solution()->profit() > sol.profit())
-            sol.update(*ins.break_solution(), info, lb_number, ub);
+            sol = *ins.break_solution();
+        LOG_FOLD_END(info, "all items fit in the knapsack");
         return algorithm_end(sol, info);
     }
 
     // Compute initial lower bound
     VER(info, "Compute initial lower bound..." << std::endl);
+    Solution sol_tmp = *ins.break_solution();
     if (params.cpt_greedynlogn == 0) {
         params.cpt_greedynlogn = -1;
         Info info_tmp(info.logger);
         Solution sol_tmp = sol_greedynlogn(ins, info_tmp);
-        if (sol_tmp.profit() > lb) {
-            sol.update(sol_tmp, info, lb_number, ub);
-            lb = sol.profit();
-        }
     } else if (params.cpt_greedy == 0) {
         params.cpt_greedy = -1;
         Info info_tmp(info.logger);
         Solution sol_tmp = sol_greedy(ins, info_tmp);
-        if (sol_tmp.profit() > lb) {
-            sol.update(sol_tmp, info, lb_number, ub);
-            lb = sol.profit();
-        }
-    } else {
-        Solution sol_tmp = *ins.break_solution();
-        if (sol_tmp.profit() > lb) {
-            sol.update(sol_tmp, info, lb_number, ub);
-            lb = sol.profit();
-        }
     }
-    if (lb == ub)
+    if (sol_tmp.profit() > lb) {
+        sol = sol_tmp;
+        lb = sol.profit();
+    }
+    LOG(info, "lb " << lb << std::endl);
+    if (lb == ub) {
+        LOG_FOLD_END(info, "lb is optimal");
         return algorithm_end(sol, info);
+    }
 
     // Variable reduction
     // If we already know the optimal value, we can use opt-1 as lower bound
     // for the reduction.
     if (params.ub_type == 'b') {
         ins.reduce1(lb, info);
-        if (ins.capacity() < 0)
+        if (ins.capacity() < 0) {
+            LOG_FOLD_END(info, "negative capacity");
             return algorithm_end(sol, info);
+        }
     } else if (params.ub_type == 't') {
         ins.reduce2(lb, info);
-        if (ins.capacity() < 0)
+        if (ins.capacity() < 0) {
+            LOG_FOLD_END(info, "negative capacity");
             return algorithm_end(sol, info);
+        }
     }
     Weight  c = ins.total_capacity();
     ItemPos f = ins.first_item();
@@ -120,22 +126,29 @@ Solution knapsack::sopt_balknap(Instance& ins, Info& info,
     ItemPos n = ins.item_number();
 
     // Trivial cases
-    // Return the best solution between the solution of the trivial instance and
-    // the solution used for the reduction.
-    if (n == 0 || c == 0) {
-        if (ins.reduced_solution()->profit() > sol.profit())
-            sol.update(*ins.reduced_solution(), info, lb_number, ub);
-        return algorithm_end(sol, info);
+    if (n == 0 || ins.capacity() == 0) {
+        LOG_FOLD_END(info, "no item or null capacity");
+        if (ins.reduced_solution()->profit() > sol.profit()) {
+            return algorithm_end(*ins.reduced_solution(), info);
+        } else {
+            return algorithm_end(sol, info);
+        }
     } else if (n == 1) {
         Solution sol_tmp = *ins.reduced_solution();
         sol_tmp.set(f, true);
-        if (sol_tmp.profit() > sol.profit())
-            sol.update(sol_tmp, info, lb_number, ub);
-        return algorithm_end(sol, info);
+        LOG_FOLD_END(info, "1 item");
+        if (sol_tmp.profit() > sol.profit()) {
+            return algorithm_end(sol_tmp, info);
+        } else {
+            return algorithm_end(sol, info);
+        }
     } else if (ins.break_item() == ins.last_item()+1) {
-        if (ins.break_solution()->profit() > sol.profit())
-            sol.update(*ins.break_solution(), info, lb_number, ub);
-        return algorithm_end(sol, info);
+        LOG_FOLD_END(info, "all items fit in the knapsack");
+        if (ins.break_solution()->profit() > sol.profit()) {
+            return algorithm_end(*ins.break_solution(), info);
+        } else {
+            return algorithm_end(sol, info);
+        }
     }
 
     ItemPos b    = ins.break_item();
@@ -145,13 +158,20 @@ Solution knapsack::sopt_balknap(Instance& ins, Info& info,
     Info info_tmp(info.logger);
     Profit ub_tmp = ub_dantzig(ins, info_tmp);
     if (ub == -1 || ub_tmp < ub)
-        Solution::update_ub(ub, ub_tmp, info, ub_number, lb);
+        ub = ub_tmp;
+    LOG(info, "ub " << ub << std::endl);
 
-    if (ins.break_solution()->profit() > lb)
-        sol.update(*ins.break_solution(), info, lb_number, ub);
+    LOG(info, ins);
+    if (ins.break_solution()->profit() > lb) {
+        sol = *ins.break_solution();
+        lb = sol.profit();
+        LOG(info, "lb " << lb << std::endl);
+    }
 
-    if (lb == ub) // If UB == LB, then stop
+    if (lb == ub) { // If UB == LB, then stop
+        LOG_FOLD_END(info, "lb is optimal");
         return algorithm_end(sol, info);
+    }
 
     VER(info, "Recursion..." << std::endl);
 
@@ -160,7 +180,7 @@ Solution knapsack::sopt_balknap(Instance& ins, Info& info,
 
     // Initialization
     // Create first partial solution centered on the break item.
-    PartSolFactory1 psolf(ins, k, b, f, l);
+    PartSolFactory1 psolf(ins, params.k, b, f, l);
     PartSol1 psol_init = 0;
     for (ItemPos j=f; j<b; ++j)
         psol_init = psolf.add(psol_init, j);
@@ -174,6 +194,7 @@ Solution knapsack::sopt_balknap(Instance& ins, Info& info,
 
     // Recursion
     for (ItemPos t=b; t<=l; ++t) {
+        LOG(info, "t " << t << " (" << ins.item(t) << ")" << std::endl);
         Weight wt = ins.item(t).w;
         Profit pt = ins.item(t).p;
 
@@ -182,6 +203,7 @@ Solution knapsack::sopt_balknap(Instance& ins, Info& info,
             goto end;
 
         // Bounding
+        LOG(info, "bound" << std::endl);
         Profit ub_t = 0;
         for (auto s = map.begin(); s != map.end() && s->first.mu <= c;) {
             Profit pi = s->first.pi;
@@ -197,6 +219,7 @@ Solution knapsack::sopt_balknap(Instance& ins, Info& info,
                     ub_dembo_rev(ins, s->second.a, pi, c-mu);
             }
             if (ub_local < lb) {
+                LOG(info, "remove " << *s << std::endl);
                 map.erase(s++);
             } else {
                 if (ub_t < ub_local)
@@ -205,7 +228,7 @@ Solution knapsack::sopt_balknap(Instance& ins, Info& info,
             }
         }
         if (ub_t < ub) {
-            Solution::update_ub(ub, ub_t, info, ub_number, lb);
+            ub = ub_t;
             if (lb == ub)
                 goto end;
         }
@@ -215,6 +238,7 @@ Solution knapsack::sopt_balknap(Instance& ins, Info& info,
             break;
 
         // Add item t
+        LOG(info, "add" << std::endl);
         auto s = map.upper_bound({c+1,0});
         auto hint = s;
         hint--;
@@ -222,12 +246,13 @@ Solution knapsack::sopt_balknap(Instance& ins, Info& info,
             std::pair<BalknapState, BalknapValue> s1 = {
                 {s->first.mu + wt, s->first.pi + pt},
                 {s->second.a, f, psolf.add(s->second.sol, t)}};
+            LOG(info, s1);
             Weight mu_ = s1.first.mu;
             Profit pi_ = s1.first.pi;
 
             // Update LB
             if (mu_ <= c && pi_ > lb) {
-                Solution::update_lb(lb, pi_, info, lb_number, ub);
+                lb = pi_;
                 best_state = s1;
                 last_item = t;
                 if (lb == ub)
@@ -245,9 +270,12 @@ Solution knapsack::sopt_balknap(Instance& ins, Info& info,
                     ub_dembo(ins, t+1, pi_, c-mu_):
                     ub_dembo_rev(ins, s->second.a-1, pi_, c-mu_);
             }
-            if (ub_local <= lb)
+            if (ub_local <= lb) {
+                LOG(info, " ×" << std::endl);
                 continue;
+            }
 
+            LOG(info, " ok" << std::endl);
             hint = map.insert(hint, s1);
             if (hint->second.a < s->second.a) {
                 hint->second.a    = s->second.a;
@@ -257,11 +285,14 @@ Solution knapsack::sopt_balknap(Instance& ins, Info& info,
         }
 
         // Remove previously added items
+        LOG(info, "remove" << std::endl);
         for (auto s = map.rbegin(); s != map.rend() && s->first.mu > c; ++s) {
             if (s->first.mu > c + wt)
                 continue;
+            LOG(info, *s << std::endl);
 
             for (ItemPos j = s->second.a_prec; j < s->second.a; ++j) {
+                LOG(info, "j " << j);
                 Weight mu_ = s->first.mu - ins.item(j).w;
                 Profit pi_ = s->first.pi - ins.item(j).p;
                 std::pair<BalknapState, BalknapValue> s1 = {
@@ -270,7 +301,7 @@ Solution knapsack::sopt_balknap(Instance& ins, Info& info,
 
                 // Update LB
                 if (mu_ <= c && pi_ > lb) {
-                    Solution::update_lb(lb, pi_, info, lb_number, ub);
+                    lb = pi_;
                     best_state = s1;
                     last_item = t;
                     if (lb == ub)
@@ -288,9 +319,12 @@ Solution knapsack::sopt_balknap(Instance& ins, Info& info,
                         ub_dembo(ins, t+1, pi_, c-mu_):
                         ub_dembo_rev(ins, j-1, pi_, c-mu_);
                 }
-                if (ub_local <= lb)
+                if (ub_local <= lb) {
+                    LOG(info, " ×" << std::endl);
                     continue;
+                }
 
+                LOG(info, " ok" << std::endl);
                 auto res = map.insert(s1);
                 if (!res.second) {
                     if (res.first->second.a < j) {
@@ -306,18 +340,23 @@ Solution knapsack::sopt_balknap(Instance& ins, Info& info,
 end:
 
     // If we didn't improve sol, then it means that sol was optimal
-    if (best_state.first.pi < sol.profit())
+    if (best_state.first.pi < sol.profit()) {
+        LOG_FOLD_END(info, "sol is optimal");
         return algorithm_end(sol, info);
+    }
+    LOG(info, "best_state " << best_state << std::endl);
+    LOG(info, "partial sol " << std::bitset<64>(best_state.second.sol) << std::endl);
 
     // Reduce instance to items from best_state.second.a to last_item and remove
     // the items from the partial solution from the instance.
     // Then run the algorithm again.
-    ins.set_first_item(best_state.second.a);
+    ins.set_first_item(best_state.second.a, info);
     ins.set_last_item(last_item);
     ins.fix(info, psolf.vector(best_state.second.sol));
 
     Info info_tmp3(info.logger);
-    sol = knapsack::sopt_balknap(ins, info_tmp3, params, k, best_state.first.pi);
+    sol = knapsack::sopt_balknap(ins, info_tmp3, params, best_state.first.pi);
+    LOG_FOLD_END(info, "balknap");
     return algorithm_end(sol, info);
 }
 

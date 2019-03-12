@@ -46,14 +46,13 @@ Solution knapsack::sopt_astar(Instance& ins, Info& info)
         return algorithm_end(sol, info);
     }
 
-    ItemPos j_max = ins.max_efficiency_item();
+    ItemPos j_max = ins.max_efficiency_item(info);
     std::vector<Weight> min_weight = ins.min_weights();
 
     std::priority_queue<Node, std::vector<Node>, Compare> q;
     Cpt q_max_size = 0;
     Cpt q_average_size = 0;
     Cpt node_number = 0;
-    Cpt sol_number = 0;
 
     Solution sol_best(ins);
 
@@ -79,7 +78,7 @@ Solution knapsack::sopt_astar(Instance& ins, Info& info)
 
         // Update best solution
         if (node.sol.profit() > sol_best.profit())
-            sol_best.update(node.sol, info, sol_number);
+            sol_best = node.sol;
 
         // Stop condition
         if (node.ub <= sol_best.profit())
@@ -262,7 +261,7 @@ Solution knapsack::sopt_astar_dp(Instance& ins, Info& info)
     }
 
     // Compute min weight table
-    ItemPos j_max = ins.max_efficiency_item();
+    ItemPos j_max = ins.max_efficiency_item(info);
     std::vector<Weight> min_weight = ins.min_weights();
 
     std::set<NodeDP*, NodeDPCompare> q;

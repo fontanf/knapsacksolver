@@ -21,6 +21,6 @@ cc_test(
                 "//opt_minknap:minknap",
                 "//opt_bellman:bellman"
         ],
-        timeout = "moderate",
+        timeout = "long",
 )
 
