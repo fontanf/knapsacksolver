@@ -226,7 +226,7 @@ Profit Instance::check(std::string cert_file)
     return sol.profit();
 }
 
-/***************************** Compute Properties *****************************/
+/******************************************************************************/
 
 ItemPos Instance::max_efficiency_item(Info& info) const
 {
@@ -357,36 +357,14 @@ ItemPos Instance::beta2(Info& info) const
     return k;
 }
 
+Profit Instance::optimum() const
+{
+    if (optimal_solution() == NULL)
+        return -1;
+    return optimal_solution()->profit();
+}
+
 /******************************************************************************/
-
-void Instance::sort(Info& info)
-{
-    LOG_FOLD_START(info, "sort" << std::endl);
-    if (sort_type() == 2) {
-        LOG_FOLD_END(info, "sort already sorted");
-        return;
-    }
-    if (sol_red_ == NULL)
-        sol_red_ = new Solution(*this);
-    sort_type_ = 2;
-    if (item_number() > 1)
-        std::sort(items_.begin()+first_item(), items_.begin()+last_item()+1,
-                [](const Item& i1, const Item& i2) {
-                return i1.p * i2.w > i2.p * i1.w;});
-
-    compute_break_item(info);
-    LOG_FOLD_END(info, "sort");
-}
-
-ItemPos Instance::ub_item(const std::vector<Item>& isum, Item item) const
-{
-    assert(sort_type() == 2);
-    auto s = std::upper_bound(isum.begin()+f_, isum.begin()+l_+1, item,
-            [](const Item& i1, const Item& i2) { return i1.w < i2.w;});
-    if (s == isum.begin()+l_+1)
-        return l_+1;
-    return s->j-1;
-}
 
 void Instance::compute_break_item(Info& info)
 {
@@ -426,6 +404,27 @@ Weight Instance::capacity() const
 {
     return (reduced_solution() == NULL)?
         total_capacity(): total_capacity() - reduced_solution()->weight();
+}
+
+/******************************************************************************/
+
+void Instance::sort(Info& info)
+{
+    LOG_FOLD_START(info, "sort" << std::endl);
+    if (sort_type() == 2) {
+        LOG_FOLD_END(info, "sort already sorted");
+        return;
+    }
+    if (sol_red_ == NULL)
+        sol_red_ = new Solution(*this);
+    sort_type_ = 2;
+    if (item_number() > 1)
+        std::sort(items_.begin()+first_item(), items_.begin()+last_item()+1,
+                [](const Item& i1, const Item& i2) {
+                return i1.p * i2.w > i2.p * i1.w;});
+
+    compute_break_item(info);
+    LOG_FOLD_END(info, "sort");
 }
 
 void Instance::remove_big_items(Info& info)
@@ -775,41 +774,6 @@ void Instance::init_combo_core(Info& info)
     LOG_FOLD_END(info, "init_combo_core" << std::endl);
 }
 
-/******************************************************************************/
-
-void Instance::surrogate(Info& info, Weight multiplier, ItemIdx bound)
-{
-    surrogate(info, multiplier, bound, first_item());
-}
-
-void Instance::surrogate(Info& info, Weight multiplier, ItemIdx bound, ItemPos first)
-{
-    sol_break_->clear();
-    if (sol_opt_ != NULL) {
-        delete sol_opt_;
-        sol_opt_ = NULL;
-    }
-    f_ = first;
-    l_ = last_item();
-    for (ItemIdx j=f_; j<=l_; ++j)
-        sol_red_->set(j, false);
-    bound -= sol_red_->item_number();
-    for (ItemIdx j=f_; j<=l_; ++j) {
-        items_[j].w += multiplier;
-        if (items_[j].w <= 0) {
-            sol_red_->set(j, true);
-            swap(j, f_);
-            f_++;
-        }
-    }
-    c_orig_ += multiplier * bound;
-
-    sort_type_ = 0;
-    sort_partially(info);
-}
-
-/******************************************************************************/
-
 void Instance::reduce1(Profit lb, Info& info)
 {
     LOG_FOLD_START(info, "reduce1 - lb " << lb << " b_ " << b_ << std::endl;);
@@ -863,6 +827,16 @@ void Instance::reduce1(Profit lb, Info& info)
     LOG(info, "n " << item_number() << "/" << total_item_number() << std::endl);
     LOG(info, "c " << capacity() << "/" << total_capacity() << std::endl);
     LOG_FOLD_END(info, "reduce1");
+}
+
+ItemPos Instance::ub_item(const std::vector<Item>& isum, Item item) const
+{
+    assert(sort_type() == 2);
+    auto s = std::upper_bound(isum.begin()+f_, isum.begin()+l_+1, item,
+            [](const Item& i1, const Item& i2) { return i1.w < i2.w;});
+    if (s == isum.begin()+l_+1)
+        return l_+1;
+    return s->j-1;
 }
 
 void Instance::reduce2(Profit lb, Info& info)
@@ -969,8 +943,6 @@ void Instance::reduce2(Profit lb, Info& info)
     LOG_FOLD_END(info, "reduce2");
 }
 
-/******************************************************************************/
-
 void Instance::set_first_item(ItemPos k, Info& info)
 {
     LOG_FOLD_START(info, "set_first_item k " << k << std::endl);
@@ -1037,11 +1009,35 @@ void Instance::fix(Info& info, const std::vector<int> vec)
 
 /******************************************************************************/
 
-Profit Instance::optimum() const
+void Instance::surrogate(Info& info, Weight multiplier, ItemIdx bound)
 {
-    if (optimal_solution() == NULL)
-        return -1;
-    return optimal_solution()->profit();
+    surrogate(info, multiplier, bound, first_item());
+}
+
+void Instance::surrogate(Info& info, Weight multiplier, ItemIdx bound, ItemPos first)
+{
+    sol_break_->clear();
+    if (sol_opt_ != NULL) {
+        delete sol_opt_;
+        sol_opt_ = NULL;
+    }
+    f_ = first;
+    l_ = last_item();
+    for (ItemIdx j=f_; j<=l_; ++j)
+        sol_red_->set(j, false);
+    bound -= sol_red_->item_number();
+    for (ItemIdx j=f_; j<=l_; ++j) {
+        items_[j].w += multiplier;
+        if (items_[j].w <= 0) {
+            sol_red_->set(j, true);
+            swap(j, f_);
+            f_++;
+        }
+    }
+    c_orig_ += multiplier * bound;
+
+    sort_type_ = 0;
+    sort_partially(info);
 }
 
 /******************************************************************************/

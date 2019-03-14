@@ -63,7 +63,7 @@ gnuplot> plot 'ins.plot' u 1:2
 
 For those algorithms, if required, the Upper bound used is neccessarly `U0`.
 
-- Dynamic programming with Bellman recursion `-a bellman_array` :heavy_check_mark: `-a bellman_array_all` :heavy_check_mark: `-a bellman_array_one` :heavy_check_mark: `-a bellman_array_part` :heavy_check_mark: `-a bellman_array_rec` :heavy_check_mark: `-a bellman_list` :heavy_check_mark: `-a bellman_list_rec`
+- Dynamic programming with Bellman recursion `-a bellman_array` :heavy_check_mark: `-a bellman_array_all` :heavy_check_mark: `-a bellman_array_one` :heavy_check_mark: `-a bellman_array_part` :heavy_check_mark: `-a bellman_array_rec` :heavy_check_mark: `-a bellman_list` :heavy_check_mark: `-a bellman_list_rec` :heavy_check_mark:
 - Dynamic programming by Profits `-a dpprofits_array` :heavy_check_mark: `-a dpprofits_array_all` :heavy_check_mark:
 - Primal Branch-and-bound `-a bab` :heavy_check_mark:
 

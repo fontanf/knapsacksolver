@@ -20,6 +20,7 @@ cc_library(
                 "-lboost_filesystem",
                 "-lboost_program_options",
                 "-lboost_regex",
+                "-lpthread",
         ],
         visibility = ["//visibility:public"],
         include_prefix = "knapsack/lib/",

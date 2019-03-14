@@ -24,7 +24,8 @@ int main(int argc, char *argv[])
     std::string cert_filepath = "";
     std::string log_filepath = "";
     int log_levelmax = 999;
-
+    Cpt cpt_surrogate = -2;
+    Cpt cpt_greedynlogn = -2;
     ItemPos k = 64;
 
     po::options_description desc("Allowed options");
@@ -36,6 +37,8 @@ int main(int argc, char *argv[])
         ("output,o", po::value<std::string>(&output_filepath), "set output file")
         ("cert,c", po::value<std::string>(&cert_filepath), "set certificate file")
         ("part-size,x", po::value<ItemPos>(&k), "")
+        ("surrogate,s", po::value<Cpt>(&cpt_surrogate), "")
+        ("greedynlogn,g", po::value<Cpt>(&cpt_greedynlogn), "")
         ("verbose,v", "")
         ("log,l", po::value<std::string>(&log_filepath), "set log file")
         ("loglevelmax", po::value<int>(&log_levelmax), "set log max level")
@@ -89,7 +92,11 @@ int main(int argc, char *argv[])
         sopt = sopt_astar(ins, info);
     } else if (algorithm == "expknap") { // expknap
         ExpknapParams p;
-        sopt = sopt_expknap(ins, info, p);
+        if (cpt_surrogate != 2)
+            p.ub_surrogate = cpt_surrogate;
+        if (cpt_greedynlogn != 2)
+            p.lb_greedynlogn = cpt_greedynlogn;
+        sopt = Expknap(ins, p).run(info);
     } else if (algorithm == "balknap") { // balknap
         BalknapParams p;
         sopt = sopt_balknap(ins, info, p, k);
