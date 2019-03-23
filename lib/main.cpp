@@ -18,12 +18,12 @@ int main(int argc, char *argv[])
 
     // Parse program options
     std::string algorithm = "bellman_array";
-    std::string instance_filepath = "";
-    std::string output_filepath = "";
+    std::string instancefile = "";
+    std::string outputfile = "";
     std::string format = "knapsack_standard";
-    std::string cert_filepath = "";
-    std::string log_filepath = "";
-    int log_levelmax = 999;
+    std::string certfile = "";
+    std::string logfile = "";
+    int loglevelmax = 999;
     Cpt cpt_surrogate = -2;
     Cpt cpt_greedynlogn = -2;
     ItemPos k = 64;
@@ -32,16 +32,16 @@ int main(int argc, char *argv[])
     desc.add_options()
         ("help,h", "produce help message")
         ("algorithm,a", po::value<std::string>(&algorithm), "set algorithm")
-        ("input,i", po::value<std::string>(&instance_filepath)->required(), "set input file (required)")
+        ("input,i", po::value<std::string>(&instancefile)->required(), "set input file (required)")
         ("format,f", po::value<std::string>(&format), "set input file format (default: knapsack_standard)")
-        ("output,o", po::value<std::string>(&output_filepath), "set output file")
-        ("cert,c", po::value<std::string>(&cert_filepath), "set certificate file")
+        ("output,o", po::value<std::string>(&outputfile), "set output file")
+        ("cert,c", po::value<std::string>(&certfile), "set certificate file")
         ("part-size,x", po::value<ItemPos>(&k), "")
         ("surrogate,s", po::value<Cpt>(&cpt_surrogate), "")
         ("greedynlogn,g", po::value<Cpt>(&cpt_greedynlogn), "")
         ("verbose,v", "")
-        ("log,l", po::value<std::string>(&log_filepath), "set log file")
-        ("loglevelmax", po::value<int>(&log_levelmax), "set log max level")
+        ("log,l", po::value<std::string>(&logfile), "set log file")
+        ("loglevelmax", po::value<int>(&loglevelmax), "set log max level")
         ("log2stderr", "write log in stderr")
         ;
     po::variables_map vm;
@@ -57,16 +57,19 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    if (!boost::filesystem::exists(instance_filepath)) {
-        std::cerr << instance_filepath << ": file not found." << std::endl;
+    if (!boost::filesystem::exists(instancefile)) {
+        std::cerr << instancefile << ": file not found." << std::endl;
         return 1;
     }
 
-    Instance ins(instance_filepath, format);
+    Instance ins(instancefile, format);
     Solution sopt(ins);
 
-    Logger logger(log_filepath, vm.count("log2stderr"), log_levelmax);
-    Info info(logger, vm.count("verbose"));
+    Info info = Info(logfile)
+        .set_verbose(vm.count("verbose"))
+        .set_log2stderr(vm.count("log2stderr"))
+        .set_loglevelmax(loglevelmax)
+        .set_outputfile(outputfile);
 
     if (algorithm == "bellman_array") { // bellman
         opt_bellman_array(ins, info);
@@ -99,7 +102,7 @@ int main(int argc, char *argv[])
         sopt = Expknap(ins, p).run(info);
     } else if (algorithm == "balknap") { // balknap
         BalknapParams p;
-        sopt = sopt_balknap(ins, info, p, k);
+        sopt = sopt_balknap(ins, p, k, info);
     } else if (algorithm == "minknap") { // minknap
         MinknapParams p;
         p.k = k;
@@ -117,13 +120,12 @@ int main(int argc, char *argv[])
         ub_dantzig(ins, info);
     } else if (algorithm == "surrelax") { // surrelax
         ins.sort_partially(info);
-        Info info_tmp(info.logger);
-        Solution sol = sol_greedynlogn(ins, info_tmp);
+        Solution sol = sol_greedynlogn(ins, Info(info, false, true));
         ub_surrogate(ins, sol.profit(), info);
     }
 
-    info.write_ini(output_filepath); // Write output file
-    sopt.write_cert(cert_filepath); // Write certificate file
+    info.write_ini(outputfile);
+    sopt.write_cert(certfile);
     return 0;
 }
 

@@ -19,7 +19,7 @@ void opts_bellman_array(const Instance& ins, std::vector<Profit>& values,
     }
 }
 
-Profit knapsack::opt_bellman_array(const Instance& ins, Info& info)
+Profit knapsack::opt_bellman_array(const Instance& ins, Info info)
 {
     VER(info, "*** bellman (array) ***" << std::endl);
 

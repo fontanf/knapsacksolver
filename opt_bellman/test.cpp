@@ -3,15 +3,15 @@
 
 using namespace knapsack;
 
-Profit opt_bellman_array_test(Instance& ins)       { Logger logger; Info info(logger, true); return opt_bellman_array(ins, info); }
-Profit opt_bellman_array_all_test(Instance& ins)   { Logger logger; Info info(logger, true); return sopt_bellman_array_all(ins, info).profit(); }
-Profit opt_bellman_array_one_test(Instance& ins)   { Logger logger; Info info(logger, true); return sopt_bellman_array_one(ins, info).profit(); }
-Profit opt_bellman_array_part1_test(Instance& ins) { Logger logger; Info info(logger, true); return sopt_bellman_array_part(ins, info, 1).profit(); }
-Profit opt_bellman_array_part2_test(Instance& ins) { Logger logger; Info info(logger, true); return sopt_bellman_array_part(ins, info, 2).profit(); }
-Profit opt_bellman_array_part3_test(Instance& ins) { Logger logger; Info info(logger, true); return sopt_bellman_array_part(ins, info, 3).profit(); }
-Profit opt_bellman_array_rec_test(Instance& ins)   { Logger logger; Info info(logger, true); return sopt_bellman_array_rec(ins, info).profit(); }
-Profit opt_bellman_list_test(Instance& ins)        { Logger logger; Info info(logger, true); return opt_bellman_list(ins, info); }
-Profit opt_bellman_list_rec_test(Instance& ins)    { Logger logger; Info info(logger, true); return sopt_bellman_list_rec(ins, info).profit(); }
+Profit opt_bellman_array_test(Instance& ins)       { return opt_bellman_array(ins); }
+Profit opt_bellman_array_all_test(Instance& ins)   { return sopt_bellman_array_all(ins).profit(); }
+Profit opt_bellman_array_one_test(Instance& ins)   { return sopt_bellman_array_one(ins).profit(); }
+Profit opt_bellman_array_part1_test(Instance& ins) { return sopt_bellman_array_part(ins, 1).profit(); }
+Profit opt_bellman_array_part2_test(Instance& ins) { return sopt_bellman_array_part(ins, 2).profit(); }
+Profit opt_bellman_array_part3_test(Instance& ins) { return sopt_bellman_array_part(ins, 3).profit(); }
+Profit opt_bellman_array_rec_test(Instance& ins)   { return sopt_bellman_array_rec(ins).profit(); }
+Profit opt_bellman_list_test(Instance& ins)        { return opt_bellman_list(ins); }
+Profit opt_bellman_list_rec_test(Instance& ins)    { return sopt_bellman_list_rec(ins).profit(); }
 
 std::vector<Profit (*)(Instance&)> f {
         opt_bellman_array_test,

@@ -6,20 +6,16 @@
 
 using namespace knapsack;
 
-Profit opt_minknap_test(Instance& ins) { Logger logger; Info info(logger, true); return Minknap(ins, MinknapParams()).run(info).profit(); }
 Profit ub_surrogate_test(Instance& ins)
 {
-    Logger logger;
-    Info info(logger, true);
-    Info info_tmp(info.logger);
-    //Profit lb = sol_greedynlogn(ins, info_tmp).profit();
+    Info info;
     ins.sort_partially(info);
-    Profit lb = sol_greedy(ins, info_tmp).profit();
+    Profit lb = sol_greedy(ins).profit();
     return ub_surrogate(ins, lb, info).ub;
 }
 
 std::vector<Profit (*)(Instance&)> f = {
-        opt_minknap_test,
+        opt_minknap,
         ub_surrogate_test,
 };
 

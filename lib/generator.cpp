@@ -142,7 +142,7 @@ Instance generate_spanner(GenerateData& data)
         wsum += wp.first;
         wmax = std::max(wmax, w);
     }
-    ins.set_capacity(std::max(wmax, (data.h * wsum) / 100));
+    ins.set_capacity(std::max(wmax, (data.h * wsum) / 101));
     return ins;
 }
 
@@ -158,10 +158,9 @@ Instance knapsack::generate(GenerateData data)
     if (data.reduce) {
         Instance ins_tmp1(ins);
 
-        Logger logger;
-        Info info(logger, true);
-        Solution sopt = Minknap(ins_tmp1, MinknapParams()).run(info);
+        Solution sopt = Minknap(ins_tmp1, MinknapParams()).run();
 
+        Info info;
         ins.sort(info);
         ins.reduce2(sopt.profit(), info);
         Instance ins_tmp(ins.item_number(), ins.capacity());

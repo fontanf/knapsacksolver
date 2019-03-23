@@ -167,7 +167,7 @@ void Minknap::remove_item(Info& info)
     LOG_FOLD_END(info, "remove_item");
 }
 
-Solution Minknap::run(Info& info)
+Solution Minknap::run(Info info)
 {
     LOG_FOLD_START(info, "minknap k " << params_.k
             << " combo_core " << params_.combo_core
@@ -199,11 +199,9 @@ Solution Minknap::run(Info& info)
     Solution sol_tmp(ins);
     if (params_.lb_greedynlogn == 0) {
         params_.lb_greedynlogn = -1;
-        Info info_tmp(info.logger);
-        sol_tmp = sol_greedynlogn(ins, info_tmp);
+        sol_tmp = sol_greedynlogn(ins);
     } else if (params_.lb_greedy == 0) {
-        Info info_tmp(info.logger);
-        sol_tmp = sol_greedy(ins, info_tmp);
+        sol_tmp = sol_greedy(ins);
     } else {
         sol_tmp = *ins.break_solution();
     }
@@ -250,8 +248,7 @@ Solution Minknap::run(Info& info)
     Profit p_bar = ins.break_solution()->profit();
 
     // Compute initial upper bound
-    Info info_tmp(info.logger);
-    Profit ub_tmp = ub_dantzig(ins, info_tmp);
+    Profit ub_tmp = ub_dantzig(ins);
     if (ub_ == -1 || ub_tmp < ub_)
         ub_ = ub_tmp;
     if (lb_ == ub_) {
@@ -314,9 +311,18 @@ Solution Minknap::run(Info& info)
     ins.set_last_item(t_ - 1);
     ins.fix(info, psolf_.vector(best_state_.sol));
 
-    Info info_tmp2(info.logger);
-    sol = run(info_tmp2);
+    sol = run();
     LOG_FOLD_END(info, "minknap");
     return algorithm_end(sol, info);
+}
+
+Profit knapsack::opt_minknap(Instance& ins, Info info)
+{
+    return Minknap(ins, MinknapParams()).run(info).profit();
+}
+
+Profit knapsack::opt_minknap(Instance& ins)
+{
+    return Minknap(ins, MinknapParams()).run().profit();
 }
 

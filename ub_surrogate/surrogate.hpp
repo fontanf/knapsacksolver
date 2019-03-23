@@ -16,7 +16,7 @@ struct SurrogateOut
     Weight multiplier = 0;
 };
 
-SurrogateOut ub_surrogate(const Instance& instance, Profit lb, Info& info);
+SurrogateOut ub_surrogate(Instance& ins, Profit lb, Info info = Info());
 
 }
 

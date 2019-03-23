@@ -4,11 +4,10 @@
 
 using namespace knapsack;
 
-Profit opt_minknap_test(Instance& ins) { Logger logger; Info info(logger, true); return Minknap(ins, MinknapParams()).run(info).profit(); }
-Profit opt_bab_test(Instance& ins)     { Logger logger; Info info(logger, true); return sopt_bab(ins, info).profit(); }
+Profit opt_bab_test(Instance& ins)     { return sopt_bab(ins).profit(); }
 
 std::vector<Profit (*)(Instance&)> f = {
-        opt_minknap_test,
+        opt_minknap,
         opt_bab_test,
 };
 

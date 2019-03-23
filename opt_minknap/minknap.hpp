@@ -27,6 +27,7 @@ struct MinknapParams
     StateIdx ub_surrogate = -1;
     StateIdx solve_sur = -1;
     bool combo_core = false;
+    double time_limit = -1;
 
     static MinknapParams pure()
     {
@@ -79,7 +80,7 @@ public:
         psolf_(ins, p.k)
     {  }
 
-    Solution run(Info& info);
+    Solution run(Info info = Info());
 
 private:
 
@@ -101,6 +102,9 @@ private:
     StateIdx distinct_state_number_ = 0;
 
 };
+
+Profit opt_minknap(Instance& ins, Info info);
+Profit opt_minknap(Instance& ins);
 
 }
 

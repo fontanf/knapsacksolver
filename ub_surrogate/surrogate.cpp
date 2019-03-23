@@ -185,8 +185,7 @@ void ub_surrogate_solve(Instance& ins, Info& info, ItemIdx k,
 
         ins.surrogate(info, s-s_prec, k, first);
         LOG_FOLD(info, ins);
-        Info info_tmp(info.logger);
-        Profit p = ub_dantzig(ins, info_tmp);
+        Profit p = ub_dantzig(ins, Info());
         ItemPos b = ins.break_item();
 
         LOG(info, "b " << b << " p " << p << std::endl);
@@ -209,18 +208,16 @@ void ub_surrogate_solve(Instance& ins, Info& info, ItemIdx k,
         s_prec = s;
         LOG_FOLD_END(info, "");
     }
-    ins.surrogate(info, -s, k, first);
-    assert(ins.first_item() == first);
+    ins.surrogate(info, -s, k);
     LOG_FOLD_END(info, "");
 }
 
-SurrogateOut knapsack::ub_surrogate(const Instance& instance, Profit lb, Info& info)
+SurrogateOut knapsack::ub_surrogate(Instance& ins, Profit lb, Info info)
 {
     LOG_FOLD_START(info, "surrogate relaxation lb " << lb << std::endl);
     VER(info, "*** surrogate relaxation ***" << std::endl);
     std::string best = "";
 
-    Instance ins(instance);
     ins.sort_partially(info);
     ItemPos b = ins.break_item();
 
@@ -232,8 +229,7 @@ SurrogateOut knapsack::ub_surrogate(const Instance& instance, Profit lb, Info& i
         LOG_FOLD_END(info, "");
         return out;
     }
-    Info info_tmp(info.logger);
-    out.ub = ub_dantzig(ins, info_tmp);
+    out.ub = ub_dantzig(ins, Info());
     if (ins.break_capacity() == 0 || b == ins.last_item() + 1) {
         algorithm_end(out.ub, info);
         LOG_FOLD_END(info, "");

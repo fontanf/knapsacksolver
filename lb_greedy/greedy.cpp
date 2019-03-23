@@ -2,7 +2,7 @@
 
 using namespace knapsack;
 
-Solution knapsack::sol_greedy(const Instance& ins, Info& info)
+Solution knapsack::sol_greedy(const Instance& ins, Info info)
 {
     LOG_FOLD_START(info, "sol_greedy" << std::endl);
     VER(info, "*** greedy ***" << std::endl);

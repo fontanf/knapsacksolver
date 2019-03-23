@@ -44,8 +44,8 @@ std::ostream& operator<<(std::ostream& os, const std::pair<BalknapState, Balknap
     return os;
 }
 
-Solution knapsack::sopt_balknap(Instance& ins, Info& info,
-        BalknapParams params, Profit o)
+Solution knapsack::sopt_balknap(Instance& ins,
+        BalknapParams params, Profit o, Info info)
 {
     LOG_FOLD_START(info, "balknap k " << params.k << std::endl);
     if (o == -1)
@@ -87,12 +87,10 @@ Solution knapsack::sopt_balknap(Instance& ins, Info& info,
     Solution sol_tmp = *ins.break_solution();
     if (params.cpt_greedynlogn == 0) {
         params.cpt_greedynlogn = -1;
-        Info info_tmp(info.logger);
-        Solution sol_tmp = sol_greedynlogn(ins, info_tmp);
+        Solution sol_tmp = sol_greedynlogn(ins);
     } else if (params.cpt_greedy == 0) {
         params.cpt_greedy = -1;
-        Info info_tmp(info.logger);
-        Solution sol_tmp = sol_greedy(ins, info_tmp);
+        Solution sol_tmp = sol_greedy(ins);
     }
     if (sol_tmp.profit() > lb) {
         sol = sol_tmp;
@@ -155,8 +153,7 @@ Solution knapsack::sopt_balknap(Instance& ins, Info& info,
     Weight w_bar = ins.break_solution()->weight();
     Profit p_bar = ins.break_solution()->profit();
 
-    Info info_tmp(info.logger);
-    Profit ub_tmp = ub_dantzig(ins, info_tmp);
+    Profit ub_tmp = ub_dantzig(ins);
     if (ub == -1 || ub_tmp < ub)
         ub = ub_tmp;
     LOG(info, "ub " << ub << std::endl);
@@ -354,8 +351,7 @@ end:
     ins.set_last_item(last_item);
     ins.fix(info, psolf.vector(best_state.second.sol));
 
-    Info info_tmp3(info.logger);
-    sol = knapsack::sopt_balknap(ins, info_tmp3, params, best_state.first.pi);
+    sol = knapsack::sopt_balknap(ins, params, best_state.first.pi);
     LOG_FOLD_END(info, "balknap");
     return algorithm_end(sol, info);
 }

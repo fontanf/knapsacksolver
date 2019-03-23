@@ -4,7 +4,6 @@
 #include "knapsack/lib/solution.hpp"
 #include "knapsack/ub_surrogate/surrogate.hpp"
 
-#include <mutex>
 #include <thread>
 
 namespace knapsack
@@ -16,6 +15,7 @@ struct ExpknapParams
     StateIdx lb_greedynlogn = -1;
     StateIdx ub_surrogate = -1;
     bool combo_core = false;
+    double time_limit = 600;
 
     static ExpknapParams pure()
     {
@@ -27,12 +27,12 @@ struct ExpknapParams
         };
     }
 
-    static ExpknapParams combo()
+    static ExpknapParams fontan()
     {
         return {
             .lb_greedy = 0,
-            .lb_greedynlogn = -1,
-            .ub_surrogate = 2000,
+            .lb_greedynlogn = 50000,
+            .ub_surrogate = 20000,
             .combo_core = true,
         };
     }
@@ -57,14 +57,13 @@ public:
             thread.join();
     }
 
-    Solution run(Info& info);
+    Solution run(Info info = Info());
 
 private:
 
     void rec(Info& info);
     void update_bounds(Info& info);
-    void surrogate(Instance ins, std::mutex& mutex, Info& info);
-    void greedynlogn(Instance ins, std::mutex& mutex, Info& info);
+    void surrogate(Instance ins, Info info);
 
     Instance& instance_;
     ExpknapParams params_;
@@ -77,7 +76,6 @@ private:
     ItemPos t_;
     Cpt node_number_ = 0;
     std::shared_ptr<bool> end_ = NULL;
-    std::mutex mutex_;
     std::vector<std::thread> threads_;
 
 };

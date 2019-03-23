@@ -35,7 +35,7 @@ public:
     }
 };
 
-Solution knapsack::sopt_astar(Instance& ins, Info& info)
+Solution knapsack::sopt_astar(Instance& ins, Info info)
 {
     VER(info, "*** babstar ***" << std::endl);
 
@@ -250,7 +250,7 @@ bool NodeDPCompare::operator()(NodeDP* n1, NodeDP* n2)
     return n1 < n2;
 }
 
-Solution knapsack::sopt_astar_dp(Instance& ins, Info& info)
+Solution knapsack::sopt_astar_dp(Instance& ins, Info info)
 {
     VER(info, "*** babstar with dp ***" << std::endl);
     ItemIdx n = ins.item_number();
@@ -366,7 +366,7 @@ Solution knapsack::sopt_astar_dp(Instance& ins, Info& info)
 
 /******************************************************************************/
 
-Solution knapsack::sopt_starknap(Instance& ins, Info& info, StarknapParams params)
+Solution knapsack::sopt_starknap(Instance& ins, StarknapParams params, Info info)
 {
     VER(info, "*** starknap ***" << std::endl);
     Solution sol(ins);
@@ -385,11 +385,9 @@ Solution knapsack::sopt_starknap(Instance& ins, Info& info, StarknapParams param
 
     VER(info, "Compute lower bound..." << std::endl);
     if (params.lb_greedynlogn == 0) {
-        Info info_tmp(info.logger);
-        sol = sol_greedynlogn(ins, info_tmp);
+        sol = sol_greedynlogn(ins);
     } else if (params.lb_greedy == 0) {
-        Info info_tmp(info.logger);
-        sol = sol_greedy(ins, info_tmp);
+        sol = sol_greedy(ins);
     } else {
         sol = *ins.break_solution();
     }

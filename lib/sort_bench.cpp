@@ -19,9 +19,7 @@ int main(int argc, char *argv[])
     ins_eff.add_items(wp);
     ins_peff.add_items(wp);
 
-    Logger logger;
-
-    Info info_1(logger);
+    Info info_1;
     std::cout << "Conmplete sorting" << std::endl;
     ins_eff.sort(info_1);
 

@@ -4,9 +4,9 @@
 
 using namespace knapsack;
 
-Profit opt_bellman_array_test(Instance& ins)         { Logger logger; Info info(logger, true); return opt_bellman_array(ins, info); }
-Profit opt_dpprofits_array_test(Instance& ins)       { Logger logger; Info info(logger, true); return opt_dpprofits_array(ins, info); }
-Profit opt_dpprofits_array_all_test(Instance& ins)   { Logger logger; Info info(logger, true); return sopt_dpprofits_array_all(ins, info).profit(); }
+Profit opt_bellman_array_test(Instance& ins)         { return opt_bellman_array(ins); }
+Profit opt_dpprofits_array_test(Instance& ins)       { return opt_dpprofits_array(ins); }
+Profit opt_dpprofits_array_all_test(Instance& ins)   { return sopt_dpprofits_array_all(ins).profit(); }
 
 std::vector<Profit (*)(Instance&)> tested_functions()
 {

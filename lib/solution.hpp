@@ -59,4 +59,10 @@ private:
 
 std::ostream& operator<<(std::ostream &os, const Solution& solution);
 
+void init_display(Profit lb, Profit ub, Info& info);
+void update_sol(Solution& sol, Profit ub, const Solution& sol_new, const std::stringstream& s, Info& info);
+void update_lb(Profit& lb, Profit ub, Profit lb_new, const std::stringstream& s, Info& info);
+void update_ub(Profit lb, Profit& ub, Profit ub_new, const std::stringstream& s, Info& info);
+
 }
+

@@ -24,13 +24,13 @@ cc_library(
 
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 git_repository(
-    name = "benchtools",
+    name = "benchtools_",
     remote = "https://github.com/fontanf/benchtools.git",
-    commit = "123a2f5aec470b733a868a8e39a2fdb3bcb99443",
+    commit = "c97a04ec70a8a19620b44f80ebbe14f54496e557",
 )
 
 local_repository(
-    name = "benchtools_",
+    name = "benchtools",
     path = "/home/florian/Dev/benchtools/",
 )
 

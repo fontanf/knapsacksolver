@@ -18,7 +18,7 @@ using namespace knapsack;
 /****************************** Create instances ******************************/
 
 Instance::Instance(ItemIdx n, Weight c):
-    name_(""), format_(""), c_orig_(c), f_(0), l_(-1)
+    c_orig_(c), f_(0), l_(-1)
 {
     items_.reserve(n);
 }
@@ -38,8 +38,7 @@ void Instance::add_items(const std::vector<std::pair<Weight, Profit>>& wp)
         add_item(i.first, i.second);
 }
 
-Instance::Instance(std::string filepath, std::string format, bool bzip2):
-    name_(filepath), format_(format)
+Instance::Instance(std::string filepath, std::string format, bool bzip2)
 {
     std::stringstream data;
     if (!bzip2) {
@@ -55,16 +54,16 @@ Instance::Instance(std::string filepath, std::string format, bool bzip2):
         file.close();
     }
 
-    if (format_ == "knapsack_standard") {
+    if (format == "knapsack_standard") {
         read_standard(data);
         read_standard_solution(filepath + ".sol");
-    } else if (format_ == "subsetsum_standard") {
+    } else if (format == "subsetsum_standard") {
         read_subsetsum_standard(data);
         read_standard_solution(filepath + ".sol");
-    } else if (format_ == "knapsack_pisinger") {
+    } else if (format == "knapsack_pisinger") {
         read_pisinger(data);
     } else {
-        std::cerr << format_ << ": Unknown format." << std::endl;
+        std::cerr << format << ": Unknown format." << std::endl;
         assert(false);
     }
 }
@@ -119,12 +118,10 @@ void Instance::read_standard_solution(std::string filepath)
 void Instance::read_pisinger(std::stringstream& data)
 {
     Cpt null;
-
-    std::getline(data, name_);
-
     std::string line;
     std::istringstream iss;
 
+    std::getline(data, line);
     std::getline(data, line, ' ');
     std::getline(data, line);
     std::istringstream(line) >> l_;
@@ -166,14 +163,9 @@ void Instance::read_pisinger(std::stringstream& data)
 
 Instance::Instance(const Instance& ins)
 {
-    name_ = ins.name_;
-    format_ = ins.format_;
-
+    items_ = ins.items_;
     c_orig_ = ins.c_orig_;
     sort_type_ = ins.sort_type_;
-    items_ = ins.items_;
-    f_ = ins.f_;
-    l_ = ins.l_;
 
     if (ins.optimal_solution() != NULL) {
         sol_opt_ = new Solution(*this);
@@ -187,7 +179,25 @@ Instance::Instance(const Instance& ins)
         sol_red_ = new Solution(*this);
         *sol_red_ = *ins.reduced_solution();
     }
+
     b_ = ins.b_;
+    f_ = ins.f_;
+    l_ = ins.l_;
+    s_ = ins.s_;
+    t_ = ins.t_;
+    s_init_ = ins.s_init_;
+    t_init_ = ins.t_init_;
+    sort_type_ = ins.sort_type_;
+    int_right_ = ins.int_right_;
+    int_left_ = ins.int_left_;
+}
+
+Instance Instance::reset(const Instance& instance)
+{
+    Instance ins;
+    ins.items_  = instance.items_;
+    ins.c_orig_ = instance.c_orig_;
+    return ins;
 }
 
 bool Instance::check()

@@ -7,80 +7,45 @@
 
 using namespace knapsack;
 
-void Expknap::surrogate(Instance ins, std::mutex& mutex, Info& info)
+void Expknap::surrogate(Instance ins, Info info)
 {
-    Logger logger;
-    Info info_tmp(logger);
-    SurrogateOut so = ub_surrogate(ins, sol_best_.profit(), info_tmp);
-    if (ub_ > so.ub) {
-        mutex.lock();
-        if (ub_ > so.ub) {
-            ub_ = so.ub;
-            VER(info, "LB " << sol_best_.profit() << " UB " << ub_ << " GAP " << ub_ - sol_best_.profit()
-                    << " (surrogate relaxation)" << std::endl);
-        }
-        mutex.unlock();
-    }
+    SurrogateOut so = ub_surrogate(ins, sol_best_.profit());
+    if (ub_ > so.ub)
+        update_ub(sol_best_.profit(), ub_, so.ub,
+                std::stringstream("surrogate relaxation"), info);
 
     if (sol_best_.profit() == ub_) {
-        mutex.lock();
-        if (sol_best_.profit() == ub_) {
-            *end_ = true;
-        }
-        mutex.unlock();
+        info.output->mutex_sol.lock();
+        *end_ = true;
+        info.output->mutex_sol.unlock();
         return;
     }
 
     Instance ins_sur(instance_);
     ins_sur.surrogate(info, so.multiplier, so.bound);
-    Expknap(ins_sur, params_);
-    Solution sol_sur = Expknap(ins_sur, params_).run(info_tmp);
-    if (ub_ > sol_sur.profit()) {
-        mutex.lock();
-        if (ub_ > sol_sur.profit()) {
-            ub_ = sol_sur.profit();
-            VER(info, "LB " << sol_best_.profit() << " UB " << ub_ << " GAP " << ub_ - sol_best_.profit()
-                    << " (surrogate instance resolution)" << std::endl);
-        }
-        mutex.unlock();
-    }
-    if (sol_sur.item_number() == so.bound) {
-        mutex.lock();
-        if (sol_sur.item_number() == so.bound) {
-            sol_best_ = sol_sur;
-            VER(info, "LB " << sol_best_.profit() << " UB " << ub_ << " GAP " << ub_ - sol_best_.profit()
-                    << " (surrogate instance resolution)" << std::endl);
-        }
-        mutex.unlock();
-    }
-}
-
-void Expknap::greedynlogn(Instance ins, std::mutex& mutex, Info& info)
-{
-    (void)info;
-    Logger logger;
-    Info info_tmp(logger);
-    Solution sol = sol_greedynlogn(ins, info_tmp);
-    if (sol_best_.profit() < sol.profit()) {
-        mutex.lock();
-        if (sol_best_.profit() < sol.profit()) {
-            sol_best_ = sol;
-            VER(info, "LB " << sol_best_.profit() << " UB " << ub_ << " GAP " << ub_ - sol_best_.profit()
-                    << " (greedynlogn)" << std::endl);
-        }
-        mutex.unlock();
-    }
+    Solution sol_sur = Expknap(ins_sur, params_).run();
+    if (ub_ > sol_sur.profit())
+        update_ub(sol_best_.profit(), ub_, sol_sur.profit(),
+                std::stringstream("surrogate ins resolution"), info);
+    if (sol_sur.item_number() == so.bound)
+        update_sol(sol_best_, ub_, sol_sur,
+                std::stringstream("surrogate ins resolution"), info);
 }
 
 void Expknap::update_bounds(Info& info)
 {
     if (params_.ub_surrogate >= 0 && params_.ub_surrogate <= node_number_) {
         params_.ub_surrogate = -1;
-        threads_.push_back(std::thread(&Expknap::surrogate, this, Instance(instance_), std::ref(mutex_), std::ref(info)));
+        threads_.push_back(std::thread(&Expknap::surrogate, this,
+                    Instance::reset(instance_), Info(info, true, false)));
     }
     if (params_.lb_greedynlogn >= 0 && params_.lb_greedynlogn <= node_number_) {
         params_.lb_greedynlogn = -1;
-        threads_.push_back(std::thread(&Expknap::greedynlogn, this, Instance(instance_), std::ref(mutex_), std::ref(info)));
+        Solution sol = sol_greedynlogn(instance_);
+        if (sol_best_.profit() < sol.profit()) {
+            update_sol(sol_best_, ub_, sol,
+                    std::stringstream("greedynlogn"), info);
+        }
     }
 }
 
@@ -93,19 +58,19 @@ void Expknap::rec(Info& info)
         LOG_FOLD_END(info, "end");
         return;
     }
+    if (info.elapsed_time() > params_.time_limit) {
+        LOG_FOLD_END(info, "time");
+        return;
+    }
     update_bounds(info); // Update bounds
 
     ItemPos s = s_;
     ItemPos t = t_;
     if (sol_curr_.remaining_capacity() >= 0) {
         if (sol_curr_.profit() > sol_best_.profit()) {
-            mutex_.lock();
-            if (sol_curr_.profit() > sol_best_.profit()) {
-                sol_best_ = sol_curr_;
-                VER(info, "LB " << sol_best_.profit() << " UB " << ub_ << " GAP " << ub_ - sol_best_.profit()
-                        << " (node " << node_number_ << ")" << std::endl);
-            }
-            mutex_.unlock();
+            std::stringstream ss;
+            ss << "node " << node_number_;
+            update_sol(sol_best_, ub_, sol_curr_, ss, info);
         }
         for (;;t++) {
             // If UB reached, then stop
@@ -162,7 +127,7 @@ void Expknap::rec(Info& info)
     assert(false);
 }
 
-Solution Expknap::run(Info& info)
+Solution Expknap::run(Info info)
 {
     VER(info, "*** expknap ***" << std::endl);
 
@@ -179,14 +144,9 @@ Solution Expknap::run(Info& info)
         return algorithm_end(sol, info);
     }
 
-    Info info_tmp1(info.logger);
-    sol_best_ = sol_greedy(instance_, info_tmp1);
-    Info info_tmp2(info.logger);
-    ub_ = ub_dantzig(instance_, info_tmp2);
-
-    VER(info, "LB " << sol_best_.profit()
-        << " UB " << ub_
-        << " GAP " << ub_ - sol_best_.profit() << std::endl);
+    sol_best_ = sol_greedy(instance_);
+    ub_ = ub_dantzig(instance_);
+    init_display(sol_best_.profit(), ub_, info);
 
     ItemPos b = instance_.break_item();
 
@@ -197,8 +157,8 @@ Solution Expknap::run(Info& info)
         t_ = b;
         rec(info);
         PUT(info, "Algorithm.NodeNumber", node_number_);
-        VER(info, "s: " << s_ << " - t: " << t_ << std::endl;)
-        VER(info, "Node number: " << node_number_ << std::endl;)
+        VER(info, "s " << s_ << " - t " << t_ << std::endl;)
+        VER(info, "Node number " << node_number_ << std::endl;)
     }
 
     *end_ = true;

@@ -1,5 +1,7 @@
 #include "knapsack/lib/solution.hpp"
 
+#include <iomanip>
+
 using namespace knapsack;
 
 Solution::Solution(const Instance& instance): instance_(instance),
@@ -51,7 +53,8 @@ int Solution::contains_idx(ItemIdx j) const
 void Solution::set(ItemPos j, int b)
 {
     assert(b == 0 || b == 1);
-    assert(j >= 0 && j < instance().total_item_number());
+    assert(j >= 0);
+    assert(j < instance().total_item_number());
     assert(instance().item(j).j >= 0 && instance().item(j).j < instance().total_item_number());
     if (contains(j) == b)
         return;
@@ -120,5 +123,73 @@ std::string Solution::to_string_items() const
         }
     }
     return s;
+}
+
+void knapsack::init_display(Profit lb, Profit ub, Info& info)
+{
+    VER(info, std::left << std::setw(10) << "Time");
+    VER(info, std::left << std::setw(10) << "LB");
+    VER(info, std::left << std::setw(10) << "UB");
+    VER(info, std::left << std::setw(10) << "GAP");
+    VER(info, "");
+    VER(info, std::endl);
+
+    double t = round(info.elapsed_time() * 10000) / 10;
+    VER(info, std::left << std::setw(10) << t);
+    VER(info, std::left << std::setw(10) << lb);
+    VER(info, std::left << std::setw(10) << ub);
+    VER(info, std::left << std::setw(10) << ub - lb);
+    VER(info, "" << std::endl);
+}
+
+void knapsack::update_lb(Profit& lb, Profit ub, Profit lb_new, const std::stringstream& s, Info& info)
+{
+    info.output->mutex_sol.lock();
+
+    if (lb < lb_new) {
+        lb = lb_new;
+        double t = round(info.elapsed_time() * 10000) / 10;
+        VER(info, std::left << std::setw(10) << t);
+        VER(info, std::left << std::setw(10) << lb);
+        VER(info, std::left << std::setw(10) << ub);
+        VER(info, std::left << std::setw(10) << ub - lb);
+        VER(info, s.str() << std::endl);
+    }
+
+    info.output->mutex_sol.unlock();
+}
+
+void knapsack::update_ub(Profit lb, Profit& ub, Profit ub_new, const std::stringstream& s, Info& info)
+{
+    info.output->mutex_sol.lock();
+
+    if (ub > ub_new) {
+        ub = ub_new;
+        double t = round(info.elapsed_time() * 10000) / 10;
+        VER(info, std::left << std::setw(10) << t);
+        VER(info, std::left << std::setw(10) << lb);
+        VER(info, std::left << std::setw(10) << ub);
+        VER(info, std::left << std::setw(10) << ub - lb);
+        VER(info, s.str() << std::endl);
+    }
+
+    info.output->mutex_sol.unlock();
+}
+
+void knapsack::update_sol(Solution& sol, Profit ub, const Solution& sol_new, const std::stringstream& s, Info& info)
+{
+    info.output->mutex_sol.lock();
+
+    if (sol.profit() < sol_new.profit()) {
+        sol = sol_new;
+        double t = round(info.elapsed_time() * 10000) / 10;
+        VER(info, std::left << std::setw(10) << t);
+        VER(info, std::left << std::setw(10) << sol.profit());
+        VER(info, std::left << std::setw(10) << ub);
+        VER(info, std::left << std::setw(10) << ub - sol.profit());
+        VER(info, s.str() << std::endl);
+    }
+
+    info.output->mutex_sol.unlock();
 }
 

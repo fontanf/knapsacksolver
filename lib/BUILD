@@ -102,6 +102,25 @@ cc_binary(
 )
 
 cc_binary(
+        name = "bench",
+        srcs = ["bench.cpp"],
+        deps = [
+                "//lb_greedy:greedy",
+                "//lb_greedynlogn:greedynlogn",
+                "//ub_dembo:dembo",
+                "//ub_surrogate:surrogate",
+                "//opt_bab:bab",
+                "//opt_astar:astar",
+                "//opt_expknap:expknap",
+                "//opt_bellman:bellman",
+                "//opt_dpprofits:dpprofits",
+                "//opt_balknap:balknap",
+                "//opt_minknap:minknap",
+                ":generator",
+        ],
+)
+
+cc_binary(
         name = "test_main",
         srcs = ["test_main.cpp"],
         deps = [

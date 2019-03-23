@@ -20,36 +20,17 @@ int main(int argc, char *argv[])
     (void)argv;
 
     GenerateData data;
-    data.n = 8;
-    data.t = "u";
-    data.r = 7;
-    data.h = 50;
-    data.s = 8;
+    data.n = 50;
+    data.t = "sc";
+    data.r = 1000;
+    data.h = 12;
+    data.s = 1062;
     Instance ins = generate(data);
 
-    //Instance ins = test_instance(1);
+    ExpknapParams p = ExpknapParams::fontan();
+    //p.time_limit = 600;
+    Info info = Info("log.txt").set_verbose(true);
+    Expknap(ins, p).run(info);
 
-    //Instance ins(3, 3);
-    //ins.add_items({{2,1}, {2,2}, {3,3}});
-    //std::cout << ins << std::endl;
-
-    Logger logger("log.txt", true);
-    Info info(logger, true);
-    {
-        Instance ins_tmp(ins);
-        Info info_tmp(logger);
-        MinknapParams p = MinknapParams::pure();
-        p.k = 1;
-        Minknap(ins_tmp, p).run(info_tmp);
-    }
-    {
-        Instance ins_tmp(ins);
-        Info info_tmp(logger);
-        MinknapParams p = MinknapParams::pure();
-        p.k = 3;
-        p.combo_core = true;
-        Minknap(ins_tmp, p).run(info_tmp);
-    }
-    return 0;
 }
 

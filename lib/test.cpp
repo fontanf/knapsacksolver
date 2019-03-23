@@ -19,8 +19,7 @@ TEST(Instance, Sort)
             {10, 5},
             {10, 12},
             {10, 20}});
-    Logger logger;
-    Info info(logger);
+    Info info;
     instance.sort(info);
 
     EXPECT_EQ(instance.item(4).p, 5);
@@ -49,8 +48,7 @@ TEST(Instance, SortPartially)
             {7, 1},
             {8, 1},
             {9, 1}});
-    Logger logger;
-    Info info(logger);
+    Info info;
     instance.sort_partially(info);
     EXPECT_EQ(instance.item(instance.break_item()).j, 2);
 }
@@ -68,8 +66,7 @@ TEST(Instance, SortPartially2)
             {4, 1},
             {5, 1},
             {6, 1}});
-    Logger logger;
-    Info info(logger);
+    Info info;
     instance.sort_partially(info);
     EXPECT_EQ(instance.item(instance.break_item()).j, 4);
 }
@@ -102,8 +99,7 @@ TEST(Instance, SortPartially3)
             }
             std::cout << "}" << std::endl;
 
-            Logger logger;
-            Info info_tmp(logger);
+            Info info_tmp;
             ins.sort_partially(info_tmp, 2);
 
             Solution sol(ins);

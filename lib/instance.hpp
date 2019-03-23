@@ -73,15 +73,15 @@ public:
      */
     Instance(const Instance& ins);
 
+    Instance() {  }
+    static Instance reset(const Instance& ins);
+
     ~Instance();
 
 
     /**
      * Getters
      */
-
-    inline std::string name()   const { return name_; }
-    inline std::string format() const { return format_; }
 
     inline ItemIdx total_item_number() const { return items_.size(); }
     inline Weight  total_capacity()    const { return c_orig_; }
@@ -260,12 +260,11 @@ private:
      * Attributes
      */
 
-    std::string name_;
-    std::string format_;
-
     std::vector<Item> items_;
     Weight c_orig_;
     Solution* sol_opt_ = NULL; // Optimal solution
+
+    ItemPos b_ = -1; // Break item
 
     // First and last items. Items moved before f_ or after l_ have their value
     // fixed in the reduced solution.
@@ -291,8 +290,6 @@ private:
 
     Solution* sol_red_   = NULL; // Reduced solution
     Solution* sol_break_ = NULL; // Break solution
-    ItemPos b_ = -1; // Break item
-    bool sol_red_opt_ = false;
 };
 
 std::ostream& operator<<(std::ostream &os, const Item& item);
