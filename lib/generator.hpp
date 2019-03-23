@@ -19,13 +19,14 @@ struct GenerateData
 
     ItemIdx     n       = 1000;
     Profit      r       = 1000;
-    int         h       = 50;
+    int         h       = -1;
     std::string t       = "u";
     Seed        s       = 0;
 
     bool reduce         = false;
 
     std::default_random_engine g;
+
 };
 
 std::ostream& operator<<(std::ostream& os, const GenerateData& data);

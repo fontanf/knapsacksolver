@@ -36,7 +36,7 @@ std::string bench(Function func, GenerateData d)
     std::cout << d << std::flush;
     for (d.h=1; d.h<=100; ++d.h) {
         d.s = d.n + d.r + d.h;
-        std::cout << "h " << d.h << " s " << d.s << std::endl;
+        //std::cout << std::endl << "h " << d.h << " s " << d.s;
         Instance ins = generate(d);
         Info info;
         func(ins, info, t_max - t_total);

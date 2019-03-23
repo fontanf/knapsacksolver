@@ -197,6 +197,8 @@ Instance Instance::reset(const Instance& instance)
     Instance ins;
     ins.items_  = instance.items_;
     ins.c_orig_ = instance.c_orig_;
+    ins.f_ = 0;
+    ins.l_ = ins.items_.size() - 1;
     return ins;
 }
 

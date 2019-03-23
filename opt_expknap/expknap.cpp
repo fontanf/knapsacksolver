@@ -9,7 +9,7 @@ using namespace knapsack;
 
 void Expknap::surrogate(Instance ins, Info info)
 {
-    SurrogateOut so = ub_surrogate(ins, sol_best_.profit());
+    SurrogateOut so = ub_surrogate(ins, sol_best_.profit(), Info(info, false, ""));
     if (ub_ > so.ub)
         update_ub(sol_best_.profit(), ub_, so.ub,
                 std::stringstream("surrogate relaxation"), info);
@@ -23,7 +23,7 @@ void Expknap::surrogate(Instance ins, Info info)
 
     Instance ins_sur(instance_);
     ins_sur.surrogate(info, so.multiplier, so.bound);
-    Solution sol_sur = Expknap(ins_sur, params_).run();
+    Solution sol_sur = Expknap(ins_sur, params_).run(Info(info, false, ""));
     if (ub_ > sol_sur.profit())
         update_ub(sol_best_.profit(), ub_, sol_sur.profit(),
                 std::stringstream("surrogate ins resolution"), info);
@@ -37,7 +37,7 @@ void Expknap::update_bounds(Info& info)
     if (params_.ub_surrogate >= 0 && params_.ub_surrogate <= node_number_) {
         params_.ub_surrogate = -1;
         threads_.push_back(std::thread(&Expknap::surrogate, this,
-                    Instance::reset(instance_), Info(info, true, false)));
+                    Instance::reset(instance_), Info(info, true, "surrelax")));
     }
     if (params_.lb_greedynlogn >= 0 && params_.lb_greedynlogn <= node_number_) {
         params_.lb_greedynlogn = -1;
