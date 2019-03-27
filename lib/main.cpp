@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
     } else if (algorithm == "bellman_array_one") {
         sopt = sopt_bellman_array_one(ins, info);
     } else if (algorithm == "bellman_array_part") {
-        sopt = sopt_bellman_array_part(ins, info, 64);
+        sopt = sopt_bellman_array_part(ins, 64, info);
     } else if (algorithm == "bellman_array_rec") {
         sopt = sopt_bellman_array_rec(ins, info);
     } else if (algorithm == "bellman_list") {
@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
         ub_dantzig(ins, info);
     } else if (algorithm == "surrelax") { // surrelax
         ins.sort_partially(info);
-        Solution sol = sol_greedynlogn(ins, Info(info, false, true));
+        Solution sol = sol_greedynlogn(ins, Info(info, false, "greedynlogn"));
         ub_surrogate(ins, sol.profit(), info);
     }
 

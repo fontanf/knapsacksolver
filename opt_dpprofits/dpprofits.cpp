@@ -6,7 +6,7 @@
 
 using namespace knapsack;
 
-Profit knapsack::opt_dpprofits_array(const Instance& ins, Info& info)
+Profit knapsack::opt_dpprofits_array(const Instance& ins, Info info)
 {
     VER(info, "*** dpprofits (array) ***" << std::endl);
 
@@ -44,7 +44,7 @@ Profit knapsack::opt_dpprofits_array(const Instance& ins, Info& info)
 
 /******************************************************************************/
 
-Solution knapsack::sopt_dpprofits_array_all(const Instance& ins, Info& info)
+Solution knapsack::sopt_dpprofits_array_all(const Instance& ins, Info info)
 {
     VER(info, "*** dpprofits (array, all) ***" << std::endl);
 

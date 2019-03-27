@@ -22,7 +22,7 @@ std::ostream& operator<<(std::ostream& os, const std::vector<BellmanState>& l)
     return os;
 }
 
-Profit knapsack::opt_bellman_list(const Instance& ins, Info& info)
+Profit knapsack::opt_bellman_list(const Instance& ins, Info info)
 {
     VER(info, "*** bellman (list) ***" << std::endl);
 
@@ -36,6 +36,8 @@ Profit knapsack::opt_bellman_list(const Instance& ins, Info& info)
     Profit lb = 0;
     std::vector<BellmanState> l0{{.w = 0, .p = 0}};
     for (ItemPos j=0; j<n; ++j) {
+        if (!info.check_time())
+            break;
         Weight wj = ins.item(j).w;
         Profit pj = ins.item(j).p;
         std::vector<BellmanState> l{{.w = 0, .p = 0}};
@@ -233,7 +235,7 @@ void sopt_bellman_list_rec_rec(BellmanListRecData& data)
     LOG_FOLD_END(data.info, "");
 }
 
-Solution knapsack::sopt_bellman_list_rec(const Instance& ins, Info& info)
+Solution knapsack::sopt_bellman_list_rec(const Instance& ins, Info info)
 {
     LOG_FOLD_START(info, "*** bellman (list, rec) ***" << std::endl);
     VER(info, "*** bellman (list, rec) ***" << std::endl);

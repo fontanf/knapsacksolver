@@ -6,6 +6,11 @@ cc_library(
                 "//lib:cpp",
                 "//ub_dembo:dembo"
         ],
+        copts = ["-fopenmp"],
+        linkopts = [
+                "-fopenmp",
+                "-lpthread",
+        ],
         visibility = ["//visibility:public"],
         include_prefix = "knapsack/opt_bellman/",
 )

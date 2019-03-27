@@ -27,6 +27,46 @@ struct GenerateData
 
     std::default_random_engine g;
 
+    static GenerateData gen_spanner(std::string type, Profit r, ItemIdx v, Profit m)
+    {
+        GenerateData d;
+        d.r = r;
+        d.t = type;
+        d.spanner = true;
+        d.v = v;
+        d.m = m;
+        return d;
+    };
+
+    static GenerateData gen_mstr(Profit r, ItemIdx k1, ItemIdx k2, double d)
+    {
+        GenerateData data;
+        data.t = "mstr";
+        data.r = r;
+        data.k1 = k1;
+        data.k2 = k2;
+        data.d = d;
+        return data;
+    };
+
+    static GenerateData gen_pceil(Profit r, double d)
+    {
+        GenerateData data;
+        data.t = "pceil";
+        data.r = r;
+        data.d = d;
+        return data;
+    };
+
+    static GenerateData gen_circle(Profit r, double d)
+    {
+        GenerateData data;
+        data.t = "circle";
+        data.r = r;
+        data.d = d;
+        return data;
+    };
+
 };
 
 std::ostream& operator<<(std::ostream& os, const GenerateData& data);

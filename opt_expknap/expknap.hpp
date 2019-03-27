@@ -15,7 +15,6 @@ struct ExpknapParams
     StateIdx lb_greedynlogn = -1;
     StateIdx ub_surrogate = -1;
     bool combo_core = false;
-    double time_limit = 600;
 
     static ExpknapParams pure()
     {

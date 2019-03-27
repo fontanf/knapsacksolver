@@ -58,7 +58,7 @@ void Expknap::rec(Info& info)
         LOG_FOLD_END(info, "end");
         return;
     }
-    if (info.elapsed_time() > params_.time_limit) {
+    if (!info.check_time()) {
         LOG_FOLD_END(info, "time");
         return;
     }

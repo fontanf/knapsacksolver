@@ -4,7 +4,7 @@
 
 using namespace knapsack;
 
-Solution knapsack::sopt_bab(Instance& ins, Info& info)
+Solution knapsack::sopt_bab(Instance& ins, Info info)
 {
     VER(info, "*** bab ***" << std::endl);
 
@@ -19,6 +19,9 @@ Solution knapsack::sopt_bab(Instance& ins, Info& info)
     Solution sol_best(ins);
     Cpt node_number = 0;
     for (ItemIdx i=0; ; ++i) {
+        if (!info.check_time())
+            return algorithm_end(sol_best, info);
+
         // Leaf test
         if (i == n || sol_curr.remaining_capacity() < min_weight[i]) {
             do { // Backtrack

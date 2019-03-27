@@ -21,7 +21,7 @@ std::ostream& knapsack::operator<<(std::ostream& os, const GenerateData& data)
 {
     os << "n " << data.n;
     if (data.spanner) {
-        os << " t spanner," << data.t << " v " << data.v << " n " << data.m;
+        os << " t spanner," << data.t << " v " << data.v << " m " << data.m;
     } else {
         os << " t " << data.t;
     }

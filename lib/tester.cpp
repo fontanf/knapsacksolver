@@ -10,6 +10,7 @@ bool test(const Instance& ins, std::vector<Profit (*)(Instance&)> fs, TestType t
     std::cout << ins << std::endl;
     Profit opt = ins.optimum();
     for (auto f: fs) {
+        std::cout << f << std::endl;
         Instance ins_tmp = ins;
         Profit val = f(ins_tmp);
         if (opt == -1)

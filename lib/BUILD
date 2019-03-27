@@ -97,7 +97,6 @@ cc_binary(
                 "//opt_dpprofits:dpprofits",
                 "//opt_balknap:balknap",
                 "//opt_minknap:minknap",
-                ":generator",
         ],
 )
 
