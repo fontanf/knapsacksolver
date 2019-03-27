@@ -82,40 +82,36 @@ Profit knapsack::opt_bellman_list(const Instance& ins, Info info)
 
 struct BellmanListRecData
 {
-    BellmanListRecData(const Instance& ins, Info& info):
-        ins(ins), info(info),
-        n1(0), n2(ins.total_item_number()-1), c(ins.total_capacity()),
-        sol_curr(ins),
-        j_max(ins.max_efficiency_item(info)) {  }
     const Instance& ins;
-    Info& info;
     ItemPos n1;
     ItemPos n2;
     Weight c;
-    Solution sol_curr;
+    Solution& sol;
     ItemPos j_max;
+    Info& info;
 };
 
-std::vector<BellmanState> opts_bellman_list(BellmanListRecData& data)
+std::vector<BellmanState> opts_bellman_list(const Instance& ins,
+        ItemPos n1, ItemPos n2, Weight c, ItemPos j_max, Info& info)
 {
-    LOG_FOLD_START(data.info, "solve n1 " << data.n1 << " n2 " << data.n2 << " c " << data.c << std::endl);
-    if (data.c == 0) {
-        LOG_FOLD_END(data.info, "");
+    LOG_FOLD_START(info, "solve n1 " << n1 << " n2 " << n2 << " c " << c << std::endl);
+    if (c == 0) {
+        LOG_FOLD_END(info, "c == 0");
         return {{0, 0}};
     }
 
     Profit lb = 0;
     std::vector<BellmanState> l0{{0, 0}};
-    for (ItemPos j=data.n1; j<=data.n2; ++j) {
-        Weight wj = data.ins.item(j).w;
-        Profit pj = data.ins.item(j).p;
+    for (ItemPos j=n1; j<n2; ++j) {
+        Weight wj = ins.item(j).w;
+        Profit pj = ins.item(j).p;
         std::vector<BellmanState> l{{0, 0}};
         std::vector<BellmanState>::iterator it = l0.begin();
         std::vector<BellmanState>::iterator it1 = l0.begin();
         while (it != l0.end() || it1 != l0.end()) {
             if (it == l0.end() || it->w > it1->w + wj) {
                 BellmanState s1{it1->w+wj, it1->p+pj};
-                if (s1.w > data.c) {
+                if (s1.w > c) {
                     break;
                 }
                 if (s1.p > l.back().p) {
@@ -124,7 +120,7 @@ std::vector<BellmanState> opts_bellman_list(BellmanListRecData& data)
                     if (s1.w == l.back().w) {
                         l.back() = s1;
                     } else {
-                        Profit ub = ub_0(data.ins, j, s1.p, data.c-s1.w, data.j_max);
+                        Profit ub = ub_0(ins, j, s1.p, c - s1.w, j_max);
                         if (ub >= lb) {
                             l.push_back(s1);
                         } else {
@@ -147,100 +143,80 @@ std::vector<BellmanState> opts_bellman_list(BellmanListRecData& data)
         }
         l0 = std::move(l);
     }
-    LOG_FOLD_END(data.info, "");
+    LOG_FOLD_END(info, "");
     return l0;
 }
 
-void sopt_bellman_list_rec_rec(BellmanListRecData& data)
+void sopt_bellman_list_rec_rec(BellmanListRecData d)
 {
-    ItemPos n1 = data.n1;
-    ItemPos n2 = data.n2;
-    ItemPos k = (data.n1 + data.n2) / 2;
+    ItemPos k = (d.n1 + d.n2 - 1) / 2 + 1;
+    LOG_FOLD_START(d.info, "rec n1 " << d.n1 << " n2 " << d.n2 << " k " << k << " c " << d.c << std::endl);
 
-    LOG_FOLD_START(data.info, "rec n1 " << n1 << " n2 " << n2 << " k " << k << " c " << data.c << std::endl);
+    std::vector<BellmanState> l1 = opts_bellman_list(d.ins, d.n1, k, d.c, d.j_max, d.info);
+    std::vector<BellmanState> l2 = opts_bellman_list(d.ins, k, d.n2, d.c, d.j_max, d.info);
 
-    Weight w1_opt = 0;
-    Weight w2_opt = 0;
-    Profit p1_opt = 0;
-    Profit p2_opt = 0;
-
-    {
-        data.n1 = n1;
-        data.n2 = k;
-        std::vector<BellmanState> l1 = opts_bellman_list(data);
-        data.n1 = k+1;
-        data.n2 = n2;
-        std::vector<BellmanState> l2 = opts_bellman_list(data);
-
-        Profit z_max  = 0;
-        Weight i1_opt = 0;
-        Weight i2_opt = 0;
-        if (l1.size() > 0) {
-            StateIdx i2 = l2.size()-1;
-            for (Weight i1=0; i1<(Weight)l1.size(); ++i1) {
-                while (l1[i1].w + l2[i2].w > data.c)
-                    i2--;
-                assert(i2 >= 0);
-                Profit z = l1[i1].p + l2[i2].p;
-                if (z > z_max) {
-                    z_max = z;
-                    i1_opt = i1;
-                    i2_opt = i2;
-                }
-            }
+    Profit z_max  = -1;
+    Weight i1_opt = 0;
+    Weight i2_opt = 0;
+    StateIdx i2 = l2.size() - 1;
+    for (StateIdx i1=0; i1<(StateIdx)l1.size(); ++i1) {
+        while (l1[i1].w + l2[i2].w > d.c)
+            i2--;
+        assert(i2 >= 0);
+        Profit z = l1[i1].p + l2[i2].p;
+        if (z_max < z) {
+            z_max = z;
+            i1_opt = i1;
+            i2_opt = i2;
         }
-        if (l2.size() > 0) {
-            StateIdx i1 = l1.size()-1;
-            for (Weight i2=0; i2<(Weight)l2.size(); ++i2) {
-                while (l2[i2].w + l1[i1].w > data.c)
-                    i1--;
-                Profit z = l1[i1].p + l2[i2].p;
-                if (z > z_max) {
-                    z_max = z;
-                    i1_opt = i1;
-                    i2_opt = i2;
-                }
-            }
+    }
+    StateIdx i1 = l1.size() - 1;
+    for (StateIdx i2=0; i2<(StateIdx)l2.size(); ++i2) {
+        while (l2[i2].w + l1[i1].w > d.c)
+            i1--;
+        Profit z = l1[i1].p + l2[i2].p;
+        if (z_max < z) {
+            z_max = z;
+            i1_opt = i1;
+            i2_opt = i2;
         }
-
-        w1_opt = l1[i1_opt].w;
-        w2_opt = l2[i2_opt].w;
-        p1_opt = l1[i1_opt].p;
-        p2_opt = l2[i2_opt].p;
-
-        LOG(data.info, "z_max " << z_max << std::endl );
-        LOG(data.info, "w1_opt " << w1_opt << " p1_opt " << p1_opt << std::endl );
-        LOG(data.info, "w2_opt " << w2_opt << " p2_opt " << p2_opt << std::endl );
     }
+    LOG(d.info, "z_max " << z_max << std::endl );
 
-    if (k == n1) {
-        if (p1_opt == data.ins.item(n1).p)
-            data.sol_curr.set(n1, true);
-    } else {
-        data.n1 = n1;
-        data.n2 = k;
-        data.c  = w1_opt;
-        sopt_bellman_list_rec_rec(data);
-    }
+    if (d.n1 == k - 1)
+        if (l1[i1_opt].p == d.ins.item(d.n1).p)
+            d.sol.set(d.n1, true);
+    if (k == d.n2 - 1)
+        if (l2[i2_opt].p == d.ins.item(k).p)
+            d.sol.set(k, true);
 
-    if (k+1 == n2) {
-        if (p2_opt == data.ins.item(n2).p)
-            data.sol_curr.set(n2, true);
-    } else {
-        data.n1 = k+1;
-        data.n2 = n2;
-        data.c  = w2_opt;
-        sopt_bellman_list_rec_rec(data);
-    }
-    LOG_FOLD_END(data.info, "");
+    if (d.n1 != k - 1)
+        sopt_bellman_list_rec_rec({
+                .ins = d.ins,
+                .n1 = d.n1,
+                .n2 = k,
+                .c = l1[i1_opt].w,
+                .sol = d.sol,
+                .j_max = d.j_max,
+                .info = d.info});
+    if (k != d.n2 - 1)
+        sopt_bellman_list_rec_rec({
+                .ins = d.ins,
+                .n1 = k,
+                .n2 = d.n2,
+                .c = l2[i2_opt].w,
+                .sol = d.sol,
+                .j_max = d.j_max,
+                .info = d.info});
+
+    LOG_FOLD_END(d.info, "");
 }
 
 Solution knapsack::sopt_bellman_list_rec(const Instance& ins, Info info)
 {
     LOG_FOLD_START(info, "*** bellman (list, rec) ***" << std::endl);
     VER(info, "*** bellman (list, rec) ***" << std::endl);
-
-    ItemPos n = ins.item_number();
+    ItemPos n = ins.total_item_number();
     Solution sol(ins);
 
     if (n == 0) {
@@ -252,9 +228,16 @@ Solution knapsack::sopt_bellman_list_rec(const Instance& ins, Info info)
         return algorithm_end(sol, info);
     }
 
-    BellmanListRecData data(ins, info);
-    sopt_bellman_list_rec_rec(data);
+    sopt_bellman_list_rec_rec({
+        .ins = ins,
+        .n1 = 0,
+        .n2 = ins.total_item_number(),
+        .c = ins.total_capacity(),
+        .sol = sol,
+        .j_max = ins.max_efficiency_item(info),
+        .info = info});
+
     LOG_FOLD_END(info, "");
-    return algorithm_end(data.sol_curr, info);
+    return algorithm_end(sol, info);
 }
 

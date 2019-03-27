@@ -281,7 +281,7 @@ struct RecData
     Weight  c;
     Solution& sol;
     std::vector<Profit>::iterator values;
-    Info info;
+    Info& info;
 };
 
 void opts_bellman_array(const Instance& ins, ItemPos n1, ItemPos n2, Weight c,
