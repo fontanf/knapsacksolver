@@ -149,6 +149,9 @@ Solution knapsack::sopt_bellman_array_one(const Instance& ins, Info info)
 
         // Recursion
         for (ItemPos j=0; j<n; ++j) {
+            if (!info.check_time())
+                goto end;
+
             Weight wj = ins.item(j).w;
             Profit pj = ins.item(j).p;
 
@@ -230,6 +233,9 @@ Solution knapsack::sopt_bellman_array_part(const Instance& ins, ItemPos k, Info 
 
         // Recursion
         for (ItemPos j=0; j<n; ++j) {
+            if (!info.check_time())
+                goto end;
+
             Weight wj = ins.item(j).w;
             Profit pj = ins.item(j).p;
 
@@ -285,10 +291,12 @@ struct RecData
 };
 
 void opts_bellman_array(const Instance& ins, ItemPos n1, ItemPos n2, Weight c,
-        std::vector<Profit>::iterator values)
+        std::vector<Profit>::iterator values, Info& info)
 {
     std::fill(values, values + c + 1, 0);
     for (ItemPos j=n1; j<n2; ++j) {
+        if (!info.check_time())
+            break;
         Weight wj = ins.item(j).w;
         Profit pj = ins.item(j).p;
         for (Weight w=c; w>=wj; w--)
@@ -303,8 +311,8 @@ void sopt_bellman_array_rec_rec(RecData d)
     std::vector<Profit>::iterator values_2 = d.values + d.c + 1;
     LOG(d.info, "n1 " << d.n1 << " k " << k << " n2 " << d.n2 << " c " << d.c << std::endl);
 
-    opts_bellman_array(d.ins, d.n1, k, d.c, d.values);
-    opts_bellman_array(d.ins, k, d.n2, d.c, values_2);
+    opts_bellman_array(d.ins, d.n1, k, d.c, d.values, d.info);
+    opts_bellman_array(d.ins, k, d.n2, d.c, values_2, d.info);
 
     Profit z_max  = -1;
     Weight c1_opt = 0;
@@ -336,8 +344,7 @@ void sopt_bellman_array_rec_rec(RecData d)
                 .c = c1_opt,
                 .sol = d.sol,
                 .values = d.values,
-                .info = d.info
-                });
+                .info = d.info});
     if (k != d.n2 - 1)
         sopt_bellman_array_rec_rec({
                 .ins = d.ins,
@@ -346,8 +353,7 @@ void sopt_bellman_array_rec_rec(RecData d)
                 .c = c2_opt,
                 .sol = d.sol,
                 .values = d.values + 2 * c1_opt + k - d.n1,
-                .info = d.info
-                });
+                .info = d.info});
 }
 
 Solution knapsack::sopt_bellman_array_rec(const Instance& ins, Info info)

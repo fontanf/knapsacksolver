@@ -103,6 +103,8 @@ std::vector<BellmanState> opts_bellman_list(const Instance& ins,
     Profit lb = 0;
     std::vector<BellmanState> l0{{0, 0}};
     for (ItemPos j=n1; j<n2; ++j) {
+        if (!info.check_time())
+            break;
         Weight wj = ins.item(j).w;
         Profit pj = ins.item(j).p;
         std::vector<BellmanState> l{{0, 0}};

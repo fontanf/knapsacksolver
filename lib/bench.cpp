@@ -227,9 +227,12 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    bench_easy(algorithm);
-    bench_difficult_small(algorithm);
-    bench_difficult_large(algorithm);
+    if (vm.count("easy"))
+        bench_easy(algorithm);
+    if (vm.count("difficult-small"))
+        bench_difficult_small(algorithm);
+    if (vm.count("difficult-large"))
+        bench_difficult_large(algorithm);
 
     return 0;
 }
