@@ -5,6 +5,7 @@ using namespace knapsack;
 
 Profit opt_bellman_array_test(Instance& ins)       { return opt_bellman_array(ins); }
 Profit opt_bellmanpar_array_test(Instance& ins)    { return opt_bellmanpar_array(ins); }
+Profit opt_bellmanrec_test(Instance& ins)          { return sopt_bellmanrec(ins).profit(); }
 Profit opt_bellman_array_all_test(Instance& ins)   { return sopt_bellman_array_all(ins).profit(); }
 Profit opt_bellman_array_one_test(Instance& ins)   { return sopt_bellman_array_one(ins).profit(); }
 Profit opt_bellman_array_part1_test(Instance& ins) { return sopt_bellman_array_part(ins, 1).profit(); }
@@ -17,6 +18,7 @@ Profit opt_bellman_list_rec_test(Instance& ins)    { return sopt_bellman_list_re
 std::vector<Profit (*)(Instance&)> f {
         opt_bellman_array_test,
         opt_bellmanpar_array_test,
+        opt_bellmanrec_test,
         opt_bellman_array_all_test,
         opt_bellman_array_one_test,
         opt_bellman_array_part1_test,

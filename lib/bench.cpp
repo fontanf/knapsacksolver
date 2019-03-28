@@ -19,6 +19,8 @@ std::function<Profit (Instance&, Info)> get_algorithm(std::string s)
         return opt_bellman_array;
     } else if (s == "bellmanpar_array") {
         return opt_bellmanpar_array;
+    } else if (s == "bellmanrec") {
+        return [](Instance& ins, Info info) { return sopt_bellmanrec(ins, info).profit(); };
     } else if (s == "bellman_array_all") {
         return [](Instance& ins, Info info) { return sopt_bellman_array_all(ins, info).profit(); };
     } else if (s == "bellman_array_one") {

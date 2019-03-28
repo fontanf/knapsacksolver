@@ -74,6 +74,61 @@ Profit knapsack::opt_bellmanpar_array(const Instance& ins, Info info)
 
 /******************************************************************************/
 
+Profit sopt_bellmanrec_rec(const Instance& ins,
+        std::vector<Profit>& values, ItemIdx j, Weight w,
+        Info& info)
+{
+    if (!info.check_time())
+        return -1;
+    if (j == -1)
+        return 0;
+    Weight c = ins.total_capacity();
+    if (values[INDEX(j, w)] == -1) {
+        Profit p1 = sopt_bellmanrec_rec(ins, values, j - 1, w, info);
+        if (ins.item(j).w > w) {
+            values[INDEX(j, w)] = p1;
+        } else {
+            Profit p2 = sopt_bellmanrec_rec(
+                    ins, values, j - 1, w - ins.item(j).w, info) + ins.item(j).p;
+            values[INDEX(j, w)] = (p1 > p2)? p1: p2;
+        }
+    }
+    return values[INDEX(j, w)];
+}
+
+Solution knapsack::sopt_bellmanrec(const Instance& ins, Info info)
+{
+    VER(info, "*** bellmanrec ***" << std::endl);
+
+    // Initialize memory table
+    ItemPos n = ins.total_item_number();
+    Weight  c = ins.total_capacity();
+    StateIdx values_size = (n + 1) * (c + 1);
+    std::vector<Profit> values(values_size, -1);
+    Profit opt = sopt_bellmanrec_rec(ins, values, n - 1, c, info);
+
+    // Retrieve optimal solution
+    Solution sol(ins);
+    ItemPos j = n - 1;
+    Weight  w = c;
+    Profit  v = 0;
+    while (v < opt) {
+        Weight wj = ins.item(j).w;
+        Profit pj = ins.item(j).p;
+        Profit v0 = values[INDEX(j - 1, w)];
+        Profit v1 = (w < wj)? 0: values[INDEX(j - 1, w - wj)] + pj;
+        if (v1 > v0) {
+            v += pj;
+            w -= wj;
+            sol.set(j, true);
+        }
+        j--;
+    }
+    return algorithm_end(sol, info);
+}
+
+/******************************************************************************/
+
 Solution knapsack::sopt_bellman_array_all(const Instance& ins, Info info)
 {
     VER(info, "*** bellman (array, all) ***" << std::endl);
