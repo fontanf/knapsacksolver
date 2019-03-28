@@ -77,7 +77,7 @@ std::function<Profit (Instance&, Info)> get_algorithm(std::string s)
 }
 
 template<typename Function>
-std::string bench(Function func, GenerateData d)
+double bench(Function func, GenerateData d)
 {
     double t_max = 300;
     double t_total = 0.0;
@@ -87,19 +87,24 @@ std::string bench(Function func, GenerateData d)
         //std::cout << std::endl << "h " << d.h << " s " << d.s;
         Instance ins = generate(d);
         Info info = Info().set_timelimit(t_max - t_total);
-        func(ins, info);
+        try {
+            func(ins, info);
+        } catch (...) {
+            std::cout << " x" << std::endl;
+            return -1;
+        }
         double t = info.elapsed_time();
         t_total += t;
         if (t_total > t_max) {
             std::cout << " mean > " << t_max*10 << std::endl;
-            return "";
+            return -1;
         }
     }
     d.h = -1;
 
     double mean = round(t_total * 100) / 10;
     std::cout << " mean " << mean << std::endl;
-    return std::to_string(mean);
+    return mean;
 }
 
 void bench_easy(std::string algorithm)
@@ -124,7 +129,12 @@ void bench_easy(std::string algorithm)
         for (auto p: vec) {
             d.t = p.first;
             d.r = p.second;
-            file << "," << bench(func, d) << std::flush;
+            double res = bench(func, d);
+            if (res < 0) {
+                file << ",x" << std::flush;
+            } else {
+                file << "," << res << std::flush;
+            }
         }
         file << std::endl;
     }
