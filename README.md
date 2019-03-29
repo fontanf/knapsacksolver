@@ -86,14 +86,14 @@ Algorithms:
 
 ### Dynamic Programming: recursive vs iterative implementation
 
-![Recursive implementation](bench/bellmanrec_easy.csv)
-![Iterative implementation](bench/bellman_array_all_easy.csv)
+- ![Recursive implementation](bench/bellmanrec_easy.csv)
+- ![Iterative implementation](bench/bellman_array_all_easy.csv)
 
 ### Dynamic Programming: cost of retrieving an optimal solution
 
-![Only optimal value](bench/bellman_array_easy.csv)
-![Keeping the whole array](bench/bellman_array_all_easy.csv)
-![Storing partial solution in states](bench/bellman_array_part_easy.csv)
-![Recursive scheme](bench/bellman_array_rec_easy.csv)
+- ![Only optimal value](bench/bellman_array_easy.csv)
+- ![Keeping the whole array](bench/bellman_array_all_easy.csv)
+- ![Storing partial solutions in states](bench/bellman_array_part_easy.csv)
+- ![Recursive scheme](bench/bellman_array_rec_easy.csv)
 
 
