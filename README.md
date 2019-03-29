@@ -82,3 +82,18 @@ Algorithms:
 - Primal-dual Dynamic programming (only with list) (`minknap`, `combo`) :heavy_check_mark: (with options `-n` :heavy_check_mark: `-g` :x: `-p` :x: `-s` :x:)
 - Primal-dual Branch-and-bound (`expknap`) `opt_expknap/main` :heavy_check_mark: (with options `-n` :x: `-g` :heavy_check_mark: `-s`  :heavy_check_mark:)
 
+## 
+
+### Dynamic Programming: recursive vs iterative implementation
+
+![Recursive implementation](bench/bellmanrec_easy.csv)
+![Iterative implementation](bench/bellman_array_all_easy.csv)
+
+### Dynamic Programming: cost of retrieving an optimal solution
+
+![Only optimal value](bench/bellman_array_easy.csv)
+![Keeping the whole array](bench/bellman_array_all_easy.csv)
+![Storing partial solution in states](bench/bellman_array_part_easy.csv)
+![Recursive scheme](bench/bellman_array_rec_easy.csv)
+
+
