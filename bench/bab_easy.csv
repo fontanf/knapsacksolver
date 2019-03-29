@@ -1,0 +1,10 @@
+n \ Type R,U 10^3,U 10^4,WC 10^3,WC 10^4,SC 10^3,SC 10^4,ISC 10^3,ISC 10^4,ASC 10^3,ASC 10^4,SS 10^3,SS 10^4,SW 10^5
+50,x,x,x,x,x,x,x,x,x,x,x,x,x
+100,x,x,x,x,x,x,x,x,x,x,8.2,x,x
+200,x,x,x,x,x,x,x,x,x,x,0.5,1,x
+500,x,x,x,x,x,x,x,x,x,x,3,3.1,x
+1000,x,x,x,x,x,x,x,x,x,x,11.6,11.9,x
+2000,x,x,x,x,x,x,x,x,x,x,45.8,46.2,x
+5000,x,x,x,x,x,x,x,x,x,x,292.4,292.6,x
+10000,x,x,x,x,x,x,x,x,x,x,1164.8,1166,x
+

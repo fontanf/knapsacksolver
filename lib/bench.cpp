@@ -145,7 +145,7 @@ void bench_easy(std::string algorithm)
 
 void bench_difficult_large(std::string algorithm)
 {
-    std::ofstream file(algorithm + "_difficult_large.csv");
+    std::ofstream file(algorithm + "_difficult-large.csv");
     std::function<Profit (Instance&, Info)> func = get_algorithm(algorithm);
     GenerateData d;
     std::vector<std::pair<std::string, Profit>> vec {
@@ -183,7 +183,7 @@ void bench_difficult_large(std::string algorithm)
 
 void bench_difficult_small(std::string algorithm)
 {
-    std::ofstream file(algorithm + "_difficult_small.csv");
+    std::ofstream file(algorithm + "_difficult-small.csv");
     std::function<Profit (Instance&, Info)> func = get_algorithm(algorithm);
     std::vector<GenerateData> vec {
         GenerateData::gen_spanner("u", 1000, 2, 10),
