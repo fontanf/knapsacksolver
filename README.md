@@ -82,18 +82,20 @@ Algorithms:
 - Primal-dual Dynamic programming (only with list) (`minknap`, `combo`) :heavy_check_mark: (with options `-n` :heavy_check_mark: `-g` :x: `-p` :x: `-s` :x:)
 - Primal-dual Branch-and-bound (`expknap`) `opt_expknap/main` :heavy_check_mark: (with options `-n` :x: `-g` :heavy_check_mark: `-s`  :heavy_check_mark:)
 
-## 
+## Results
 
 ### Dynamic Programming: recursive vs iterative implementation
 
+Except for very sparse instances (like SW), the iterative implementation is about 10 times faster.
 - ![Recursive implementation](bench/bellmanrec_easy.csv)
 - ![Iterative implementation](bench/bellman_array_all_easy.csv)
 
 ### Dynamic Programming: cost of retrieving an optimal solution
 
+The recursive scheme is clearly the fastest to retrieve an optimal solution.
+It still requires 2 times more time than the implementation returning only the optimal value.
 - ![Only optimal value](bench/bellman_array_easy.csv)
 - ![Keeping the whole array](bench/bellman_array_all_easy.csv)
 - ![Storing partial solutions in states](bench/bellman_array_part_easy.csv)
 - ![Recursive scheme](bench/bellman_array_rec_easy.csv)
-
 
