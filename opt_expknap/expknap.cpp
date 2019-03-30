@@ -81,7 +81,7 @@ void Expknap::rec(Info& info)
 
             // Expand
             if (instance_.int_right_size() > 0 && t > instance_.last_sorted_item())
-                instance_.sort_right(sol_best_.profit());
+                instance_.sort_right(info, sol_best_.profit());
 
             // Bounding test
             Profit ub = ub_dembo(instance_, t, sol_curr_);
@@ -107,7 +107,7 @@ void Expknap::rec(Info& info)
 
             // Expand
             if (instance_.int_left_size() > 0 && s < instance_.first_sorted_item())
-                instance_.sort_left(sol_best_.profit());
+                instance_.sort_left(info, sol_best_.profit());
 
             // Bounding test
             Profit ub = ub_dembo_rev(instance_, s, sol_curr_);

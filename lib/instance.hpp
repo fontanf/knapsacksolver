@@ -133,16 +133,15 @@ public:
      */
     void sort_partially(Info& info, ItemIdx limit=128);
 
-    void sort_right(Profit lb);
-    void sort_left(Profit lb);
+    void sort_right(Info& info, Profit lb);
+    void sort_left(Info& info, Profit lb);
     ItemPos int_right_size() const { return int_right_.size(); }
     ItemPos int_left_size()  const { return int_left_.size();  }
     ItemPos first_sorted_item() const { return s_; }
     ItemPos  last_sorted_item()  const { return t_; }
     const std::vector<Interval>& int_right() const { return int_right_; }
     const std::vector<Interval>& int_left()  const { return int_left_; }
-    std::pair<ItemPos, ItemPos> bound_items_add(ItemPos s, ItemPos t, Info& info) const;
-    std::pair<ItemPos, ItemPos> bound_items_rem(ItemPos s, ItemPos t, Info& info) const;
+    std::pair<ItemPos, ItemPos> bound_items(ItemPos s, ItemPos t, Profit lb, Info& info);
     /**
      * Compute improved initial core. See "Dynamic Programming and Strong
      * Bounds for the 0-1 Knapsack Problem", 3. The Initial Core (Martello,

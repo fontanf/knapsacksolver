@@ -90,12 +90,12 @@ private:
     Instance& instance_;
     MinknapParams params_;
 
-    Profit opt_ = -1;
     Profit lb_ = 0;
     Profit ub_ = -1;
     ItemPos s_;
     ItemPos t_;
     std::vector<MinknapState> l0_;
+    std::vector<MinknapState> l_;
     PartSolFactory2 psolf_;
     MinknapState best_state_;
     StateIdx state_number_ = 0;

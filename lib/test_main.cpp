@@ -20,17 +20,23 @@ int main(int argc, char *argv[])
     (void)argv;
 
     GenerateData data;
-    data.n = 50;
-    data.t = "sc";
+    data.n = 2000;
+    data.t = "circle";
     data.r = 1000;
-    data.h = 12;
-    data.s = 1062;
+    data.d = 2.0 / 3;
+    data.h = 81;
+    data.s = 3081;
     Instance ins = generate(data);
 
-    ExpknapParams p = ExpknapParams::fontan();
+    MinknapParams p = MinknapParams::pure();
+    Info info = Info("log.txt")
+        .set_verbose(true)
+        //.set_log2stderr(true)
+        ;
+    Minknap(ins, p).run(info);
+    //ExpknapParams p = ExpknapParams::fontan();
     //p.time_limit = 600;
-    Info info = Info("log.txt").set_verbose(true);
-    Expknap(ins, p).run(info);
+    //Expknap(ins, p).run(info);
 
 }
 

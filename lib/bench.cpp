@@ -47,11 +47,21 @@ std::function<Profit (Instance&, Info)> get_algorithm(std::string s)
     } else if (s == "balknap") { // balknap
         BalknapParams p;
         sopt_balknap(ins, p, k, info);
-    } else if (s == "minknap") { // minknap
-        MinknapParams p;
-        p.k = k;
-        Minknap(ins, p).run(info);
     */
+    } else if (s == "minknap") { // minknap
+        return [](Instance& ins, Info info) {
+            return Minknap(ins, MinknapParams::pure()).run(info).profit();
+        };
+    } else if (s == "minknap_combocore") {
+        return [](Instance& ins, Info info) {
+            MinknapParams p = MinknapParams::pure();
+            p.combo_core = true;
+            return Minknap(ins, p).run(info).profit();
+        };
+    } else if (s == "minknap_fontan") {
+        return [](Instance& ins, Info info) {
+            return Minknap(ins, MinknapParams::fontan()).run(info).profit();
+        };
     } else if (s == "greedy") { // greedy
         return [](Instance& ins, Info info) {
             ins.sort_partially(info);
@@ -84,19 +94,19 @@ double bench(Function func, GenerateData d)
     std::cout << d << std::flush;
     for (d.h=1; d.h<=100; ++d.h) {
         d.s = d.n + d.r + d.h;
-        //std::cout << std::endl << "h " << d.h << " s " << d.s;
+        //std::cout << std::endl << "h " << d.h << " s " << d.s << std::flush;
         Instance ins = generate(d);
         Info info = Info().set_timelimit(t_max - t_total);
         try {
             func(ins, info);
+            double t = info.elapsed_time();
+            t_total += t;
+            if (t_total > t_max) {
+                std::cout << " mean > " << t_max*10 << std::endl;
+                return -1;
+            }
         } catch (...) {
             std::cout << " x" << std::endl;
-            return -1;
-        }
-        double t = info.elapsed_time();
-        t_total += t;
-        if (t_total > t_max) {
-            std::cout << " mean > " << t_max*10 << std::endl;
             return -1;
         }
     }
@@ -172,7 +182,12 @@ void bench_difficult_large(std::string algorithm)
         for (auto p: vec) {
             d.t = p.first;
             d.r = p.second;
-            file << "," << bench(func, d) << std::flush;
+            double res = bench(func, d);
+            if (res < 0) {
+                file << ",x" << std::flush;
+            } else {
+                file << "," << res << std::flush;
+            }
         }
         file << std::endl;
     }
@@ -202,7 +217,12 @@ void bench_difficult_small(std::string algorithm)
         file << n << std::flush;
         for (GenerateData d: vec) {
             d.n = n;
-            file << "," << bench(func, d) << std::flush;
+            double res = bench(func, d);
+            if (res < 0) {
+                file << ",x" << std::flush;
+            } else {
+                file << "," << res << std::flush;
+            }
         }
         file << std::endl;
     }

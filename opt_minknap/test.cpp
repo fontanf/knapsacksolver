@@ -4,9 +4,11 @@
 
 using namespace knapsack;
 
+Profit opt_bellman_array_test(Instance& ins) { return opt_bellman_array(ins); }
+
 Profit opt_minknap_1_test(Instance& ins)
 {
-    Info info;
+    Info info = Info().set_log2stderr(true);
     auto p = MinknapParams::pure();
     p.k = 1;
     return Minknap(ins, p).run(info).profit();
@@ -14,7 +16,7 @@ Profit opt_minknap_1_test(Instance& ins)
 
 Profit opt_minknap_2_test(Instance& ins)
 {
-    Info info;
+    Info info = Info().set_log2stderr(true);
     auto p = MinknapParams::pure();
     p.k = 2;
     return Minknap(ins, p).run(info).profit();
@@ -22,7 +24,7 @@ Profit opt_minknap_2_test(Instance& ins)
 
 Profit opt_minknap_3_test(Instance& ins)
 {
-    Info info;
+    Info info = Info().set_log2stderr(true);
     auto p = MinknapParams::pure();
     p.k = 3;
     return Minknap(ins, p).run(info).profit();
@@ -30,7 +32,7 @@ Profit opt_minknap_3_test(Instance& ins)
 
 Profit opt_minknap_combocore_test(Instance& ins)
 {
-    Info info;
+    Info info = Info().set_log2stderr(true);
     auto p = MinknapParams::pure();
     p.k = 3;
     p.combo_core = true;
@@ -38,7 +40,7 @@ Profit opt_minknap_combocore_test(Instance& ins)
 }
 
 std::vector<Profit (*)(Instance&)> f = {
-        opt_bellman_array,
+        opt_bellman_array_test,
         opt_minknap_1_test,
         opt_minknap_2_test,
         opt_minknap_3_test,

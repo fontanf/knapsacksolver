@@ -532,64 +532,54 @@ void Instance::sort_partially(Info& info, ItemIdx limit)
 
     int_right_.clear();
     int_left_.clear();
-    if (item_number() > 1) {
-        // Quick sort like algorithm
-        ItemPos f = first_item();
-        ItemPos l = last_item();
-        Weight c = capacity();
-        while (f < l) {
-            LOG(info, "f " << f << " l " << l << std::endl);
-            if (l - f < limit) {
-                std::sort(items_.begin() + f, items_.begin() + l + 1,
-                        [](const Item& i1, const Item& i2) {
-                        return i1.p * i2.w > i2.p * i1.w;});
-                ItemPos b = f;
-                for (; b<=l; ++b) {
-                    if (c < item(b).w)
-                        break;
-                    c -= item(b).w;
-                }
-                if (f < b)
-                    int_left_.push_back({f, b-1});
-                if (b < l)
-                    int_right_.push_back({b+1, l});
-                break;
-            }
 
-            std::pair<ItemPos, ItemPos> fl = partition(f, l, info);
-            ItemPos w = 0;
-            for (ItemPos k=f; k<fl.first; ++k)
-                w += item(k).w;
+    // Quick sort like algorithm
+    ItemPos f = first_item();
+    ItemPos l = last_item();
+    Weight c = capacity();
+    while (f < l) {
+        LOG(info, "f " << f << " l " << l << std::endl);
+        if (l - f < limit) {
+            std::sort(items_.begin() + f, items_.begin() + l + 1,
+                    [](const Item& i1, const Item& i2) {
+                    return i1.p * i2.w > i2.p * i1.w;});
+            break;
+        }
 
-            if (w > c) {
-                if (fl.second+1 <= l)
-                    int_right_.push_back({fl.second+1, l});
-                int_right_.push_back({fl.second, fl.first});
-                l = fl.first-1;
-                continue;
-            }
+        std::pair<ItemPos, ItemPos> fl = partition(f, l, info);
+        ItemPos w = 0;
+        for (ItemPos k=f; k<fl.first; ++k)
+            w += item(k).w;
 
-            for (ItemPos k=fl.first; k<=fl.second; ++k)
-                w += item(k).w;
-            if (w >= c) {
-                if (f <= fl.first-1)
-                    int_left_.push_back({f, fl.first-1});
-                if (fl.second+1 <= l)
-                    int_right_.push_back({fl.second+1, l});
-                break;
-            } else {
-                c -= w;
-                if (f <= fl.first-1)
-                    int_left_.push_back({f, fl.first-1});
-                int_left_.push_back({fl.first, fl.second});
-                f = fl.second+1;
-            }
+        if (w > c) {
+            if (fl.second + 1 <= l)
+                int_right_.push_back({fl.second + 1, l});
+            int_right_.push_back({fl.second, fl.first});
+            l = fl.first - 1;
+            continue;
+        }
+
+        for (ItemPos k=fl.first; k<=fl.second; ++k)
+            w += item(k).w;
+        if (w >= c) {
+            break;
+        } else {
+            c -= w;
+            if (f <= fl.first-1)
+                int_left_.push_back({f, fl.first-1});
+            int_left_.push_back({fl.first, fl.second});
+            f = fl.second+1;
         }
     }
 
     sort_type_ = 1;
 
     compute_break_item(info);
+
+    if (f < b_)
+        int_left_.push_back({f, b_ - 1});
+    if (b_ < l)
+        int_right_.push_back({b_ + 1, l});
     s_ = b_;
     t_ = b_;
     s_init_ = b_;
@@ -598,8 +588,9 @@ void Instance::sort_partially(Info& info, ItemIdx limit)
     LOG_FOLD_END(info, "sort_partially");
 }
 
-void Instance::sort_right(Profit lb)
+void Instance::sort_right(Info& info, Profit lb)
 {
+    LOG_FOLD_START(info, "sort_right lb " << lb << std::endl);
     Interval in = int_right_.back();
     int_right_.pop_back();
     ItemPos k = t_;
@@ -610,6 +601,8 @@ void Instance::sort_right(Profit lb)
                 || (k == t_ && j == in.l)) {
             k++;
             swap(k, j);
+        } else {
+            LOG(info, "set " << j << " (" << item(j) << ")" << std::endl);
         }
     }
     std::sort(items_.begin()+t_+1, items_.begin()+k+1,
@@ -620,10 +613,12 @@ void Instance::sort_right(Profit lb)
         l_ = t_;
     if (s_init_ == t_init_ && first_item() >= first_sorted_item() && last_item() <= last_sorted_item())
         sort_type_ = 2;
+    LOG_FOLD_END(info, "sort_right");
 }
 
-void Instance::sort_left(Profit lb)
+void Instance::sort_left(Info& info, Profit lb)
 {
+    LOG_FOLD_START(info, "sort_left lb " << lb << std::endl);
     Interval in = int_left_.back();
     int_left_.pop_back();
     ItemPos k = s_;
@@ -635,6 +630,7 @@ void Instance::sort_left(Profit lb)
             k--;
             swap(k, j);
         } else {
+            LOG(info, "set " << j << " (" << item(j) << ")" << std::endl);
             sol_red_->set(j, true);
         }
     }
@@ -646,48 +642,37 @@ void Instance::sort_left(Profit lb)
         f_ = s_;
     if (s_init_ == t_init_ && first_item() >= first_sorted_item() && last_item() <= last_sorted_item())
         sort_type_ = 2;
+    LOG_FOLD_END(info, "sort_left");
 }
 
-std::pair<ItemPos, ItemPos> Instance::bound_items_add(ItemPos s, ItemPos t, Info& info) const
+std::pair<ItemPos, ItemPos> Instance::bound_items(ItemPos s, ItemPos t, Profit lb, Info& info)
 {
-    std::pair<ItemPos, ItemPos> jj;
-    if (s <= first_item() - 1) {
-        jj.first = first_item() - 1;
+    LOG_FOLD_START(info, "bound_items s " << s << " t " << t << std::endl);
+    std::pair<ItemPos, ItemPos> st;
+
+    while (s < first_sorted_item() && int_left().size() > 0)
+        sort_left(info, lb);
+    if (s < first_item()) {
+        st.first = first_item() - 1;
     } else if (s >= first_initial_core_item()) {
-        jj.first = break_item();
+        st.first = break_item();
     } else {
-        jj.first = s;
+        st.first = s;
     }
-    if (t >= last_item()) {
-        jj.second = last_item() + 1;
-    } else if (t <= last_initial_core_item()) {
-        jj.second = break_item();
-    } else {
-        jj.second = t + 1;
-    }
-    LOG(info, "bound items: " << jj.first << " " << jj.second << std::endl);
-    return jj;
-}
 
-std::pair<ItemPos, ItemPos> Instance::bound_items_rem(ItemPos s, ItemPos t, Info& info) const
-{
-    std::pair<ItemPos, ItemPos> jj;
+    while (t > last_sorted_item() && int_right().size() > 0)
+        sort_right(info, lb);
     if (t >= last_item() + 1) {
-        jj.second = last_item() + 1;
+        st.second = last_item() + 1;
     } else if (t <= last_initial_core_item()) {
-        jj.second = break_item();
+        st.second = break_item();
     } else {
-        jj.second = t;
+        st.second = t;
     }
-    if (s <= first_item()) {
-        jj.first = first_item() - 1;
-    } else if (s >= first_initial_core_item()) {
-        jj.first = break_item();
-    } else {
-        jj.first = s - 1;
-    }
-    LOG(info, "bound items: " << jj.first << " " << jj.second << std::endl);
-    return jj;
+
+    LOG(info, st.first << " " << st.second << std::endl);
+    LOG_FOLD_END(info, "bound_items");
+    return st;
 }
 
 void Instance::add_item_to_initial_core(ItemPos j, Info& info)
@@ -1057,12 +1042,12 @@ void Instance::surrogate(Info& info, Weight multiplier, ItemIdx bound, ItemPos f
 Solution knapsack::algorithm_end(const Solution& sol, Info& info)
 {
     double t = info.elapsed_time();
-    LOG_FOLD(info, sol.to_string_items());
+    LOG(info, "sol " << sol.to_string_items() << " p " << sol.profit() << std::endl);
     PUT(info, "Solution.Value", sol.profit());
     PUT(info, "Solution.Time", t);
     VER(info, "---" << std::endl
             << "Value: " << sol.profit() << std::endl
-            << "Time: " << t << std::endl);
+            << "Time: " << t*1000 << std::endl);
     return sol;
 }
 
@@ -1102,15 +1087,17 @@ std::ostream& knapsack::operator<<(std::ostream& os, const Instance& ins)
         os
             <<  "n " << ins.item_number() << " c " << ins.capacity()
             << " f " << ins.first_item() << " l " << ins.last_item()
+            << " p_red " << ins.reduced_solution()->profit()
             << std::endl;
     if (ins.break_solution() != NULL)
         os << "b " << ins.break_item()
             << " wsum " << ins.break_weight()
             << " psum " << ins.break_profit()
+            << " p_break " << ins.break_solution()->profit()
             << std::endl;
     os << "sort_type " << ins.sort_type() << std::endl;
 
-    os << "left ";
+    os << "left";
     for (Interval in: ins.int_left())
         os << " " << in;
     os << std::endl;
