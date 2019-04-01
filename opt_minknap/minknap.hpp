@@ -64,7 +64,7 @@ struct MinknapParams
             .lb_pairing = 10000,
             .ub_surrogate = 2000,
             .solve_sur = 2000,
-            .combo_core = true,
+            .combo_core = false,
         };
     }
 };

@@ -32,7 +32,7 @@ struct ExpknapParams
             .lb_greedy = 0,
             .lb_greedynlogn = 50000,
             .ub_surrogate = 20000,
-            .combo_core = true,
+            .combo_core = false,
         };
     }
 };
@@ -42,25 +42,25 @@ class Expknap
 
 public:
 
-    Expknap(Instance& ins, ExpknapParams p,
-            std::shared_ptr<bool> end = nullptr):
+    Expknap(Instance& ins, ExpknapParams p, std::atomic<bool>* end = NULL):
         instance_(ins), params_(p), sol_curr_(ins), sol_best_(ins), end_(end)
     {
-        if (end_ == nullptr)
-            end_ = std::shared_ptr<bool>(new bool(false));
+        sur_ = (end_ != NULL);
+        if (end_ == NULL)
+            end_ = new std::atomic<bool>(false);
     }
 
     ~Expknap()
     {
-        for (std::thread& thread: threads_)
-            thread.join();
+        if (!sur_)
+            delete end_;
     }
 
     Solution run(Info info = Info());
 
 private:
 
-    void rec(Info& info);
+    void rec(ItemPos s, ItemPos t, Info& info);
     void update_bounds(Info& info);
     void surrogate(Instance ins, Info info);
 
@@ -71,10 +71,9 @@ private:
     Profit ub_ = -1;
     Solution sol_curr_;
     Solution sol_best_;
-    ItemPos s_;
-    ItemPos t_;
     Cpt node_number_ = 0;
-    std::shared_ptr<bool> end_ = NULL;
+    bool sur_ = false;
+    std::atomic<bool>* end_ = NULL;
     std::vector<std::thread> threads_;
 
 };

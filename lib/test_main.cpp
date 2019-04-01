@@ -20,23 +20,35 @@ int main(int argc, char *argv[])
     (void)argv;
 
     GenerateData data;
-    data.n = 2000;
-    data.t = "circle";
-    data.r = 1000;
-    data.d = 2.0 / 3;
-    data.h = 81;
-    data.s = 3081;
+    data.n = 100;
+    data.t = "sw";
+    data.r = 100000000;
+    //data.d = 2.0 / 3;
+    data.h = 45;
+    data.s = 100000145;
     Instance ins = generate(data);
 
-    MinknapParams p = MinknapParams::pure();
+    Profit opt = 0;
+    {
+        Info info = Info().set_verbose(true);
+        MinknapParams p = MinknapParams::pure();
+        opt = Minknap(ins, p).run(info).profit();
+    }
+
+    {
+        Info info = Info().set_verbose(true);
+        SurrogateOut so = ub_surrogate(ins, opt, info);
+        std::cout << so.ub << " " << so.bound << std::endl;
+    }
+
     Info info = Info("log.txt")
         .set_verbose(true)
         //.set_log2stderr(true)
         ;
-    Minknap(ins, p).run(info);
-    //ExpknapParams p = ExpknapParams::fontan();
-    //p.time_limit = 600;
-    //Expknap(ins, p).run(info);
+    //MinknapParams p = MinknapParams::pure();
+    //Minknap(ins, p).run(info);
+    ExpknapParams p = ExpknapParams::fontan();
+    Expknap(ins, p).run(info);
 
 }
 

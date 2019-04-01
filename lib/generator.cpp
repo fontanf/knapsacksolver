@@ -78,8 +78,8 @@ std::pair<Weight, Profit> item(GenerateData& data)
         w = d(data.g);
         p = w;
     } else if (data.t == "sw") {
-        std::uniform_int_distribution<int> d1(data.r, data.r + 100);
-        std::uniform_int_distribution<int> d2(1, 1000);
+        std::uniform_int_distribution<int> d1(data.r, data.r + data.r / 1000);
+        std::uniform_int_distribution<int> d2(1, data.r / 100);
         w = d1(data.g);
         p = d2(data.g);
     } else if (data.t == "mstr") {

@@ -22,16 +22,13 @@ Solution& Solution::operator=(const Solution& solution)
         } else {
             // Used to convert a solution of a surrogate instance to a
             // solution of its original instance.
-            p_ = 0;
-            w_ = 0;
             k_ = solution.item_number();
             x_ = solution.data();
-            for (ItemPos j=0; j<instance().total_item_number(); ++j) {
-                if (contains(j)) {
-                    p_ += instance().item(j).p;
+            p_ = solution.profit();
+            w_ = 0;
+            for (ItemPos j=0; j<instance().total_item_number(); ++j)
+                if (contains(j))
                     w_ += instance().item(j).w;
-                }
-            }
         }
     }
     return *this;
@@ -128,17 +125,17 @@ std::string Solution::to_string_items() const
 void knapsack::init_display(Profit lb, Profit ub, Info& info)
 {
     VER(info, std::left << std::setw(10) << "Time");
-    VER(info, std::left << std::setw(10) << "LB");
-    VER(info, std::left << std::setw(10) << "UB");
-    VER(info, std::left << std::setw(10) << "GAP");
+    VER(info, std::left << std::setw(12) << "LB");
+    VER(info, std::left << std::setw(12) << "UB");
+    VER(info, std::left << std::setw(12) << "GAP");
     VER(info, "");
     VER(info, std::endl);
 
     double t = round(info.elapsed_time() * 10000) / 10;
     VER(info, std::left << std::setw(10) << t);
-    VER(info, std::left << std::setw(10) << lb);
-    VER(info, std::left << std::setw(10) << ub);
-    VER(info, std::left << std::setw(10) << ub - lb);
+    VER(info, std::left << std::setw(12) << lb);
+    VER(info, std::left << std::setw(12) << ub);
+    VER(info, std::left << std::setw(12) << ub - lb);
     VER(info, "" << std::endl);
 }
 
@@ -150,9 +147,9 @@ void knapsack::update_lb(Profit& lb, Profit ub, Profit lb_new, const std::string
         lb = lb_new;
         double t = round(info.elapsed_time() * 10000) / 10;
         VER(info, std::left << std::setw(10) << t);
-        VER(info, std::left << std::setw(10) << lb);
-        VER(info, std::left << std::setw(10) << ub);
-        VER(info, std::left << std::setw(10) << ub - lb);
+        VER(info, std::left << std::setw(12) << lb);
+        VER(info, std::left << std::setw(12) << ub);
+        VER(info, std::left << std::setw(12) << ub - lb);
         VER(info, s.str() << std::endl);
     }
 
@@ -167,9 +164,9 @@ void knapsack::update_ub(Profit lb, Profit& ub, Profit ub_new, const std::string
         ub = ub_new;
         double t = round(info.elapsed_time() * 10000) / 10;
         VER(info, std::left << std::setw(10) << t);
-        VER(info, std::left << std::setw(10) << lb);
-        VER(info, std::left << std::setw(10) << ub);
-        VER(info, std::left << std::setw(10) << ub - lb);
+        VER(info, std::left << std::setw(12) << lb);
+        VER(info, std::left << std::setw(12) << ub);
+        VER(info, std::left << std::setw(12) << ub - lb);
         VER(info, s.str() << std::endl);
     }
 
@@ -184,9 +181,9 @@ void knapsack::update_sol(Solution& sol, Profit ub, const Solution& sol_new, con
         sol = sol_new;
         double t = round(info.elapsed_time() * 10000) / 10;
         VER(info, std::left << std::setw(10) << t);
-        VER(info, std::left << std::setw(10) << sol.profit());
-        VER(info, std::left << std::setw(10) << ub);
-        VER(info, std::left << std::setw(10) << ub - sol.profit());
+        VER(info, std::left << std::setw(12) << sol.profit());
+        VER(info, std::left << std::setw(12) << ub);
+        VER(info, std::left << std::setw(12) << ub - sol.profit());
         VER(info, s.str() << std::endl);
     }
 

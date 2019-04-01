@@ -41,6 +41,8 @@ std::function<Profit (Instance&, Info)> get_algorithm(std::string s)
         return [](Instance& ins, Info info) { return sopt_bab(ins, info).profit(); };
     } else if (s == "astar") { // astar
         return [](Instance& ins, Info info) { return sopt_astar(ins, info).profit(); };
+    } else if (s == "expknap") { // expknap
+        return [](Instance& ins, Info info) { return Expknap(ins, ExpknapParams::pure()).run(info).profit(); };
     } else if (s == "expknap_fontan") { // expknap
         return [](Instance& ins, Info info) { return Expknap(ins, ExpknapParams::fontan()).run(info).profit(); };
     /*
@@ -68,7 +70,10 @@ std::function<Profit (Instance&, Info)> get_algorithm(std::string s)
             return sol_greedy(ins, info).profit();
         };
     } else if (s == "greedynlogn") { // greedynlogn
-        return [](Instance& ins, Info info) { return sol_greedynlogn(ins, info).profit(); };
+        return [](Instance& ins, Info info) {
+            ins.sort_partially(info);
+            return sol_greedynlogn(ins, info).profit();
+        };
     } else if (s == "greedynlogn_for") {
         return [](Instance& ins, Info info) { return sol_forwardgreedynlogn(ins, info).profit(); };
     } else if (s == "greedynlogn_back") {
@@ -78,7 +83,8 @@ std::function<Profit (Instance&, Info)> get_algorithm(std::string s)
     } else if (s == "surrelax") { // surrelax
         return [](Instance& ins, Info info) {
             ins.sort_partially(info);
-            Solution sol = sol_greedynlogn(ins, Info(info, false, "greedynlogn"));
+            //Solution sol = sol_greedynlogn(ins, Info(info, false, "greedynlogn"));
+            Solution sol = sol_greedy(ins, Info(info, false, "greedy"));
             return ub_surrogate(ins, sol.profit(), info).ub;
         };
     } else {
@@ -94,9 +100,12 @@ double bench(Function func, GenerateData d)
     std::cout << d << std::flush;
     for (d.h=1; d.h<=100; ++d.h) {
         d.s = d.n + d.r + d.h;
-        //std::cout << std::endl << "h " << d.h << " s " << d.s << std::flush;
+        //std::cout << std::endl << d << std::flush;
         Instance ins = generate(d);
-        Info info = Info().set_timelimit(t_max - t_total);
+        Info info = Info()
+            .set_timelimit(t_max - t_total)
+            //.set_verbose(true)
+            ;
         try {
             func(ins, info);
             double t = info.elapsed_time();
