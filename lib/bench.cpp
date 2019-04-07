@@ -60,6 +60,10 @@ std::function<Profit (Instance&, Info)> get_algorithm(std::string s)
             p.combo_core = true;
             return Minknap(ins, p).run(info).profit();
         };
+    } else if (s == "minknap_combo") {
+        return [](Instance& ins, Info info) {
+            return Minknap(ins, MinknapParams::combo()).run(info).profit();
+        };
     } else if (s == "minknap_fontan") {
         return [](Instance& ins, Info info) {
             return Minknap(ins, MinknapParams::fontan()).run(info).profit();
@@ -80,6 +84,7 @@ std::function<Profit (Instance&, Info)> get_algorithm(std::string s)
         return [](Instance& ins, Info info) { return sol_backwardgreedynlogn(ins, info).profit(); };
     } else if (s == "dantzig") { // dantzig
         return [](Instance& ins, Info info) { return ub_dantzig(ins, info); };
+    /*
     } else if (s == "surrelax") { // surrelax
         return [](Instance& ins, Info info) {
             ins.sort_partially(info);
@@ -87,6 +92,7 @@ std::function<Profit (Instance&, Info)> get_algorithm(std::string s)
             Solution sol = sol_greedy(ins, Info(info, false, "greedy"));
             return ub_surrogate(ins, sol.profit(), info).ub;
         };
+    */
     } else {
         return opt_bellman_array;
     }
@@ -100,11 +106,11 @@ double bench(Function func, GenerateData d)
     std::cout << d << std::flush;
     for (d.h=1; d.h<=100; ++d.h) {
         d.s = d.n + d.r + d.h;
-        //std::cout << std::endl << d << std::flush;
+        std::cout << std::endl << d << std::flush;
         Instance ins = generate(d);
         Info info = Info()
             .set_timelimit(t_max - t_total)
-            //.set_verbose(true)
+            .set_verbose(true)
             ;
         try {
             func(ins, info);
@@ -116,6 +122,15 @@ double bench(Function func, GenerateData d)
             }
         } catch (...) {
             std::cout << " x" << std::endl;
+            std::cout << std::endl << d << std::flush;
+            Instance ins = generate(d);
+            Info info = Info()
+                .set_timelimit(t_max - t_total)
+                .set_verbose(true)
+                .set_log2stderr(true)
+                ;
+            func(ins, info);
+            exit(1);
             return -1;
         }
     }

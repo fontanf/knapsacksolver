@@ -10,6 +10,7 @@ ItemIdx max_card(const Instance& ins, Info& info)
 {
     LOG_FOLD_START(info, "max_card" << std::endl);
     if (ins.item_number() == 1) {
+        LOG_FOLD_END(info, "1 item");
         return 1;
     }
 
@@ -44,10 +45,10 @@ ItemIdx max_card(const Instance& ins, Info& info)
             w_curr += ins.item(index[i]).w;
 
         if (w_curr + ins.item(index[j]).w <= c) {
-            f = j+1;
+            f = j + 1;
             w = w_curr + ins.item(index[j]).w;
         } else if (w_curr > c) {
-            l = j-1;
+            l = j - 1;
         } else {
             break;
         }
@@ -63,7 +64,7 @@ ItemIdx max_card(const Instance& ins, Info& info)
         r -= ins.item(index[j]).w;
     }
 
-    LOG_FOLD_END(info, "");
+    LOG_FOLD_END(info, "k " << k);
     return k;
 }
 
@@ -72,8 +73,10 @@ ItemIdx min_card(const Instance& ins, Info& info, Profit lb)
     LOG_FOLD_START(info, "min_card" << std::endl);
 
     lb -= ins.reduced_solution()->profit();
-    if (ins.item_number() <= 1)
+    if (ins.item_number() <= 1) {
+        LOG_FOLD_END(info, "1 item");
         return (ins.item(1).p <= lb)? 1: 0;
+    }
 
     std::vector<ItemIdx> index(ins.total_item_number());
     std::iota(index.begin(), index.end(), 0);
@@ -105,9 +108,9 @@ ItemIdx min_card(const Instance& ins, Info& info, Profit lb)
             p_curr += ins.item(index[i]).p;
 
         if (p_curr > lb) {
-            l = j-1;
+            l = j - 1;
         } else if (p_curr + ins.item(index[j]).p <= lb) {
-            f = j+1;
+            f = j + 1;
             p = p_curr + ins.item(index[j]).p;
         } else {
             break;
@@ -118,35 +121,42 @@ ItemIdx min_card(const Instance& ins, Info& info, Profit lb)
     Profit z = 0;
     for (ItemPos j=ins.first_item(); j<=ins.last_item(); ++j) {
         if (z + ins.item(index[j]).p > lb) {
-            k = j+1;
+            k = j + 1;
             break;
         }
         z += ins.item(index[j]).p;
     }
 
-    LOG_FOLD_END(info, "");
+    LOG_FOLD_END(info, "k " << k);
     return k;
 }
 
-void ub_surrogate_solve(Instance& ins, Info& info, ItemIdx k,
-        Weight s_min, Weight s_max, SurrogateOut& out)
+struct UBS
+{
+    Profit ub;
+    Weight s;
+};
+
+UBS ub_surrogate_solve(Instance& ins, Info& info, ItemIdx k,
+        Weight s_min, Weight s_max)
 {
     LOG_FOLD_START(info, "ub_surrogate_solve k " << k << " s_min " << s_min << " s_max " << s_max << std::endl);
-    out.bound = k;
     ItemPos first = ins.first_item();
+    Profit ub = ub_dantzig(ins);
     Weight  s_prec = 0;
     Weight  s = 0;
+    Weight  s_best = 0;
     Weight s1 = s_min;
     Weight s2 = s_max;
     Weight wmax = ins.item(ins.first_item()).w;
     Weight wmin = ins.item(ins.first_item()).w;
     Profit pmax = ins.item(ins.first_item()).p;
     for (ItemPos j=ins.first_item()+1; j<=ins.last_item(); ++j) {
-        if (ins.item(j).w > wmax)
+        if (wmax < ins.item(j).w)
             wmax = ins.item(j).w;
-        if (ins.item(j).w < wmin)
+        if (wmin > ins.item(j).w)
             wmin = ins.item(j).w;
-        if (ins.item(j).p > pmax)
+        if (pmax < ins.item(j).p)
             pmax = ins.item(j).p;
     }
     Weight wabs = wmax;
@@ -185,14 +195,14 @@ void ub_surrogate_solve(Instance& ins, Info& info, ItemIdx k,
 
         ins.surrogate(info, s-s_prec, k, first);
         LOG_FOLD(info, ins);
-        Profit p = ub_dantzig(ins, Info());
+        Profit p = ub_dantzig(ins);
         ItemPos b = ins.break_item();
 
         LOG(info, "b " << b << " p " << p << std::endl);
 
-        if (p < out.ub) {
-            out.ub         = p;
-            out.multiplier = s;
+        if (ub > p) {
+            ub = p;
+            s_best = s;
         }
 
         if (b == k && ins.break_capacity() == 0) {
@@ -210,70 +220,134 @@ void ub_surrogate_solve(Instance& ins, Info& info, ItemIdx k,
     }
     ins.surrogate(info, -s, k);
     LOG_FOLD_END(info, "");
+    return {ub, s_best};
 }
 
-SurrogateOut knapsack::ub_surrogate(Instance& ins, Profit lb, Info info)
+void knapsack::ub_solvesurrelax(SurrelaxData d)
 {
-    LOG_FOLD_START(info, "surrogate relaxation lb " << lb << std::endl);
-    VER(info, "*** surrogate relaxation ***" << std::endl);
-    std::string best = "";
+    LOG_FOLD_START(d.info, "surrogate relaxation lb " << d.lb << std::endl);
 
-    ins.sort_partially(info);
-    ItemPos b = ins.break_item();
-
-    SurrogateOut out;
+    d.ins.sort_partially(d.info);
+    ItemPos b = d.ins.break_item();
 
     // Trivial cases
-    if (ins.item_number() == 0) {
-        algorithm_end(out.ub, info);
-        LOG_FOLD_END(info, "");
-        return out;
+    if (d.ins.item_number() == 0) {
+        Profit ub = (d.ins.reduced_solution() == NULL)? 0: d.ins.reduced_solution()->profit();
+        if (d.ub == -1 || d.ub > ub)
+            update_ub(d.lb, d.ub, ub, std::stringstream("surrogate relaxation"), d.info);
+        LOG_FOLD_END(d.info, "no items");
+        return;
     }
-    out.ub = ub_dantzig(ins, Info());
-    if (ins.break_capacity() == 0 || b == ins.last_item() + 1) {
-        algorithm_end(out.ub, info);
-        LOG_FOLD_END(info, "");
-        return out;
+    Profit ub = ub_dantzig(d.ins);
+    if (d.ins.break_capacity() == 0 || b == d.ins.last_item() + 1) {
+        if (d.ub == -1 || d.ub > ub)
+            update_ub(d.lb, d.ub, ub, std::stringstream("surrogate relaxation"), d.info);
+        LOG_FOLD_END(d.info, "dantzig");
+        return;
     }
 
     // Compte s_min and s_max
     // s_min and s_max should ideally be (-)pmax*wmax, but this may cause
     // overflow
-    Weight wmax = ins.item(ins.max_weight_item(info)).w;
-    Profit pmax = ins.item(ins.max_profit_item(info)).p;
+    Weight wmax = d.ins.item(d.ins.max_weight_item(d.info)).w;
+    Profit pmax = d.ins.item(d.ins.max_profit_item(d.info)).p;
     Weight s_max = (INT_FAST64_MAX / pmax > wmax)?  pmax*wmax:  INT_FAST64_MAX;
     Weight s_min = (INT_FAST64_MAX / pmax > wmax)? -pmax*wmax: -INT_FAST64_MAX;
 
-    if (max_card(ins, info) == b) {
-        ub_surrogate_solve(ins, info, b, 0, s_max, out);
-        best = "max";
-    } else if (min_card(ins, info, lb) == b + 1) {
-        ub_surrogate_solve(ins, info, b + 1, s_min, 0, out);
-        if (out.ub < lb) {
-            assert(ins.optimal_solution() == NULL || lb == ins.optimal_solution()->profit());
-            out.ub = lb;
+    if (max_card(d.ins, d.info) == b) {
+        UBS o = ub_surrogate_solve(d.ins, d.info, b, 0, s_max);
+        Profit ub = std::max(o.ub, d.lb);
+        if (ub > d.ub)
+            update_ub(d.lb, d.ub, ub,
+                    std::stringstream("surrogate relaxation"), d.info);
+        if (*d.end || d.ub == d.lb)
+            return;
+
+        Solution sol_sur(d.sol_best.instance());
+        d.ins.surrogate(d.info, o.s, b);
+        sol_sur = d.func(d.ins, Info(d.info, false, ""), d.end);
+        if (*d.end)
+            return;
+        if (sol_sur.feasible() && d.lb < sol_sur.profit()) {
+            d.info.output->mutex_sol.lock();
+            d.sol_best = sol_sur;
+            d.info.output->mutex_sol.unlock();
+            update_lb(d.lb, d.ub, sol_sur.profit(),
+                    std::stringstream("surrogate ins resolution (lb)"), d.info);
         }
-        best = "min";
+        if (d.ub > ub)
+            update_ub(d.lb, d.ub, ub,
+                    std::stringstream("surrogate ins resolution (ub)"), d.info);
+    } else if (min_card(d.ins, d.info, d.lb) == b + 1) {
+        UBS o = ub_surrogate_solve(d.ins, d.info, b + 1, s_min, 0);
+        Profit ub = std::max(o.ub, d.lb);
+        if (d.ub > ub)
+            update_ub(d.lb, d.ub, ub,
+                    std::stringstream("surrogate relaxation"), d.info);
+        if (*d.end || d.ub == d.lb)
+            return;
+
+        Solution sol_sur(d.sol_best.instance());
+        d.ins.surrogate(d.info, o.s, b + 1);
+        sol_sur = d.func(d.ins, Info(d.info, false, ""), d.end);
+        if (*d.end)
+            return;
+        if (sol_sur.feasible() && d.lb < sol_sur.profit()) {
+            d.info.output->mutex_sol.lock();
+            d.sol_best = sol_sur;
+            d.info.output->mutex_sol.unlock();
+            update_lb(d.lb, d.ub, sol_sur.profit(),
+                    std::stringstream("surrogate ins resolution (lb)"), d.info);
+        }
+        ub = std::max(sol_sur.profit(), d.lb);
+        if (d.ub > ub)
+            update_ub(d.lb, d.ub, ub,
+                    std::stringstream("surrogate ins resolution (ub)"), d.info);
     } else {
-        SurrogateOut out2;
-        out2.ub = out.ub;
-        ub_surrogate_solve(ins, info, b,     0,     s_max, out);
-        ub_surrogate_solve(ins, info, b + 1, s_min, 0,     out2);
-        if (out2.ub < lb) {
-            out2.ub = lb;
+        Instance ins_2(d.ins);
+        UBS o1 = ub_surrogate_solve(d.ins, d.info, b,     0,     s_max);
+        UBS o2 = ub_surrogate_solve(ins_2, d.info, b + 1, s_min, 0);
+        Profit ub = std::max(std::max(o1.ub, o2.ub), d.lb);
+        if (ub < d.ub)
+            update_ub(d.lb, d.ub, ub,
+                    std::stringstream("surrogate relaxation"), d.info);
+        if (*d.end || d.ub == d.lb)
+            return;
+
+        Solution sol_sur1(d.sol_best.instance());
+        d.ins.surrogate(d.info, o1.s, b);
+        sol_sur1 = d.func(d.ins, Info(d.info, false, ""), d.end);
+        if (*d.end)
+            return;
+        if (sol_sur1.feasible() && d.lb < sol_sur1.profit()) {
+            d.info.output->mutex_sol.lock();
+            d.sol_best = sol_sur1;
+            d.info.output->mutex_sol.unlock();
+            update_lb(d.lb, d.ub, sol_sur1.profit(),
+                    std::stringstream("surrogate ins resolution (lb)"), d.info);
         }
-        if (out2.ub > out.ub) {
-            out.ub         = out2.ub;
-            out.multiplier = out2.multiplier;
-            out.bound      = out2.bound;
+        if (*d.end || d.ub == d.lb)
+            return;
+
+        Solution sol_sur2(d.sol_best.instance());
+        d.ins.surrogate(d.info, o2.s, b + 1);
+        sol_sur2 = d.func(ins_2, Info(d.info, false, ""), d.end);
+        if (*d.end)
+            return;
+        if (sol_sur2.feasible() && d.lb < sol_sur2.profit()) {
+            d.info.output->mutex_sol.lock();
+            d.sol_best = sol_sur2;
+            d.info.output->mutex_sol.unlock();
+            update_lb(d.lb, d.ub, sol_sur2.profit(),
+                    std::stringstream("surrogate ins resolution (lb)"), d.info);
         }
-        best = "maxmin";
+
+        ub = std::max(std::max(sol_sur1.profit(), sol_sur2.profit()), d.lb);
+        if (d.ub > ub)
+            update_ub(d.lb, d.ub, ub,
+                    std::stringstream("surrogate ins resolution (ub)"), d.info);
     }
 
-    VER(info, "Best bound: " << best << std::endl);
-    PUT(info, "Algorithm.Best", best);
-    algorithm_end(out.ub, info);
-    LOG_FOLD_END(info, "");
-    return out;
+    LOG_FOLD_END(d.info, "");
 }
 

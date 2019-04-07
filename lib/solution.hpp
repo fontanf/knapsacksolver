@@ -21,6 +21,7 @@ public:
     inline Profit profit()             const { return p_; }
     inline ItemIdx item_number()       const { return k_; }
     const std::vector<int>& data()     const { return x_; }
+    inline bool feasible()             const { return w_ <= instance_.total_capacity(); }
 
     /**
      * Add/remove an item to/from the solution.

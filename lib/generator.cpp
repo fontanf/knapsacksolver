@@ -125,8 +125,8 @@ Instance generate_spanner(GenerateData& data)
     std::vector<std::pair<Weight, Profit>> vec;
     for (ItemIdx j=0; j<data.v; ++j) {
         auto wp = item(data);
-        Weight w = (2*wp.first-1) / data.m + 1;
-        Weight p = (2*wp.second-1) / data.m + 1;
+        Weight w = (2 * wp.first  - 1 + data.m) / data.m;
+        Weight p = (2 * wp.second - 1 + data.m) / data.m;
         vec.push_back({w, p});
     }
 

@@ -42,12 +42,12 @@ class Expknap
 
 public:
 
-    Expknap(Instance& ins, ExpknapParams p, std::atomic<bool>* end = NULL):
+    Expknap(Instance& ins, ExpknapParams p, bool* end = NULL):
         instance_(ins), params_(p), sol_curr_(ins), sol_best_(ins), end_(end)
     {
         sur_ = (end_ != NULL);
         if (end_ == NULL)
-            end_ = new std::atomic<bool>(false);
+            end_ = new bool(false);
     }
 
     ~Expknap()
@@ -62,18 +62,19 @@ private:
 
     void rec(ItemPos s, ItemPos t, Info& info);
     void update_bounds(Info& info);
-    void surrogate(Instance ins, Info info);
 
     Instance& instance_;
     ExpknapParams params_;
 
     Profit opt_ = -1;
     Profit ub_ = -1;
+    Profit lb_ = 0;
     Solution sol_curr_;
     Solution sol_best_;
     Cpt node_number_ = 0;
+
     bool sur_ = false;
-    std::atomic<bool>* end_ = NULL;
+    bool* end_ = NULL;
     std::vector<std::thread> threads_;
 
 };

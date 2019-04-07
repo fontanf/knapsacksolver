@@ -7,42 +7,21 @@
 
 using namespace knapsack;
 
-void Expknap::surrogate(Instance ins, Info info)
-{
-    SurrogateOut so = ub_surrogate(ins, sol_best_.profit(), Info(info, false, ""));
-    if (ub_ > so.ub)
-        update_ub(sol_best_.profit(), ub_, so.ub,
-                std::stringstream("surrogate relaxation"), info);
-
-    if (sol_best_.profit() == ub_) {
-        *end_ = true;
-        return;
-    }
-
-    Instance ins_sur(ins);
-    ins_sur.surrogate(info, so.multiplier, so.bound);
-    Solution sol_sur = Expknap(ins_sur, params_, end_).run(Info(info, false, ""));
-    if (*end_)
-        return;
-    if (sol_sur.profit() < sol_best_.profit()) {
-        update_ub(sol_best_.profit(), ub_, sol_best_.profit(),
-                std::stringstream("surrogate ins resolution (ub)"), info);
-    } else {
-        if (ub_ > sol_sur.profit())
-            update_ub(sol_best_.profit(), ub_, std::max(sol_best_.profit(), sol_sur.profit()),
-                    std::stringstream("surrogate ins resolution (ub)"), info);
-        if (sol_sur.item_number() == so.bound)
-            update_sol(sol_best_, ub_, sol_sur,
-                    std::stringstream("surrogate ins resolution (lb)"), info);
-    }
-}
-
 void Expknap::update_bounds(Info& info)
 {
     if (params_.ub_surrogate >= 0 && params_.ub_surrogate <= node_number_) {
         params_.ub_surrogate = -1;
-        threads_.push_back(std::thread(&Expknap::surrogate, this,
-                    Instance::reset(instance_), Info(info, true, "surrelax")));
+        std::function<Solution (Instance&, Info, bool*)> func
+            = [this](Instance& ins, Info info, bool* end) {
+                return Expknap(ins, params_, end).run(info); };
+        threads_.push_back(std::thread(ub_solvesurrelax, SurrelaxData{
+                    .ins      = Instance::reset(instance_),
+                    .lb       = lb_,
+                    .sol_best = sol_best_,
+                    .ub       = ub_,
+                    .func     = func,
+                    .end      = end_,
+                    .info     = Info(info, true, "surrelax")}));
     }
     if (params_.lb_greedynlogn >= 0 && params_.lb_greedynlogn <= node_number_) {
         params_.lb_greedynlogn = -1;

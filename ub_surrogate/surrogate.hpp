@@ -9,14 +9,18 @@
 namespace knapsack
 {
 
-struct SurrogateOut
+struct SurrelaxData
 {
-    Profit ub = 0;
-    ItemIdx bound = -1;
-    Weight multiplier = 0;
+    Instance ins;
+    Profit& lb;
+    Solution& sol_best;
+    Profit& ub;
+    std::function<Solution(Instance&, Info, bool*)> func;
+    bool* end;
+    Info info = Info();
 };
 
-SurrogateOut ub_surrogate(Instance& ins, Profit lb, Info info = Info());
+void ub_solvesurrelax(SurrelaxData d);
 
 }
 
