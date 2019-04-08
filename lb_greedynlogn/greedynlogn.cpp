@@ -178,7 +178,6 @@ Solution knapsack::sol_greedynlogn(const Instance& ins, Info info)
         best = "backward";
     }
 
-    VER(info, "Best solution from: " << best << std::endl);
     PUT(info, "Algorithm.Best", best);
     LOG_FOLD_END(info, "");
     return algorithm_end(sol, info);

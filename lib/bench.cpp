@@ -106,11 +106,11 @@ double bench(Function func, GenerateData d)
     std::cout << d << std::flush;
     for (d.h=1; d.h<=100; ++d.h) {
         d.s = d.n + d.r + d.h;
-        std::cout << std::endl << d << std::flush;
+        //std::cout << std::endl << d << std::flush;
         Instance ins = generate(d);
         Info info = Info()
             .set_timelimit(t_max - t_total)
-            .set_verbose(true)
+            //.set_verbose(true)
             ;
         try {
             func(ins, info);
@@ -200,7 +200,8 @@ void bench_difficult_large(std::string algorithm)
         ",SS 10^5,SS 10^6,SS 10^7"
         ",SW 10^7,SW 10^8"
         << std::endl;
-    for (ItemIdx n: {50, 100, 200, 500, 1000, 2000, 5000, 10000}) {
+    //for (ItemIdx n: {50, 100, 200, 500, 1000, 2000, 5000, 10000}) {
+    for (ItemIdx n: {1000, 2000, 5000, 10000}) {
         d.n = n;
         file << n << std::flush;
         for (auto p: vec) {

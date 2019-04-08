@@ -11,6 +11,7 @@ cc_library(
                 "solution.cpp"
         ],
         deps = [
+                "//ub_dembo:dembo",
                 "@benchtools//:info",
         ],
         linkopts = [

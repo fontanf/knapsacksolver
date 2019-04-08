@@ -36,9 +36,13 @@ void Minknap::add_item(Info& info)
             if (l_.empty() || s1.p > l_.back().p) {
                 if (s1.w <= c && s1.p > lb_) { // Update lower bound
                     std::stringstream ss;
-                    ss << "s " << s_ << " t " << t_ << " (lb)";
+                    ss << "it " << t_ - s_ << " (lb)";
                     update_lb(lb_, ub_, s1.p, ss, info);
                     best_state_ = s1;
+                    if (lb_ > ub_) {
+                        std::cout << "lb_ " << lb_ << " ub_ " << ub_ << std::endl;
+                        exit(1);
+                    }
                     assert(lb_ <= ub_);
                     if (lb_ == ub_) {
                         LOG_FOLD_END(info, " lb == ub");
@@ -98,7 +102,7 @@ void Minknap::add_item(Info& info)
     }
     if (ub_max != -1 && ub_ < ub_max) {
         std::stringstream ss;
-        ss << "s " << s_ << " t " << t_ << " (ub)";
+        ss << "it " << t_ - s_ << " (ub)";
         update_ub(lb_, ub_, ub_max, ss, info);
     }
     l0_.swap(l_);
@@ -152,9 +156,13 @@ void Minknap::remove_item(Info& info)
             if (l_.empty() || s1.p > l_.back().p) {
                 if (s1.w <= c && s1.p > lb_) { // Update lower bound
                     std::stringstream ss;
-                    ss << "s " << s_ << " t " << t_ << " (lb)";
+                    ss << "it " << t_ - s_ << " (lb)";
                     update_lb(lb_, ub_, s1.p, ss, info);
                     best_state_ = s1;
+                    if (lb_ > ub_) {
+                        std::cout << "lb_ " << lb_ << " ub_ " << ub_ << std::endl;
+                        exit(1);
+                    }
                     assert(lb_ <= ub_);
                     if (lb_ == ub_) {
                         LOG_FOLD_END(info, " lb == ub");
@@ -188,7 +196,7 @@ void Minknap::remove_item(Info& info)
     }
     if (ub_max != -1 && ub_ < ub_max) {
         std::stringstream ss;
-        ss << "s " << s_ << " t " << t_ << " (ub)";
+        ss << "it " << t_ - s_ << " (ub)";
         update_ub(lb_, ub_, ub_max, ss, info);
     }
     l0_.swap(l_);
@@ -305,7 +313,7 @@ Solution Minknap::run(Info info)
                 return algorithm_end(Solution(ins), info);
             update_bounds(info); // Update bounds
             LOG(info, "f " << ins.first_item() << " s' " << ins.first_sorted_item()
-                    << " s " << s_ << " t " << t_
+                    << " s " << s_ << " b " << ins.break_item() << " t " << t_
                     << " t' " << ins.last_sorted_item() << " l " << ins.last_item()
                     << std::endl);
             ++t_;
@@ -322,7 +330,7 @@ Solution Minknap::run(Info info)
                 return algorithm_end(Solution(ins), info);
             update_bounds(info); // Update bounds
             LOG(info, "f " << ins.first_item() << " s' " << ins.first_sorted_item()
-                    << " s " << s_ << " t " << t_
+                    << " s " << s_ << " b " << ins.break_item() << " t " << t_
                     << " t' " << ins.last_sorted_item() << " l " << ins.last_item()
                     << std::endl);
             --s_;
@@ -345,8 +353,6 @@ Solution Minknap::run(Info info)
     if (!sur_)
         *end_ = false;
 
-    VER(info, "Total state number: " << state_number_ << std::endl);
-    VER(info, "Distinct state number: " << distinct_state_number_ << std::endl);
     PUT(info, "Algorithm.TotalStateNumber", state_number_);
     PUT(info, "Algorithm.DistinctStateNumber", distinct_state_number_);
 

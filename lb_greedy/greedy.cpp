@@ -48,9 +48,7 @@ Solution knapsack::sol_greedy(const Instance& ins, Info info)
         }
     }
 
-    VER(info, "Best algorithm: " << best_algo << std::endl);
     PUT(info, "Algorithm.Best", best_algo);
-
     LOG_FOLD_END(info, "sol_greedy " << sol.profit());
     return algorithm_end(sol, info);
 }

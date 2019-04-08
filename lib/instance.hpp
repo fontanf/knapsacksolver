@@ -131,7 +131,9 @@ public:
      * described in "A Minimal Algorithm for the 0-1 Knapsack Problem"
      * (Pisinger, 1997).
      */
-    void sort_partially(Info& info, ItemIdx limit=128);
+    void sort_partially(Info& info, ItemIdx limit=4);
+
+    bool check_partialsort(Info& info) const;
 
     void sort_right(Info& info, Profit lb);
     void sort_left(Info& info, Profit lb);
@@ -200,7 +202,7 @@ public:
     void surrogate(Info& info, Weight multiplier, ItemIdx bound);
 
     const Solution* break_solution()   const { return sol_break_; }
-    ItemPos break_item()     const { return (sort_type_ >= 1)? b_: -1; }
+    ItemPos break_item()     const { return b_; }
     Profit  break_profit()   const;
     Weight  break_weight()   const;
     Weight  break_capacity() const;
@@ -270,13 +272,13 @@ private:
     ItemPos f_ = -1;
     ItemPos l_ = -1;
 
-    // Core. Items between s_ and t_ are sorted by their efficiency.
-    ItemPos s_ = -1;
-    ItemIdx t_ = -1;
-
     // Initial core.
     ItemPos s_init_ = -1;
     ItemPos t_init_ = -1;
+
+    // Current Core.
+    ItemPos s_ = -1;
+    ItemIdx t_ = -1;
 
     /**
      * 0: not sorted

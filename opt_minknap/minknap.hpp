@@ -61,7 +61,7 @@ struct MinknapParams
             .lb_greedynlogn = 5000,
             .lb_pairing = 10000,
             .ub_surrogate = 2000,
-            .combo_core = false,
+            .combo_core = true,
         };
     }
 };

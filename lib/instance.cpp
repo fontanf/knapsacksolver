@@ -1,5 +1,6 @@
 #include "knapsack/lib/instance.hpp"
 #include "knapsack/lib/solution.hpp"
+#include "knapsack/ub_dembo/dembo.hpp"
 
 #include <sstream>
 #include <iomanip>
@@ -554,21 +555,26 @@ void Instance::sort_partially(Info& info, ItemIdx limit)
         if (w > c) {
             if (fl.second + 1 <= l)
                 int_right_.push_back({fl.second + 1, l});
-            int_right_.push_back({fl.second, fl.first});
+            int_right_.push_back({fl.first, fl.second});
             l = fl.first - 1;
             continue;
         }
 
         for (ItemPos k=fl.first; k<=fl.second; ++k)
             w += item(k).w;
-        if (w >= c) {
-            break;
+        if (w > c) {
+            if (fl.second + 1 <= l)
+                int_right_.push_back({fl.second + 1, l});
+            if (f <= fl.first-1)
+                int_left_.push_back({f, fl.first - 1});
+            f = fl.first;
+            l = fl.second;
         } else {
             c -= w;
-            if (f <= fl.first-1)
-                int_left_.push_back({f, fl.first-1});
+            if (f <= fl.first - 1)
+                int_left_.push_back({f, fl.first - 1});
             int_left_.push_back({fl.first, fl.second});
-            f = fl.second+1;
+            f = fl.second + 1;
         }
     }
 
@@ -585,6 +591,8 @@ void Instance::sort_partially(Info& info, ItemIdx limit)
     s_init_ = b_;
     t_init_ = b_;
 
+    assert(check_partialsort(info));
+    LOG_FOLD(info, *this);
     LOG_FOLD_END(info, "sort_partially");
 }
 
@@ -594,25 +602,37 @@ void Instance::sort_right(Info& info, Profit lb)
     Interval in = int_right_.back();
     int_right_.pop_back();
     ItemPos k = t_;
+    LOG(info, "in.f " << in.f << " in.l " << in.l << std::endl);
     for (ItemPos j=in.f; j<=in.l; ++j) {
-        Profit ub = break_solution()->profit() + item(j).p
-            + ((break_capacity() - item(j).w) * item(b_).p) / item(b_).w;
-        if ((item(j).w <= capacity() && ub > lb)
-                || (k == t_ && j == in.l)) {
+        LOG(info, "j " << j << " (" << item(j) << ")");
+        Profit p = break_solution()->profit() + item(break_item()).p + item(j).p;
+        Weight r = break_capacity() - item(break_item()).w - item(j).w;
+        assert(r < 0);
+        Profit ub = ub_dembo_rev(*this, break_item(), p, r);
+        LOG(info, " ub " << ub);
+        if (item(j).w <= capacity() && ub > lb) {
             k++;
             swap(k, j);
+            LOG(info, " swap " << j << " j " << k << " k " << std::endl);
         } else {
-            LOG(info, "set " << j << " (" << item(j) << ")" << std::endl);
+            LOG(info, " set 0" << std::endl);
         }
     }
     std::sort(items_.begin()+t_+1, items_.begin()+k+1,
             [](const Item& i1, const Item& i2) {
             return i1.p * i2.w > i2.p * i1.w;});
     t_ = k;
-    if (int_right_.size() == 0)
+    if (int_right_.size() == 0) {
         l_ = t_;
-    if (s_init_ == t_init_ && first_item() >= first_sorted_item() && last_item() <= last_sorted_item())
-        sort_type_ = 2;
+        LOG(info, "l_ " << l_ << std::endl);
+    }
+    if (first_item() >= first_sorted_item() && last_item() <= last_sorted_item()) {
+        if (s_init_ == t_init_) {
+            sort_type_ = 2;
+        } else {
+            sort_type_ = 0;
+        }
+    }
     LOG_FOLD_END(info, "sort_right");
 }
 
@@ -622,15 +642,20 @@ void Instance::sort_left(Info& info, Profit lb)
     Interval in = int_left_.back();
     int_left_.pop_back();
     ItemPos k = s_;
+    LOG(info, "in.l " << in.f << " in.f " << in.l << " b " << break_item() << std::endl);
     for (ItemPos j=in.l; j>=in.f; --j) {
-        Profit ub = break_solution()->profit() - item(j).p
-            + ((break_capacity() + item(j).w) * item(b_).p) / item(b_).w;
-        if ((item(j).w <= capacity() && ub > lb)
-                || (j == in.f && k == s_)) {
+        LOG(info, "j " << j << " (" << item(j) << ")");
+        Profit p = break_solution()->profit() - item(j).p;
+        Weight r = break_capacity() + item(j).w;
+        assert(r > 0);
+        Profit ub = ub_dembo(*this, break_item(), p, r);
+        LOG(info, " ub " << ub);
+        if (item(j).w <= capacity() && ub > lb) {
             k--;
             swap(k, j);
+            LOG(info, " swap " << j << " j " << k << " k " << std::endl);
         } else {
-            LOG(info, "set " << j << " (" << item(j) << ")" << std::endl);
+            LOG(info, " set 1" << std::endl);
             sol_red_->set(j, true);
         }
     }
@@ -638,10 +663,17 @@ void Instance::sort_left(Info& info, Profit lb)
             [](const Item& i1, const Item& i2) {
             return i1.p * i2.w > i2.p * i1.w;});
     s_ = k;
-    if (int_left_.size() == 0)
+    if (int_left_.size() == 0) {
         f_ = s_;
-    if (s_init_ == t_init_ && first_item() >= first_sorted_item() && last_item() <= last_sorted_item())
-        sort_type_ = 2;
+        LOG(info, "f_ " << f_ << std::endl);
+    }
+    if (first_item() >= first_sorted_item() && last_item() <= last_sorted_item()) {
+        if (s_init_ == t_init_) {
+            sort_type_ = 2;
+        } else {
+            sort_type_ = 0;
+        }
+    }
     LOG_FOLD_END(info, "sort_left");
 }
 
@@ -650,6 +682,7 @@ std::pair<ItemPos, ItemPos> Instance::bound_items(ItemPos s, ItemPos t, Profit l
     LOG_FOLD_START(info, "bound_items s " << s << " t " << t << std::endl);
     std::pair<ItemPos, ItemPos> st;
 
+    LOG(info, "s " << s << " f " << first_item() << " b " << break_item() << std::endl);
     while (s < first_sorted_item() && int_left().size() > 0)
         sort_left(info, lb);
     if (s < first_item()) {
@@ -682,6 +715,7 @@ void Instance::add_item_to_initial_core(ItemPos j, Info& info)
         LOG_FOLD_END(info, "add_item_to_initial_core j = -1");
         return;
     }
+    LOG(info, "item " << item(j) << std::endl);
     if (s_init_ <= j && j <= t_init_) {
         LOG_FOLD_END(info, "add_item_to_initial_core j already in core");
         return;
@@ -704,7 +738,7 @@ void Instance::add_item_to_initial_core(ItemPos j, Info& info)
             items_[j_prec] = items_[in->l];
             j_prec = in->l;
             in->l--;
-            if (next(in) != int_left_.end())
+            if (std::next(in) != int_left_.end())
                 std::next(in)->f--;
             if (in->f > in->l) {
                 in = int_left_.erase(in);
@@ -728,32 +762,110 @@ void Instance::add_item_to_initial_core(ItemPos j, Info& info)
                 LOG(info, std::endl);
         )
         for (auto in = int_right_.begin(); in != int_right_.end();) {
+            LOG(info, "interval " << *in << std::endl);
             if (in->f > j) {
                 in++;
                 continue;
             }
-            items_[j_prec] = items_[in->l];
-            j_prec = in->l;
+            items_[j_prec] = items_[in->f];
+            j_prec = in->f;
             in->f++;
-            if (next(in) != int_right_.end())
+            if (std::next(in) != int_right_.end())
                 std::next(in)->l++;
             if (in->f > in->l) {
                 in = int_right_.erase(in);
             } else {
                 in++;
             }
+            DBG(
+                    LOG(info, "right ");
+                    for (Interval in: int_right())
+                        LOG(info, " " << in);
+                    LOG(info, std::endl);
+            )
         }
-        DBG(
-                LOG(info, "right ");
-                for (Interval in: int_right())
-                    LOG(info, " " << in);
-                LOG(info, std::endl);
-        )
         t_init_++;
         t_++;
     }
     items_[j_prec] = tmp;
+
+    LOG_FOLD(info, *this);
     LOG_FOLD_END(info, "add_item_to_initial_core");
+}
+
+bool Instance::check_partialsort(Info& info) const
+{
+    LOG_FOLD(info, *this);
+
+    Weight w_total = reduced_solution()->weight();
+    for (ItemPos j=first_item(); j<=last_item(); ++j)
+        w_total += item(j).w;
+    if (w_total <= total_capacity()) {
+        if (break_item() != last_item() + 1)
+            return false;
+        return true;
+    }
+
+    if (break_item() < 0 || break_item() >= total_item_number())
+        return false;
+    if (break_solution()->weight() > total_capacity())
+        return false;
+    if (break_solution()->weight() + item(break_item()).w <= total_capacity())
+        return false;
+    for (ItemPos j=first_item(); j<break_item(); ++j)
+        if (item(j).p * item(break_item()).w < item(break_item()).p * item(j).w)
+            return false;
+    for (ItemPos j=break_item()+1; j<=last_item(); ++j)
+        if (item(j).p * item(break_item()).w > item(break_item()).p * item(j).w)
+            return false;
+
+    if (int_left().size() != 0) {
+        if (int_left_.back().l > s_ - 1)
+            return false;
+        for (auto it = int_left().begin(); it != std::prev(int_left().end()); ++it)
+            if (it->l != std::next(it)->f - 1)
+                return false;
+        Effciency emin_prev = INT_FAST64_MAX;
+        for (auto i: int_left_) {
+            if (i.f > i.l)
+                return false;
+            Effciency emax = 0;
+            Effciency emin = INT_FAST64_MAX;
+            for (ItemPos j=i.f; j<=i.l; ++j) {
+                if (emax < item(j).efficiency())
+                    emax = item(j).efficiency();
+                if (emin > item(j).efficiency())
+                    emin = item(j).efficiency();
+            }
+            if (emax > emin_prev)
+                return false;
+            emin_prev = emin;
+        }
+    }
+    if (int_right().size() != 0) {
+        if (int_right_.back().f < t_ + 1)
+            return false;
+        for (auto it = int_right().rbegin(); it != std::prev(int_right().rend()); ++it)
+            if (it->l != std::next(it)->f - 1)
+                return false;
+        Effciency emax_prev = 0;
+        for (auto i: int_right_) {
+            if (i.f > i.l)
+                return false;
+            Effciency emax = 0;
+            Effciency emin = INT_FAST64_MAX;
+            for (ItemPos j=i.f; j<=i.l; ++j) {
+                if (emax < item(j).efficiency())
+                    emax = item(j).efficiency();
+                if (emin > item(j).efficiency())
+                    emin = item(j).efficiency();
+            }
+            if (emin < emax_prev)
+                return false;
+            emax_prev = emax;
+        }
+    }
+    return true;
 }
 
 void Instance::init_combo_core(Info& info)
@@ -768,6 +880,7 @@ void Instance::init_combo_core(Info& info)
     add_item_to_initial_core(max_weight_item(info), info);
     add_item_to_initial_core(min_weight_item(info), info);
     sort_type_ = 1;
+    assert(check_partialsort(info));
     LOG_FOLD_END(info, "init_combo_core" << std::endl);
 }
 

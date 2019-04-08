@@ -27,7 +27,6 @@ Solution knapsack::sopt_bab(Instance& ins, Info info)
             do { // Backtrack
                 i--;
                 if (i < 0) {
-                    VER(info, "Node number: " << node_number << std::endl);
                     PUT(info, "Algorithm.NodeNumber", node_number);
                     return algorithm_end(sol_best, info);
                 }

@@ -136,7 +136,6 @@ Solution Expknap::run(Info info)
     for (std::thread& thread: threads_)
         thread.join();
     PUT(info, "Algorithm.NodeNumber", node_number_);
-    VER(info, "Node number " << node_number_ << std::endl;)
     return algorithm_end(sol_best_, info);
 }
 

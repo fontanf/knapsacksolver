@@ -20,22 +20,25 @@ int main(int argc, char *argv[])
     (void)argv;
 
     GenerateData data;
-    data.n = 500;
-    data.t = "asc";
-    data.r = 10000;
+    data.n = 50;
+    data.t = "wc";
+    data.r = 100;
     //data.d = 2.0 / 3;
-    data.h = 31;
-    data.s = 10531;
+    data.h = 10;
+    data.s = 2;
     Instance ins = generate(data);
 
-    opt_bellman_array(ins, Info().set_verbose(true));
+    //opt_bellman_array(ins, Info().set_verbose(true));
 
-    //Profit opt = 0;
-    //{
-        //Info info = Info().set_verbose(true);
+    {
+        Info info = Info().set_verbose(true);
         //MinknapParams p = MinknapParams::pure();
-        //opt = Minknap(ins, p).run(info).profit();
-    //}
+        //p.combo_core = true;
+        auto p = MinknapParams::pure();
+        p.k = 3;
+        p.combo_core = true;
+        Minknap(ins, p).run(info);
+    }
 
     //{
         //Info info = Info().set_verbose(true);

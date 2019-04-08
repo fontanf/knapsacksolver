@@ -219,7 +219,7 @@ UBS ub_surrogate_solve(Instance& ins, Info& info, ItemIdx k,
         LOG_FOLD_END(info, "");
     }
     ins.surrogate(info, -s, k);
-    LOG_FOLD_END(info, "");
+    LOG_FOLD_END(info, "ub " << ub << " s " << s_best);
     return {ub, s_best};
 }
 
@@ -260,7 +260,7 @@ void knapsack::ub_solvesurrelax(SurrelaxData d)
         if (ub > d.ub)
             update_ub(d.lb, d.ub, ub,
                     std::stringstream("surrogate relaxation"), d.info);
-        if (*d.end || d.ub == d.lb)
+        if (*d.end || d.ub == d.lb || o.s == 0)
             return;
 
         Solution sol_sur(d.sol_best.instance());
@@ -284,7 +284,7 @@ void knapsack::ub_solvesurrelax(SurrelaxData d)
         if (d.ub > ub)
             update_ub(d.lb, d.ub, ub,
                     std::stringstream("surrogate relaxation"), d.info);
-        if (*d.end || d.ub == d.lb)
+        if (*d.end || d.ub == d.lb || o.s == 0)
             return;
 
         Solution sol_sur(d.sol_best.instance());
@@ -311,7 +311,7 @@ void knapsack::ub_solvesurrelax(SurrelaxData d)
         if (ub < d.ub)
             update_ub(d.lb, d.ub, ub,
                     std::stringstream("surrogate relaxation"), d.info);
-        if (*d.end || d.ub == d.lb)
+        if (*d.end || d.ub == d.lb || o1.s == 0 || o2.s == 0)
             return;
 
         Solution sol_sur1(d.sol_best.instance());

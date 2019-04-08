@@ -46,8 +46,11 @@ inline Profit ub_dembo(const Instance& ins, ItemPos j, const Solution& sol_curr)
 
 inline Profit ub_dembo(const Instance& ins, ItemPos j, Profit p, Weight r)
 {
+    //if (j <= ins.last_item())
+        //std::cout << " j " << j << " " << ins.item(j) << " l " << ins.last_item() << " p " << p << " r " << r;
     if (j <= ins.last_item())
         p += (r * ins.item(j).p) / ins.item(j).w;
+    //std::cout << " p " << p << "  " << std::flush;
     return p;
 }
 

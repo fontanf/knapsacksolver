@@ -120,13 +120,9 @@ Solution knapsack::sopt_astar(Instance& ins, Info info)
 
     }
 
-    VER(info, "Node number: " << node_number << std::endl);
-    VER(info, "Queue max size: " << q_max_size << std::endl);
-    VER(info, "Queue average size: " << q_average_size / node_number << std::endl);
     PUT(info, "Algorithm.NodeNumber", node_number);
     PUT(info, "Algorithm.QueueMaxSize", q_max_size);
     PUT(info, "Algorithm.QueueAverageSize", q_average_size / node_number);
-
     return algorithm_end(sol_best, info);
 }
 
@@ -354,13 +350,9 @@ Solution knapsack::sopt_astar_dp(Instance& ins, Info info)
 
     n0.cut_child(q, info);
 
-    VER(info, "Node number: " << node_number << std::endl);
-    VER(info, "Queue max size: " << q_max_size << std::endl);
-    VER(info, "Queue average size: " << q_average_size / node_number << std::endl);
     PUT(info, "Algorithm.NodeNumber", node_number);
     PUT(info, "Algorithm.QueueMaxSize", q_max_size);
     PUT(info, "Algorithm.QueueAverageSize", q_average_size / node_number);
-
     return algorithm_end(sol_best, info);
 }
 
@@ -383,7 +375,6 @@ Solution knapsack::sopt_starknap(Instance& ins, StarknapParams params, Info info
         return algorithm_end(sol, info);
     }
 
-    VER(info, "Compute lower bound..." << std::endl);
     if (params.lb_greedynlogn == 0) {
         sol = sol_greedynlogn(ins);
     } else if (params.lb_greedy == 0) {
@@ -391,7 +382,6 @@ Solution knapsack::sopt_starknap(Instance& ins, StarknapParams params, Info info
     } else {
         sol = *ins.break_solution();
     }
-    VER(info, " " << sol.profit() << std::endl);
 
     // Variable reduction
     if (params.upper_bound == "b") {
@@ -461,7 +451,6 @@ Solution knapsack::sopt_starknap(Instance& ins, StarknapParams params, Info info
         }
     }
 
-    VER(info, "Branch..." << std::endl);
     NodeDP n0;
     n0.w = ins.break_solution()->weight();
     n0.p = ins.break_solution()->profit();
@@ -550,13 +539,9 @@ Solution knapsack::sopt_starknap(Instance& ins, StarknapParams params, Info info
     if (n0.child != NULL)
         n0.cut_child(q, info);
 
-    VER(info, "Node number: " << node_number << std::endl);
-    VER(info, "Queue max size: " << q_max_size << std::endl);
-    VER(info, "Queue average size: " << q_average_size / node_number << std::endl);
     PUT(info, "Algorithm.NodeNumber", node_number);
     PUT(info, "Algorithm.QueueMaxSize", q_max_size);
     PUT(info, "Algorithm.QueueAverageSize", q_average_size / node_number);
-
     return algorithm_end(sol, info);
 }
 

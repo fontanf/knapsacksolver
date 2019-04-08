@@ -83,7 +83,6 @@ Solution knapsack::sopt_balknap(Instance& ins,
     }
 
     // Compute initial lower bound
-    VER(info, "Compute initial lower bound..." << std::endl);
     Solution sol_tmp = *ins.break_solution();
     if (params.cpt_greedynlogn == 0) {
         params.cpt_greedynlogn = -1;
@@ -169,8 +168,6 @@ Solution knapsack::sopt_balknap(Instance& ins,
         LOG_FOLD_END(info, "lb is optimal");
         return algorithm_end(sol, info);
     }
-
-    VER(info, "Recursion..." << std::endl);
 
     // Create memory table
     std::map<BalknapState, BalknapValue, BalknapState> map;
