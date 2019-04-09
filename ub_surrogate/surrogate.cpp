@@ -257,7 +257,7 @@ void knapsack::ub_solvesurrelax(SurrelaxData d)
     if (max_card(d.ins, d.info) == b) {
         UBS o = ub_surrogate_solve(d.ins, d.info, b, 0, s_max);
         Profit ub = std::max(o.ub, d.lb);
-        if (ub > d.ub)
+        if (d.ub > ub)
             update_ub(d.lb, d.ub, ub,
                     std::stringstream("surrogate relaxation"), d.info);
         if (*d.end || d.ub == d.lb || o.s == 0)
@@ -308,7 +308,7 @@ void knapsack::ub_solvesurrelax(SurrelaxData d)
         UBS o1 = ub_surrogate_solve(d.ins, d.info, b,     0,     s_max);
         UBS o2 = ub_surrogate_solve(ins_2, d.info, b + 1, s_min, 0);
         Profit ub = std::max(std::max(o1.ub, o2.ub), d.lb);
-        if (ub < d.ub)
+        if (d.ub > ub)
             update_ub(d.lb, d.ub, ub,
                     std::stringstream("surrogate relaxation"), d.info);
         if (*d.end || d.ub == d.lb || o1.s == 0 || o2.s == 0)
