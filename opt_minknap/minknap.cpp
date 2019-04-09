@@ -39,10 +39,6 @@ void Minknap::add_item(Info& info)
                     ss << "it " << t_ - s_ << " (lb)";
                     update_lb(lb_, ub_, s1.p, ss, info);
                     best_state_ = s1;
-                    if (lb_ > ub_) {
-                        std::cout << "lb_ " << lb_ << " ub_ " << ub_ << std::endl;
-                        exit(1);
-                    }
                     assert(lb_ <= ub_);
                     if (lb_ == ub_) {
                         LOG_FOLD_END(info, " lb == ub");
@@ -159,10 +155,6 @@ void Minknap::remove_item(Info& info)
                     ss << "it " << t_ - s_ << " (lb)";
                     update_lb(lb_, ub_, s1.p, ss, info);
                     best_state_ = s1;
-                    if (lb_ > ub_) {
-                        std::cout << "lb_ " << lb_ << " ub_ " << ub_ << std::endl;
-                        exit(1);
-                    }
                     assert(lb_ <= ub_);
                     if (lb_ == ub_) {
                         LOG_FOLD_END(info, " lb == ub");
@@ -309,8 +301,10 @@ Solution Minknap::run(Info info)
         if (t_ <= ins.last_item()) {
             if (!info.check_time())
                 break;
-            if (*end_)
+            if (*end_) {
+                LOG_FOLD_END(info, "end");
                 return algorithm_end(Solution(ins), info);
+            }
             update_bounds(info); // Update bounds
             LOG(info, "f " << ins.first_item() << " s' " << ins.first_sorted_item()
                     << " s " << s_ << " b " << ins.break_item() << " t " << t_
@@ -326,8 +320,10 @@ Solution Minknap::run(Info info)
         if (s_ >= ins.first_item()) {
             if (!info.check_time())
                 break;
-            if (*end_)
+            if (*end_) {
+                LOG_FOLD_END(info, "end");
                 return algorithm_end(Solution(ins), info);
+            }
             update_bounds(info); // Update bounds
             LOG(info, "f " << ins.first_item() << " s' " << ins.first_sorted_item()
                     << " s " << s_ << " b " << ins.break_item() << " t " << t_
@@ -360,13 +356,13 @@ Solution Minknap::run(Info info)
         return algorithm_end(sol_best_, info);
 
     assert(best_state_.p >= lb_);
-
     LOG_FOLD(info, instance_);
     lb_  = best_state_.p - 1;
     ub_  = best_state_.p;
     ins.set_first_item(s_ + 1, info);
     ins.set_last_item(t_ - 1);
     ins.fix(info, psolf_.vector(best_state_.sol));
+    assert(ins.capacity() >= 0);
 
     run(Info(info, false, ""));
     LOG_FOLD_END(info, "minknap");

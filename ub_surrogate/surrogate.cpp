@@ -330,7 +330,7 @@ void knapsack::ub_solvesurrelax(SurrelaxData d)
             return;
 
         Solution sol_sur2(d.sol_best.instance());
-        d.ins.surrogate(d.info, o2.s, b + 1);
+        ins_2.surrogate(d.info, o2.s, b + 1);
         sol_sur2 = d.func(ins_2, Info(d.info, false, ""), d.end);
         if (*d.end)
             return;

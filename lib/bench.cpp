@@ -111,6 +111,7 @@ double bench(Function func, GenerateData d)
         Info info = Info()
             .set_timelimit(t_max - t_total)
             //.set_verbose(true)
+            //.set_log2stderr(true)
             ;
         try {
             func(ins, info);

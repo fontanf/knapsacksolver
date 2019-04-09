@@ -213,9 +213,9 @@ bool Instance::check()
 
 Instance::~Instance()
 {
-    if (sol_opt_ != NULL)
+    if (optimal_solution() != NULL)
         delete sol_opt_;
-    if (sol_red_ != NULL)
+    if (reduced_solution() != NULL)
         delete sol_red_;
 }
 
@@ -243,9 +243,9 @@ Profit Instance::check(std::string cert_file)
 
 ItemPos Instance::max_efficiency_item(Info& info) const
 {
-    ItemPos k = 0;
+    ItemPos k = -1;
     for (ItemPos j=first_item(); j<=last_item(); ++j)
-        if (item(j).p * item(k).w > item(k).p * item(j).w)
+        if (k == -1 || item(j).p * item(k).w > item(k).p * item(j).w)
             k = j;
     LOG(info, "max_efficiency_item " << k << std::endl);
     return k;
@@ -263,9 +263,9 @@ ItemPos Instance::before_break_item(Info& info) const
 
 ItemPos Instance::max_profit_item(Info& info) const
 {
-    ItemPos k = 0;
+    ItemPos k = -1;
     for (ItemPos j=first_item(); j<=last_item(); ++j)
-        if (item(j).p > item(k).p)
+        if (k == -1 || item(j).p > item(k).p)
             k = j;
     LOG(info, "max_profit_item " << k << std::endl);
     return k;
@@ -273,9 +273,9 @@ ItemPos Instance::max_profit_item(Info& info) const
 
 ItemPos Instance::min_profit_item(Info& info) const
 {
-    ItemPos k = 0;
+    ItemPos k = -1;
     for (ItemPos j=first_item(); j<=last_item(); ++j)
-        if (item(j).p < item(k).p)
+        if (k == -1 || item(j).p < item(k).p)
             k = j;
     LOG(info, "min_profit_item " << k << std::endl);
     return k;
@@ -283,9 +283,9 @@ ItemPos Instance::min_profit_item(Info& info) const
 
 ItemPos Instance::max_weight_item(Info& info) const
 {
-    ItemPos k = 0;
+    ItemPos k = -1;
     for (ItemPos j=first_item(); j<=last_item(); ++j)
-        if (item(j).w > item(k).w)
+        if (k == -1 || item(j).w > item(k).w)
             k = j;
     LOG(info, "max_weight_item " << k << std::endl);
     return k;
@@ -293,9 +293,9 @@ ItemPos Instance::max_weight_item(Info& info) const
 
 ItemPos Instance::min_weight_item(Info& info) const
 {
-    ItemPos k = 0;
+    ItemPos k = -1;
     for (ItemPos j=first_item(); j<=last_item(); ++j)
-        if (item(j).w < item(k).w)
+        if (k == -1 || item(j).w < item(k).w)
             k = j;
     LOG(info, "min_weight_item " << k << std::endl);
     return k;
@@ -338,7 +338,7 @@ ItemPos Instance::gamma1(Info& info) const
 ItemPos Instance::gamma2(Info& info) const
 {
     Weight w = break_weight() + item(break_item()).w;
-    ItemPos k = 0;
+    ItemPos k = -1;
     for (ItemPos j=first_item(); j<break_item(); ++j)
         if ((k == -1 || item(k).p > item(j).p) && w - item(j).w <= total_capacity())
             k = j;
@@ -428,7 +428,7 @@ void Instance::sort(Info& info)
         LOG_FOLD_END(info, "sort already sorted");
         return;
     }
-    if (sol_red_ == NULL)
+    if (reduced_solution() == NULL)
         sol_red_ = new Solution(*this);
     sort_type_ = 2;
     if (item_number() > 1)
@@ -528,7 +528,7 @@ void Instance::sort_partially(Info& info, ItemIdx limit)
         return;
     }
 
-    if (sol_red_ == NULL)
+    if (reduced_solution() == NULL)
         sol_red_ = new Solution(*this);
 
     int_right_.clear();
@@ -563,12 +563,7 @@ void Instance::sort_partially(Info& info, ItemIdx limit)
         for (ItemPos k=fl.first; k<=fl.second; ++k)
             w += item(k).w;
         if (w > c) {
-            if (fl.second + 1 <= l)
-                int_right_.push_back({fl.second + 1, l});
-            if (f <= fl.first-1)
-                int_left_.push_back({f, fl.first - 1});
-            f = fl.first;
-            l = fl.second;
+            break;
         } else {
             c -= w;
             if (f <= fl.first - 1)
@@ -801,34 +796,62 @@ bool Instance::check_partialsort(Info& info) const
     for (ItemPos j=first_item(); j<=last_item(); ++j)
         w_total += item(j).w;
     if (w_total <= total_capacity()) {
-        if (break_item() != last_item() + 1)
+        if (break_item() != last_item() + 1) {
+            std::cout << 1 << std::endl;
+            LOG_FOLD_END(info, "b " << break_item() << " != l + 1 " << last_item() + 1);
             return false;
+        }
         return true;
     }
 
-    if (break_item() < 0 || break_item() >= total_item_number())
+    if (break_item() < 0 || break_item() >= total_item_number()) {
+        std::cout << 2 << std::endl;
+        LOG_FOLD_END(info, "b " << break_item());
         return false;
-    if (break_solution()->weight() > total_capacity())
+    }
+    if (break_solution()->weight() > total_capacity()) {
+        std::cout << *this << std::endl;
+        std::cout << 3 << std::endl;
+        LOG_FOLD_END(info, "wbar " << break_solution()->weight() << " c " << total_capacity());
         return false;
-    if (break_solution()->weight() + item(break_item()).w <= total_capacity())
+    }
+    if (break_solution()->weight() + item(break_item()).w <= total_capacity()) {
+        std::cout << 4 << std::endl;
+        LOG_FOLD_END(info, "wbar + wb " << break_solution()->weight() + item(break_item()).w << " c " << total_capacity());
         return false;
-    for (ItemPos j=first_item(); j<break_item(); ++j)
-        if (item(j).p * item(break_item()).w < item(break_item()).p * item(j).w)
+    }
+    for (ItemPos j=first_item(); j<break_item(); ++j) {
+        if (item(j).p * item(break_item()).w < item(break_item()).p * item(j).w) {
+            std::cout << 5 << std::endl;
+            LOG_FOLD_END(info, "j " << j << "(" << item(j) << ") b " << break_item() << "(" << item(break_item()) << ")");
             return false;
-    for (ItemPos j=break_item()+1; j<=last_item(); ++j)
-        if (item(j).p * item(break_item()).w > item(break_item()).p * item(j).w)
+        }
+    }
+    for (ItemPos j=break_item()+1; j<=last_item(); ++j) {
+        if (item(j).p * item(break_item()).w > item(break_item()).p * item(j).w) {
+            std::cout << 6 << std::endl;
+            LOG_FOLD_END(info, "j " << j << "(" << item(j) << ") b " << break_item() << "(" << item(break_item()) << ")");
             return false;
+        }
+    }
 
     if (int_left().size() != 0) {
-        if (int_left_.back().l > s_ - 1)
+        if (int_left().back().l > s_ - 1) {
+            std::cout << 7 << std::endl;
+            LOG_FOLD_END(info, "int_left().back().l " << int_left().back().l << " s " << s_);
             return false;
+        }
         for (auto it = int_left().begin(); it != std::prev(int_left().end()); ++it)
-            if (it->l != std::next(it)->f - 1)
+            if (it->l != std::next(it)->f - 1) {
+                std::cout << 8 << std::endl;
                 return false;
+            }
         Effciency emin_prev = INT_FAST64_MAX;
         for (auto i: int_left_) {
-            if (i.f > i.l)
+            if (i.f > i.l) {
+                std::cout << 9 << std::endl;
                 return false;
+            }
             Effciency emax = 0;
             Effciency emin = INT_FAST64_MAX;
             for (ItemPos j=i.f; j<=i.l; ++j) {
@@ -837,21 +860,29 @@ bool Instance::check_partialsort(Info& info) const
                 if (emin > item(j).efficiency())
                     emin = item(j).efficiency();
             }
-            if (emax > emin_prev)
+            if (emax > emin_prev) {
+                std::cout << 10 << std::endl;
                 return false;
+            }
             emin_prev = emin;
         }
     }
     if (int_right().size() != 0) {
-        if (int_right_.back().f < t_ + 1)
+        if (int_right_.back().f < t_ + 1) {
+            std::cout << 11 << std::endl;
             return false;
+        }
         for (auto it = int_right().rbegin(); it != std::prev(int_right().rend()); ++it)
-            if (it->l != std::next(it)->f - 1)
+            if (it->l != std::next(it)->f - 1) {
+                std::cout << 12 << std::endl;
                 return false;
+            }
         Effciency emax_prev = 0;
         for (auto i: int_right_) {
-            if (i.f > i.l)
+            if (i.f > i.l) {
+                std::cout << 13 << std::endl;
                 return false;
+            }
             Effciency emax = 0;
             Effciency emin = INT_FAST64_MAX;
             for (ItemPos j=i.f; j<=i.l; ++j) {
@@ -860,8 +891,10 @@ bool Instance::check_partialsort(Info& info) const
                 if (emin > item(j).efficiency())
                     emin = item(j).efficiency();
             }
-            if (emin < emax_prev)
+            if (emin < emax_prev) {
+                std::cout << 14 << std::endl;
                 return false;
+            }
             emax_prev = emax;
         }
     }
@@ -1145,6 +1178,8 @@ void Instance::surrogate(Info& info, Weight multiplier, ItemIdx bound, ItemPos f
         }
     }
     c_orig_ += multiplier * bound;
+    if (c_orig_ <= reduced_solution()->weight())
+        c_orig_ =  reduced_solution()->weight();
 
     sort_type_ = 0;
     sort_partially(info);

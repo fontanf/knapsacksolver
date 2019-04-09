@@ -20,23 +20,19 @@ int main(int argc, char *argv[])
     (void)argv;
 
     GenerateData data;
-    data.n = 50;
-    data.t = "wc";
-    data.r = 100;
+    data.n = 2000;
+    data.t = "asc";
+    data.r = 1000;
     //data.d = 2.0 / 3;
-    data.h = 10;
-    data.s = 2;
+    data.h = 43;
+    data.s = 3043;
     Instance ins = generate(data);
 
     //opt_bellman_array(ins, Info().set_verbose(true));
 
     {
-        Info info = Info().set_verbose(true);
-        //MinknapParams p = MinknapParams::pure();
-        //p.combo_core = true;
-        auto p = MinknapParams::pure();
-        p.k = 3;
-        p.combo_core = true;
+        Info info = Info("log.txt").set_verbose(true);
+        auto p = MinknapParams::combo();
         Minknap(ins, p).run(info);
     }
 
