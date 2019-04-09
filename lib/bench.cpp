@@ -201,8 +201,7 @@ void bench_difficult_large(std::string algorithm)
         ",SS 10^5,SS 10^6,SS 10^7"
         ",SW 10^7,SW 10^8"
         << std::endl;
-    //for (ItemIdx n: {50, 100, 200, 500, 1000, 2000, 5000, 10000}) {
-    for (ItemIdx n: {1000, 2000, 5000, 10000}) {
+    for (ItemIdx n: {50, 100, 200, 500, 1000, 2000, 5000, 10000}) {
         d.n = n;
         file << n << std::flush;
         for (auto p: vec) {
