@@ -13,7 +13,7 @@ bazel build --cxxopt='-std=c++14' --compilation_mode=opt -- //lib:main
 
 Generate an instance:
 ```
-bazel build --compilation_mode=opt -- //lib:generator_main
+bazel build --cxxopt='-std=c++14' --compilation_mode=opt -- //lib:generator_main
 ./bazel-bin/lib/generator_main -n 1000 -t sc -r 1000 -o ./ins.txt
 ```
 
@@ -99,9 +99,9 @@ It still requires 2 times more time than the implementation returning only the o
 
 ### State of the art algorithms
 
-- `expknap`
-- `expknap -n -s 20000 -g 50000`
-- `minknap` ![easy](bench/minknap_easy.csv) ![difficult large](bench/minknap_difficult-large.csv) ![difficult small](bench/minknap_difficult-small.csv)
-- `minknap -n -s 2000 -p 10000` (`combo`)
-- `balknap`
+| `expknap`                               |                                 |                                                       |                                                       |
+| `expknap -n -s 20000 -g 50000`          |                                 |                                                       |                                                       |
+| `minknap`                               | ![easy](bench/minknap_easy.csv) | ![difficult large](bench/minknap_difficult-large.csv) | ![difficult small](bench/minknap_difficult-small.csv) |
+| `minknap -n -s 2000 -p 10000` (`combo`) |                                 |                                                       |                                                       |
+| `balknap`                               |                                 |                                                       |                                                       |
 
