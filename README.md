@@ -99,6 +99,8 @@ It still requires 2 times more time than the implementation returning only the o
 
 ### State of the art algorithms
 
+| Algorithm                               | Easy                            | Difficult large                                       | Difficult small                                       |
+| --------------------------------------- | ------------------------------- | ----------------------------------------------------- | ----------------------------------------------------- |
 | `expknap`                               |                                 |                                                       |                                                       |
 | `expknap -n -s 20000 -g 50000`          |                                 |                                                       |                                                       |
 | `minknap`                               | ![easy](bench/minknap_easy.csv) | ![difficult large](bench/minknap_difficult-large.csv) | ![difficult small](bench/minknap_difficult-small.csv) |
