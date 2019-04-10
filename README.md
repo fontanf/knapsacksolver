@@ -97,3 +97,11 @@ It still requires 2 times more time than the implementation returning only the o
 - ![Storing partial solutions in states](bench/bellman_array_part_easy.csv)
 - ![Recursive scheme](bench/bellman_array_rec_easy.csv)
 
+### State of the art algorithms
+
+- `expknap`
+- `expknap -n -s 20000 -g 50000`
+- `minknap` ![easy](bench/minknap_easy.csv) ![difficult large](bench/minknap_difficult-large.csv) ![difficult small](bench/minknap_difficult-small.csv)
+- `minknap -n -s 2000 -p 10000` (`combo`)
+- `balknap`
+
