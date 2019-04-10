@@ -65,8 +65,9 @@ int main(int argc, char *argv[])
     Instance ins(instancefile, format);
     Solution sopt(ins);
 
-    Info info = Info(logfile)
+    Info info = Info()
         .set_verbose(vm.count("verbose"))
+        .set_logfile(logfile)
         .set_log2stderr(vm.count("log2stderr"))
         .set_loglevelmax(loglevelmax)
         .set_outputfile(outputfile);
@@ -118,10 +119,12 @@ int main(int argc, char *argv[])
         sopt = sol_backwardgreedynlogn(ins, info);
     } else if (algorithm == "dantzig") { // dantzig
         ub_dantzig(ins, info);
+    /*
     } else if (algorithm == "surrelax") { // surrelax
         ins.sort_partially(info);
         Solution sol = sol_greedynlogn(ins, Info(info, false, "greedynlogn"));
         ub_surrogate(ins, sol.profit(), info);
+    */
     }
 
     info.write_ini(outputfile);
