@@ -11,11 +11,11 @@ Profit knapsack::opt_dpprofits_array(const Instance& ins, Info info)
     VER(info, "*** dpprofits (array) ***" << std::endl);
 
     ItemIdx n = ins.item_number();
-    Weight  c = ins.total_capacity();
     if (n == 0)
         return algorithm_end(0, info);
 
     // Initialize memory table
+    Weight c = ins.total_capacity();
     ItemPos j_max = ins.max_efficiency_item(info);
     Profit ub = ub_0(ins, 0, 0, ins.total_capacity(), j_max);
     std::vector<Weight> values(ub + 1, c + 1);
@@ -47,13 +47,11 @@ Solution knapsack::sopt_dpprofits_array_all(const Instance& ins, Info info)
     VER(info, "*** dpprofits (array, all) ***" << std::endl);
 
     ItemIdx n = ins.item_number();
-    Weight  c = ins.total_capacity();
-    if (n == 0) {
-        Solution sol(ins);
-        return algorithm_end(sol, info);
-    }
+    if (n == 0)
+        return algorithm_end(Solution(ins), info);
 
     // Initialize memory table
+    Weight c = ins.total_capacity();
     ItemPos j_max = ins.max_efficiency_item(info);
     Profit ub = ub_0(ins, 0, 0, ins.total_capacity(), j_max);
     StateIdx values_size = (n + 1) * (ub + 1);
