@@ -38,9 +38,6 @@ gnuplot> set xrange[0:]
 gnuplot> plot 'ins.plot' u 1:2
 ```
 
-
-## Notes
-
 ## Lower bounds
 
 - O(n) Greedy `-a greedy` run Forward and Backward Greedy algorithms and return the best solution :heavy_check_mark:
@@ -80,7 +77,7 @@ Furthermore, some `combo` improvements may here be used with the other algorithm
 
 Algorithms:
 - Balanced Dynamic programming `-a balknap -u t`. The list implementation requires a map. Therefore, its asymptotical complexity is slightly greater than the one with an array. However, the possiblity of combining the dynamic programming with bouding makes it more performant. Two versions are still implemented. Options `-u` can be set to `b` (partial sorting, Dembo Upper bound with break item) or `t` (complete sorting, better Upper Bound) :heavy_check_mark: (with options `-n` :x: `-g` :heavy_check_mark: `-s` :heavy_check_mark:)
-- Primal-dual Dynamic programming (only with list) (`minknap`, `combo`) :heavy_check_mark: (with options `-n` :heavy_check_mark: `-g` :x: `-p` :x: `-s` :x:)
+- Primal-dual Dynamic programming (only with list) (`minknap`, `combo`) :heavy_check_mark: (with options `-n` :heavy_check_mark: `-g` :heavy_check_mark: `-p` :x: `-s` :heavy_check_mark:)
 - Primal-dual Branch-and-bound (`expknap`) `opt_expknap/main` :heavy_check_mark: (with options `-n` :x: `-g` :heavy_check_mark: `-s`  :heavy_check_mark:)
 
 ## Results
