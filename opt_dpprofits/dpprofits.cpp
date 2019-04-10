@@ -25,11 +25,9 @@ Profit knapsack::opt_dpprofits_array(const Instance& ins, Info info)
     for (ItemPos j=0; j<n; ++j) {
         Profit pj = ins.item(j).p;
         Weight wj = ins.item(j).w;
-        for (Profit q=ub; q>=0; --q) {
-            if (q < pj)
-                continue;
+        for (Profit q=ub; q>=pj; --q) {
             Weight w = (q == pj)? wj: values[q - pj] + wj;
-            if (w < values[q])
+            if (values[q] > w)
                 values[q] = w;
         }
     }
@@ -68,14 +66,12 @@ Solution knapsack::sopt_dpprofits_array_all(const Instance& ins, Info info)
     for (ItemPos j=0; j<n; ++j) {
         Profit pj = ins.item(j).p;
         Profit wj = ins.item(j).w;
-        for (Profit q=0; q<=ub; ++q) {
-            if (q < pj) {
-                values[INDEX(j, q)] = values[INDEX(j - 1, q)];
-                continue;
-            }
+        for (Profit q=0; q<pj; ++q)
+            values[INDEX(j, q)] = values[INDEX(j - 1, q)];
+        for (Profit q=pj; q<=ub; ++q) {
             Weight v0 = values[INDEX(j - 1, q)];
             Weight v1 = (q == pj)? wj: values[INDEX(j - 1, q - pj)] + wj;
-            values[INDEX(j, q)] = (v1 < v0)? v1: v0;
+            values[INDEX(j, q)] = std::min(v1, v0);
         }
     }
 
