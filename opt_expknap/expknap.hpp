@@ -68,7 +68,6 @@ private:
 
     Profit opt_ = -1;
     Profit ub_ = -1;
-    Profit lb_ = 0;
     Solution sol_curr_;
     Solution sol_best_;
     Cpt node_number_ = 0;

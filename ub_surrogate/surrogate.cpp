@@ -225,7 +225,7 @@ UBS ub_surrogate_solve(Instance& ins, Info& info, ItemIdx k,
 
 void knapsack::ub_solvesurrelax(SurrelaxData d)
 {
-    LOG_FOLD_START(d.info, "surrogate relaxation lb " << d.lb << std::endl);
+    LOG_FOLD_START(d.info, "surrogate relaxation lb " << d.lowerbound() << std::endl);
 
     d.ins.sort_partially(d.info);
     ItemPos b = d.ins.break_item();
@@ -234,14 +234,16 @@ void knapsack::ub_solvesurrelax(SurrelaxData d)
     if (d.ins.item_number() == 0) {
         Profit ub = (d.ins.reduced_solution() == NULL)? 0: d.ins.reduced_solution()->profit();
         if (d.ub == -1 || d.ub > ub)
-            update_ub(d.lb, d.ub, ub, std::stringstream("surrogate relaxation"), d.info);
+            update_ub(d.lowerbound(), d.ub, ub,
+                    std::stringstream("surrogate relaxation"), d.info);
         LOG_FOLD_END(d.info, "no items");
         return;
     }
     Profit ub = ub_dantzig(d.ins);
     if (d.ins.break_capacity() == 0 || b == d.ins.last_item() + 1) {
         if (d.ub == -1 || d.ub > ub)
-            update_ub(d.lb, d.ub, ub, std::stringstream("surrogate relaxation"), d.info);
+            update_ub(d.lowerbound(), d.ub, ub,
+                    std::stringstream("surrogate relaxation"), d.info);
         LOG_FOLD_END(d.info, "dantzig");
         return;
     }
@@ -256,95 +258,83 @@ void knapsack::ub_solvesurrelax(SurrelaxData d)
 
     if (max_card(d.ins, d.info) == b) {
         UBS o = ub_surrogate_solve(d.ins, d.info, b, 0, s_max);
-        Profit ub = std::max(o.ub, d.lb);
+        Profit ub = std::max(o.ub, d.lowerbound());
         if (d.ub > ub)
-            update_ub(d.lb, d.ub, ub,
+            update_ub(d.lowerbound(), d.ub, ub,
                     std::stringstream("surrogate relaxation"), d.info);
-        if (*d.end || d.ub == d.lb || o.s == 0)
+        if (*d.end || d.ub == d.lowerbound() || o.s == 0)
             return;
 
-        Solution sol_sur(d.sol_best.instance());
+        Solution sol_sur((d.sol_best != NULL)? d.sol_best->instance(): d.ins);
         d.ins.surrogate(d.info, o.s, b);
         sol_sur = d.func(d.ins, Info(d.info, false, ""), d.end);
         if (*d.end)
             return;
-        if (sol_sur.feasible() && d.lb < sol_sur.profit()) {
-            d.info.output->mutex_sol.lock();
-            d.sol_best = sol_sur;
-            d.info.output->mutex_sol.unlock();
-            update_lb(d.lb, d.ub, sol_sur.profit(),
+        if (sol_sur.feasible() && d.lowerbound() < sol_sur.profit()) {
+            update_sol(d.sol_best, d.lb, d.ub, sol_sur,
                     std::stringstream("surrogate ins resolution (lb)"), d.info);
         }
         if (d.ub > ub)
-            update_ub(d.lb, d.ub, ub,
+            update_ub(d.lowerbound(), d.ub, ub,
                     std::stringstream("surrogate ins resolution (ub)"), d.info);
-    } else if (min_card(d.ins, d.info, d.lb) == b + 1) {
+    } else if (min_card(d.ins, d.info, d.lowerbound()) == b + 1) {
         UBS o = ub_surrogate_solve(d.ins, d.info, b + 1, s_min, 0);
-        Profit ub = std::max(o.ub, d.lb);
+        Profit ub = std::max(o.ub, d.lowerbound());
         if (d.ub > ub)
-            update_ub(d.lb, d.ub, ub,
+            update_ub(d.lowerbound(), d.ub, ub,
                     std::stringstream("surrogate relaxation"), d.info);
-        if (*d.end || d.ub == d.lb || o.s == 0)
+        if (*d.end || d.ub == d.lowerbound() || o.s == 0)
             return;
 
-        Solution sol_sur(d.sol_best.instance());
+        Solution sol_sur((d.sol_best != NULL)? d.sol_best->instance(): d.ins);
         d.ins.surrogate(d.info, o.s, b + 1);
         sol_sur = d.func(d.ins, Info(d.info, false, ""), d.end);
         if (*d.end)
             return;
-        if (sol_sur.feasible() && d.lb < sol_sur.profit()) {
-            d.info.output->mutex_sol.lock();
-            d.sol_best = sol_sur;
-            d.info.output->mutex_sol.unlock();
-            update_lb(d.lb, d.ub, sol_sur.profit(),
+        if (sol_sur.feasible() && d.lowerbound() < sol_sur.profit()) {
+            update_sol(d.sol_best, d.lb, d.ub, sol_sur,
                     std::stringstream("surrogate ins resolution (lb)"), d.info);
         }
-        ub = std::max(sol_sur.profit(), d.lb);
+        ub = std::max(sol_sur.profit(), d.lowerbound());
         if (d.ub > ub)
-            update_ub(d.lb, d.ub, ub,
+            update_ub(d.lowerbound(), d.ub, ub,
                     std::stringstream("surrogate ins resolution (ub)"), d.info);
     } else {
         Instance ins_2(d.ins);
         UBS o1 = ub_surrogate_solve(d.ins, d.info, b,     0,     s_max);
         UBS o2 = ub_surrogate_solve(ins_2, d.info, b + 1, s_min, 0);
-        Profit ub = std::max(std::max(o1.ub, o2.ub), d.lb);
+        Profit ub = std::max(std::max(o1.ub, o2.ub), d.lowerbound());
         if (d.ub > ub)
-            update_ub(d.lb, d.ub, ub,
+            update_ub(d.lowerbound(), d.ub, ub,
                     std::stringstream("surrogate relaxation"), d.info);
-        if (*d.end || d.ub == d.lb || o1.s == 0 || o2.s == 0)
+        if (*d.end || d.ub == d.lowerbound() || o1.s == 0 || o2.s == 0)
             return;
 
-        Solution sol_sur1(d.sol_best.instance());
+        Solution sol_sur1((d.sol_best != NULL)? d.sol_best->instance(): d.ins);
         d.ins.surrogate(d.info, o1.s, b);
         sol_sur1 = d.func(d.ins, Info(d.info, false, ""), d.end);
         if (*d.end)
             return;
-        if (sol_sur1.feasible() && d.lb < sol_sur1.profit()) {
-            d.info.output->mutex_sol.lock();
-            d.sol_best = sol_sur1;
-            d.info.output->mutex_sol.unlock();
-            update_lb(d.lb, d.ub, sol_sur1.profit(),
+        if (sol_sur1.feasible() && d.lowerbound() < sol_sur1.profit()) {
+            update_sol(d.sol_best, d.lb, d.ub, sol_sur1,
                     std::stringstream("surrogate ins resolution (lb)"), d.info);
         }
-        if (*d.end || d.ub == d.lb)
+        if (*d.end || d.ub == d.lowerbound())
             return;
 
-        Solution sol_sur2(d.sol_best.instance());
+        Solution sol_sur2((d.sol_best != NULL)? d.sol_best->instance(): d.ins);
         ins_2.surrogate(d.info, o2.s, b + 1);
         sol_sur2 = d.func(ins_2, Info(d.info, false, ""), d.end);
         if (*d.end)
             return;
-        if (sol_sur2.feasible() && d.lb < sol_sur2.profit()) {
-            d.info.output->mutex_sol.lock();
-            d.sol_best = sol_sur2;
-            d.info.output->mutex_sol.unlock();
-            update_lb(d.lb, d.ub, sol_sur2.profit(),
+        if (sol_sur2.feasible() && d.lowerbound() < sol_sur2.profit()) {
+            update_sol(d.sol_best, d.lb, d.ub, sol_sur2,
                     std::stringstream("surrogate ins resolution (lb)"), d.info);
         }
 
-        ub = std::max(std::max(sol_sur1.profit(), sol_sur2.profit()), d.lb);
+        ub = std::max(std::max(sol_sur1.profit(), sol_sur2.profit()), d.lowerbound());
         if (d.ub > ub)
-            update_ub(d.lb, d.ub, ub,
+            update_ub(d.lowerbound(), d.ub, ub,
                     std::stringstream("surrogate ins resolution (ub)"), d.info);
     }
 

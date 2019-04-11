@@ -204,8 +204,8 @@ void Minknap::update_bounds(Info& info)
                 return Minknap(ins, params_, end).run(info); };
         threads_.push_back(std::thread(ub_solvesurrelax, SurrelaxData{
                     .ins      = Instance::reset(instance_),
-                    .lb       = lb_,
-                    .sol_best = sol_best_,
+                    .lb       = &lb_,
+                    .sol_best = &sol_best_,
                     .ub       = ub_,
                     .func     = func,
                     .end      = end_,

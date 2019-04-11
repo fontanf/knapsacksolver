@@ -16,8 +16,8 @@ void Expknap::update_bounds(Info& info)
                 return Expknap(ins, params_, end).run(info); };
         threads_.push_back(std::thread(ub_solvesurrelax, SurrelaxData{
                     .ins      = Instance::reset(instance_),
-                    .lb       = lb_,
-                    .sol_best = sol_best_,
+                    .lb       = NULL,
+                    .sol_best = &sol_best_,
                     .ub       = ub_,
                     .func     = func,
                     .end      = end_,
@@ -27,7 +27,7 @@ void Expknap::update_bounds(Info& info)
         params_.lb_greedynlogn = -1;
         Solution sol = sol_greedynlogn(instance_);
         if (sol_best_.profit() < sol.profit())
-            update_sol(sol_best_, ub_, sol, std::stringstream("greedynlogn"), info);
+            update_sol(&sol_best_, NULL, ub_, sol, std::stringstream("greedynlogn"), info);
     }
 }
 
@@ -54,7 +54,7 @@ void Expknap::rec(ItemPos s, ItemPos t, Info& info)
         if (sol_curr_.profit() > sol_best_.profit()) {
             std::stringstream ss;
             ss << "node " << node_number_;
-            update_sol(sol_best_, ub_, sol_curr_, ss, info);
+            update_sol(&sol_best_, NULL, ub_, sol_curr_, ss, info);
         }
         for (;;t++) {
             // Expand

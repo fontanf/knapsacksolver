@@ -30,7 +30,7 @@ void bab_rec(BabData& d)
     if (d.sol_best.profit() < d.sol_curr.profit()) {
         std::stringstream ss;
         ss << "node " << d.node_number;
-        update_sol(d.sol_best, d.ub, d.sol_curr, ss, d.info);
+        update_sol(&d.sol_best, NULL, d.ub, d.sol_curr, ss, d.info);
     }
 
     for (ItemPos j=d.j; j<=d.ins.last_item(); j++) {

@@ -149,7 +149,7 @@ void knapsack::update_lb(Profit& lb, Profit ub, Profit lb_new, const std::string
         VER(info, std::left << std::setw(10) << t);
         VER(info, std::left << std::setw(12) << lb);
         VER(info, std::left << std::setw(12) << ub);
-        VER(info, std::left << std::setw(12) << ub - lb);
+        VER(info, std::left << std::setw(12) << ub - lb_new);
         VER(info, s.str() << std::endl);
     }
 
@@ -166,24 +166,37 @@ void knapsack::update_ub(Profit lb, Profit& ub, Profit ub_new, const std::string
         VER(info, std::left << std::setw(10) << t);
         VER(info, std::left << std::setw(12) << lb);
         VER(info, std::left << std::setw(12) << ub);
-        VER(info, std::left << std::setw(12) << ub - lb);
+        VER(info, std::left << std::setw(12) << ub_new - lb);
         VER(info, s.str() << std::endl);
     }
 
     info.output->mutex_sol.unlock();
 }
 
-void knapsack::update_sol(Solution& sol, Profit ub, const Solution& sol_new, const std::stringstream& s, Info& info)
+void knapsack::update_sol(Solution* sol, Profit* lb, Profit ub, const Solution& sol_new, const std::stringstream& s, Info& info)
 {
     info.output->mutex_sol.lock();
 
-    if (sol.profit() < sol_new.profit()) {
-        sol = sol_new;
+    assert(sol != NULL || lb != NULL);
+    Profit val = 0;
+    if (sol == NULL) {
+        val = *lb;
+    } else if (lb == NULL) {
+        val = sol->profit();
+    } else {
+        val = std::max(*lb, sol->profit());
+    }
+
+    if (val < sol_new.profit()) {
+        if (lb != NULL)
+            *lb = sol_new.profit();
+        if (sol != NULL)
+            *sol = sol_new;
         double t = round(info.elapsed_time() * 10000) / 10;
         VER(info, std::left << std::setw(10) << t);
-        VER(info, std::left << std::setw(12) << sol.profit());
+        VER(info, std::left << std::setw(12) << sol_new.profit());
         VER(info, std::left << std::setw(12) << ub);
-        VER(info, std::left << std::setw(12) << ub - sol.profit());
+        VER(info, std::left << std::setw(12) << ub - sol_new.profit());
         VER(info, s.str() << std::endl);
     }
 
