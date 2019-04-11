@@ -83,7 +83,9 @@ int main(int argc, char *argv[])
     } else if (algorithm == "bellman_array_rec") {
         sopt = sopt_bellman_array_rec(ins, info);
     } else if (algorithm == "bellman_list") {
-        opt_bellman_list(ins, info);
+        opt_bellman_list(ins, false, info);
+    } else if (algorithm == "bellman_list_sort") {
+        opt_bellman_list(ins, true, info);
     } else if (algorithm == "bellman_list_rec") {
         sopt = sopt_bellman_list_rec(ins, info);
     } else if (algorithm == "dpprofits_array") { // dpprofits
@@ -91,7 +93,9 @@ int main(int argc, char *argv[])
     } else if (algorithm == "dpprofits_array_all") {
         sopt = sopt_dpprofits_array_all(ins, info);
     } else if (algorithm == "bab") { // bab
-        sopt = sopt_bab(ins, info);
+        sopt = sopt_bab(ins, false, info);
+    } else if (algorithm == "bab_sort") { // bab
+        sopt = sopt_bab(ins, true, info);
     } else if (algorithm == "astar") { // astar
         sopt = sopt_astar(ins, info);
     } else if (algorithm == "expknap") { // expknap

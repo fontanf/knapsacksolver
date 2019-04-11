@@ -39,15 +39,12 @@ void bab_rec(BabData& d)
         if (d.min_weight[j] > d.sol_curr.remaining_capacity())
             return;
 
-        Profit ub = (!d.sort)?  // Bounding test
-            ub_0(d.ins, j, d.sol_curr, d.j_max):
-            ub_dembo(d.ins, j, d.sol_curr);
-        if (ub <= d.sol_best.profit()) {
-            if (!d.sort) {
+        if (!d.sort) { // Bounding test
+            if (ub_0(d.ins, j, d.sol_curr, d.j_max) <= d.sol_best.profit())
                 continue;
-            } else {
+        } else {
+            if (ub_dembo(d.ins, j, d.sol_curr) <= d.sol_best.profit())
                 return;
-            }
         }
 
         // Recursive call
