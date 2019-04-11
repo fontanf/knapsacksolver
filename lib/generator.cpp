@@ -5,6 +5,7 @@
 
 #include <random>
 #include <cmath>
+#include <algorithm>
 
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/filter/zlib.hpp>
@@ -48,11 +49,11 @@ std::pair<Weight, Profit> item(GenerateData& data)
         p = d(data.g);
     } else if (data.t == "wc") {
         std::uniform_int_distribution<int> d1(1, data.r);
-        std::uniform_int_distribution<int> d2(-(data.r+1)/10, data.r/10);
+        std::uniform_int_distribution<int> d2(-(data.r + 1) / 10, data.r / 10);
         w = d1(data.g);
-        do {
-            p = w + d2(data.g);
-        } while (p <= 0);
+        p = w + d2(data.g);
+        if (p < 1)
+            p = 1;
     } else if (data.t == "sc") {
         std::uniform_int_distribution<int> d(1, data.r);
         w = d(data.g);

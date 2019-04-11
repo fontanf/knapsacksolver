@@ -75,13 +75,13 @@ void Instance::read_standard(std::stringstream& data)
     data >> n >> c_orig_;
 
     f_ = 0;
-    l_ = n-1;
+    l_ = n - 1;
 
     items_.reserve(n);
-    Profit p;
     Weight w;
+    Profit p;
     for (ItemPos j=0; j<n; ++j) {
-        data >> p >> w;
+        data >> w >> p;
         add_item(w, p);
     }
 }
@@ -975,11 +975,11 @@ void Instance::reduce1(Profit lb, Info& info)
 ItemPos Instance::ub_item(const std::vector<Item>& isum, Item item) const
 {
     assert(sort_type() == 2);
-    auto s = std::upper_bound(isum.begin()+f_, isum.begin()+l_+1, item,
+    auto s = std::upper_bound(isum.begin() + f_, isum.begin() + l_ + 1, item,
             [](const Item& i1, const Item& i2) { return i1.w < i2.w;});
-    if (s == isum.begin()+l_+1)
-        return l_+1;
-    return s->j-1;
+    if (s == isum.begin() + l_ + 1)
+        return l_ + 1;
+    return s->j - 1;
 }
 
 void Instance::reduce2(Profit lb, Info& info)
