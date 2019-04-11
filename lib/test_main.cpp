@@ -20,36 +20,14 @@ int main(int argc, char *argv[])
     (void)argv;
 
     GenerateData data;
-    data.n = 2000;
+    data.n = 500;
     data.t = "asc";
-    data.r = 1000;
-    //data.d = 2.0 / 3;
-    data.h = 43;
-    data.s = 3043;
+    data.r = 10000;
+    data.h = 31;
+    data.s = 10531;
     Instance ins = generate(data);
-
-    //opt_bellman_array(ins, Info().set_verbose(true));
-
-    {
-        Info info = Info("log.txt").set_verbose(true);
-        auto p = MinknapParams::combo();
-        Minknap(ins, p).run(info);
-    }
-
-    //{
-        //Info info = Info().set_verbose(true);
-        //SurrogateOut so = ub_surrogate(ins, opt, info);
-        //std::cout << so.ub << " " << so.bound << std::endl;
-    //}
-
-    //Info info = Info("log.txt")
-        //.set_verbose(true)
-        //.set_log2stderr(true)
-        ;
-    //MinknapParams p = MinknapParams::pure();
-    //Minknap(ins, p).run(info);
-    //ExpknapParams p = ExpknapParams::fontan();
-    //Expknap(ins, p).run(info);
+    Info info = Info().set_verbose(true).set_log2stderr(true).set_logfile("log.txt");
+    Minknap(ins, MinknapParams::combo()).run(info).profit();
 
 }
 

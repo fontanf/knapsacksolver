@@ -10,7 +10,7 @@ Profit opt_bellman_array_test(Instance& ins) { return opt_bellman_array(ins); }
 Profit opt_minknap_1_test(Instance& ins)
 {
     Info info = Info()
-        .set_log2stderr(true)
+        //.set_log2stderr(true)
         ;
     auto p = MinknapParams::pure();
     p.k = 1;
@@ -20,7 +20,7 @@ Profit opt_minknap_1_test(Instance& ins)
 Profit opt_minknap_2_test(Instance& ins)
 {
     Info info = Info()
-        .set_log2stderr(true)
+        //.set_log2stderr(true)
         ;
     auto p = MinknapParams::pure();
     p.k = 2;
@@ -30,7 +30,7 @@ Profit opt_minknap_2_test(Instance& ins)
 Profit opt_minknap_3_test(Instance& ins)
 {
     Info info = Info()
-        .set_log2stderr(true)
+        //.set_log2stderr(true)
         ;
     auto p = MinknapParams::pure();
     p.k = 3;
@@ -40,8 +40,8 @@ Profit opt_minknap_3_test(Instance& ins)
 Profit opt_minknap_combocore_k1_test(Instance& ins)
 {
     Info info = Info()
-        .set_log2stderr(true)
-        .set_verbose(true)
+        //.set_log2stderr(true)
+        //.set_verbose(true)
         ;
     auto p = MinknapParams::pure();
     p.k = 1;
@@ -52,8 +52,8 @@ Profit opt_minknap_combocore_k1_test(Instance& ins)
 Profit opt_minknap_combocore_k2_test(Instance& ins)
 {
     Info info = Info()
-        .set_log2stderr(true)
-        .set_verbose(true)
+        //.set_log2stderr(true)
+        //.set_verbose(true)
         ;
     auto p = MinknapParams::pure();
     p.k = 2;
@@ -64,8 +64,9 @@ Profit opt_minknap_combocore_k2_test(Instance& ins)
 Profit opt_minknap_combocore_k3_test(Instance& ins)
 {
     Info info = Info()
-        .set_log2stderr(true)
-        .set_verbose(true);
+        //.set_log2stderr(true)
+        //.set_verbose(true)
+        ;
     auto p = MinknapParams::pure();
     p.k = 3;
     p.combo_core = true;
@@ -86,7 +87,6 @@ TEST(minknap, TEST)   { test(TEST, f); }
 TEST(minknap, SMALL)  { test(SMALL, f); }
 TEST(minknap, MEDIUM) { test(MEDIUM, f); }
 
-
 TEST(minknap, TEST1)
 {
     GenerateData data;
@@ -96,7 +96,10 @@ TEST(minknap, TEST1)
     data.h = 31;
     data.s = 10531;
     Instance ins = generate(data);
-    Info info = Info().set_verbose(true);
+    Info info = Info()
+        //.set_verbose(true)
+        //.set_log2stderr(true)
+        ;
     Profit opt = Minknap(ins, MinknapParams::combo()).run(info).profit();
     EXPECT_EQ(opt, 1081470);
 }
@@ -105,13 +108,15 @@ TEST(minknap, TEST2)
 {
     GenerateData data;
     data.n = 1000;
-    data.t = "c";
+    data.t = "wc";
     data.r = 10000;
     data.h = 6;
     data.s = 11006;
     Instance ins = generate(data);
-    Info info = Info().set_verbose(true);
+    Info info = Info()
+        //.set_verbose(true)
+        ;
     Profit opt = Minknap(ins, MinknapParams::pure()).run(info).profit();
-    EXPECT_EQ(opt, 415226);
+    EXPECT_EQ(opt, 407548);
 }
 

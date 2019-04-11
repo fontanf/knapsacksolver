@@ -6,6 +6,7 @@
 
 using namespace knapsack;
 
+/*
 Profit ub_surrogate_test(Instance& ins)
 {
     Info info;
@@ -22,3 +23,4 @@ std::vector<Profit (*)(Instance&)> f = {
 TEST(surrogate, TEST)  { test(TEST, f, UB); }
 TEST(surrogate, SMALL) { test(SMALL, f, UB); }
 
+*/

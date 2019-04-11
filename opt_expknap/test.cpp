@@ -7,8 +7,8 @@ using namespace knapsack;
 Profit opt_expknap_test(Instance& ins)
 {
     Info info = Info()
-        .set_verbose(true)
-        .set_log2stderr(true)
+        //.set_verbose(true)
+        //.set_log2stderr(true)
         ;
     return Expknap(ins, ExpknapParams::pure()).run(info).profit();
 }

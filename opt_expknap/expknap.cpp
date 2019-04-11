@@ -34,7 +34,10 @@ void Expknap::update_bounds(Info& info)
 void Expknap::rec(ItemPos s, ItemPos t, Info& info)
 {
     node_number_++; // Increment node number
-    LOG_FOLD_START(info, "node number " << node_number_ << " s " << s << " t " << t << std::endl);
+    LOG_FOLD_START(info, "node number " << node_number_
+            << " s " << s << " t " << t
+            << " w " << sol_curr_.weight() << " p " << sol_curr_.profit()
+            << std::endl);
 
     if (*end_) {
         LOG_FOLD_END(info, "end");
@@ -51,44 +54,52 @@ void Expknap::rec(ItemPos s, ItemPos t, Info& info)
     update_bounds(info); // Update bounds
 
     if (sol_curr_.remaining_capacity() >= 0) {
-        if (sol_curr_.profit() > sol_best_.profit()) {
+        if (sol_best_.profit() < sol_curr_.profit()) {
             std::stringstream ss;
             ss << "node " << node_number_;
             update_sol(&sol_best_, NULL, ub_, sol_curr_, ss, info);
         }
         for (;;t++) {
+            LOG(info, "t " << t);
+
             // Expand
-            if (instance_.int_right_size() > 0 && t > instance_.last_sorted_item())
+            while (instance_.int_right_size() > 0 && t > instance_.last_sorted_item())
                 instance_.sort_right(info, sol_best_.profit());
 
             // Bounding test
             Profit ub = ub_dembo(instance_, t, sol_curr_);
+            LOG(info, " ub " << ub << " lb " << sol_best_.profit());
             if (ub <= sol_best_.profit()) {
-                LOG_FOLD_END(info, "bound");
+                LOG_FOLD_END(info, " bound");
                 return;
             }
 
             // Recursive call
             assert(t <= instance_.last_item());
+            LOG(info, " add (" << instance_.item(t) << ")" << std::endl);
             sol_curr_.set(t, true); // Add item t
             rec(s, t + 1, info);
             sol_curr_.set(t, false); // Remove item t
         }
     } else {
         for (;;s--) {
+            LOG(info, "s " << s);
+
             // Expand
-            if (instance_.int_left_size() > 0 && s < instance_.first_sorted_item())
+            while (instance_.int_left_size() > 0 && s < instance_.first_sorted_item())
                 instance_.sort_left(info, sol_best_.profit());
 
             // Bounding test
             Profit ub = ub_dembo_rev(instance_, s, sol_curr_);
+            LOG(info, "ub " << ub << " lb " << sol_best_.profit());
             if (ub <= sol_best_.profit()) {
-                LOG_FOLD_END(info, "bound");
+                LOG_FOLD_END(info, " bound");
                 return;
             }
 
             // Recursive call
             assert(s >= instance_.first_item());
+            LOG(info, " remove (" << instance_.item(s) << ")" << std::endl);
             sol_curr_.set(s, false); // Remove item s
             rec(s - 1, t, info);
             sol_curr_.set(s, true); // Add item s

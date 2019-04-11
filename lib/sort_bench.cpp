@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
     std::cout << "Conmplete sorting" << std::endl;
     ins_eff.sort(info_1);
 
-    Info info_2(logger);
+    Info info_2;
     std::cout << "Partial sorting" << std::endl;
     ins_eff.sort_partially(info_2);
 
