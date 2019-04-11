@@ -1,6 +1,7 @@
 #include "knapsack/opt_bellman/bellman.hpp"
 
 #include "knapsack/ub_dembo/dembo.hpp"
+#include "knapsack/lb_greedynlogn/greedynlogn.hpp"
 
 using namespace knapsack;
 
@@ -22,39 +23,66 @@ std::ostream& operator<<(std::ostream& os, const std::vector<BellmanState>& l)
     return os;
 }
 
-Profit knapsack::opt_bellman_list(const Instance& ins, Info info)
+Profit knapsack::opt_bellman_list(Instance& ins, bool sort, Info info)
 {
     VER(info, "*** bellman (list) ***" << std::endl);
+    LOG_FOLD_START(info, "bellman sort " << sort << std::endl);
 
     Weight  c = ins.total_capacity();
     ItemPos n = ins.total_item_number();
     ItemPos j_max = ins.max_efficiency_item(info);
 
-    if (n == 0 || c == 0)
+    if (n == 0 || c == 0) {
+        LOG_FOLD_END(info, "no item or null capacity");
         return algorithm_end(0, info);
+    }
 
     Profit lb = 0;
-    std::vector<BellmanState> l0{{.w = 0, .p = 0}};
-    for (ItemPos j=0; j<n; ++j) {
+    if (sort) {
+        ins.sort(info);
+        if (ins.break_item() == ins.last_item() + 1) {
+            LOG_FOLD_END(info, "all items fit in the knapsack");
+            return algorithm_end(ins.break_solution()->profit(), info);
+        }
+        lb = sol_greedynlogn(ins).profit();
+        ins.reduce2(lb, info);
+        if (ins.capacity() < 0) {
+            LOG_FOLD_END(info, "c < 0");
+            return algorithm_end(lb, info);
+        } else if (n == 0 || ins.capacity() == 0) {
+            LOG_FOLD_END(info, "no item or null capacity after reduction");
+            return algorithm_end(std::max(lb, ins.reduced_solution()->profit()), info);
+        } else if (ins.break_item() == ins.last_item() + 1) {
+            LOG_FOLD_END(info, "all items fit in the knapsack after reduction");
+            return algorithm_end(std::max(lb, ins.break_solution()->profit()), info);
+        }
+    }
+
+    std::vector<BellmanState> l0{{
+        .w = (ins.reduced_solution() == NULL)? 0: ins.reduced_solution()->weight(),
+        .p = (ins.reduced_solution() == NULL)? 0: ins.reduced_solution()->profit()}};
+    for (ItemPos j=ins.first_item(); j<=ins.last_item(); ++j) {
         if (!info.check_time())
             break;
         Weight wj = ins.item(j).w;
         Profit pj = ins.item(j).p;
-        std::vector<BellmanState> l{{.w = 0, .p = 0}};
+        std::vector<BellmanState> l;
         std::vector<BellmanState>::iterator it  = l0.begin();
         std::vector<BellmanState>::iterator it1 = l0.begin();
         while (it != l0.end() || it1 != l0.end()) {
-            if (it == l0.end() || it->w > it1->w + wj) {
+            if (it1 != l0.end() && (it == l0.end() || it->w > it1->w + wj)) {
                 BellmanState s1{.w = it1->w + wj, .p = it1->p + pj};
                 if (s1.w > c)
                     break;
                 if (s1.p > l.back().p) {
-                    if (s1.p > lb) // Update lower bound
+                    if (lb < s1.p) // Update lower bound
                         lb = s1.p;
                     if (s1.w == l.back().w) {
                         l.back() = s1;
                     } else {
-                        Profit ub = ub_0(ins, j+1, s1.p, c-s1.w, j_max);
+                        Profit ub = (!sort)?
+                            ub_0(ins, j+1, s1.p, c - s1.w, j_max):
+                            ub_dembo(ins, j+1, s1.p, c - s1.w);
                         if (ub > lb)
                             l.push_back(s1);
                     }
@@ -62,7 +90,9 @@ Profit knapsack::opt_bellman_list(const Instance& ins, Info info)
                 it1++;
             } else {
                 assert(it != l0.end());
-                if (it->p > l.back().p) {
+                if (l.empty()) {
+                    l.push_back(*it);
+                } else if (it->p > l.back().p) {
                     if (it->w == l.back().w) {
                         l.back() = *it;
                     } else {
@@ -75,6 +105,7 @@ Profit knapsack::opt_bellman_list(const Instance& ins, Info info)
         l0 = std::move(l);
     }
 
+    LOG_FOLD_END(info, "");
     return algorithm_end(lb, info);
 }
 
@@ -107,11 +138,11 @@ std::vector<BellmanState> opts_bellman_list(const Instance& ins,
             break;
         Weight wj = ins.item(j).w;
         Profit pj = ins.item(j).p;
-        std::vector<BellmanState> l{{0, 0}};
+        std::vector<BellmanState> l;
         std::vector<BellmanState>::iterator it = l0.begin();
         std::vector<BellmanState>::iterator it1 = l0.begin();
         while (it != l0.end() || it1 != l0.end()) {
-            if (it == l0.end() || it->w > it1->w + wj) {
+            if (it1 != l0.end() && (it == l0.end() || it->w > it1->w + wj)) {
                 BellmanState s1{it1->w+wj, it1->p+pj};
                 if (s1.w > c) {
                     break;
@@ -132,13 +163,17 @@ std::vector<BellmanState> opts_bellman_list(const Instance& ins,
                 }
                 it1++;
             } else {
-                if (it->p > l.back().p) {
-                    if (it->w == l.back().w) {
-                        l.back() = *it;
-                    } else {
-                        l.push_back(*it);
-                    }
+                if (l.empty()) {
+                    l.push_back(*it);
                 } else {
+                    if (it->p > l.back().p) {
+                        if (it->w == l.back().w) {
+                            l.back() = *it;
+                        } else {
+                            l.push_back(*it);
+                        }
+                    } else {
+                    }
                 }
                 ++it;
             }

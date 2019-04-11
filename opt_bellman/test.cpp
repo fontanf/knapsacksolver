@@ -13,6 +13,7 @@ Profit opt_bellman_array_part2_test(Instance& ins) { return sopt_bellman_array_p
 Profit opt_bellman_array_part3_test(Instance& ins) { return sopt_bellman_array_part(ins, 3).profit(); }
 Profit opt_bellman_array_rec_test(Instance& ins)   { return sopt_bellman_array_rec(ins).profit(); }
 Profit opt_bellman_list_test(Instance& ins)        { return opt_bellman_list(ins); }
+Profit opt_bellman_list_sort_test(Instance& ins)   { return opt_bellman_list(ins, true, Info().set_log2stderr(true)); }
 Profit opt_bellman_list_rec_test(Instance& ins)    { return sopt_bellman_list_rec(ins).profit(); }
 
 std::vector<Profit (*)(Instance&)> f {
@@ -26,6 +27,7 @@ std::vector<Profit (*)(Instance&)> f {
         opt_bellman_array_part3_test,
         opt_bellman_array_rec_test,
         opt_bellman_list_test,
+        opt_bellman_list_sort_test,
         opt_bellman_list_rec_test,
 };
 

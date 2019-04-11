@@ -4,7 +4,8 @@ cc_library(
         srcs = ["bellman_array.cpp", "bellman_list.cpp"],
         deps = [
                 "//lib:cpp",
-                "//ub_dembo:dembo"
+                "//ub_dembo:dembo",
+                "//lb_greedynlogn:greedynlogn",
         ],
         copts = ["-fopenmp"],
         linkopts = [

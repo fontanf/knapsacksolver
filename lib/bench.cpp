@@ -30,7 +30,9 @@ std::function<Profit (Instance&, Info)> get_algorithm(std::string s)
     } else if (s == "bellman_array_rec") {
         return [](Instance& ins, Info info) { return sopt_bellman_array_rec(ins, info).profit(); };
     } else if (s == "bellman_list") {
-        return opt_bellman_list;
+        return [](Instance& ins, Info info) { return opt_bellman_list(ins, false, info); };
+    } else if (s == "bellman_list_sort") {
+        return [](Instance& ins, Info info) { return opt_bellman_list(ins, true, info); };
     } else if (s == "bellman_list_rec") {
         return [](Instance& ins, Info info) { return sopt_bellman_list_rec(ins, info).profit(); };
     } else if (s == "dpprofits_array") { // dpprofits
