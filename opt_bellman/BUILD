@@ -5,6 +5,7 @@ cc_library(
         deps = [
                 "//lib:cpp",
                 "//ub_dembo:dembo",
+                "//ub_dantzig:dantzig",
                 "//lb_greedynlogn:greedynlogn",
         ],
         copts = ["-fopenmp"],

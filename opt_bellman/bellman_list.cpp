@@ -1,6 +1,7 @@
 #include "knapsack/opt_bellman/bellman.hpp"
 
 #include "knapsack/ub_dembo/dembo.hpp"
+#include "knapsack/ub_dantzig/dantzig.hpp"
 #include "knapsack/lb_greedynlogn/greedynlogn.hpp"
 
 using namespace knapsack;
@@ -25,7 +26,7 @@ std::ostream& operator<<(std::ostream& os, const std::vector<BellmanState>& l)
 
 Profit knapsack::opt_bellman_list(Instance& ins, bool sort, Info info)
 {
-    VER(info, "*** bellman (list) ***" << std::endl);
+    VER(info, "*** bellman (list" << ((sort)? ", sort": "") << ") ***" << std::endl);
     LOG_FOLD_START(info, "bellman sort " << sort << std::endl);
 
     Weight  c = ins.total_capacity();
@@ -58,6 +59,8 @@ Profit knapsack::opt_bellman_list(Instance& ins, bool sort, Info info)
         }
     }
 
+    Profit ub = (!sort)? ub_0(ins, 0, 0, ins.total_capacity(), j_max): ub_dantzig(ins);
+    init_display(lb, ub, info);
     std::vector<BellmanState> l0{{
         .w = (ins.reduced_solution() == NULL)? 0: ins.reduced_solution()->weight(),
         .p = (ins.reduced_solution() == NULL)? 0: ins.reduced_solution()->profit()}};
@@ -75,8 +78,11 @@ Profit knapsack::opt_bellman_list(Instance& ins, bool sort, Info info)
                 if (s1.w > c)
                     break;
                 if (s1.p > l.back().p) {
-                    if (lb < s1.p) // Update lower bound
-                        lb = s1.p;
+                    if (lb < s1.p) { // Update lower bound
+                        std::stringstream ss;
+                        ss << "it " << j - ins.first_item();
+                        update_lb(lb, ub, s1.p, ss, info);
+                    }
                     if (s1.w == l.back().w) {
                         l.back() = s1;
                     } else {
@@ -104,6 +110,8 @@ Profit knapsack::opt_bellman_list(Instance& ins, bool sort, Info info)
         }
         l0 = std::move(l);
     }
+    if (info.check_time() && lb != ub)
+        update_ub(lb, ub, lb, std::stringstream("tree search completed"), info);
 
     LOG_FOLD_END(info, "");
     return algorithm_end(lb, info);
