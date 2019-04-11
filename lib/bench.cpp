@@ -40,7 +40,9 @@ std::function<Profit (Instance&, Info)> get_algorithm(std::string s)
     } else if (s == "dpprofits_array_all") {
         return [](Instance& ins, Info info) { return sopt_dpprofits_array_all(ins, info).profit(); };
     } else if (s == "bab") { // bab
-        return [](Instance& ins, Info info) { return sopt_bab(ins, info).profit(); };
+        return [](Instance& ins, Info info) { return sopt_bab(ins, false, info).profit(); };
+    } else if (s == "bab_sort") {
+        return [](Instance& ins, Info info) { return sopt_bab(ins, true, info).profit(); };
     } else if (s == "astar") { // astar
         return [](Instance& ins, Info info) { return sopt_astar(ins, info).profit(); };
     } else if (s == "expknap") { // expknap

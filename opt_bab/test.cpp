@@ -4,11 +4,13 @@
 
 using namespace knapsack;
 
-Profit opt_bab_test(Instance& ins)     { return sopt_bab(ins).profit(); }
+Profit opt_bab_test(Instance& ins)      { return sopt_bab(ins, false).profit(); }
+Profit opt_bab_sort_test(Instance& ins) { return sopt_bab(ins, true).profit(); }
 
 std::vector<Profit (*)(Instance&)> f = {
         opt_minknap,
         opt_bab_test,
+        opt_bab_sort_test,
 };
 
 TEST(bab, TEST)  { test(TEST, f); }

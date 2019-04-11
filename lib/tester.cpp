@@ -92,11 +92,11 @@ public:
 
 private:
 
-    ItemIdx n_max = 13;
+    ItemIdx n_max = 10;
     Weight r_max = 10;
     Cpt h_max = 100;
     Seed s_max = 20;
-    ItemIdx n = 10;
+    ItemIdx n = 1;
     Weight r = 2;
     Cpt h = 1;
     Seed s = -1;
