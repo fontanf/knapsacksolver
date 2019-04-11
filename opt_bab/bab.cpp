@@ -58,7 +58,7 @@ void bab_rec(BabData& d)
 
 Solution knapsack::sopt_bab(Instance& ins, bool sort, Info info)
 {
-    VER(info, "*** bab ***" << std::endl);
+    VER(info, "*** bab" << ((sort)? " (sort)": "") << " ***" << std::endl);
 
     ItemIdx n = ins.item_number();
     Solution sol(ins);
@@ -112,6 +112,9 @@ Solution knapsack::sopt_bab(Instance& ins, bool sort, Info info)
         .info = info,
     };
     bab_rec(d);
+    if (info.check_time() && sol.profit() != ub)
+        update_ub(sol.profit(), ub, sol.profit(),
+                std::stringstream("tree search completed"), info);
 
     LOG_FOLD_END(info, "");
     return algorithm_end(sol, info);
