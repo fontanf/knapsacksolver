@@ -74,6 +74,10 @@ int main(int argc, char *argv[])
 
     if (algorithm == "bellman_array") { // bellman
         opt_bellman_array(ins, info);
+    } else if (algorithm == "bellmanpar_array") {
+        opt_bellmanpar_array(ins, info);
+    } else if (algorithm == "bellmanrec") {
+        sopt = sopt_bellmanrec(ins, info);
     } else if (algorithm == "bellman_array_all") {
         sopt = sopt_bellman_array_all(ins, info);
     } else if (algorithm == "bellman_array_one") {
@@ -94,7 +98,7 @@ int main(int argc, char *argv[])
         sopt = sopt_dpprofits_array_all(ins, info);
     } else if (algorithm == "bab") { // bab
         sopt = sopt_bab(ins, false, info);
-    } else if (algorithm == "bab_sort") { // bab
+    } else if (algorithm == "bab_sort") {
         sopt = sopt_bab(ins, true, info);
     } else if (algorithm == "astar") { // astar
         sopt = sopt_astar(ins, info);

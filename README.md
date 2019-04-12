@@ -54,22 +54,25 @@ gnuplot> plot 'ins.plot' u 1:2
 
 For Dynamic programming algorithms:
 - option `-m` selects the type of memory used. Possible values are (if implemented) `array` or `list`. Lists are slower but eliminate dominated states and allow the use of Upper bounds.
-* option `-r` selects the method used to retrieve the optimal solution. Possible values (if implemented) are
+- option `-r` selects the method used to retrieve the optimal solution. Possible values (if implemented) are
   - `none`: no solution retrieved, only the optimal value is returned
   - `all`: keep all states in memory and backtrack
   - `one`: keep only the last states in memory, retrieve the last item added and run the algorithm again to retrieve the complete optimal solution
   - `part`: keep a partial solution in each state and run the algorithm again while the global solution is not complete
   - `rec`: use the recursive scheme
 
-- Dynamic programming with Bellman recursion `-a bellman_array` :heavy_check_mark: `-a bellman_array_all` :heavy_check_mark: `-a bellman_array_one` :heavy_check_mark: `-a bellman_array_part` :heavy_check_mark: `-a bellman_array_rec` :heavy_check_mark: `-a bellman_list` :heavy_check_mark: `-a bellman_list_rec` :heavy_check_mark:
+Algorithms:
+- Dynamic programming with Bellman recursion
+  - Top-down (recursive): `-a bellmanrec_array`
+  - Bottom-up (iterative), array: `-a bellman_array` :heavy_check_mark: `-a bellman_array_all` :heavy_check_mark: `-a bellman_array_one` :heavy_check_mark: `-a bellman_array_part` :heavy_check_mark: `-a bellman_array_rec` :heavy_check_mark:
+  - Bottom-up (iterative), lists: `-a bellman_list` :heavy_check_mark: `-a bellman_list_sort` :heavy_check_mark: `-a bellman_list_rec` :heavy_check_mark:
+  - Bottom-up (iterative), array, parallel: `-a bellmanpar_array` :heavy_check_mark:
 - Dynamic programming by Profits `-a dpprofits_array` :heavy_check_mark: `-a dpprofits_array_all` :heavy_check_mark:
-- Primal Branch-and-bound `-a bab` :heavy_check_mark:
+- Primal Branch-and-bound `-a bab` :heavy_check_mark: `-a bab_sort` :heavy_check_mark:
 
 ### Exact algorithms with partial or complete sorting as pre-processing
 
-Primal-dual Dynamic programming and Primal-dual Branch-and-bound allow to sort and reduce items 'by need' instead. This makes them more efficient on small or easy instances compared to other algorithms of the litterature which sort and reduce items in a pre-processing step. Balanced Dynamic programming may require only the partial sorting, however better bounds can be used if items are fully sorted.
-
-Furthermore, some `combo` improvements may here be used with the other algorithms.
+`combo` improvements are implemented:
 - Option `-n`: use `combo` core
 - Option `-g X`: `greedynlogn` will be executed at Xth node / if state number goes over X
 - Option `-p X`: state pairing with items outside the core will be executed if state number goes over X
@@ -78,7 +81,7 @@ Furthermore, some `combo` improvements may here be used with the other algorithm
 Algorithms:
 - Balanced Dynamic programming `-a balknap -u t`. The list implementation requires a map. Therefore, its asymptotical complexity is slightly greater than the one with an array. However, the possiblity of combining the dynamic programming with bouding makes it more performant. Two versions are still implemented. Options `-u` can be set to `b` (partial sorting, Dembo Upper bound with break item) or `t` (complete sorting, better Upper Bound) :heavy_check_mark: (with options `-n` :x: `-g` :heavy_check_mark: `-s` :heavy_check_mark:)
 - Primal-dual Dynamic programming (only with list) (`minknap`, `combo`) :heavy_check_mark: (with options `-n` :heavy_check_mark: `-g` :heavy_check_mark: `-p` :x: `-s` :heavy_check_mark:)
-- Primal-dual Branch-and-bound (`expknap`) `opt_expknap/main` :heavy_check_mark: (with options `-n` :x: `-g` :heavy_check_mark: `-s`  :heavy_check_mark:)
+- Primal-dual Branch-and-bound (`expknap`) `opt_expknap/main` :heavy_check_mark: (with options `-n` :heavy_check_mark: `-g` :heavy_check_mark: `-s`  :heavy_check_mark:)
 
 ## Results
 
@@ -102,7 +105,7 @@ It still requires 2 times more time than the implementation returning only the o
 | Algorithm                               | Instances                                                                                                                                     |
 | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
 | `expknap`                               |                                                                                                                                               |
-| `expknap -n -s 20000 -g 50000`          |                                                                                                                                               |
+| `expknap -n -s 20000 -g 50000`          | ![easy](bench/expknap_easy.csv), ![difficult large](bench/expknap_difficult-large.csv), ![difficult small](bench/expknap_difficult-small.csv) |
 | `minknap`                               | ![easy](bench/minknap_easy.csv), ![difficult large](bench/minknap_difficult-large.csv), ![difficult small](bench/minknap_difficult-small.csv) |
 | `minknap -n -s 2000 -p 10000` (`combo`) |                                                                                                                                               |
 | `balknap`                               |                                                                                                                                               |

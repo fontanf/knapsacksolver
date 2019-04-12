@@ -32,7 +32,7 @@ struct ExpknapParams
             .lb_greedy = 0,
             .lb_greedynlogn = 50000,
             .ub_surrogate = 20000,
-            .combo_core = false,
+            .combo_core = true,
         };
     }
 };

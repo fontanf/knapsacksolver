@@ -60,15 +60,9 @@ void Expknap::rec(ItemPos s, ItemPos t, Info& info)
             update_sol(&sol_best_, NULL, ub_, sol_curr_, ss, info);
         }
         for (;;t++) {
-            LOG(info, "t " << t);
-
-            // Expand
-            while (instance_.int_right_size() > 0 && t > instance_.last_sorted_item())
-                instance_.sort_right(info, sol_best_.profit());
-
             // Bounding test
-            Profit ub = ub_dembo(instance_, t, sol_curr_);
-            LOG(info, " ub " << ub << " lb " << sol_best_.profit());
+            Profit ub = ub_dembo(instance_, instance_.bound_item_right(t, sol_best_.profit(), info), sol_curr_);
+            LOG(info, "t " << t << " ub " << ub << " lb " << sol_best_.profit());
             if (ub <= sol_best_.profit()) {
                 LOG_FOLD_END(info, " bound");
                 return;
@@ -83,15 +77,9 @@ void Expknap::rec(ItemPos s, ItemPos t, Info& info)
         }
     } else {
         for (;;s--) {
-            LOG(info, "s " << s);
-
-            // Expand
-            while (instance_.int_left_size() > 0 && s < instance_.first_sorted_item())
-                instance_.sort_left(info, sol_best_.profit());
-
             // Bounding test
-            Profit ub = ub_dembo_rev(instance_, s, sol_curr_);
-            LOG(info, "ub " << ub << " lb " << sol_best_.profit());
+            Profit ub = ub_dembo_rev(instance_, instance_.bound_item_left(s, sol_best_.profit(), info), sol_curr_);
+            LOG(info, "s " << s << " ub " << ub << " lb " << sol_best_.profit());
             if (ub <= sol_best_.profit()) {
                 LOG_FOLD_END(info, " bound");
                 return;
@@ -124,6 +112,8 @@ Solution Expknap::run(Info info)
         Solution sol = *instance_.break_solution();
         return algorithm_end(sol, info);
     }
+    if (params_.combo_core)
+        instance_.init_combo_core(info);
 
     // Initial bounds
     if (params_.lb_greedy < 0) {

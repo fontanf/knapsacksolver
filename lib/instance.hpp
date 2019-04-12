@@ -143,7 +143,8 @@ public:
     ItemPos  last_sorted_item()  const { return t_; }
     const std::vector<Interval>& int_right() const { return int_right_; }
     const std::vector<Interval>& int_left()  const { return int_left_; }
-    std::pair<ItemPos, ItemPos> bound_items(ItemPos s, ItemPos t, Profit lb, Info& info);
+    ItemPos bound_item_left(ItemPos s, Profit lb, Info& info);
+    ItemPos bound_item_right(ItemPos t, Profit lb, Info& info);
     /**
      * Compute improved initial core. See "Dynamic Programming and Strong
      * Bounds for the 0-1 Knapsack Problem", 3. The Initial Core (Martello,

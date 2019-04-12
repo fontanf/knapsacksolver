@@ -672,35 +672,38 @@ void Instance::sort_left(Info& info, Profit lb)
     LOG_FOLD_END(info, "sort_left");
 }
 
-std::pair<ItemPos, ItemPos> Instance::bound_items(ItemPos s, ItemPos t, Profit lb, Info& info)
+ItemPos Instance::bound_item_left(ItemPos s, Profit lb, Info& info)
 {
-    LOG_FOLD_START(info, "bound_items s " << s << " t " << t << std::endl);
-    std::pair<ItemPos, ItemPos> st;
-
-    LOG(info, "s " << s << " f " << first_item() << " b " << break_item() << std::endl);
+    LOG(info, "bound_item_left s " << s << ": ");
     while (s < first_sorted_item() && int_left().size() > 0)
         sort_left(info, lb);
     if (s < first_item()) {
-        st.first = first_item() - 1;
+        LOG(info, first_item() + 1);
+        return first_item() - 1;
     } else if (s >= first_initial_core_item()) {
-        st.first = break_item();
+        LOG(info, break_item());
+        return break_item();
     } else {
-        st.first = s;
+        LOG(info, s);
+        return s;
     }
+}
 
+ItemPos Instance::bound_item_right(ItemPos t, Profit lb, Info& info)
+{
+    LOG(info, "bound_item_left t " << t << ": ");
     while (t > last_sorted_item() && int_right().size() > 0)
         sort_right(info, lb);
     if (t >= last_item() + 1) {
-        st.second = last_item() + 1;
+        LOG(info, last_item() + 1);
+        return last_item() + 1;
     } else if (t <= last_initial_core_item()) {
-        st.second = break_item();
+        LOG(info, break_item());
+        return break_item();
     } else {
-        st.second = t;
+        LOG(info, t);
+        return t;
     }
-
-    LOG(info, st.first << " " << st.second << std::endl);
-    LOG_FOLD_END(info, "bound_items");
-    return st;
 }
 
 void Instance::add_item_to_initial_core(ItemPos j, Info& info)

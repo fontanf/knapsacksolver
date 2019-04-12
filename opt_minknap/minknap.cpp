@@ -23,7 +23,8 @@ void Minknap::add_item(Info& info)
     Weight c = ins.total_capacity();
     Weight wt = ins.item(t_ - 1).w;
     Profit pt = ins.item(t_ - 1).p;
-    auto x = instance_.bound_items(s_, t_, lb_, info);
+    ItemPos sx = instance_.bound_item_left(s_, lb_, info);
+    ItemPos tx = instance_.bound_item_right(t_, lb_, info);
     Profit ub_max = -1;
 
     l_.clear();
@@ -51,8 +52,8 @@ void Minknap::add_item(Info& info)
                     LOG(info, " ok" << std::endl);
                 } else {
                     Profit ub = (s1.w <= c)?
-                        ub_dembo(ins, x.second, s1.p, c - s1.w):
-                        ub_dembo_rev(ins, x.first, s1.p, c - s1.w);
+                        ub_dembo(ins, tx, s1.p, c - s1.w):
+                        ub_dembo_rev(ins, sx, s1.p, c - s1.w);
                     LOG(info, " ub " << ub << " lb " << lb_);
                     if (ub > lb_) {
                         if (ub_max < ub)
@@ -78,8 +79,8 @@ void Minknap::add_item(Info& info)
                     LOG(info, " ok" << std::endl);
                 } else {
                     Profit ub = (it->w <= c)?
-                        ub_dembo(ins, x.second, it->p, c - it->w):
-                        ub_dembo_rev(ins, x.first, it->p, c - it->w);
+                        ub_dembo(ins, tx, it->p, c - it->w):
+                        ub_dembo_rev(ins, sx, it->p, c - it->w);
                     LOG(info, " ub " << ub << " lb " << lb_);
                     if (ub > lb_) {
                         if (ub_max < ub)
@@ -114,7 +115,8 @@ void Minknap::remove_item(Info& info)
     Weight c = ins.total_capacity();
     Weight ws = ins.item(s_ + 1).w;
     Profit ps = ins.item(s_ + 1).p;
-    auto x = instance_.bound_items(s_, t_, lb_, info);
+    ItemPos sx = instance_.bound_item_left(s_, lb_, info);
+    ItemPos tx = instance_.bound_item_right(t_, lb_, info);
     Profit ub_max = -1;
 
     l_.clear();
@@ -130,8 +132,8 @@ void Minknap::remove_item(Info& info)
                     LOG(info, " ok" << std::endl);
                 } else {
                     Profit ub = (it->w <= c)?
-                        ub_dembo(ins, x.second, it->p, c - it->w):
-                        ub_dembo_rev(ins, x.first, it->p, c - it->w);
+                        ub_dembo(ins, tx, it->p, c - it->w):
+                        ub_dembo_rev(ins, sx, it->p, c - it->w);
                     LOG(info, " ub " << ub << " lb " << lb_);
                     if (ub > lb_) {
                         if (ub_max < ub)
@@ -167,8 +169,8 @@ void Minknap::remove_item(Info& info)
                     LOG(info, " ok" << std::endl);
                 } else {
                     Profit ub = (s1.w <= c)?
-                        ub_dembo(ins, x.second, s1.p, c - s1.w):
-                        ub_dembo_rev(ins, x.first, s1.p, c - s1.w);
+                        ub_dembo(ins, tx, s1.p, c - s1.w):
+                        ub_dembo_rev(ins, sx, s1.p, c - s1.w);
                     LOG(info, " ub " << ub << " lb " << lb_);
                     if (ub > lb_) {
                         if (ub_max < ub)
