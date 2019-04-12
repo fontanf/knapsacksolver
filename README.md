@@ -63,7 +63,7 @@ For Dynamic programming algorithms:
 
 Algorithms:
 - Dynamic programming with Bellman recursion
-  - Top-down (recursive): `-a bellmanrec_array`
+  - Top-down (recursive): `-a bellmanrec_array` :heavy_check_mark:
   - Bottom-up (iterative), array: `-a bellman_array` :heavy_check_mark: `-a bellman_array_all` :heavy_check_mark: `-a bellman_array_one` :heavy_check_mark: `-a bellman_array_part` :heavy_check_mark: `-a bellman_array_rec` :heavy_check_mark:
   - Bottom-up (iterative), lists: `-a bellman_list` :heavy_check_mark: `-a bellman_list_sort` :heavy_check_mark: `-a bellman_list_rec` :heavy_check_mark:
   - Bottom-up (iterative), array, parallel: `-a bellmanpar_array` :heavy_check_mark:
@@ -85,6 +85,9 @@ Algorithms:
 
 ## Results
 
+- Processor: Intel® Core™ i5-8500 CPU @ 3.00GHz × 6
+- Time limit: 3000s for each cell.
+
 ### Dynamic Programming: recursive vs iterative implementation
 
 Except for very sparse instances (like SW), the iterative implementation is about 10 times faster.
@@ -104,7 +107,7 @@ It still requires 2 times more time than the implementation returning only the o
 
 | Algorithm                               | Instances                                                                                                                                                          |
 | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `expknap`                               |                                                                                                                                                                    |
+| `expknap`                               | ![easy](bench/expknap_easy.csv),        ![difficult large](bench/expknap_difficult-large.csv),        ![difficult small](bench/expknap_difficult-small.csv)        |
 | `expknap -n -s 20000 -g 50000`          | ![easy](bench/expknap_fontan_easy.csv), ![difficult large](bench/expknap_fontan_difficult-large.csv), ![difficult small](bench/expknap_fontan_difficult-small.csv) |
 | `minknap`                               | ![easy](bench/minknap_easy.csv),        ![difficult large](bench/minknap_difficult-large.csv),        ![difficult small](bench/minknap_difficult-small.csv)        |
 | `minknap -n -s 2000 -p 10000` (`combo`) |                                                                                                                                                                    |
