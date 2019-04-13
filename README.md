@@ -103,6 +103,12 @@ It still requires 2 times more time than the implementation returning only the o
 - ![Storing partial solutions in states](bench/bellman_array_part_easy.csv)
 - ![Recursive scheme](bench/bellman_array_rec_easy.csv)
 
+### When cache makes parallel algorithms slower
+
+The parallel algorithm is implemented as follows: items are divided in two sets of same size. The all-capacities version of the knapsack problem is solved for both sets with the classical `bellman` recursion. Then, the optimal value is computed by merging the information from both arrays.
+- ![Sequencial](bench/bellman_array_easy.csv)
+- ![Parallel](bench/bellmanpar_array_easy.csv)
+
 ### State of the art algorithms
 
 | Algorithm                               | Instances                                                                                                                                                          |
