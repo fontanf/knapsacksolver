@@ -113,3 +113,7 @@ It still requires 2 times more time than the implementation returning only the o
 | `minknap -n -s 2000 -p 10000` (`combo`) |                                                                                                                                                                    |
 | `balknap`                               |                                                                                                                                                                    |
 
+Remarks:
+- Spanner instances are among the worst cases of the `minknap` recursion, since many items of the break solution won't be in an optimal solution. It is interesting to note that the `bellman` recursion performs better ![on those instances](bench/bellman_list_sort_difficult-small.csv). However, the worst case of the `bellman` recursion is worse than the worst case of the `minknap` recursion.
+- `expknap` is able to prove the optimal solution for the subset sum instances because the capacity is always reached.
+
