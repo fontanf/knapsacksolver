@@ -7,7 +7,7 @@ Solution knapsack::sol_greedy(const Instance& ins, Info info)
     LOG_FOLD_START(info, "sol_greedy" << std::endl);
     VER(info, "*** greedy ***" << std::endl);
 
-    assert(ins.sort_type() >= 1);
+    assert(ins.break_item() != -1);
 
     Solution sol = *ins.break_solution();
     std::string best_algo = "Break";

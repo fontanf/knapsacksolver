@@ -95,6 +95,7 @@ private:
 
     void add_item(Info& info);
     void remove_item(Info& info);
+    ItemPos find_state(bool left, Info& info);
 
     void update_bounds(Info& info);
 

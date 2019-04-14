@@ -73,6 +73,16 @@ Profit opt_minknap_combocore_k3_test(Instance& ins)
     return Minknap(ins, p).run(info).profit();
 }
 
+Profit opt_minknap_pairing_test(Instance& ins)
+{
+    Info info = Info()
+        //.set_log2stderr(true)
+        ;
+    auto p = MinknapParams::pure();
+    p.lb_pairing = 10;
+    return Minknap(ins, p).run(info).profit();
+}
+
 std::vector<Profit (*)(Instance&)> f = {
         opt_bellman_array_test,
         opt_minknap_1_test,
@@ -81,6 +91,7 @@ std::vector<Profit (*)(Instance&)> f = {
         opt_minknap_combocore_k1_test,
         opt_minknap_combocore_k2_test,
         opt_minknap_combocore_k3_test,
+        opt_minknap_pairing_test,
 };
 
 TEST(minknap, TEST)   { test(TEST, f); }

@@ -268,12 +268,13 @@ void knapsack::ub_solvesurrelax(SurrelaxData d)
         Solution sol_sur((d.sol_best != NULL)? d.sol_best->instance(): d.ins);
         d.ins.surrogate(d.info, o.s, b);
         sol_sur = d.func(d.ins, Info(d.info, false, ""), d.end);
-        if (*d.end)
+        if (*d.end || sol_sur.item_number() == 0)
             return;
         if (sol_sur.feasible() && d.lowerbound() < sol_sur.profit()) {
             update_sol(d.sol_best, d.lb, d.ub, sol_sur,
                     std::stringstream("surrogate ins resolution (lb)"), d.info);
         }
+        ub = std::max(sol_sur.profit(), d.lowerbound());
         if (d.ub > ub)
             update_ub(d.lowerbound(), d.ub, ub,
                     std::stringstream("surrogate ins resolution (ub)"), d.info);
@@ -289,7 +290,7 @@ void knapsack::ub_solvesurrelax(SurrelaxData d)
         Solution sol_sur((d.sol_best != NULL)? d.sol_best->instance(): d.ins);
         d.ins.surrogate(d.info, o.s, b + 1);
         sol_sur = d.func(d.ins, Info(d.info, false, ""), d.end);
-        if (*d.end)
+        if (*d.end || sol_sur.item_number() == 0)
             return;
         if (sol_sur.feasible() && d.lowerbound() < sol_sur.profit()) {
             update_sol(d.sol_best, d.lb, d.ub, sol_sur,
@@ -313,7 +314,7 @@ void knapsack::ub_solvesurrelax(SurrelaxData d)
         Solution sol_sur1((d.sol_best != NULL)? d.sol_best->instance(): d.ins);
         d.ins.surrogate(d.info, o1.s, b);
         sol_sur1 = d.func(d.ins, Info(d.info, false, ""), d.end);
-        if (*d.end)
+        if (*d.end || sol_sur1.item_number() == 0)
             return;
         if (sol_sur1.feasible() && d.lowerbound() < sol_sur1.profit()) {
             update_sol(d.sol_best, d.lb, d.ub, sol_sur1,
@@ -325,7 +326,7 @@ void knapsack::ub_solvesurrelax(SurrelaxData d)
         Solution sol_sur2((d.sol_best != NULL)? d.sol_best->instance(): d.ins);
         ins_2.surrogate(d.info, o2.s, b + 1);
         sol_sur2 = d.func(ins_2, Info(d.info, false, ""), d.end);
-        if (*d.end)
+        if (*d.end || sol_sur2.item_number() == 0)
             return;
         if (sol_sur2.feasible() && d.lowerbound() < sol_sur2.profit()) {
             update_sol(d.sol_best, d.lb, d.ub, sol_sur2,

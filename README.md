@@ -116,10 +116,12 @@ The parallel algorithm is implemented as follows: items are divided in two sets 
 | `expknap`                               | ![easy](bench/expknap_easy.csv),        ![difficult large](bench/expknap_difficult-large.csv),        ![difficult small](bench/expknap_difficult-small.csv)        |
 | `expknap -n -s 20000 -g 50000`          | ![easy](bench/expknap_fontan_easy.csv), ![difficult large](bench/expknap_fontan_difficult-large.csv), ![difficult small](bench/expknap_fontan_difficult-small.csv) |
 | `minknap`                               | ![easy](bench/minknap_easy.csv),        ![difficult large](bench/minknap_difficult-large.csv),        ![difficult small](bench/minknap_difficult-small.csv)        |
-| `minknap -n -s 2000 -p 10000` (`combo`) |                                                                                                                                                                    |
+| `minknap -n -s 2000 -p 10000` (`combo`) | ![easy](bench/minknap_combo_easy.csv),  ![difficult large](bench/minknap_combo_difficult-large.csv),  ![difficult small](bench/minknap_combo_difficult-small.csv)  |
 | `balknap`                               |                                                                                                                                                                    |
 
 Remarks:
 - Spanner instances are among the worst cases of the `minknap` recursion, since many items of the break solution won't be in an optimal solution. It is interesting to note that the `bellman` recursion performs better ![on those instances](bench/bellman_list_sort_difficult-small.csv). However, the worst case of the `bellman` recursion is worse than the worst case of the `minknap` recursion.
-- `expknap` is able to prove the optimal solution for the subset sum instances because the capacity is always reached.
+- These subset sum, strongly correlated and inverse strongly correlated instances are easy to solve since the upper bound happens to always be optimal.
+- With `combo` optimizations, `expknap` is able to solve strongly correlated and inverse strongly correlated instances. It also solves more almost strongly correlated instances.
+- Taking advantage of parallelization, this implementation of `combo` is able to solve all instances of the `difficult-large` dataset.
 

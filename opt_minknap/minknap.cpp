@@ -103,6 +103,7 @@ void Minknap::add_item(Info& info)
         update_ub(lb_, ub_, ub_max, ss, info);
     }
     l0_.swap(l_);
+    state_number_ += l0_.size();
     LOG_FOLD_END(info, "add_item");
 }
 
@@ -194,7 +195,50 @@ void Minknap::remove_item(Info& info)
         update_ub(lb_, ub_, ub_max, ss, info);
     }
     l0_.swap(l_);
+    state_number_ += l0_.size();
     LOG_FOLD_END(info, "remove_item");
+}
+
+ItemPos Minknap::find_state(bool right, Info& info)
+{
+    (void)info;
+    Instance& ins = instance_;
+    Profit lb0 = 0;
+    ItemIdx j = -1;
+    ItemPos first = (right)? t_: ins.first_item();
+    ItemPos last  = (right)? ins.last_item(): s_;
+    for (ItemPos t=first; t<=last; ++t) {
+        Weight w = (right)?
+            ins.total_capacity() - ins.item(t).w:
+            ins.total_capacity() + ins.item(t).w;
+        if (l0_.front().w > w)
+            continue;
+        ItemPos f = 0;
+        ItemPos l = l0_.size() - 1; // l0_[l] > w
+        while (f + 1 < l) {
+            ItemPos m = (f + l) / 2;
+            if (l0_[m].w >= w) {
+                assert(l != m);
+                l = m;
+            } else {
+                assert(f != m);
+                f = m;
+            }
+        }
+        if (f != (StateIdx)l0_.size() - 1 && l0_[f + 1].w <= w)
+            f++;
+        assert(f < (StateIdx)l0_.size());
+        assert(l0_[f].w <= w);
+        assert(f == (StateIdx)l0_.size() - 1 || l0_[f + 1].w > w);
+        Profit lb = (right)?
+            l0_[f].p + ins.item(t).p:
+            l0_[f].p - ins.item(t).p;
+        if (lb0 < lb) {
+            j = t;
+            lb0 = lb;
+        }
+    }
+    return j;
 }
 
 void Minknap::update_bounds(Info& info)
@@ -216,11 +260,45 @@ void Minknap::update_bounds(Info& info)
     if (params_.lb_greedynlogn >= 0 && params_.lb_greedynlogn <= (StateIdx)l0_.size()) {
         params_.lb_greedynlogn = -1;
         Solution sol = sol_greedynlogn(instance_);
-        if (sol_best_.profit() < sol.profit()) {
-            info.output->mutex_sol.lock();
-            sol_best_ = sol;
-            info.output->mutex_sol.unlock();
-            update_lb(lb_, ub_, sol.profit(), std::stringstream("greedynlogn"), info);
+        if (sol_best_.profit() < sol.profit())
+            update_sol(&sol_best_, &lb_, ub_, sol, std::stringstream("greedynlogn"), info);
+    }
+    if (params_.lb_pairing >= 0 && params_.lb_pairing <= (StateIdx)l0_.size()) {
+        params_.lb_pairing *= 10;
+        Instance& ins = instance_;
+
+        if (t_ <= ins.last_item()) {
+            ItemPos j = find_state(true, info);
+            if (j != -1) {
+                if (j > ins.last_sorted_item()) {
+                    ins.add_item_to_initial_core(j, info);
+                    j = ins.last_sorted_item();
+                }
+                while (j != t_) {
+                    ins.swap(j - 1, j);
+                    j--;
+                }
+                ++t_;
+                add_item(info);
+                if (lb_ == ub_ || !info.check_time() || *end_)
+                    return;
+            }
+        }
+
+        if (s_ >= ins.first_item()) {
+            ItemPos j = find_state(false, info);
+            if (j != -1) {
+                if (j < ins.first_sorted_item()) {
+                    ins.add_item_to_initial_core(j, info);
+                    j = ins.first_sorted_item();
+                }
+                while (j != s_) {
+                    ins.swap(j, j + 1);
+                    j++;
+                }
+                --s_;
+                remove_item(info);
+            }
         }
     }
 }
@@ -300,40 +378,46 @@ Solution Minknap::run(Info info)
     state_number_++;
     LOG_FOLD(info, ins);
     while (!l0_.empty()) {
+        update_bounds(info); // Update bounds
+        if (!info.check_time())
+            break;
+        if (sur_ && *end_) {
+            LOG_FOLD_END(info, "end");
+            return algorithm_end(Solution(ins), info);
+        }
+        if (lb_ == ub_)
+            break;
+
         if (t_ <= ins.last_item()) {
-            if (!info.check_time())
-                break;
-            if (*end_) {
-                LOG_FOLD_END(info, "end");
-                return algorithm_end(Solution(ins), info);
-            }
-            update_bounds(info); // Update bounds
             LOG(info, "f " << ins.first_item() << " s' " << ins.first_sorted_item()
                     << " s " << s_ << " b " << ins.break_item() << " t " << t_
                     << " t' " << ins.last_sorted_item() << " l " << ins.last_item()
                     << std::endl);
             ++t_;
             add_item(info);
-            state_number_ += l0_.size();
+            if (!info.check_time())
+                break;
+            if (sur_ && *end_) {
+                LOG_FOLD_END(info, "end");
+                return algorithm_end(Solution(ins), info);
+            }
             if (lb_ == ub_)
                 break;
         }
 
         if (s_ >= ins.first_item()) {
-            if (!info.check_time())
-                break;
-            if (*end_) {
-                LOG_FOLD_END(info, "end");
-                return algorithm_end(Solution(ins), info);
-            }
-            update_bounds(info); // Update bounds
             LOG(info, "f " << ins.first_item() << " s' " << ins.first_sorted_item()
                     << " s " << s_ << " b " << ins.break_item() << " t " << t_
                     << " t' " << ins.last_sorted_item() << " l " << ins.last_item()
                     << std::endl);
             --s_;
             remove_item(info);
-            state_number_ += l0_.size();
+            if (!info.check_time())
+                break;
+            if (sur_ && *end_) {
+                LOG_FOLD_END(info, "end");
+                return algorithm_end(Solution(ins), info);
+            }
             if (lb_ == ub_)
                 break;
         }
@@ -354,18 +438,17 @@ Solution Minknap::run(Info info)
     PUT(info, "Algorithm.TotalStateNumber", state_number_);
     PUT(info, "Algorithm.DistinctStateNumber", distinct_state_number_);
 
-    if (best_state_.p <= sol_best_.profit())
+    if (lb_ == sol_best_.profit())
         return algorithm_end(sol_best_, info);
 
-    assert(best_state_.p >= lb_);
+    //assert(best_state_.p >= lb_);
     LOG_FOLD(info, instance_);
-    lb_  = best_state_.p - 1;
-    ub_  = best_state_.p;
     ins.set_first_item(s_ + 1, info);
     ins.set_last_item(t_ - 1);
     ins.fix(info, psolf_.vector(best_state_.sol));
     assert(ins.capacity() >= 0);
 
+    lb_--;
     run(Info(info, false, ""));
     LOG_FOLD_END(info, "minknap");
     return algorithm_end(sol_best_, info);

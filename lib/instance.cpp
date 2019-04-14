@@ -786,6 +786,7 @@ void Instance::add_item_to_initial_core(ItemPos j, Info& info)
         t_++;
     }
     items_[j_prec] = tmp;
+    sort_type_ = 1;
 
     LOG_FOLD(info, *this);
     LOG_FOLD_END(info, "add_item_to_initial_core");
@@ -915,7 +916,6 @@ void Instance::init_combo_core(Info& info)
     add_item_to_initial_core(beta2(info), info);
     add_item_to_initial_core(max_weight_item(info), info);
     add_item_to_initial_core(min_weight_item(info), info);
-    sort_type_ = 1;
     assert(check_partialsort(info));
     LOG_FOLD_END(info, "init_combo_core" << std::endl);
 }

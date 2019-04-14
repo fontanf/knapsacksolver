@@ -154,6 +154,12 @@ public:
     ItemPos first_initial_core_item() const { return s_init_; }
     ItemPos  last_initial_core_item() const { return t_init_; }
 
+    /*
+     * Move item j to the initial core and carefully update int_right_ and
+     * int_left_.
+     */
+    void add_item_to_initial_core(ItemPos j, Info& info);
+
     /**
      * Apply variable reduction. See "Knapsack Problem", Chap 3.2:
      * "Variable Reduction" (Kellerer, 2004) for more details.
@@ -188,6 +194,7 @@ public:
      */
     void set_last_item(ItemPos k);
 
+    inline void swap(ItemPos j, ItemPos k) { Item tmp = items_[j]; items_[j] = items_[k]; items_[k] = tmp; };
     void fix(Info& info, const std::vector<int> vec);
 
     /**
@@ -241,13 +248,6 @@ private:
 
     std::pair<ItemPos, ItemPos> partition(ItemPos f, ItemPos l, Info& info);
     bool check();
-    inline void swap(ItemPos j, ItemPos k) { Item tmp = items_[j]; items_[j] = items_[k]; items_[k] = tmp; };
-
-    /*
-     * Move item j to the initial core and carefully update int_right_ and
-     * int_left_.
-     */
-    void add_item_to_initial_core(ItemPos j, Info& info);
 
     std::vector<Item> get_isum() const;
     ItemPos ub_item(const std::vector<Item>& isum, Item item) const;
