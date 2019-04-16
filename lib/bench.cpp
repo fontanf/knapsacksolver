@@ -49,8 +49,20 @@ std::function<Profit (Instance&, Info)> get_algorithm(std::string s)
         return [](Instance& ins, Info info) { return Expknap(ins, ExpknapParams::pure()).run(info).profit(); };
     } else if (s == "expknap_combo") { // expknap
         return [](Instance& ins, Info info) { return Expknap(ins, ExpknapParams::combo()).run(info).profit(); };
-    } else if (s == "balknap") { // balknap
-        return [](Instance& ins, Info info) { return Balknap(ins, BalknapParams::pure()).run(info).profit(); };
+    } else if (s == "balknap_b") { // balknap
+        return [](Instance& ins, Info info) {
+            BalknapParams p = BalknapParams::pure();
+            p.greedy = 0;
+            p.ub = 'b';
+            return Balknap(ins, p).run(info).profit();
+        };
+    } else if (s == "balknap_t") { // balknap
+        return [](Instance& ins, Info info) {
+            BalknapParams p = BalknapParams::pure();
+            p.greedynlogn = 0;
+            p.ub = 't';
+            return Balknap(ins, p).run(info).profit();
+        };
     } else if (s == "balknap_combo") {
         return [](Instance& ins, Info info) { return Balknap(ins, BalknapParams::combo()).run(info).profit(); };
     } else if (s == "minknap") { // minknap

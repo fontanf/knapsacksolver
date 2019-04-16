@@ -48,7 +48,7 @@ gnuplot> plot 'ins.plot' u 1:2
 
 ## Exact algorithms
 
-### Exact algorithms without pre-processing or sorting
+### Classical algorithms
 
 For Dynamic programming algorithms:
 - option `-m` selects the type of memory used. Possible values are (if implemented) `array` or `list`. Lists are slower but eliminate dominated states and allow the use of Upper bounds.
@@ -68,7 +68,7 @@ Algorithms:
 - Dynamic programming by Profits `-a dpprofits_array` :heavy_check_mark: `-a dpprofits_array_all` :heavy_check_mark:
 - Primal Branch-and-bound `-a bab` :heavy_check_mark: `-a bab_sort` :heavy_check_mark:
 
-### Exact algorithms with partial or complete sorting as pre-processing
+### State of the art algorithms
 
 `combo` improvements are implemented:
 - Option `-n`: use `combo` core
@@ -77,7 +77,7 @@ Algorithms:
 - Option `-s X`: surrogate relaxation and instance will be solved at Xth node / if state number goes over X
 
 Algorithms:
-- Balanced Dynamic programming `-a balknap -u t`. The list implementation requires a map. Therefore, its asymptotical complexity is slightly greater than the one with an array. However, the possiblity of combining the dynamic programming with bouding makes it more performant. Two versions are still implemented. Options `-u` can be set to `b` (partial sorting, Dembo Upper bound with break item) or `t` (complete sorting, better Upper Bound) :heavy_check_mark: (with options `-g` :heavy_check_mark: `-s` :heavy_check_mark:)
+- Balanced Dynamic programming `-a balknap -u t`. The list implementation requires a map. Therefore, its asymptotical complexity is slightly greater than the one with an array. However, the possiblity of combining the dynamic programming with bouding makes it more performant. Still, two versions are implemented. Options `-u` can be set to `b` (partial sorting, Dembo Upper bound with break item) or `t` (complete sorting, better Upper Bound) :heavy_check_mark: (with options `-g` :heavy_check_mark: `-s` :heavy_check_mark:)
 - Primal-dual Dynamic programming (only with list) (`minknap`, `combo`) :heavy_check_mark: (with options `-n` :heavy_check_mark: `-g` :heavy_check_mark: `-p` :heavy_check_mark: `-s` :heavy_check_mark:)
 - Primal-dual Branch-and-bound (`expknap`) `opt_expknap/main` :heavy_check_mark: (with options `-n` :heavy_check_mark: `-g` :heavy_check_mark: `-s`  :heavy_check_mark:)
 

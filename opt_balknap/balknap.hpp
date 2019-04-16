@@ -40,7 +40,6 @@ struct BalknapParams
     StateIdx greedy      = 0;
     StateIdx greedynlogn = -1;
     StateIdx surrogate   = 2000;
-    StateIdx pairing     = 10000;
 
     static BalknapParams pure()
     {
@@ -50,7 +49,6 @@ struct BalknapParams
             .greedy = -1,
             .greedynlogn = -1,
             .surrogate = -1,
-            .pairing = -1,
         };
     }
 
@@ -62,7 +60,6 @@ struct BalknapParams
             .greedy = 0,
             .greedynlogn = 5000,
             .surrogate = 2000,
-            .pairing = 10000,
         };
     }
 };
@@ -106,7 +103,6 @@ private:
 
     ItemPos t_;
     std::map<BalknapState, BalknapValue, BalknapState> map_;
-    bool pairing_ = false;
 
     StateIdx state_number_ = 0;
     StateIdx distinct_state_number_ = 0;
