@@ -1,8 +1,6 @@
-WORK IN PROGRESS
-
 # Knapsack
 
-Algorithm implementations for the Knapsack Problem. Most algorithms are detailed in the "Knapsack Problem" book (Kellerer et al., 2004).
+Classical and state of the art algorithm implementations for the Knapsack Problem. Most algorithms are detailed in the "Knapsack Problem" book (Kellerer et al., 2004).
 
 This project uses Bazel https://bazel.build/
 
@@ -79,7 +77,7 @@ Algorithms:
 - Option `-s X`: surrogate relaxation and instance will be solved at Xth node / if state number goes over X
 
 Algorithms:
-- Balanced Dynamic programming `-a balknap -u t`. The list implementation requires a map. Therefore, its asymptotical complexity is slightly greater than the one with an array. However, the possiblity of combining the dynamic programming with bouding makes it more performant. Two versions are still implemented. Options `-u` can be set to `b` (partial sorting, Dembo Upper bound with break item) or `t` (complete sorting, better Upper Bound) :heavy_check_mark: (with options `-n` :x: `-g` :heavy_check_mark: `-s` :heavy_check_mark:)
+- Balanced Dynamic programming `-a balknap -u t`. The list implementation requires a map. Therefore, its asymptotical complexity is slightly greater than the one with an array. However, the possiblity of combining the dynamic programming with bouding makes it more performant. Two versions are still implemented. Options `-u` can be set to `b` (partial sorting, Dembo Upper bound with break item) or `t` (complete sorting, better Upper Bound) :heavy_check_mark: (with options `-g` :heavy_check_mark: `-s` :heavy_check_mark:)
 - Primal-dual Dynamic programming (only with list) (`minknap`, `combo`) :heavy_check_mark: (with options `-n` :heavy_check_mark: `-g` :heavy_check_mark: `-p` :heavy_check_mark: `-s` :heavy_check_mark:)
 - Primal-dual Branch-and-bound (`expknap`) `opt_expknap/main` :heavy_check_mark: (with options `-n` :heavy_check_mark: `-g` :heavy_check_mark: `-s`  :heavy_check_mark:)
 
@@ -114,7 +112,7 @@ The parallel algorithm is implemented as follows: items are divided in two sets 
 | Algorithm                               | Instances                                                                                                                                                          |
 | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `expknap`                               | ![easy](bench/expknap_easy.csv),        ![difficult large](bench/expknap_difficult-large.csv),        ![difficult small](bench/expknap_difficult-small.csv)        |
-| `expknap -n -s 20000 -g 50000`          | ![easy](bench/expknap_fontan_easy.csv), ![difficult large](bench/expknap_fontan_difficult-large.csv), ![difficult small](bench/expknap_fontan_difficult-small.csv) |
+| `expknap -n -s 20000 -g 50000`          | ![easy](bench/expknap_combo_easy.csv), ![difficult large](bench/expknap_combo_difficult-large.csv), ![difficult small](bench/expknap_combo_difficult-small.csv) |
 | `minknap`                               | ![easy](bench/minknap_easy.csv),        ![difficult large](bench/minknap_difficult-large.csv),        ![difficult small](bench/minknap_difficult-small.csv)        |
 | `minknap -n -s 2000 -p 10000` (`combo`) | ![easy](bench/minknap_combo_easy.csv),  ![difficult large](bench/minknap_combo_difficult-large.csv),  ![difficult small](bench/minknap_combo_difficult-small.csv)  |
 | `balknap`                               | ![easy](bench/balknap_easy.csv),        ![difficult large](bench/balknap_difficult-large.csv),        ![difficult small](bench/balknap_difficult-small.csv)        |
