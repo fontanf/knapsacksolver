@@ -40,8 +40,8 @@ Profit opt_minknap_3_test(Instance& ins)
 Profit opt_minknap_combocore_k1_test(Instance& ins)
 {
     Info info = Info()
-        //.set_log2stderr(true)
-        //.set_verbose(true)
+        .set_verbose(true)
+        .set_log2stderr(true)
         ;
     auto p = MinknapParams::pure();
     p.k = 1;
@@ -52,8 +52,8 @@ Profit opt_minknap_combocore_k1_test(Instance& ins)
 Profit opt_minknap_combocore_k2_test(Instance& ins)
 {
     Info info = Info()
-        //.set_log2stderr(true)
-        //.set_verbose(true)
+        .set_verbose(true)
+        .set_log2stderr(true)
         ;
     auto p = MinknapParams::pure();
     p.k = 2;
@@ -64,8 +64,8 @@ Profit opt_minknap_combocore_k2_test(Instance& ins)
 Profit opt_minknap_combocore_k3_test(Instance& ins)
 {
     Info info = Info()
-        //.set_log2stderr(true)
-        //.set_verbose(true)
+        .set_verbose(true)
+        .set_log2stderr(true)
         ;
     auto p = MinknapParams::pure();
     p.k = 3;
@@ -76,10 +76,11 @@ Profit opt_minknap_combocore_k3_test(Instance& ins)
 Profit opt_minknap_pairing_test(Instance& ins)
 {
     Info info = Info()
-        //.set_log2stderr(true)
+        .set_verbose(true)
+        .set_log2stderr(true)
         ;
     auto p = MinknapParams::pure();
-    p.lb_pairing = 10;
+    p.pairing = 10;
     return Minknap(ins, p).run(info).profit();
 }
 

@@ -184,10 +184,10 @@ Instance::Instance(const Instance& ins)
     b_ = ins.b_;
     f_ = ins.f_;
     l_ = ins.l_;
-    s_ = ins.s_;
-    t_ = ins.t_;
     s_init_ = ins.s_init_;
     t_init_ = ins.t_init_;
+    s_prime_ = ins.s_prime_;
+    t_prime_ = ins.t_prime_;
     sort_type_ = ins.sort_type_;
     int_right_ = ins.int_right_;
     int_left_ = ins.int_left_;
@@ -531,6 +531,7 @@ void Instance::sort_partially(Info& info, ItemIdx limit)
     if (reduced_solution() == NULL)
         sol_red_ = new Solution(*this);
 
+    srand(0);
     int_right_.clear();
     int_left_.clear();
 
@@ -581,8 +582,8 @@ void Instance::sort_partially(Info& info, ItemIdx limit)
         int_left_.push_back({f, b_ - 1});
     if (b_ < l)
         int_right_.push_back({b_ + 1, l});
-    s_ = b_;
-    t_ = b_;
+    s_prime_ = b_;
+    t_prime_ = b_;
     s_init_ = b_;
     t_init_ = b_;
 
@@ -596,7 +597,7 @@ void Instance::sort_right(Info& info, Profit lb)
     LOG_FOLD_START(info, "sort_right lb " << lb << std::endl);
     Interval in = int_right_.back();
     int_right_.pop_back();
-    ItemPos k = t_;
+    ItemPos k = t_prime();
     LOG(info, "in.f " << in.f << " in.l " << in.l << std::endl);
     for (ItemPos j=in.f; j<=in.l; ++j) {
         LOG(info, "j " << j << " (" << item(j) << ")");
@@ -608,20 +609,20 @@ void Instance::sort_right(Info& info, Profit lb)
         if (item(j).w <= capacity() && ub > lb) {
             k++;
             swap(k, j);
-            LOG(info, " swap " << j << " j " << k << " k " << std::endl);
+            LOG(info, " swap j " << j << " k " << k << std::endl);
         } else {
             LOG(info, " set 0" << std::endl);
         }
     }
-    std::sort(items_.begin()+t_+1, items_.begin()+k+1,
+    std::sort(items_.begin() + t_prime() + 1, items_.begin() + k + 1,
             [](const Item& i1, const Item& i2) {
             return i1.p * i2.w > i2.p * i1.w;});
-    t_ = k;
+    t_prime_ = k;
     if (int_right_.size() == 0) {
-        l_ = t_;
+        l_ = t_prime();
         LOG(info, "l_ " << l_ << std::endl);
     }
-    if (first_item() >= first_sorted_item() && last_item() <= last_sorted_item()) {
+    if (first_item() >= s_prime() && last_item() <= t_prime()) {
         if (s_init_ == t_init_) {
             sort_type_ = 2;
         } else {
@@ -634,9 +635,10 @@ void Instance::sort_right(Info& info, Profit lb)
 void Instance::sort_left(Info& info, Profit lb)
 {
     LOG_FOLD_START(info, "sort_left lb " << lb << std::endl);
+    LOG(info, "s_prime " << s_prime() << std::endl);
     Interval in = int_left_.back();
     int_left_.pop_back();
-    ItemPos k = s_;
+    ItemPos k = s_prime();
     LOG(info, "in.l " << in.f << " in.f " << in.l << " b " << break_item() << std::endl);
     for (ItemPos j=in.l; j>=in.f; --j) {
         LOG(info, "j " << j << " (" << item(j) << ")");
@@ -648,21 +650,22 @@ void Instance::sort_left(Info& info, Profit lb)
         if (item(j).w <= capacity() && ub > lb) {
             k--;
             swap(k, j);
-            LOG(info, " swap " << j << " j " << k << " k " << std::endl);
+            LOG(info, " swap j " << j << " k " << k << std::endl);
         } else {
             LOG(info, " set 1" << std::endl);
             sol_red_->set(j, true);
         }
     }
-    std::sort(items_.begin()+k, items_.begin()+s_,
+    std::sort(items_.begin() + k, items_.begin() + s_prime(),
             [](const Item& i1, const Item& i2) {
             return i1.p * i2.w > i2.p * i1.w;});
-    s_ = k;
+    s_prime_ = k;
+    LOG(info, "s_prime " << s_prime() << std::endl);
     if (int_left_.size() == 0) {
-        f_ = s_;
+        f_ = s_prime();
         LOG(info, "f_ " << f_ << std::endl);
     }
-    if (first_item() >= first_sorted_item() && last_item() <= last_sorted_item()) {
+    if (first_item() >= s_prime() && last_item() <= t_prime()) {
         if (s_init_ == t_init_) {
             sort_type_ = 2;
         } else {
@@ -674,39 +677,39 @@ void Instance::sort_left(Info& info, Profit lb)
 
 ItemPos Instance::bound_item_left(ItemPos s, Profit lb, Info& info)
 {
-    LOG(info, "bound_item_left s " << s << ": ");
-    while (s < first_sorted_item() && int_left().size() > 0)
+    LOG_FOLD_START(info, "bound_item_left s " << s << std::endl);
+    while (s < s_prime() && int_left().size() > 0)
         sort_left(info, lb);
     if (s < first_item()) {
-        LOG(info, first_item() + 1);
+        LOG_FOLD_END(info, "bound_item_left " << first_item() + 1);
         return first_item() - 1;
-    } else if (s >= first_initial_core_item()) {
-        LOG(info, break_item());
+    } else if (s >= s_init()) {
+        LOG_FOLD_END(info, "bound_item_left " << break_item());
         return break_item();
     } else {
-        LOG(info, s);
+        LOG_FOLD_END(info, "bound_item_left " << s);
         return s;
     }
 }
 
 ItemPos Instance::bound_item_right(ItemPos t, Profit lb, Info& info)
 {
-    LOG(info, "bound_item_left t " << t << ": ");
-    while (t > last_sorted_item() && int_right().size() > 0)
+    LOG_FOLD_START(info, "bound_item_right t " << t << std::endl);
+    while (t > t_prime() && int_right().size() > 0)
         sort_right(info, lb);
     if (t >= last_item() + 1) {
-        LOG(info, last_item() + 1);
+        LOG_FOLD_END(info, "bound_item_right " << last_item() + 1);
         return last_item() + 1;
-    } else if (t <= last_initial_core_item()) {
-        LOG(info, break_item());
+    } else if (t <= t_init()) {
+        LOG_FOLD_END(info, "bound_item_right " << break_item());
         return break_item();
     } else {
-        LOG(info, t);
+        LOG_FOLD_END(info, "bound_item_right " << t);
         return t;
     }
 }
 
-void Instance::add_item_to_initial_core(ItemPos j, Info& info)
+void Instance::add_item_to_core(ItemPos s, ItemPos t, ItemPos j, Info& info)
 {
     LOG_FOLD_START(info, "add_item_to_initial_core j " << j << std::endl);
     if (j == -1) {
@@ -714,78 +717,94 @@ void Instance::add_item_to_initial_core(ItemPos j, Info& info)
         return;
     }
     LOG(info, "item " << item(j) << std::endl);
-    if (s_init_ <= j && j <= t_init_) {
+    if (s <= j && j <= t) {
         LOG_FOLD_END(info, "add_item_to_initial_core j already in core");
         return;
     }
 
-    Item tmp = items_[j];
-    ItemPos j_prec = j;
+    Item it_tmp = items_[j];
     if (j < break_item()) {
-        DBG(
-                LOG(info, "left ");
-                for (Interval in: int_left())
-                    LOG(info, " " << in);
-                LOG(info, std::endl);
-        )
-        for (auto in = int_left_.begin(); in != int_left_.end();) {
-            if (in->l < j) {
-                in++;
-                continue;
+        LOG(info, "step 1" << std::endl);
+        if (j < s_second()) {
+            for (auto in = int_left_.begin(); in != int_left_.end();) {
+                if (in->l < j) {
+                    in++;
+                    continue;
+                }
+                LOG(info, "move " << in->l << " (" << item(in->l) << ") to " << j << std::endl);
+                items_[j] = items_[in->l];
+                j = in->l;
+                in->l--;
+                if (std::next(in) != int_left_.end())
+                    std::next(in)->f--;
+                if (in->f > in->l) {
+                    in = int_left_.erase(in);
+                } else {
+                    in++;
+                }
             }
-            items_[j_prec] = items_[in->l];
-            j_prec = in->l;
-            in->l--;
-            if (std::next(in) != int_left_.end())
-                std::next(in)->f--;
-            if (in->f > in->l) {
-                in = int_left_.erase(in);
-            } else {
-                in++;
-            }
+            s_prime_--;
         }
-        DBG(
-                LOG(info, "left ");
-                for (Interval in: int_left())
-                    LOG(info, " " << in);
-                LOG(info, std::endl);
-        )
+
+        LOG(info, "step 2" << std::endl);
+        if (j < s_prime()) {
+            LOG(info, "move " << s_prime() << " (" << item(s_prime()) << ") to " << j << std::endl);
+            items_[j] = items_[s_prime()];
+            j = s_prime();
+        }
+
+        LOG(info, "step 3" << std::endl);
+        while (j != s) {
+            LOG(info, "move " << j + 1 << " (" << item(j + 1) << ") to " << j << std::endl);
+            items_[j] = items_[j + 1];
+            j++;
+        }
+
+        items_[s] = it_tmp;
+
         s_init_--;
-        s_--;
     } else {
-        DBG(
-                LOG(info, "right ");
-                for (Interval in: int_right())
-                    LOG(info, " " << in);
-                LOG(info, std::endl);
-        )
-        for (auto in = int_right_.begin(); in != int_right_.end();) {
-            LOG(info, "interval " << *in << std::endl);
-            if (in->f > j) {
-                in++;
-                continue;
+        LOG(info, "step 1" << std::endl);
+        if (j > t_second()) {
+            for (auto in = int_right_.begin(); in != int_right_.end();) {
+                LOG(info, "interval " << *in << std::endl);
+                if (in->f > j) {
+                    in++;
+                    continue;
+                }
+                LOG(info, "move " << in->f << " (" << item(in->f) << ") to " << j << std::endl);
+                items_[j] = items_[in->f];
+                j = in->f;
+                in->f++;
+                if (std::next(in) != int_right_.end())
+                    std::next(in)->l++;
+                if (in->f > in->l) {
+                    in = int_right_.erase(in);
+                } else {
+                    in++;
+                }
             }
-            items_[j_prec] = items_[in->f];
-            j_prec = in->f;
-            in->f++;
-            if (std::next(in) != int_right_.end())
-                std::next(in)->l++;
-            if (in->f > in->l) {
-                in = int_right_.erase(in);
-            } else {
-                in++;
-            }
-            DBG(
-                    LOG(info, "right ");
-                    for (Interval in: int_right())
-                        LOG(info, " " << in);
-                    LOG(info, std::endl);
-            )
+            t_prime_++;
         }
+
+        LOG(info, "step 2" << std::endl);
+        if (j > t_prime()) {
+            LOG(info, "move " << t_prime() << " (" << item(t_prime()) << ") to " << j << std::endl);
+            items_[j] = items_[t_prime()];
+            j = t_prime();
+        }
+
+        LOG(info, "step 3" << std::endl);
+        while (j != t) {
+            LOG(info, "move " << j - 1 << " (" << item(j - 1) << ") to " << j << std::endl);
+            items_[j] = items_[j - 1];
+            j--;
+        }
+
+        items_[t] = it_tmp;
+
         t_init_++;
-        t_++;
     }
-    items_[j_prec] = tmp;
     sort_type_ = 1;
 
     LOG_FOLD(info, *this);
@@ -840,9 +859,9 @@ bool Instance::check_partialsort(Info& info) const
     }
 
     if (int_left().size() != 0) {
-        if (int_left().back().l > s_ - 1) {
+        if (int_left().back().l > s_prime() - 1) {
             std::cout << 7 << std::endl;
-            LOG_FOLD_END(info, "int_left().back().l " << int_left().back().l << " s " << s_);
+            LOG_FOLD_END(info, "int_left().back().l " << int_left().back().l << " s " << s_prime());
             return false;
         }
         for (auto it = int_left().begin(); it != std::prev(int_left().end()); ++it)
@@ -872,7 +891,7 @@ bool Instance::check_partialsort(Info& info) const
         }
     }
     if (int_right().size() != 0) {
-        if (int_right_.back().f < t_ + 1) {
+        if (int_right_.back().f < t_prime() + 1) {
             std::cout << 11 << std::endl;
             return false;
         }
@@ -909,13 +928,13 @@ void Instance::init_combo_core(Info& info)
 {
     LOG_FOLD_START(info, "init_combo_core" << std::endl);
     assert(sort_type_ >= 1);
-    add_item_to_initial_core(before_break_item(info), info);
-    add_item_to_initial_core(gamma1(info), info);
-    add_item_to_initial_core(gamma2(info), info);
-    add_item_to_initial_core(beta1(info), info);
-    add_item_to_initial_core(beta2(info), info);
-    add_item_to_initial_core(max_weight_item(info), info);
-    add_item_to_initial_core(min_weight_item(info), info);
+    add_item_to_core(s_init_ - 1, t_init_ + 1, before_break_item(info), info);
+    add_item_to_core(s_init_ - 1, t_init_ + 1, gamma1(info), info);
+    add_item_to_core(s_init_ - 1, t_init_ + 1, gamma2(info), info);
+    add_item_to_core(s_init_ - 1, t_init_ + 1, beta1(info), info);
+    add_item_to_core(s_init_ - 1, t_init_ + 1, beta2(info), info);
+    add_item_to_core(s_init_ - 1, t_init_ + 1, max_weight_item(info), info);
+    add_item_to_core(s_init_ - 1, t_init_ + 1, min_weight_item(info), info);
     assert(check_partialsort(info));
     LOG_FOLD_END(info, "init_combo_core" << std::endl);
 }
@@ -1300,10 +1319,14 @@ std::ostream& knapsack::operator<<(std::ostream& os, const Instance& ins)
             os << "f";
         if (j == ins.last_item())
             os << "l";
-        if (j == ins.first_initial_core_item())
-            os << "s";
-        if (j == ins.last_initial_core_item())
-            os << "t";
+        if (j == ins.s_prime())
+            os << "s'";
+        if (j == ins.t_prime())
+            os << "t'";
+        if (j == ins.s_second())
+            os << "s''";
+        if (j == ins.t_second())
+            os << "t''";
 
         os << std::endl;
     }

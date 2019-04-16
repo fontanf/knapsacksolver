@@ -23,20 +23,20 @@ std::ostream& operator<<(std::ostream& os, const MinknapState& s);
 struct MinknapParams
 {
     Cpt k = 64;
-    StateIdx lb_greedy = 0;
-    StateIdx lb_greedynlogn = -1;
-    StateIdx lb_pairing = -1;
-    StateIdx ub_surrogate = -1;
+    StateIdx greedy = 0;
+    StateIdx greedynlogn = -1;
+    StateIdx pairing = -1;
+    StateIdx surrogate = -1;
     bool combo_core = false;
 
     static MinknapParams pure()
     {
         return {
             .k = 64,
-            .lb_greedy = -1,
-            .lb_greedynlogn = -1,
-            .lb_pairing = -1,
-            .ub_surrogate = -1,
+            .greedy = -1,
+            .greedynlogn = -1,
+            .pairing = -1,
+            .surrogate = -1,
             .combo_core = false,
         };
     }
@@ -45,10 +45,10 @@ struct MinknapParams
     {
         return {
             .k = 64,
-            .lb_greedy = 0,
-            .lb_greedynlogn = -1,
-            .lb_pairing = 10000,
-            .ub_surrogate = 2000,
+            .greedy = 0,
+            .greedynlogn = -1,
+            .pairing = 10000,
+            .surrogate = 2000,
             .combo_core = true,
         };
     }
@@ -57,10 +57,10 @@ struct MinknapParams
     {
         return {
             .k = 64,
-            .lb_greedy = 0,
-            .lb_greedynlogn = 5000,
-            .lb_pairing = 10000,
-            .ub_surrogate = 2000,
+            .greedy = 0,
+            .greedynlogn = 5000,
+            .pairing = 10000,
+            .surrogate = 2000,
             .combo_core = true,
         };
     }

@@ -11,17 +11,17 @@ namespace knapsack
 
 struct ExpknapParams
 {
-    StateIdx lb_greedy = 0;
-    StateIdx lb_greedynlogn = -1;
-    StateIdx ub_surrogate = -1;
+    StateIdx greedy = 0;
+    StateIdx greedynlogn = -1;
+    StateIdx surrogate = -1;
     bool combo_core = false;
 
     static ExpknapParams pure()
     {
         return {
-            .lb_greedy = -1,
-            .lb_greedynlogn = -1,
-            .ub_surrogate = -1,
+            .greedy = -1,
+            .greedynlogn = -1,
+            .surrogate = -1,
             .combo_core = false,
         };
     }
@@ -29,9 +29,9 @@ struct ExpknapParams
     static ExpknapParams fontan()
     {
         return {
-            .lb_greedy = 0,
-            .lb_greedynlogn = 50000,
-            .ub_surrogate = 20000,
+            .greedy = 0,
+            .greedynlogn = 50000,
+            .surrogate = 20000,
             .combo_core = true,
         };
     }

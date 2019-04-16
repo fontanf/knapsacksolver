@@ -49,11 +49,8 @@ std::function<Profit (Instance&, Info)> get_algorithm(std::string s)
         return [](Instance& ins, Info info) { return Expknap(ins, ExpknapParams::pure()).run(info).profit(); };
     } else if (s == "expknap_fontan") { // expknap
         return [](Instance& ins, Info info) { return Expknap(ins, ExpknapParams::fontan()).run(info).profit(); };
-    /*
     } else if (s == "balknap") { // balknap
-        BalknapParams p;
-        sopt_balknap(ins, p, k, info);
-    */
+        return [](Instance& ins, Info info) { return Balknap(ins, BalknapParams::fontan()).run(info).profit(); };
     } else if (s == "minknap") { // minknap
         return [](Instance& ins, Info info) {
             return Minknap(ins, MinknapParams::pure()).run(info).profit();
@@ -98,6 +95,7 @@ std::function<Profit (Instance&, Info)> get_algorithm(std::string s)
         };
     */
     } else {
+        exit(1);
         return opt_bellman_array;
     }
 }

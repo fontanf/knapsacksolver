@@ -21,22 +21,22 @@ int main(int argc, char *argv[])
 
     GenerateData data;
     data.n = 50;
-    data.t = "sc";
-    data.r = 10000;
-    data.h = 46;
-    data.s = 10096;
+    data.t = "u";
+    data.r = 100;
+    data.h = 40;
+    data.s = 2;
     Instance ins = generate(data);
     Info info = Info()
         .set_verbose(true)
-        //.set_log2stderr(true)
-        //.set_logfile("log.txt")
+        .set_log2stderr(true)
+        .set_logfile("log.txt")
         ;
     //opt_bellman_array(ins, info);
 
-    MinknapParams p = MinknapParams::combo();
+    MinknapParams p = MinknapParams::pure();
     //p.ub_surrogate = -1;
-    //p.lb_pairing = -1;
-    Minknap(ins, p).run(info).profit();
+    p.pairing = 10;
+    Minknap(ins, p).run(info);
 
 }
 

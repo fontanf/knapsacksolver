@@ -105,13 +105,14 @@ int main(int argc, char *argv[])
     } else if (algorithm == "expknap") { // expknap
         ExpknapParams p;
         if (cpt_surrogate != 2)
-            p.ub_surrogate = cpt_surrogate;
+            p.surrogate = cpt_surrogate;
         if (cpt_greedynlogn != 2)
-            p.lb_greedynlogn = cpt_greedynlogn;
+            p.greedynlogn = cpt_greedynlogn;
         sopt = Expknap(ins, p).run(info);
     } else if (algorithm == "balknap") { // balknap
         BalknapParams p;
-        sopt = sopt_balknap(ins, p, k, info);
+        p.k = k;
+        sopt = Balknap(ins, p).run(info);
     } else if (algorithm == "minknap") { // minknap
         MinknapParams p;
         p.k = k;

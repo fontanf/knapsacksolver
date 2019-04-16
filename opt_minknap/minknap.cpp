@@ -201,13 +201,18 @@ void Minknap::remove_item(Info& info)
 
 ItemPos Minknap::find_state(bool right, Info& info)
 {
-    (void)info;
+    LOG_FOLD_START(info, "find_state" << std::endl);
     Instance& ins = instance_;
     Profit lb0 = 0;
     ItemIdx j = -1;
     ItemPos first = (right)? t_: ins.first_item();
     ItemPos last  = (right)? ins.last_item(): s_;
     for (ItemPos t=first; t<=last; ++t) {
+        if (ins.s_second() <= t && t < ins.s_prime())
+            continue;
+        if (ins.t_prime() < t && t <= ins.t_second())
+            continue;
+        LOG(info, "t " << t << std::endl);
         Weight w = (right)?
             ins.total_capacity() - ins.item(t).w:
             ins.total_capacity() + ins.item(t).w;
@@ -216,6 +221,7 @@ ItemPos Minknap::find_state(bool right, Info& info)
         ItemPos f = 0;
         ItemPos l = l0_.size() - 1; // l0_[l] > w
         while (f + 1 < l) {
+            LOG(info, "f " << f << " l " << l << std::endl);
             ItemPos m = (f + l) / 2;
             if (l0_[m].w >= w) {
                 assert(l != m);
@@ -225,8 +231,10 @@ ItemPos Minknap::find_state(bool right, Info& info)
                 f = m;
             }
         }
+        LOG(info, "f " << f << " l " << l << std::endl);
         if (f != (StateIdx)l0_.size() - 1 && l0_[f + 1].w <= w)
             f++;
+        LOG(info, "f " << f << " l " << l << std::endl);
         assert(f < (StateIdx)l0_.size());
         assert(l0_[f].w <= w);
         assert(f == (StateIdx)l0_.size() - 1 || l0_[f + 1].w > w);
@@ -238,13 +246,14 @@ ItemPos Minknap::find_state(bool right, Info& info)
             lb0 = lb;
         }
     }
+    LOG_FOLD_END(info, "find_state");
     return j;
 }
 
 void Minknap::update_bounds(Info& info)
 {
-    if (params_.ub_surrogate >= 0 && params_.ub_surrogate <= (StateIdx)l0_.size()) {
-        params_.ub_surrogate = -1;
+    if (params_.surrogate >= 0 && params_.surrogate <= (StateIdx)l0_.size()) {
+        params_.surrogate = -1;
         std::function<Solution (Instance&, Info, bool*)> func
             = [this](Instance& ins, Info info, bool* end) {
                 return Minknap(ins, params_, end).run(info); };
@@ -257,27 +266,21 @@ void Minknap::update_bounds(Info& info)
                     .end      = end_,
                     .info     = Info(info, true, "surrelax")}));
     }
-    if (params_.lb_greedynlogn >= 0 && params_.lb_greedynlogn <= (StateIdx)l0_.size()) {
-        params_.lb_greedynlogn = -1;
+    if (params_.greedynlogn >= 0 && params_.greedynlogn <= (StateIdx)l0_.size()) {
+        params_.greedynlogn = -1;
         Solution sol = sol_greedynlogn(instance_);
         if (sol_best_.profit() < sol.profit())
             update_sol(&sol_best_, &lb_, ub_, sol, std::stringstream("greedynlogn"), info);
     }
-    if (params_.lb_pairing >= 0 && params_.lb_pairing <= (StateIdx)l0_.size()) {
-        params_.lb_pairing *= 10;
+    if (params_.pairing >= 0 && params_.pairing <= (StateIdx)l0_.size()) {
+        LOG_FOLD_START(info, "pairing" << std::endl);
+        params_.pairing *= 10;
         Instance& ins = instance_;
 
         if (t_ <= ins.last_item()) {
             ItemPos j = find_state(true, info);
             if (j != -1) {
-                if (j > ins.last_sorted_item()) {
-                    ins.add_item_to_initial_core(j, info);
-                    j = ins.last_sorted_item();
-                }
-                while (j != t_) {
-                    ins.swap(j - 1, j);
-                    j--;
-                }
+                ins.add_item_to_core(s_, t_, j, info);
                 ++t_;
                 add_item(info);
                 if (lb_ == ub_ || !info.check_time() || *end_)
@@ -288,18 +291,12 @@ void Minknap::update_bounds(Info& info)
         if (s_ >= ins.first_item()) {
             ItemPos j = find_state(false, info);
             if (j != -1) {
-                if (j < ins.first_sorted_item()) {
-                    ins.add_item_to_initial_core(j, info);
-                    j = ins.first_sorted_item();
-                }
-                while (j != s_) {
-                    ins.swap(j, j + 1);
-                    j++;
-                }
+                ins.add_item_to_core(s_, t_, j, info);
                 --s_;
                 remove_item(info);
             }
         }
+        LOG_FOLD_END(info, "pairing");
     }
 }
 
@@ -309,7 +306,18 @@ Solution Minknap::run(Info info)
             << " combo_core " << params_.combo_core
             << std::endl);
     LOG_FOLD(info, instance_);
-    VER(info, "*** minknap ***" << std::endl);
+
+    VER(info, "*** minknap");
+    if (params_.k != 64)
+        VER(info, " k " << params_.k);
+    if (params_.surrogate != -1)
+        VER(info, " s " << params_.surrogate);
+    if (params_.pairing != -1)
+        VER(info, " p " << params_.pairing);
+    if (params_.combo_core)
+        VER(info, " cc");
+    VER(info, " ***" << std::endl);
+
     Instance& ins = instance_;
     Weight  c = ins.capacity();
     ItemPos n = ins.item_number();
@@ -343,10 +351,10 @@ Solution Minknap::run(Info info)
 
     // Compute initial lower bound
     Solution sol_tmp(ins);
-    if (params_.lb_greedynlogn == 0) {
-        params_.lb_greedynlogn = -1;
+    if (params_.greedynlogn == 0) {
+        params_.greedynlogn = -1;
         sol_tmp = sol_greedynlogn(ins);
-    } else if (params_.lb_greedy == 0) {
+    } else if (params_.greedy == 0) {
         sol_tmp = sol_greedy(ins);
     } else {
         sol_tmp = *ins.break_solution();
@@ -389,9 +397,15 @@ Solution Minknap::run(Info info)
             break;
 
         if (t_ <= ins.last_item()) {
-            LOG(info, "f " << ins.first_item() << " s' " << ins.first_sorted_item()
-                    << " s " << s_ << " b " << ins.break_item() << " t " << t_
-                    << " t' " << ins.last_sorted_item() << " l " << ins.last_item()
+            LOG(info, "f " << ins.first_item()
+                    << " s'' " << ins.s_second()
+                    << " s' " << ins.s_prime()
+                    << " s " << s_
+                    << " b " << ins.break_item()
+                    << " t " << t_
+                    << " t' " << ins.t_prime()
+                    << " t'' " << ins.t_second()
+                    << " l " << ins.last_item()
                     << std::endl);
             ++t_;
             add_item(info);
@@ -406,9 +420,15 @@ Solution Minknap::run(Info info)
         }
 
         if (s_ >= ins.first_item()) {
-            LOG(info, "f " << ins.first_item() << " s' " << ins.first_sorted_item()
-                    << " s " << s_ << " b " << ins.break_item() << " t " << t_
-                    << " t' " << ins.last_sorted_item() << " l " << ins.last_item()
+            LOG(info, "f " << ins.first_item()
+                    << " s'' " << ins.s_second()
+                    << " s' " << ins.s_prime()
+                    << " s " << s_
+                    << " b " << ins.break_item()
+                    << " t " << t_
+                    << " t' " << ins.t_prime()
+                    << " t'' " << ins.t_second()
+                    << " l " << ins.last_item()
                     << std::endl);
             --s_;
             remove_item(info);

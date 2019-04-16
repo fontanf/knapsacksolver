@@ -139,8 +139,12 @@ public:
     void sort_left(Info& info, Profit lb);
     ItemPos int_right_size() const { return int_right_.size(); }
     ItemPos int_left_size()  const { return int_left_.size();  }
-    ItemPos first_sorted_item() const { return s_; }
-    ItemPos  last_sorted_item()  const { return t_; }
+    ItemPos s_init() const { return s_init_; }
+    ItemPos t_init() const { return t_init_; }
+    ItemPos s_prime() const { return s_prime_; }
+    ItemPos t_prime() const { return t_prime_; }
+    ItemPos s_second() const { return (int_left().empty())? 0: int_left().back().l + 1; }
+    ItemPos t_second() const { return (int_right().empty())? total_item_number() - 1: int_right().back().f - 1; }
     const std::vector<Interval>& int_right() const { return int_right_; }
     const std::vector<Interval>& int_left()  const { return int_left_; }
     ItemPos bound_item_left(ItemPos s, Profit lb, Info& info);
@@ -151,14 +155,12 @@ public:
      * 1999).
      */
     void init_combo_core(Info& info);
-    ItemPos first_initial_core_item() const { return s_init_; }
-    ItemPos  last_initial_core_item() const { return t_init_; }
 
     /*
      * Move item j to the initial core and carefully update int_right_ and
      * int_left_.
      */
-    void add_item_to_initial_core(ItemPos j, Info& info);
+    void add_item_to_core(ItemPos s, ItemPos t, ItemPos j, Info& info);
 
     /**
      * Apply variable reduction. See "Knapsack Problem", Chap 3.2:
@@ -277,9 +279,8 @@ private:
     ItemPos s_init_ = -1;
     ItemPos t_init_ = -1;
 
-    // Current Core.
-    ItemPos s_ = -1;
-    ItemIdx t_ = -1;
+    ItemPos s_prime_ = -1;
+    ItemIdx t_prime_ = -1;
 
     /**
      * 0: not sorted

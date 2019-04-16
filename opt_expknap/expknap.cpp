@@ -9,8 +9,8 @@ using namespace knapsack;
 
 void Expknap::update_bounds(Info& info)
 {
-    if (params_.ub_surrogate >= 0 && params_.ub_surrogate <= node_number_) {
-        params_.ub_surrogate = -1;
+    if (params_.surrogate >= 0 && params_.surrogate <= node_number_) {
+        params_.surrogate = -1;
         std::function<Solution (Instance&, Info, bool*)> func
             = [this](Instance& ins, Info info, bool* end) {
                 return Expknap(ins, params_, end).run(info); };
@@ -23,8 +23,8 @@ void Expknap::update_bounds(Info& info)
                     .end      = end_,
                     .info     = Info(info, true, "surrelax")}));
     }
-    if (params_.lb_greedynlogn >= 0 && params_.lb_greedynlogn <= node_number_) {
-        params_.lb_greedynlogn = -1;
+    if (params_.greedynlogn >= 0 && params_.greedynlogn <= node_number_) {
+        params_.greedynlogn = -1;
         Solution sol = sol_greedynlogn(instance_);
         if (sol_best_.profit() < sol.profit())
             update_sol(&sol_best_, NULL, ub_, sol, std::stringstream("greedynlogn"), info);
@@ -116,7 +116,7 @@ Solution Expknap::run(Info info)
         instance_.init_combo_core(info);
 
     // Initial bounds
-    if (params_.lb_greedy < 0) {
+    if (params_.greedy < 0) {
         sol_best_ = *instance_.break_solution();
     } else {
         sol_best_ = sol_greedy(instance_);
