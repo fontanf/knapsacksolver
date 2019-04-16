@@ -124,10 +124,10 @@ std::string Solution::to_string_items() const
 
 void knapsack::init_display(Profit lb, Profit ub, Info& info)
 {
-    VER(info, std::left << std::setw(10) << "Time");
+    VER(info, std::left << std::setw(10) << "T (ms)");
     VER(info, std::left << std::setw(12) << "LB");
     VER(info, std::left << std::setw(12) << "UB");
-    VER(info, std::left << std::setw(12) << "GAP");
+    VER(info, std::left << std::setw(10) << "GAP");
     VER(info, "");
     VER(info, std::endl);
 
@@ -135,7 +135,7 @@ void knapsack::init_display(Profit lb, Profit ub, Info& info)
     VER(info, std::left << std::setw(10) << t);
     VER(info, std::left << std::setw(12) << lb);
     VER(info, std::left << std::setw(12) << ub);
-    VER(info, std::left << std::setw(12) << ub - lb);
+    VER(info, std::left << std::setw(10) << ub - lb);
     VER(info, "" << std::endl);
 }
 
@@ -149,7 +149,7 @@ void knapsack::update_lb(Profit& lb, Profit ub, Profit lb_new, const std::string
         VER(info, std::left << std::setw(10) << t);
         VER(info, std::left << std::setw(12) << lb);
         VER(info, std::left << std::setw(12) << ub);
-        VER(info, std::left << std::setw(12) << ub - lb_new);
+        VER(info, std::left << std::setw(10) << ub - lb_new);
         VER(info, s.str() << std::endl);
     }
 
@@ -166,7 +166,7 @@ void knapsack::update_ub(Profit lb, Profit& ub, Profit ub_new, const std::string
         VER(info, std::left << std::setw(10) << t);
         VER(info, std::left << std::setw(12) << lb);
         VER(info, std::left << std::setw(12) << ub);
-        VER(info, std::left << std::setw(12) << ub_new - lb);
+        VER(info, std::left << std::setw(10) << ub_new - lb);
         VER(info, s.str() << std::endl);
     }
 
@@ -196,7 +196,7 @@ void knapsack::update_sol(Solution* sol, Profit* lb, Profit ub, const Solution& 
         VER(info, std::left << std::setw(10) << t);
         VER(info, std::left << std::setw(12) << sol_new.profit());
         VER(info, std::left << std::setw(12) << ub);
-        VER(info, std::left << std::setw(12) << ub - sol_new.profit());
+        VER(info, std::left << std::setw(10) << ub - sol_new.profit());
         VER(info, s.str() << std::endl);
     }
 

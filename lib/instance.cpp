@@ -1217,7 +1217,7 @@ Solution knapsack::algorithm_end(const Solution& sol, Info& info)
     PUT(info, "Solution.Time", t);
     VER(info, "---" << std::endl
             << "Value: " << sol.profit() << std::endl
-            << "Time: " << t*1000 << std::endl);
+            << "Time (ms): " << t*1000 << std::endl);
     return sol;
 }
 
@@ -1228,7 +1228,7 @@ Profit knapsack::algorithm_end(Profit val, Info& info)
     PUT(info, "Solution.Time", t);
     VER(info, "---" << std::endl
             << "Value: " << val << std::endl
-            << "Time: " << t*1000 << std::endl);
+            << "Time (ms): " << t*1000 << std::endl);
     return val;
 }
 
