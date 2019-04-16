@@ -2,7 +2,7 @@
 
 Classical and state of the art algorithm implementations for the Knapsack Problem. Most algorithms are detailed in the "Knapsack Problem" book (Kellerer et al., 2004).
 
-<img src="knapsack.png" width="200"><img src="knapsack_2.png" width="200">
+<img src="knapsack.png" height="275"> <img src="knapsack_2.png" height="275">
 
 [image source](https://commons.wikimedia.org/wiki/File:Knapsack.svg)
 
