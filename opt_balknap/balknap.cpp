@@ -265,9 +265,6 @@ Solution Balknap::run(Info info)
             hint--;
         }
 
-        if (!info.check_time())
-            goto end;
-
         // Remove previously added items
         LOG(info, "remove" << std::endl);
         for (auto s = map_.rbegin(); s != map_.rend() && s->first.mu > c; ++s) {
@@ -276,6 +273,8 @@ Solution Balknap::run(Info info)
             LOG(info, *s << std::endl);
 
             update_bounds(info);
+            if (!info.check_time())
+                goto end;
 
             for (ItemPos j = s->second.a_prec; j < s->second.a; ++j) {
                 LOG(info, "j " << j);
