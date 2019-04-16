@@ -2,10 +2,10 @@
 
 Classical and state of the art algorithm implementations for the Knapsack Problem. Most algorithms are detailed in the "Knapsack Problem" book (Kellerer et al., 2004).
 
-![Knapsack](knapsack.png?raw=true "Title")
-[image source](https://commons.wikimedia.org/wiki/File:Knapsack.svg)
+![Knapsack](knapsack.png?raw=true "Title" | width=100)
+![Knapsack](knapsack_2.png?raw=true "Title" | width=100)
 
-![Knapsack](knapsack_2.png?raw=true "Title")
+[image source](https://commons.wikimedia.org/wiki/File:Knapsack.svg)
 
 This project uses Bazel https://bazel.build/
 
