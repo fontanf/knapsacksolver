@@ -5,8 +5,8 @@
 #include "knapsack/lb_greedynlogn/greedynlogn.hpp"
 #include "knapsack/ub_dembo/dembo.hpp"
 #include "knapsack/ub_dantzig/dantzig.hpp"
+#include "knapsack/ub_surrogate/surrogate.hpp"
 
-#include <map>
 #include <bitset>
 
 using namespace knapsack;
@@ -21,6 +21,30 @@ std::ostream& knapsack::operator<<(std::ostream& os, const std::pair<BalknapStat
         //<< " s " << std::bitset<16>(s.second.sol)
         << ")";
     return os;
+}
+
+void Balknap::update_bounds(Info& info)
+{
+    if (params_.surrogate >= 0 && params_.surrogate <= (StateIdx)map_.size()) {
+        params_.surrogate = -1;
+        std::function<Solution (Instance&, Info, bool*)> func
+            = [this](Instance& ins, Info info, bool* end) {
+                return Balknap(ins, params_, end).run(info); };
+        threads_.push_back(std::thread(ub_solvesurrelax, SurrelaxData{
+                    .ins      = Instance::reset(instance_),
+                    .lb       = &lb_,
+                    .sol_best = &sol_best_,
+                    .ub       = ub_,
+                    .func     = func,
+                    .end      = end_,
+                    .info     = Info(info, true, "surrelax")}));
+    }
+    if (params_.greedynlogn >= 0 && params_.greedynlogn <= (StateIdx)map_.size()) {
+        params_.greedynlogn = -1;
+        Solution sol = sol_greedynlogn(instance_);
+        if (sol_best_.profit() < sol.profit())
+            update_sol(&sol_best_, &lb_, ub_, sol, std::stringstream("greedynlogn"), info);
+    }
 }
 
 Solution Balknap::run(Info info)
@@ -127,30 +151,29 @@ Solution Balknap::run(Info info)
         return algorithm_end(sol_best_, info);
     }
 
-    // Create memory table
-    std::map<BalknapState, BalknapValue, BalknapState> map;
-
     // Initialization
     // Create first partial solution centered on the break item.
+    map_.clear();
     PartSolFactory1 psolf(ins, params_.k, b, f, l);
     PartSol1 psol_init = 0;
     for (ItemPos j=f; j<b; ++j)
         psol_init = psolf.add(psol_init, j);
     // s(w_bar,p_bar) = b
-    map.insert({{w_bar,p_bar},{b,f,psol_init}});
+    map_.insert({{w_bar,p_bar},{b,f,psol_init}});
 
     // Best state. Note that it is not a pointer
-    std::pair<BalknapState, BalknapValue> best_state = {map.begin()->first, map.begin()->second};
+    std::pair<BalknapState, BalknapValue> best_state = {map_.begin()->first, map_.begin()->second};
     // Also keep last added item to improve the variable reduction at the end.
     ItemPos last_item = b-1;
 
     // Recursion
     for (ItemPos t=b; t<=l; ++t) {
+        update_bounds(info);
+
         LOG(info, "t " << t << " (" << ins.item(t) << ")" << std::endl);
         Weight wt = ins.item(t).w;
         Profit pt = ins.item(t).p;
 
-        //bounds_data.run(func, map.size());
         if (lb_ == ub_)
             goto end;
         if (!info.check_time())
@@ -159,7 +182,7 @@ Solution Balknap::run(Info info)
         // Bounding
         LOG(info, "bound" << std::endl);
         Profit ub_t = 0;
-        for (auto s = map.begin(); s != map.end() && s->first.mu <= c;) {
+        for (auto s = map_.begin(); s != map_.end() && s->first.mu <= c;) {
             Profit pi = s->first.pi;
             Weight mu = s->first.mu;
             Profit ub_local = 0;
@@ -174,7 +197,7 @@ Solution Balknap::run(Info info)
             }
             if (ub_local < lb_) {
                 LOG(info, "remove " << *s << std::endl);
-                map.erase(s++);
+                map_.erase(s++);
             } else {
                 if (ub_t < ub_local)
                     ub_t = ub_local;
@@ -182,21 +205,23 @@ Solution Balknap::run(Info info)
             }
         }
         if (ub_t < ub_) {
-            ub_ = ub_t;
+            std::stringstream ss;
+            ss << "it " << t - b << " (ub)";
+            update_ub(lb_, ub_, ub_t, ss, info);
             if (lb_ == ub_)
                 goto end;
         }
 
         // If there is no more states, the stop
-        if (map.size() == 0)
+        if (map_.size() == 0)
             break;
 
         // Add item t
         LOG(info, "add" << std::endl);
-        auto s = map.upper_bound({c+1,0});
+        auto s = map_.upper_bound({c+1,0});
         auto hint = s;
         hint--;
-        while (s != map.begin() && (--s)->first.mu <= c) {
+        while (s != map_.begin() && (--s)->first.mu <= c) {
             std::pair<BalknapState, BalknapValue> s1 = {
                 {s->first.mu + wt, s->first.pi + pt},
                 {s->second.a, f, psolf.add(s->second.sol, t)}};
@@ -223,8 +248,8 @@ Solution Balknap::run(Info info)
                     ub_dembo_rev(ins, b, pi_, c-mu_);
             } else if (params_.ub == 't') {
                 ub_local = (mu_ <= c)?
-                    ub_dembo(ins, t+1, pi_, c-mu_):
-                    ub_dembo_rev(ins, s->second.a-1, pi_, c-mu_);
+                    ub_dembo(ins, t + 1, pi_, c-mu_):
+                    ub_dembo_rev(ins, s->second.a - 1, pi_, c-mu_);
             }
             if (ub_local <= lb_) {
                 LOG(info, " ×" << std::endl);
@@ -232,10 +257,10 @@ Solution Balknap::run(Info info)
             }
 
             LOG(info, " ok" << std::endl);
-            hint = map.insert(hint, s1);
+            hint = map_.insert(hint, s1);
             if (hint->second.a < s->second.a) {
-                hint->second.a    = s->second.a;
-                hint->second.sol  = psolf.add(s->second.sol, t);
+                hint->second.a = s->second.a;
+                hint->second.sol = psolf.add(s->second.sol, t);
             }
             hint--;
         }
@@ -245,10 +270,12 @@ Solution Balknap::run(Info info)
 
         // Remove previously added items
         LOG(info, "remove" << std::endl);
-        for (auto s = map.rbegin(); s != map.rend() && s->first.mu > c; ++s) {
+        for (auto s = map_.rbegin(); s != map_.rend() && s->first.mu > c; ++s) {
             if (s->first.mu > c + wt)
                 continue;
             LOG(info, *s << std::endl);
+
+            update_bounds(info);
 
             for (ItemPos j = s->second.a_prec; j < s->second.a; ++j) {
                 LOG(info, "j " << j);
@@ -277,8 +304,8 @@ Solution Balknap::run(Info info)
                         ub_dembo_rev(ins, b, pi_, c-mu_);
                 } else if (params_.ub == 't') {
                     ub_local = (mu_ <= c)?
-                        ub_dembo(ins, t+1, pi_, c-mu_):
-                        ub_dembo_rev(ins, j-1, pi_, c-mu_);
+                        ub_dembo(ins, t + 1, pi_, c-mu_):
+                        ub_dembo_rev(ins, j - 1, pi_, c-mu_);
                 }
                 if (ub_local <= lb_) {
                     LOG(info, " ×" << std::endl);
@@ -286,7 +313,7 @@ Solution Balknap::run(Info info)
                 }
 
                 LOG(info, " ok" << std::endl);
-                auto res = map.insert(s1);
+                auto res = map_.insert(s1);
                 if (!res.second) {
                     if (res.first->second.a < j) {
                         res.first->second.a = j;

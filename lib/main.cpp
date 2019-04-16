@@ -117,6 +117,8 @@ int main(int argc, char *argv[])
         MinknapParams p;
         p.k = k;
         sopt = Minknap(ins, p).run(info);
+    } else if (algorithm == "minknap_combo") {
+        sopt = Minknap(ins, MinknapParams::combo()).run(info);
     } else if (algorithm == "greedy") { // greedy
         ins.sort_partially(info);
         sopt = sol_greedy(ins, info);

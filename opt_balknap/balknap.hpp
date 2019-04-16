@@ -5,6 +5,7 @@
 #include "knapsack/lib/part_solution_1.hpp"
 
 #include <thread>
+#include <map>
 
 namespace knapsack
 {
@@ -39,6 +40,7 @@ struct BalknapParams
     StateIdx greedy      = 0;
     StateIdx greedynlogn = -1;
     StateIdx surrogate   = 2000;
+    StateIdx pairing     = 10000;
 
     static BalknapParams pure()
     {
@@ -48,10 +50,11 @@ struct BalknapParams
             .greedy = -1,
             .greedynlogn = -1,
             .surrogate = -1,
+            .pairing = -1,
         };
     }
 
-    static BalknapParams fontan()
+    static BalknapParams combo()
     {
         return {
             .k = 64,
@@ -59,6 +62,7 @@ struct BalknapParams
             .greedy = 0,
             .greedynlogn = 5000,
             .surrogate = 2000,
+            .pairing = 10000,
         };
     }
 };
@@ -99,6 +103,10 @@ private:
     Profit lb_ = 0;
     Profit ub_ = -1;
     Solution sol_best_;
+
+    ItemPos t_;
+    std::map<BalknapState, BalknapValue, BalknapState> map_;
+    bool pairing_ = false;
 
     StateIdx state_number_ = 0;
     StateIdx distinct_state_number_ = 0;

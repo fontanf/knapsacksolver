@@ -26,7 +26,7 @@ struct ExpknapParams
         };
     }
 
-    static ExpknapParams fontan()
+    static ExpknapParams combo()
     {
         return {
             .greedy = 0,

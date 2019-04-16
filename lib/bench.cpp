@@ -47,10 +47,12 @@ std::function<Profit (Instance&, Info)> get_algorithm(std::string s)
         return [](Instance& ins, Info info) { return sopt_astar(ins, info).profit(); };
     } else if (s == "expknap") { // expknap
         return [](Instance& ins, Info info) { return Expknap(ins, ExpknapParams::pure()).run(info).profit(); };
-    } else if (s == "expknap_fontan") { // expknap
-        return [](Instance& ins, Info info) { return Expknap(ins, ExpknapParams::fontan()).run(info).profit(); };
+    } else if (s == "expknap_combo") { // expknap
+        return [](Instance& ins, Info info) { return Expknap(ins, ExpknapParams::combo()).run(info).profit(); };
     } else if (s == "balknap") { // balknap
-        return [](Instance& ins, Info info) { return Balknap(ins, BalknapParams::fontan()).run(info).profit(); };
+        return [](Instance& ins, Info info) { return Balknap(ins, BalknapParams::pure()).run(info).profit(); };
+    } else if (s == "balknap_combo") {
+        return [](Instance& ins, Info info) { return Balknap(ins, BalknapParams::combo()).run(info).profit(); };
     } else if (s == "minknap") { // minknap
         return [](Instance& ins, Info info) {
             return Minknap(ins, MinknapParams::pure()).run(info).profit();
@@ -64,10 +66,6 @@ std::function<Profit (Instance&, Info)> get_algorithm(std::string s)
     } else if (s == "minknap_combo") {
         return [](Instance& ins, Info info) {
             return Minknap(ins, MinknapParams::combo()).run(info).profit();
-        };
-    } else if (s == "minknap_fontan") {
-        return [](Instance& ins, Info info) {
-            return Minknap(ins, MinknapParams::fontan()).run(info).profit();
         };
     } else if (s == "greedy") { // greedy
         return [](Instance& ins, Info info) {
@@ -108,11 +106,11 @@ double bench(Function func, GenerateData d)
     std::cout << d << std::flush;
     for (d.h=1; d.h<=100; ++d.h) {
         d.s = d.n + d.r + d.h;
-        //std::cout << std::endl << d << std::flush;
+        std::cout << std::endl << d << std::flush;
         Instance ins = generate(d);
         Info info = Info()
             .set_timelimit(t_max - t_total)
-            //.set_verbose(true)
+            .set_verbose(true)
             //.set_log2stderr(true)
             ;
         try {

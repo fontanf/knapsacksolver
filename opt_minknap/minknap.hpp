@@ -52,18 +52,6 @@ struct MinknapParams
             .combo_core = true,
         };
     }
-
-    static MinknapParams fontan()
-    {
-        return {
-            .k = 64,
-            .greedy = 0,
-            .greedynlogn = 5000,
-            .pairing = 10000,
-            .surrogate = 2000,
-            .combo_core = true,
-        };
-    }
 };
 
 class Minknap
