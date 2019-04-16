@@ -111,26 +111,31 @@ std::function<Profit (Instance&, Info)> get_algorithm(std::string s)
 }
 
 template<typename Function>
-double bench(Function func, GenerateData d)
+double bench(Function func, GenerateData d, bool verbose = false)
 {
     double t_max = 300;
     double t_total = 0.0;
     std::cout << d << std::flush;
     for (d.h=1; d.h<=100; ++d.h) {
         d.s = d.n + d.r + d.h;
-        std::cout << std::endl << d << std::flush;
+        if (verbose)
+            std::cout << std::endl << d << std::endl;
         Instance ins = generate(d);
         Info info = Info()
             .set_timelimit(t_max - t_total)
-            .set_verbose(true)
-            //.set_log2stderr(true)
+            .set_verbose(verbose)
             ;
         try {
             func(ins, info);
             double t = info.elapsed_time();
             t_total += t;
             if (t_total > t_max) {
-                std::cout << " mean > " << t_max*10 << std::endl;
+                if (verbose) {
+                    std::cout << std::endl;
+                } else {
+                    std::cout << " ";
+                }
+                std::cout << "mean > " << t_max*10 << std::endl;
                 return -1;
             }
         } catch (...) {
@@ -150,11 +155,16 @@ double bench(Function func, GenerateData d)
     d.h = -1;
 
     double mean = round(t_total * 100) / 10;
-    std::cout << " mean " << mean << std::endl;
+    if (verbose) {
+        std::cout << std::endl;
+    } else {
+        std::cout << " ";
+    }
+    std::cout << "mean " << mean << std::endl;
     return mean;
 }
 
-void bench_easy(std::string algorithm)
+void bench_easy(std::string algorithm, bool verbose = false)
 {
     std::ofstream file(algorithm + "_easy.csv");
     std::function<Profit (Instance&, Info)> func = get_algorithm(algorithm);
@@ -170,13 +180,12 @@ void bench_easy(std::string algorithm)
 
     file << "n \\ Type R,U 10^3,U 10^4,WC 10^3,WC 10^4,SC 10^3,SC 10^4,ISC 10^3,ISC 10^4,ASC 10^3,ASC 10^4,SS 10^3,SS 10^4,SW 10^5" << std::endl;
     for (ItemIdx n: {50, 100, 200, 500, 1000, 2000, 5000, 10000}) {
-    //for (ItemIdx n: {1, 2, 5, 10, 20, 50, 100, 200}) {
         d.n = n;
         file << n << std::flush;
         for (auto p: vec) {
             d.t = p.first;
             d.r = p.second;
-            double res = bench(func, d);
+            double res = bench(func, d, verbose);
             if (res < 0) {
                 file << ",x" << std::flush;
             } else {
@@ -190,7 +199,7 @@ void bench_easy(std::string algorithm)
     file.close();
 }
 
-void bench_difficult_large(std::string algorithm)
+void bench_difficult_large(std::string algorithm, bool verbose = false)
 {
     std::ofstream file(algorithm + "_difficult-large.csv");
     std::function<Profit (Instance&, Info)> func = get_algorithm(algorithm);
@@ -219,7 +228,7 @@ void bench_difficult_large(std::string algorithm)
         for (auto p: vec) {
             d.t = p.first;
             d.r = p.second;
-            double res = bench(func, d);
+            double res = bench(func, d, verbose);
             if (res < 0) {
                 file << ",x" << std::flush;
             } else {
@@ -233,7 +242,7 @@ void bench_difficult_large(std::string algorithm)
     file.close();
 }
 
-void bench_difficult_small(std::string algorithm)
+void bench_difficult_small(std::string algorithm, bool verbose = false)
 {
     std::ofstream file(algorithm + "_difficult-small.csv");
     std::function<Profit (Instance&, Info)> func = get_algorithm(algorithm);
@@ -254,7 +263,7 @@ void bench_difficult_small(std::string algorithm)
         file << n << std::flush;
         for (GenerateData d: vec) {
             d.n = n;
-            double res = bench(func, d);
+            double res = bench(func, d, verbose);
             if (res < 0) {
                 file << ",x" << std::flush;
             } else {
@@ -279,6 +288,7 @@ int main(int argc, char *argv[])
     desc.add_options()
         ("help,h", "produce help message")
         ("algorithm,a", po::value<std::string>(&algorithm), "set algorithm")
+        ("verbose,v", "")
         ("easy", "")
         ("difficult-small", "")
         ("difficult-large", "")
@@ -296,12 +306,13 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    bool verbose = vm.count("verbose");
     if (vm.count("easy"))
-        bench_easy(algorithm);
+        bench_easy(algorithm, verbose);
     if (vm.count("difficult-small"))
-        bench_difficult_small(algorithm);
+        bench_difficult_small(algorithm, verbose);
     if (vm.count("difficult-large"))
-        bench_difficult_large(algorithm);
+        bench_difficult_large(algorithm, verbose);
 
     return 0;
 }

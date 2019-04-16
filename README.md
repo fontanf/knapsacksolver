@@ -116,7 +116,7 @@ The parallel algorithm is implemented as follows: items are divided in two sets 
 | Algorithm                               | Instances                                                                                                                                                          |
 | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `expknap`                               | ![easy](bench/expknap_easy.csv),        ![difficult large](bench/expknap_difficult-large.csv),        ![difficult small](bench/expknap_difficult-small.csv)        |
-| `expknap -n -s 20000 -g 50000`          | ![easy](bench/expknap_combo_easy.csv), ![difficult large](bench/expknap_combo_difficult-large.csv), ![difficult small](bench/expknap_combo_difficult-small.csv) |
+| `expknap -n -s 20000 -g 50000`          | ![easy](bench/expknap_combo_easy.csv),  ![difficult large](bench/expknap_combo_difficult-large.csv),  ![difficult small](bench/expknap_combo_difficult-small.csv)  |
 | `minknap`                               | ![easy](bench/minknap_easy.csv),        ![difficult large](bench/minknap_difficult-large.csv),        ![difficult small](bench/minknap_difficult-small.csv)        |
 | `minknap -n -s 2000 -p 10000` (`combo`) | ![easy](bench/minknap_combo_easy.csv),  ![difficult large](bench/minknap_combo_difficult-large.csv),  ![difficult small](bench/minknap_combo_difficult-small.csv)  |
 | `balknap`                               | ![easy](bench/balknap_easy.csv),        ![difficult large](bench/balknap_difficult-large.csv),        ![difficult small](bench/balknap_difficult-small.csv)        |
