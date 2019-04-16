@@ -10,7 +10,7 @@ This project uses Bazel https://bazel.build/
 
 Compile:
 ```
-bazel build --cxxopt='-std=c++14' --compilation_mode=opt -- //lib:main
+bazel build --cxxopt='-std=c++14' --compilation_mode=opt -- //...
 ```
 
 Generate an instance:
@@ -38,6 +38,11 @@ gnuplot
 gnuplot> set yrange[0:]
 gnuplot> set xrange[0:]
 gnuplot> plot 'ins.plot' u 1:2
+```
+
+Unit tests:
+```
+bazel test --cxxopt='-std=c++14' --compilation_mode=opt -- //...
 ```
 
 ## Lower bounds
@@ -89,6 +94,12 @@ Algorithms:
 
 - Processor: Intel® Core™ i5-8500 CPU @ 3.00GHz × 6
 - Time limit: 3000s for each cell.
+
+Bench:
+```
+bazel build --cxxopt='-std=c++14' --compilation_mode=opt -- //lib:bench
+./bazel-bin/lib/bench -a minknap_combo --easy --difficult-small --difficult-large
+```
 
 ### Dynamic Programming: recursive vs iterative implementation
 
