@@ -44,47 +44,40 @@ std::pair<Weight, Profit> item(GenerateData& data)
     Weight w = -1;
     Profit p = -1;
     if (data.t == "u") {
-        std::uniform_int_distribution<int> d(1,data.r);
+        std::uniform_int_distribution<Weight> d(1,data.r);
         w = d(data.g);
         p = d(data.g);
     } else if (data.t == "wc") {
-        std::uniform_int_distribution<int> d1(1, data.r);
-        std::uniform_int_distribution<int> d2(-(data.r + 1) / 10, data.r / 10);
+        std::uniform_int_distribution<Weight> d1(1, data.r);
+        std::uniform_int_distribution<Profit> d2(-(data.r + 1) / 10, data.r / 10);
         w = d1(data.g);
         p = w + d2(data.g);
         if (p < 1)
             p = 1;
     } else if (data.t == "sc") {
-        std::uniform_int_distribution<int> d(1, data.r);
+        std::uniform_int_distribution<Weight> d(1, data.r);
         w = d(data.g);
         p = w + data.r/10;
     } else if (data.t == "isc") {
-        std::uniform_int_distribution<int> d(1, data.r);
+        std::uniform_int_distribution<Weight> d(1, data.r);
         p = d(data.g);
         w = p + data.r/10;
     } else if (data.t == "asc") {
-        std::uniform_int_distribution<int> d1(1, data.r);
-        std::uniform_int_distribution<int> d2(-(data.r+1)/500, data.r/500);
+        std::uniform_int_distribution<Weight> d1(1, data.r);
+        std::uniform_int_distribution<Profit> d2(-(data.r+1)/500, data.r/500);
         w = d1(data.g);
         p = w + data.r/10 + d2(data.g);
-    } else if (data.t == "asc2") {
-        std::uniform_int_distribution<int> d1(1, data.r);
-        std::normal_distribution<double> d2(0, data.r/100);
-        w = d1(data.g);
-        p = w + d2(data.g);
-        if (p < 1)
-            p = 1;
     } else if (data.t == "ss") {
-        std::uniform_int_distribution<int> d(1, data.r);
+        std::uniform_int_distribution<Weight> d(1, data.r);
         w = d(data.g);
         p = w;
     } else if (data.t == "sw") {
-        std::uniform_int_distribution<int> d1(data.r, data.r + data.r / 1000);
-        std::uniform_int_distribution<int> d2(1, data.r / 100);
+        std::uniform_int_distribution<Weight> d1(data.r, data.r + data.r / 1000);
+        std::uniform_int_distribution<Profit> d2(1, data.r / 100);
         w = d1(data.g);
         p = d2(data.g);
     } else if (data.t == "mstr") {
-        std::uniform_int_distribution<int> d(1, data.r);
+        std::uniform_int_distribution<Weight> d(1, data.r);
         w = d(data.g);
         if (w % (Profit)data.d == 0) {
             p = w + data.k1;
@@ -92,11 +85,11 @@ std::pair<Weight, Profit> item(GenerateData& data)
             p = w + data.k2;
         }
     } else if (data.t == "pceil") {
-        std::uniform_int_distribution<int> d(1, data.r);
+        std::uniform_int_distribution<Weight> d(1, data.r);
         w = d(data.g);
-        p = data.d * ((w - 1) / data.d + 1);
+        p = data.d * ((w - 1) / (Profit)data.d + 1);
     } else if (data.t == "circle") {
-        std::uniform_int_distribution<int> d(1, data.r);
+        std::uniform_int_distribution<Weight> d(1, data.r);
         w = d(data.g);
         p = data.d * sqrt(4*data.r*data.r - (w-2*data.r)*(w-2*data.r));
     } else {
@@ -133,7 +126,7 @@ Instance generate_spanner(GenerateData& data)
 
     Instance ins(data.n, 0);
     ItemIdx i = 0;
-    std::uniform_int_distribution<int> dist(1, data.m);
+    std::uniform_int_distribution<Cpt> dist(1, data.m);
     Weight wsum = 0;
     Weight wmax = 0;
     while (ins.item_number() < data.n) {
