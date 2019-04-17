@@ -23,8 +23,6 @@ struct GenerateData
     std::string t       = "u";
     Seed        s       = 0;
 
-    bool reduce         = false;
-
     std::default_random_engine g;
 
     static GenerateData gen_spanner(std::string type, Profit r, ItemIdx v, Profit m)

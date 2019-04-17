@@ -51,22 +51,20 @@ std::pair<Weight, Profit> item(GenerateData& data)
         std::uniform_int_distribution<Weight> d1(1, data.r);
         std::uniform_int_distribution<Profit> d2(-(data.r + 1) / 10, data.r / 10);
         w = d1(data.g);
-        p = w + d2(data.g);
-        if (p < 1)
-            p = 1;
+        p = std::max((Profit)1, w + d2(data.g));
     } else if (data.t == "sc") {
         std::uniform_int_distribution<Weight> d(1, data.r);
         w = d(data.g);
-        p = w + data.r/10;
+        p = w + data.r / 10;
     } else if (data.t == "isc") {
         std::uniform_int_distribution<Weight> d(1, data.r);
         p = d(data.g);
-        w = p + data.r/10;
+        w = p + data.r / 10;
     } else if (data.t == "asc") {
         std::uniform_int_distribution<Weight> d1(1, data.r);
-        std::uniform_int_distribution<Profit> d2(-(data.r+1)/500, data.r/500);
+        std::uniform_int_distribution<Profit> d2(-(data.r + 1) / 500, data.r / 500);
         w = d1(data.g);
-        p = w + data.r/10 + d2(data.g);
+        p = w + data.r / 10 + d2(data.g);
     } else if (data.t == "ss") {
         std::uniform_int_distribution<Weight> d(1, data.r);
         w = d(data.g);
@@ -79,11 +77,7 @@ std::pair<Weight, Profit> item(GenerateData& data)
     } else if (data.t == "mstr") {
         std::uniform_int_distribution<Weight> d(1, data.r);
         w = d(data.g);
-        if (w % (Profit)data.d == 0) {
-            p = w + data.k1;
-        } else {
-            p = w + data.k2;
-        }
+        p = (w % (Profit)data.d == 0)? w + data.k1: w + data.k2;
     } else if (data.t == "pceil") {
         std::uniform_int_distribution<Weight> d(1, data.r);
         w = d(data.g);
@@ -91,7 +85,7 @@ std::pair<Weight, Profit> item(GenerateData& data)
     } else if (data.t == "circle") {
         std::uniform_int_distribution<Weight> d(1, data.r);
         w = d(data.g);
-        p = data.d * sqrt(4*data.r*data.r - (w-2*data.r)*(w-2*data.r));
+        p = data.d * sqrt(4 * data.r * data.r - (w - 2 * data.r) * (w - 2 * data.r));
     } else {
         assert(false);
     }
@@ -145,26 +139,8 @@ Instance generate_spanner(GenerateData& data)
 
 Instance knapsack::generate(GenerateData data)
 {
-    Instance ins(0, 0);
     data.g.seed(data.s);
-    if (data.spanner) {
-        ins = generate_spanner(data);
-    } else {
-        ins = generate_standard(data);
-    }
-    if (data.reduce) {
-        Instance ins_tmp1(ins);
-
-        Solution sopt = Minknap(ins_tmp1, MinknapParams()).run();
-
-        Info info;
-        ins.sort(info);
-        ins.reduce2(sopt.profit(), info);
-        Instance ins_tmp(ins.item_number(), ins.capacity());
-        for (ItemIdx j=ins.first_item(); j<=ins.last_item(); ++j)
-            ins_tmp.add_item(ins.item(j).w, ins.item(j).w);
-        ins = ins_tmp;
-    }
+    Instance ins = (data.spanner)? generate_spanner(data): generate_standard(data);
     return ins;
 }
 
