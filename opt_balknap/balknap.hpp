@@ -57,8 +57,8 @@ struct BalknapParams
         return {
             .k = 64,
             .ub = 't',
-            .greedy = 0,
-            .greedynlogn = 5000,
+            .greedy = -1,
+            .greedynlogn = 0,
             .surrogate = 2000,
         };
     }

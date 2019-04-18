@@ -169,15 +169,16 @@ Solution Balknap::run(Info info)
     // Recursion
     for (ItemPos t=b; t<=l; ++t) {
         update_bounds(info);
-
-        LOG(info, "t " << t << " (" << ins.item(t) << ")" << std::endl);
-        Weight wt = ins.item(t).w;
-        Profit pt = ins.item(t).p;
-
         if (lb_ == ub_)
             goto end;
         if (!info.check_time())
             goto end;
+        if (sur_ && *end_)
+            return algorithm_end(Solution(ins), info);
+
+        LOG(info, "t " << t << " (" << ins.item(t) << ")" << std::endl);
+        Weight wt = ins.item(t).w;
+        Profit pt = ins.item(t).p;
 
         // Bounding
         LOG(info, "bound" << std::endl);
@@ -215,6 +216,10 @@ Solution Balknap::run(Info info)
         // If there is no more states, the stop
         if (map_.size() == 0)
             break;
+        if (lb_ == ub_)
+            goto end;
+        if (sur_ && *end_)
+            return algorithm_end(Solution(ins), info);
 
         // Add item t
         LOG(info, "add" << std::endl);
@@ -275,6 +280,10 @@ Solution Balknap::run(Info info)
             update_bounds(info);
             if (!info.check_time())
                 goto end;
+            if (lb_ == ub_)
+                goto end;
+            if (sur_ && *end_)
+                return algorithm_end(Solution(ins), info);
 
             for (ItemPos j = s->second.a_prec; j < s->second.a; ++j) {
                 LOG(info, "j " << j);
