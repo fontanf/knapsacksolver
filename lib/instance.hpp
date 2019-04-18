@@ -133,20 +133,14 @@ public:
      */
     void sort_partially(Info& info, ItemIdx limit=4);
 
-    bool check_partialsort(Info& info) const;
-
-    void sort_right(Info& info, Profit lb);
-    void sort_left(Info& info, Profit lb);
-    ItemPos int_right_size() const { return int_right_.size(); }
-    ItemPos int_left_size()  const { return int_left_.size();  }
+    const std::vector<Interval>& int_right() const { return int_right_; }
+    const std::vector<Interval>& int_left()  const { return int_left_; }
     ItemPos s_init() const { return s_init_; }
     ItemPos t_init() const { return t_init_; }
     ItemPos s_prime() const { return s_prime_; }
     ItemPos t_prime() const { return t_prime_; }
     ItemPos s_second() const { return (int_left().empty())? 0: int_left().back().l + 1; }
     ItemPos t_second() const { return (int_right().empty())? total_item_number() - 1: int_right().back().f - 1; }
-    const std::vector<Interval>& int_right() const { return int_right_; }
-    const std::vector<Interval>& int_left()  const { return int_left_; }
     ItemPos bound_item_left(ItemPos s, Profit lb, Info& info);
     ItemPos bound_item_right(ItemPos t, Profit lb, Info& info);
     /**
@@ -196,7 +190,6 @@ public:
      */
     void set_last_item(ItemPos k);
 
-    inline void swap(ItemPos j, ItemPos k) { Item tmp = items_[j]; items_[j] = items_[k]; items_[k] = tmp; };
     void fix(Info& info, const std::vector<int> vec);
 
     /**
@@ -250,6 +243,9 @@ private:
 
     std::pair<ItemPos, ItemPos> partition(ItemPos f, ItemPos l, Info& info);
     bool check();
+    bool check_partialsort(Info& info) const;
+
+    inline void swap(ItemPos j, ItemPos k) { Item tmp = items_[j]; items_[j] = items_[k]; items_[k] = tmp; };
 
     std::vector<Item> get_isum() const;
     ItemPos ub_item(const std::vector<Item>& isum, Item item) const;
@@ -258,6 +254,9 @@ private:
      * Remove items which weight is greater than the updated capacity
      */
     void remove_big_items(Info& info);
+
+    void sort_right(Info& info, Profit lb);
+    void sort_left(Info& info, Profit lb);
 
 
     /*
@@ -289,7 +288,8 @@ private:
      */
     int sort_type_ = 0;
 
-    std::vector<Interval> int_right_, int_left_;
+    std::vector<Interval> int_right_;
+    std::vector<Interval> int_left_;
 
     Solution* sol_red_   = NULL; // Reduced solution
     Solution* sol_break_ = NULL; // Break solution
