@@ -7,15 +7,6 @@
 #include <cmath>
 #include <algorithm>
 
-#include <boost/iostreams/filtering_stream.hpp>
-#include <boost/iostreams/filter/zlib.hpp>
-#include <boost/iostreams/filter/gzip.hpp>
-#include <boost/iostreams/filter/bzip2.hpp>
-#include <boost/iostreams/copy.hpp>
-#include <boost/archive/binary_oarchive.hpp>
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/serialization/vector.hpp>
-
 using namespace knapsack;
 
 std::ostream& knapsack::operator<<(std::ostream& os, const GenerateData& data)

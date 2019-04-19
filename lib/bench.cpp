@@ -11,6 +11,8 @@
 #include "knapsack/ub_dantzig/dantzig.hpp"
 #include "knapsack/ub_surrogate/surrogate.hpp"
 
+#include <boost/program_options.hpp>
+
 using namespace knapsack;
 
 std::function<Profit (Instance&, Info)> get_algorithm(std::string s)

@@ -5,15 +5,6 @@
 #include <sstream>
 #include <iomanip>
 
-#include <boost/iostreams/filtering_stream.hpp>
-#include <boost/iostreams/filter/zlib.hpp>
-#include <boost/iostreams/filter/gzip.hpp>
-#include <boost/iostreams/filter/bzip2.hpp>
-#include <boost/iostreams/copy.hpp>
-#include <boost/archive/binary_oarchive.hpp>
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/serialization/vector.hpp>
-
 using namespace knapsack;
 
 /****************************** Create instances ******************************/
@@ -39,38 +30,26 @@ void Instance::add_items(const std::vector<std::pair<Weight, Profit>>& wp)
         add_item(i.first, i.second);
 }
 
-Instance::Instance(std::string filepath, std::string format, bool bzip2)
+Instance::Instance(std::string filepath, std::string format)
 {
     std::stringstream data;
-    if (!bzip2) {
-        boost::filesystem::ifstream file(filepath, std::ios_base::in);
-        data << file.rdbuf();
-        file.close();
-    } else {
-        boost::filesystem::ifstream file(filepath, std::ios_base::in);
-        boost::iostreams::filtering_istream in;
-        in.push(boost::iostreams::bzip2_decompressor());
-        in.push(file);
-        boost::iostreams::copy(in, data);
-        file.close();
-    }
+    std::ifstream file(filepath, std::ios_base::in);
 
     if (format == "knapsack_standard") {
-        read_standard(data);
+        read_standard(filepath);
         read_standard_solution(filepath + ".sol");
     } else if (format == "subsetsum_standard") {
-        read_subsetsum_standard(data);
+        read_subsetsum_standard(filepath);
         read_standard_solution(filepath + ".sol");
-    } else if (format == "knapsack_pisinger") {
-        read_pisinger(data);
     } else {
         std::cerr << format << ": Unknown format." << std::endl;
         assert(false);
     }
 }
 
-void Instance::read_standard(std::stringstream& data)
+void Instance::read_standard(std::string filepath)
 {
+    std::ifstream data(filepath);
     ItemIdx n;
     data >> n >> c_orig_;
 
@@ -86,8 +65,9 @@ void Instance::read_standard(std::stringstream& data)
     }
 }
 
-void Instance::read_subsetsum_standard(std::stringstream& data)
+void Instance::read_subsetsum_standard(std::string filepath)
 {
+    std::ifstream data(filepath);
     ItemIdx n;
     data >> n >> c_orig_;
 
@@ -113,52 +93,6 @@ void Instance::read_standard_solution(std::string filepath)
     for (ItemPos j=0; j<total_item_number(); ++j) {
         file >> x;
         sol_opt_->set(j, x);
-    }
-}
-
-void Instance::read_pisinger(std::stringstream& data)
-{
-    Cpt null;
-    std::string line;
-    std::istringstream iss;
-
-    std::getline(data, line);
-    std::getline(data, line, ' ');
-    std::getline(data, line);
-    std::istringstream(line) >> l_;
-    f_ = 0;
-    l_--;
-
-    std::getline(data, line, ' ');
-    std::getline(data, line);
-    std::istringstream(line) >> c_orig_;
-
-    std::getline(data, line, ' ');
-    std::getline(data, line);
-    std::istringstream(line) >> null;
-
-    std::getline(data, line);
-
-    items_.reserve(item_number());
-    sol_opt_ = new Solution(*this);
-
-    ItemIdx id;
-    Profit p;
-    Weight w;
-    int    x;
-    for (ItemPos j=0; j<item_number(); ++j) {
-        std::getline(data, line, ',');
-        std::istringstream(line) >> id;
-        std::getline(data, line, ',');
-        std::istringstream(line) >> p;
-        std::getline(data, line, ',');
-        std::istringstream(line) >> w;
-        std::getline(data, line);
-        std::istringstream(line) >> x;
-        add_item(w, p);
-        // Update Optimal solution
-        if (x == 1)
-            sol_opt_->set(j, true);
     }
 }
 

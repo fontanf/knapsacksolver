@@ -10,6 +10,11 @@
 #include "knapsack/ub_dantzig/dantzig.hpp"
 #include "knapsack/ub_surrogate/surrogate.hpp"
 
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/fstream.hpp>
+#include <boost/program_options.hpp>
+
 using namespace knapsack;
 
 int main(int argc, char *argv[])

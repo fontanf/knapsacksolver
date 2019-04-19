@@ -5,6 +5,7 @@
 #include "knapsack/ub_dembo/dembo.hpp"
 
 #include <queue>
+#include <set>
 
 using namespace knapsack;
 

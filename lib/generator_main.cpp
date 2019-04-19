@@ -1,5 +1,7 @@
 #include "knapsack/lib/generator.hpp"
 
+#include <boost/program_options.hpp>
+
 using namespace knapsack;
 
 int main(int argc, char *argv[])

@@ -9,11 +9,6 @@
 #include <iostream>
 #include <fstream>
 
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/fstream.hpp>
-#include <boost/program_options.hpp>
-
 namespace knapsack
 {
 
@@ -66,7 +61,7 @@ public:
     /**
      * Create instance from file.
      */
-    Instance(std::string filename, std::string format, bool bzip2=false);
+    Instance(std::string filename, std::string format);
 
     /**
      * Copy constructor
@@ -236,9 +231,8 @@ private:
      * Methods
      */
 
-    void read_standard(std::stringstream& data);
-    void read_subsetsum_standard(std::stringstream& data);
-    void read_pisinger(std::stringstream& data);
+    void read_standard(std::string filepath);
+    void read_subsetsum_standard(std::string filepath);
     void read_standard_solution(std::string filepath);
 
     std::pair<ItemPos, ItemPos> partition(ItemPos f, ItemPos l, Info& info);
