@@ -31,6 +31,9 @@ int main(int argc, char *argv[])
     int loglevelmax = 999;
     Cpt cpt_surrogate = -2;
     Cpt cpt_greedynlogn = -2;
+    Cpt cpt_greedy = -2;
+    Cpt cpt_pairing = -2;
+    char ub = 't';
     ItemPos k = 64;
 
     po::options_description desc("Allowed options");
@@ -41,13 +44,17 @@ int main(int argc, char *argv[])
         ("format,f", po::value<std::string>(&format), "set input file format (default: knapsack_standard)")
         ("output,o", po::value<std::string>(&outputfile), "set output file")
         ("cert,c", po::value<std::string>(&certfile), "set certificate file")
-        ("part-size,x", po::value<ItemPos>(&k), "")
-        ("surrogate,s", po::value<Cpt>(&cpt_surrogate), "")
-        ("greedynlogn,g", po::value<Cpt>(&cpt_greedynlogn), "")
-        ("verbose,v", "")
+        ("verbose,v", "set verbosity")
         ("log,l", po::value<std::string>(&logfile), "set log file")
         ("loglevelmax", po::value<int>(&loglevelmax), "set log max level")
         ("log2stderr", "write log in stderr")
+        ("part-size,k", po::value<ItemPos>(&k), "size of partial solutions (for minknap, balknap and, bellman_array_part)")
+        ("combo-core,n", "use combo core (for minknap and expknap)")
+        ("greedy", po::value<Cpt>(&cpt_greedy), "run greedy (for minknap, expknap and balknap)")
+        ("greedynlogn,g", po::value<Cpt>(&cpt_greedynlogn), "run greedynlogn (for minknap, expknap and balknap)")
+        ("pairing,p", po::value<Cpt>(&cpt_pairing), "for minknap, pairing states with items outside of the core")
+        ("ub,u", po::value<char>(&ub), "for balknap, 'b' or 't'")
+        ("surrogate,s", po::value<Cpt>(&cpt_surrogate), "solve surrogate relaxation and instance (for minknap, expknap and balknap)")
         ;
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -88,7 +95,7 @@ int main(int argc, char *argv[])
     } else if (algorithm == "bellman_array_one") {
         sopt = sopt_bellman_array_one(ins, info);
     } else if (algorithm == "bellman_array_part") {
-        sopt = sopt_bellman_array_part(ins, 64, info);
+        sopt = sopt_bellman_array_part(ins, k, info);
     } else if (algorithm == "bellman_array_rec") {
         sopt = sopt_bellman_array_rec(ins, info);
     } else if (algorithm == "bellman_list") {
@@ -109,17 +116,26 @@ int main(int argc, char *argv[])
         sopt = sopt_astar(ins, info);
     } else if (algorithm == "expknap") { // expknap
         ExpknapParams p;
-        if (cpt_surrogate != 2)
-            p.surrogate = cpt_surrogate;
-        if (cpt_greedynlogn != 2)
-            p.greedynlogn = cpt_greedynlogn;
+        if (vm.count("combo-core")) p.combo_core = true;
+        if (cpt_greedy      != -2) p.greedy      = cpt_greedy;
+        if (cpt_greedynlogn != -2) p.greedynlogn = cpt_greedynlogn;
+        if (cpt_surrogate   != -2) p.surrogate   = cpt_surrogate;
         sopt = Expknap(ins, p).run(info);
     } else if (algorithm == "balknap") { // balknap
         BalknapParams p;
+        if (cpt_greedy      != -2) p.greedy      = cpt_greedy;
+        if (cpt_greedynlogn != -2) p.greedynlogn = cpt_greedynlogn;
+        if (cpt_surrogate   != -2) p.surrogate   = cpt_surrogate;
+        p.ub = ub;
         p.k = k;
         sopt = Balknap(ins, p).run(info);
     } else if (algorithm == "minknap") { // minknap
         MinknapParams p;
+        if (vm.count("combo-core")) p.combo_core = true;
+        if (cpt_greedy      != -2) p.greedy      = cpt_greedy;
+        if (cpt_greedynlogn != -2) p.greedynlogn = cpt_greedynlogn;
+        if (cpt_pairing     != -2) p.pairing     = cpt_pairing;
+        if (cpt_surrogate   != -2) p.surrogate   = cpt_surrogate;
         p.k = k;
         sopt = Minknap(ins, p).run(info);
     } else if (algorithm == "minknap_combo") {
