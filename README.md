@@ -37,7 +37,7 @@ Instances can be visualized with gnuplot:
 ```
 ./bazel-bin/lib/generator_main -n 1000 -t sw -r 1000 -o ./ins.txt -p ./ins.plot
 gnuplot
-gnuplot> set yrange[0:]; gnuplot> set xrange[0:]; gnuplot> plot 'ins.plot' u 1:2
+gnuplot> set yrange[0:]; set xrange[0:]; plot 'ins.plot' u 1:2
 ```
 
 Unit tests:
