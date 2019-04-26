@@ -279,6 +279,37 @@ void bench_difficult_small(std::string algorithm, bool verbose = false)
     file.close();
 }
 
+void bench_miscellaneous(std::string algorithm, bool verbose = false)
+{
+    std::ofstream file(algorithm + "_miscellaneous.csv");
+    std::function<Profit (Instance&, Info)> func = get_algorithm(algorithm);
+    std::vector<GenerateData> vec {
+        GenerateData::normal(1000, 100),
+        GenerateData::normal(1000, 50),
+        GenerateData::normal(1000, 25),
+        GenerateData::normal(1000, 10),
+        };
+
+    file << "n \\ Type,N 100,N 100,"
+        << std::endl;
+    for (ItemIdx n: {50, 100, 200, 500, 1000, 2000, 5000, 10000}) {
+        file << n << std::flush;
+        for (GenerateData d: vec) {
+            d.n = n;
+            double res = bench(func, d, verbose);
+            if (res < 0) {
+                file << ",x" << std::flush;
+            } else {
+                file << "," << res << std::flush;
+            }
+        }
+        file << std::endl;
+    }
+    std::cout << std::endl;
+    file << std::endl;
+    file.close();
+}
+
 int main(int argc, char *argv[])
 {
     namespace po = boost::program_options;
@@ -294,6 +325,7 @@ int main(int argc, char *argv[])
         ("easy", "")
         ("difficult-small", "")
         ("difficult-large", "")
+        ("miscellaneous", "")
         ;
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -315,6 +347,8 @@ int main(int argc, char *argv[])
         bench_difficult_small(algorithm, verbose);
     if (vm.count("difficult-large"))
         bench_difficult_large(algorithm, verbose);
+    if (vm.count("miscellaneous"))
+        bench_miscellaneous(algorithm, verbose);
 
     return 0;
 }

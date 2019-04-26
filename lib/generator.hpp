@@ -65,6 +65,15 @@ struct GenerateData
         return data;
     };
 
+    static GenerateData normal(Profit r, double d)
+    {
+        GenerateData data;
+        data.t = "normal";
+        data.r = r;
+        data.d = d;
+        return data;
+    };
+
 };
 
 std::ostream& operator<<(std::ostream& os, const GenerateData& data);

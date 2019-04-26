@@ -21,7 +21,7 @@ std::ostream& knapsack::operator<<(std::ostream& os, const GenerateData& data)
         os << " r " << data.r;
     if (data.t == "mstr")
         os << " k1 " << data.k1 << " k2 " << data.k2;
-    if (data.t == "mstr" || data.t == "pceil" || data.t == "circle")
+    if (data.t == "mstr" || data.t == "pceil" || data.t == "circle" || data.t == "normal")
         os << " d " << data.d;
     if (data.h != -1)
         os << " h " << data.h;
@@ -77,6 +77,10 @@ std::pair<Weight, Profit> item(GenerateData& data)
         std::uniform_int_distribution<Weight> d(1, data.r);
         w = d(data.g);
         p = data.d * sqrt(4 * data.r * data.r - (w - 2 * data.r) * (w - 2 * data.r));
+    } else if (data.t == "normal") {
+        std::normal_distribution<double> d(0, data.d);
+        w = std::min(data.r, std::max((Weight)1, data.r / 2 + (Weight)d(data.g)));
+        p = std::min(data.r, std::max((Profit)1, w          + (Profit)d(data.g)));
     } else {
         assert(false);
     }
