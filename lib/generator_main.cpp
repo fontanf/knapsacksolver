@@ -24,6 +24,8 @@ int main(int argc, char *argv[])
         (",H", po::value<int>(&data.h), "set h")
         (",s", po::value<Seed>(&data.s), "set seed")
         ("spanner,S", "set spanner")
+        ("normal,N", "set normal")
+        ("sigma,", po::value<Weight>(&data.sigma), "set sigma")
         (",m", po::value<Profit>(&data.m), "set m (for spanner instances)")
         (",v", po::value<Profit>(&data.v), "set v (for spanner instances)")
         (",o", po::value<std::string>(&output_file), "set output file")
@@ -42,6 +44,7 @@ int main(int argc, char *argv[])
         return 1;
     }
     data.spanner = vm.count("spanner");
+    data.normal = vm.count("normal");
 
     std::cout << data << std::endl;
     Instance ins = generate(data);
