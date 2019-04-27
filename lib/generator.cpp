@@ -12,6 +12,8 @@ using namespace knapsack;
 std::ostream& knapsack::operator<<(std::ostream& os, const GenerateData& data)
 {
     os << "n " << data.n;
+    if (data.normal)
+        os << " w/normal sigma " << data.sigma;
     if (data.spanner) {
         os << " t spanner," << data.t << " v " << data.v << " m " << data.m;
     } else {
@@ -34,55 +36,51 @@ std::pair<Weight, Profit> item(GenerateData& data)
 {
     Weight w = -1;
     Profit p = -1;
-    if (data.t == "u") {
+    if (!data.normal) {
         std::uniform_int_distribution<Weight> d(1,data.r);
         w = d(data.g);
+    } else {
+        std::normal_distribution<double> d(data.r / 2, data.sigma);
+        w = std::min(data.r, std::max((Weight)1, (Weight)d(data.g)));
+    }
+
+    if (data.t == "u") {
+        std::uniform_int_distribution<Weight> d(1, data.r);
         p = d(data.g);
     } else if (data.t == "wc") {
-        std::uniform_int_distribution<Weight> d1(1, data.r);
         std::uniform_int_distribution<Profit> d2(-(data.r + 1) / 10, data.r / 10);
-        w = d1(data.g);
         p = std::max((Profit)1, w + d2(data.g));
     } else if (data.t == "sc") {
-        std::uniform_int_distribution<Weight> d(1, data.r);
-        w = d(data.g);
         p = w + data.r / 10;
     } else if (data.t == "isc") {
-        std::uniform_int_distribution<Weight> d(1, data.r);
-        p = d(data.g);
+        p = w;
         w = p + data.r / 10;
     } else if (data.t == "asc") {
-        std::uniform_int_distribution<Weight> d1(1, data.r);
         std::uniform_int_distribution<Profit> d2(-(data.r + 1) / 500, data.r / 500);
-        w = d1(data.g);
         p = w + data.r / 10 + d2(data.g);
     } else if (data.t == "ss") {
-        std::uniform_int_distribution<Weight> d(1, data.r);
-        w = d(data.g);
         p = w;
     } else if (data.t == "sw") {
-        std::uniform_int_distribution<Weight> d1(data.r, data.r + data.r / 1000);
+        if (!data.normal) {
+            std::uniform_int_distribution<Weight> d(data.r, data.r + data.r / 1000);
+            w = d(data.g);
+        } else {
+            std::normal_distribution<double> d(data.r + data.r / 2000, data.sigma);
+            w = d(data.g);
+        }
         std::uniform_int_distribution<Profit> d2(1, data.r / 100);
-        w = d1(data.g);
         p = d2(data.g);
     } else if (data.t == "mstr") {
-        std::uniform_int_distribution<Weight> d(1, data.r);
-        w = d(data.g);
         p = (w % (Profit)data.d == 0)? w + data.k1: w + data.k2;
     } else if (data.t == "pceil") {
-        std::uniform_int_distribution<Weight> d(1, data.r);
-        w = d(data.g);
         p = data.d * ((w - 1) / (Profit)data.d + 1);
     } else if (data.t == "circle") {
-        std::uniform_int_distribution<Weight> d(1, data.r);
-        w = d(data.g);
         p = data.d * sqrt(4 * data.r * data.r - (w - 2 * data.r) * (w - 2 * data.r));
     } else if (data.t == "normal") {
-        std::normal_distribution<double> d(0, data.d);
-        w = std::min(data.r, std::max((Weight)1, data.r / 2 + (Weight)d(data.g)));
-        p = std::min(data.r, std::max((Profit)1, w          + (Profit)d(data.g)));
+        std::normal_distribution<double> d(w, data.d);
+        p = std::min(data.r, std::max((Profit)1, w + (Profit)d(data.g)));
     } else {
-        assert(false);
+        exit(1);
     }
     return {w, p};
 }

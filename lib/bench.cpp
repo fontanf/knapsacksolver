@@ -284,11 +284,11 @@ void bench_miscellaneous(std::string algorithm, bool verbose = false)
     std::ofstream file(algorithm + "_miscellaneous.csv");
     std::function<Profit (Instance&, Info)> func = get_algorithm(algorithm);
     std::vector<GenerateData> vec {
-        GenerateData::normal(1000, 100),
-        GenerateData::normal(1000, 50),
-        GenerateData::normal(1000, 25),
-        GenerateData::normal(1000, 10),
-        };
+        GenerateData::gen_normal(1000, 100),
+        GenerateData::gen_normal(1000, 50),
+        GenerateData::gen_normal(1000, 25),
+        GenerateData::gen_normal(1000, 10),
+    };
 
     file << "n \\ Type,N 100,N 100,"
         << std::endl;
