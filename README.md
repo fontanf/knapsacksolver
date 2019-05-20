@@ -26,7 +26,7 @@ Examples:
 - `-n 100 -t mstr -r 1000 -k1 300 -k2 200 -d 6`
 - `-n 100 -t pceil -r 1000 -d 3`
 - `-n 100 -t circle -r 1000 -d 0.66`
-- `-n 100 -t normal -r 1000 -d 50`
+- `-n 100 --normal --sigma 50 -t normal -r 1000 -d 50`
 
 Solve:
 ```

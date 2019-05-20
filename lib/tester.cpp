@@ -7,10 +7,8 @@ using namespace knapsack;
 
 bool test(const Instance& ins, std::vector<Profit (*)(Instance&)> fs, TestType tt)
 {
-    std::cout << ins << std::endl;
     Profit opt = ins.optimum();
     for (auto f: fs) {
-        std::cout << f << std::endl;
         Instance ins_tmp = ins;
         Profit val = f(ins_tmp);
         if (opt == -1)
@@ -46,7 +44,6 @@ public:
     Instance next()
     {
         i++;
-        std::cout << "i " << i << std::endl;
         return test_instance(i);
     }
 
@@ -243,7 +240,7 @@ void test(Instances& inss, std::vector<Profit (*)(Instance&)> fs, TestType tt)
             return;
         }
     } while (ins.item_number() != 0);
-    std::cout << "end" << std::endl;
+    std::cout << "ok" << std::endl;
 }
 
 void knapsack::test(InstacesType it, std::vector<Profit (*)(Instance&)> fs, TestType tt)

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "gtest/gtest.h"
-
 #include "knapsack/lib/instance.hpp"
+
+#include <gtest/gtest.h>
 
 namespace knapsack
 {

@@ -10,6 +10,17 @@ typedef int_fast64_t Seed;
 struct GenerateData
 {
     bool        spanner = false;
+
+    /**
+     * if normal == false, weights are distributed uniformely between 0 and r.
+     * This is how weights are distributed in the literature.
+     * If normal == true, then a normal distribution is used, centered on r / 2,
+     * and with standard deviation sigma.
+     * Weights are still insured to stay between 1 and r.
+     */
+    bool        normal = false;
+    Weight      sigma = 10;
+
     ItemIdx     v       = 2;
     Profit      m       = 10;
 
@@ -65,9 +76,11 @@ struct GenerateData
         return data;
     };
 
-    static GenerateData normal(Profit r, double d)
+    static GenerateData gen_normal(Profit r, double d)
     {
         GenerateData data;
+        data.normal = true;
+        data.sigma = d;
         data.t = "normal";
         data.r = r;
         data.d = d;
