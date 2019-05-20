@@ -54,7 +54,7 @@ public:
      * Manual constructor.
      */
     Instance(ItemIdx n, Weight c);
-    void add_item(Weight w, Profit p);
+    ItemIdx add_item(Weight w, Profit p);
     void add_items(const std::vector<std::pair<Weight, Profit>>& wp);
     void set_capacity(Weight c) { c_orig_ = c; }
 

@@ -15,13 +15,14 @@ Instance::Instance(ItemIdx n, Weight c):
     items_.reserve(n);
 }
 
-void Instance::add_item(Weight w, Profit p)
+ItemIdx Instance::add_item(Weight w, Profit p)
 {
     ItemIdx j = items_.size();
     items_.push_back({j, w, p});
     l_ = j;
     sol_opt_ = NULL;
     sol_break_ = NULL;
+    return j;
 }
 
 void Instance::add_items(const std::vector<std::pair<Weight, Profit>>& wp)
