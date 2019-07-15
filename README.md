@@ -3,7 +3,7 @@
 Classical and state of the art algorithm implementations for the Knapsack Problem. Most algorithms are detailed in the "Knapsack Problem" book (Kellerer et al., 2004).
 These implementations of `minknap` and `minknap_combo` are the best **free** knapsack solvers I am aware of (Pisinger's codes are not free).
 
-<img src="knapsack_2.png" height="275"><img src="knapsack.png" height="275">
+<img src="knapsack.png" height="275">
 
 [image source](https://commons.wikimedia.org/wiki/File:Knapsack.svg)
 
