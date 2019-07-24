@@ -11,12 +11,12 @@ This project uses Bazel https://bazel.build/
 
 Compile:
 ```
-bazel build --cxxopt='-std=c++14' --compilation_mode=opt -- //...
+bazel build -- //...
 ```
 
 Generate an instance:
 ```
-bazel build --cxxopt='-std=c++14' --compilation_mode=opt -- //lib:generator_main
+bazel build -- //lib:generator_main
 ./bazel-bin/lib/generator_main -n 1000 -t sc -r 1000 -o ./ins.txt
 ```
 
@@ -42,7 +42,7 @@ gnuplot> set yrange[0:]; set xrange[0:]; plot 'ins.plot' u 1:2
 
 Unit tests:
 ```
-bazel test --cxxopt='-std=c++14' --compilation_mode=opt -- //...
+bazel test --compilation_mode=opt -- //...
 ```
 
 ## Lower bounds

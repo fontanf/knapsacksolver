@@ -14,15 +14,7 @@ cc_library(
                 "//ub_dembo:dembo",
                 "@benchtools//:info",
         ],
-        linkopts = [
-                "-lboost_iostreams",
-                "-lboost_serialization",
-                "-lboost_system",
-                "-lboost_filesystem",
-                "-lboost_program_options",
-                "-lboost_regex",
-                "-lpthread",
-        ],
+        linkopts = ["-lpthread"],
         visibility = ["//visibility:public"],
         include_prefix = "knapsack/lib/",
 )
@@ -42,7 +34,10 @@ cc_library(
         name = "generator",
         hdrs = ["generator.hpp"],
         srcs = ["generator.cpp"],
-        deps = ["//lib:cpp", "//opt_minknap:minknap"],
+        deps = [
+                "//lib:cpp",
+                "//opt_minknap:minknap"
+        ],
         visibility = ["//visibility:public"],
         include_prefix = "knapsack/lib/",
 )
@@ -51,6 +46,7 @@ cc_binary(
         name = "generator_main",
         srcs = ["generator_main.cpp"],
         deps = [":generator"],
+        linkopts = ["-lboost_program_options"],
 )
 
 cc_library(
@@ -99,6 +95,7 @@ cc_binary(
                 "//opt_balknap:balknap",
                 "//opt_minknap:minknap",
         ],
+        linkopts = ["-lboost_program_options"],
 )
 
 cc_binary(
@@ -118,6 +115,7 @@ cc_binary(
                 "//opt_minknap:minknap",
                 ":generator",
         ],
+        linkopts = ["-lboost_program_options"],
 )
 
 cc_binary(

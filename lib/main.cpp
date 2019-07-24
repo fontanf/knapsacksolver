@@ -10,9 +10,6 @@
 #include "knapsack/ub_dantzig/dantzig.hpp"
 #include "knapsack/ub_surrogate/surrogate.hpp"
 
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/fstream.hpp>
 #include <boost/program_options.hpp>
 
 using namespace knapsack;
@@ -66,11 +63,6 @@ int main(int argc, char *argv[])
         po::notify(vm);
     } catch (po::required_option e) {
         std::cout << desc << std::endl;;
-        return 1;
-    }
-
-    if (!boost::filesystem::exists(instancefile)) {
-        std::cerr << instancefile << ": file not found." << std::endl;
         return 1;
     }
 
