@@ -3,9 +3,13 @@
 Classical and state of the art algorithm implementations for the Knapsack Problem. Most algorithms are detailed in the "Knapsack Problem" book (Kellerer et al., 2004).
 These implementations of `minknap` and `minknap_combo` are the best **free** knapsack solvers I am aware of (Pisinger's codes are not free).
 
+Note: the code of `minknap` with all its optimizations is rather complex. I tried to test it to the best of my ability, however, some bugs might remain. If you wish to use it, do not hesitate to compare the returned values with a simpler algorithm like `opt_bellman_array` during development phase. If you find an instance (preferably a small one) for which two exact algorithms do not return the same value, please open an issue or contact me.
+
 ![knapsack](knapsack.png?raw=true "knapsack")
 
 [image source](https://commons.wikimedia.org/wiki/File:Knapsack.svg)
+
+## Usage (command line)
 
 This project uses Bazel https://bazel.build/
 
@@ -42,8 +46,28 @@ gnuplot> set yrange[0:]; set xrange[0:]; plot 'ins.plot' u 1:2
 
 Unit tests:
 ```
-bazel test --compilation_mode=opt -- //...
+bazel test -- //...
 ```
+
+## Usage (C++ library)
+
+* Import this repository into your project. The include directory is the root.
+If you use Bazel, just add the following lines to the `WORKSPACE` file:
+```
+git_repository(
+    name = "knapsack",
+    remote = "https://github.com/fontanf/knapsack.git",
+    commit = "c45720bd8f220d44863d0c8a6a4cc8aa6d5841c8",
+)
+```
+And then in the `BUILD` file, add the dependency to the concerned rule:
+```
+        deps = [
+                "@knapsack//opt_minknap:minknap",
+        ],
+```
+* Then an example of how to create an instance and solve it can be found here:
+https://github.com/fontanf/gap/blob/master/lb_lagrelax_lbfgs/lagrelax_lbfgs.cpp
 
 ## Lower bounds
 
