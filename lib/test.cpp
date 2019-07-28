@@ -70,7 +70,7 @@ TEST(Instance, SortPartially2)
 
 TEST(Instance, SortPartially3)
 {
-    std::default_random_engine g(0);
+    std::mt19937_64 g(0);
     for (Cpt n=1; n<=1000; ++n) {
         std::uniform_int_distribution<int> d1(1, n);
         for (Cpt h=1; h<100; ++h) {

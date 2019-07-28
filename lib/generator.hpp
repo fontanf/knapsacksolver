@@ -34,7 +34,7 @@ struct GenerateData
     std::string t       = "u";
     Seed        s       = 0;
 
-    std::default_random_engine g;
+    std::mt19937_64 g;
 
     static GenerateData gen_spanner(std::string type, Profit r, ItemIdx v, Profit m)
     {
