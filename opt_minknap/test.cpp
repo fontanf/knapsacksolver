@@ -113,7 +113,7 @@ TEST(minknap, TEST1)
         //.set_log2stderr(true)
         ;
     Profit opt = Minknap(ins, MinknapParams::combo()).run(info).profit();
-    EXPECT_EQ(opt, 1081470);
+    EXPECT_EQ(opt, 1083713);
 }
 
 TEST(minknap, TEST2)
@@ -129,6 +129,6 @@ TEST(minknap, TEST2)
         //.set_verbose(true)
         ;
     Profit opt = Minknap(ins, MinknapParams::pure()).run(info).profit();
-    EXPECT_EQ(opt, 407548);
+    EXPECT_EQ(opt, 398832);
 }
 

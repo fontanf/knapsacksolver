@@ -16,6 +16,11 @@ public:
         idx_ = std::vector<ItemPos>(size, -1);
     }
 
+    void reset()
+    {
+        std::fill(idx_.begin(), idx_.end(), -1);
+    }
+
     PartSolFactory2(Instance& ins): PartSolFactory2(ins, 64) {  }
 
     ItemPos size() const { return size_; }
@@ -46,9 +51,23 @@ public:
     std::string print(PartSol2& s) const
     {
         std::string str = "";
-        for (ItemPos j=0; j<size_; ++j)
+        for (ItemPos j=0; j<size_; ++j) {
+            if (str != "")
+                str += " ";
             if (idx_[j] != -1)
-                str += std::to_string(idx_[j]) + " " + std::to_string(contains(s, j)) + "; ";
+                str += std::to_string(idx_[j]) + " " + std::to_string(contains(s, j)) + ";";
+        }
+        return str;
+    }
+
+    std::string print() const
+    {
+        std::string str = "";
+        for (ItemPos j=0; j<size_; ++j) {
+            if (str != "")
+                str += " ";
+            str += std::to_string(idx_[j]);
+        }
         return str;
     }
 

@@ -16,9 +16,10 @@ std::ostream& knapsack::operator<<(std::ostream& os, const MinknapState& s)
 
 void Minknap::add_item(Info& info)
 {
-    LOG_FOLD_START(info, "add_item s " << s_ << " t " << t_ << " lb " << lb_ << std::endl);
     const Instance& ins = instance_;
+    LOG_FOLD_START(info, "add_item s " << s_ << " t " << t_ << " item " << ins.item(t_ - 1) << " lb " << lb_ << std::endl);
     psolf_.add_item(t_ - 1);
+    LOG(info, "psolf " << psolf_.print() << std::endl);
     best_state_.sol = psolf_.remove(best_state_.sol);
     Weight c = ins.total_capacity();
     Weight wt = ins.item(t_ - 1).w;
@@ -109,9 +110,10 @@ void Minknap::add_item(Info& info)
 
 void Minknap::remove_item(Info& info)
 {
-    LOG_FOLD_START(info, "remove_item s " << s_ << " t " << t_ << " lb " << lb_ << std::endl);
     const Instance& ins = instance_;
+    LOG_FOLD_START(info, "remove_item s " << s_ << " t " << t_ << " item " << ins.item(s_ + 1) << " lb " << lb_ << std::endl);
     psolf_.add_item(s_ + 1);
+    LOG(info, "psolf " << psolf_.print() << std::endl);
     best_state_.sol = psolf_.add(best_state_.sol);
     Weight c = ins.total_capacity();
     Weight ws = ins.item(s_ + 1).w;
@@ -318,19 +320,20 @@ Solution Minknap::run(Info info)
         VER(info, " cc");
     VER(info, " ***" << std::endl);
 
+    psolf_.reset();
     Instance& ins = instance_;
     Weight  c = ins.capacity();
     ItemPos n = ins.item_number();
 
     // Trivial cases
     if (n == 0 || c == 0) {
-        LOG_FOLD_END(info, "no item or capacity null" << std::endl);
+        LOG_FOLD_END(info, "no item or capacity null");
         sol_best_ = (ins.reduced_solution() == NULL)? Solution(ins): *ins.reduced_solution();
         return algorithm_end(sol_best_, info);
     } else if (n == 1) {
         Solution sol_tmp = (ins.reduced_solution() == NULL)? Solution(ins): *ins.reduced_solution();
         sol_tmp.set(ins.first_item(), true);
-        LOG_FOLD_END(info, "1 item" << std::endl);
+        LOG_FOLD_END(info, "1 item");
         if (sol_tmp.profit() > sol_best_.profit())
             sol_best_ = sol_tmp;
         return algorithm_end(sol_best_, info);
@@ -371,7 +374,7 @@ Solution Minknap::run(Info info)
 
     init_display(lb_, ub_, info);
     if (lb_ == ub_) {
-        LOG_FOLD_END(info, "lower bound is optimal" << std::endl);
+        LOG_FOLD_END(info, "lower bound is optimal");
         return algorithm_end(sol_best_, info);
     }
 
@@ -465,6 +468,8 @@ Solution Minknap::run(Info info)
     LOG_FOLD(info, instance_);
     ins.set_first_item(s_ + 1, info);
     ins.set_last_item(t_ - 1);
+    LOG(info, "best_state " << best_state_ << std::endl);
+    LOG(info, psolf_.print(best_state_.sol) << std::endl);
     ins.fix(info, psolf_.vector(best_state_.sol));
     assert(ins.capacity() >= 0);
 

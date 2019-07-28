@@ -190,7 +190,7 @@ ItemPos Instance::before_break_item(Info& info) const
 {
     ItemPos k = -1;
     for (ItemPos j=first_item(); j<break_item(); ++j)
-        if (k == -1 || (item(j).p * item(k).w > item(k).p * item(j).w))
+        if (k == -1 || (item(j).p * item(k).w < item(k).p * item(j).w))
             k = j;
     LOG(info, "before_break_item " << k << std::endl);
     return k;
@@ -871,7 +871,7 @@ void Instance::init_combo_core(Info& info)
     add_item_to_core(s_init_ - 1, t_init_ + 1, max_weight_item(info), info);
     add_item_to_core(s_init_ - 1, t_init_ + 1, min_weight_item(info), info);
     assert(check_partialsort(info));
-    LOG_FOLD_END(info, "init_combo_core" << std::endl);
+    LOG_FOLD_END(info, "init_combo_core");
 }
 
 void Instance::reduce1(Profit lb, Info& info)
@@ -1063,7 +1063,12 @@ void Instance::set_last_item(ItemPos k)
 
 void Instance::fix(Info& info, const std::vector<int> vec)
 {
-    LOG_FOLD_START(info, "fix" << std::endl);
+    LOG_FOLD_START(info, "fix");
+    DBG(
+            for (int i: vec)
+                LOG(info, " " << i);
+            LOG(info, std::endl);
+    )
     LOG(info, "reduced solution " << reduced_solution()->to_string_items() << std::endl);
 
     std::vector<Item> not_fixed;
