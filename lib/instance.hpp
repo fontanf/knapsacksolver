@@ -61,7 +61,7 @@ public:
     /**
      * Create instance from file.
      */
-    Instance(std::string filename, std::string format);
+    Instance(std::string filepath, std::string format);
 
     /**
      * Copy constructor
@@ -207,10 +207,10 @@ public:
 
     ItemPos ub_item(Item item) const;
 
-    void plot(std::string filename);
-    void write(std::string filename);
-    void plot_reduced(std::string filename);
-    void write_reduced(std::string filename);
+    void plot(std::string filepath);
+    void write(std::string filepath);
+    void plot_reduced(std::string filepath);
+    void write_reduced(std::string filepath);
 
     /**
      * Return the profit of the certificate file.
@@ -231,9 +231,9 @@ private:
      * Methods
      */
 
-    void read_standard(std::string filepath);
-    void read_subsetsum_standard(std::string filepath);
-    void read_standard_solution(std::string filepath);
+    void read_standard(std::ifstream& file);
+    void read_subsetsum_standard(std::ifstream& file);
+    void read_standard_solution(std::ifstream& file);
 
     std::pair<ItemPos, ItemPos> partition(ItemPos f, ItemPos l, Info& info);
     bool check();

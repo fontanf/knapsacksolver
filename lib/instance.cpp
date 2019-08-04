@@ -33,26 +33,32 @@ void Instance::add_items(const std::vector<std::pair<Weight, Profit>>& wp)
 
 Instance::Instance(std::string filepath, std::string format)
 {
-    std::stringstream data;
-    std::ifstream file(filepath, std::ios_base::in);
+    std::ifstream file(filepath);
+    std::ifstream file_sol(filepath + ".sol");
+    if (!file.good()) {
+        std::cerr << "\033[31m" << "ERROR, unable to open file \"" << filepath << "\"" << "\033[0m" << std::endl;
+        assert(false);
+        return;
+    }
 
     if (format == "knapsack_standard") {
-        read_standard(filepath);
-        read_standard_solution(filepath + ".sol");
+        read_standard(file);
+        if (file_sol.good())
+            read_standard_solution(file_sol);
     } else if (format == "subsetsum_standard") {
-        read_subsetsum_standard(filepath);
-        read_standard_solution(filepath + ".sol");
+        read_subsetsum_standard(file);
+        if (file_sol.good())
+            read_standard_solution(file_sol);
     } else {
-        std::cerr << format << ": Unknown format." << std::endl;
+        std::cerr << "\033[31m" << "ERROR, unknown instance format: \"" << format << "\"" << "\033[0m" << std::endl;
         assert(false);
     }
 }
 
-void Instance::read_standard(std::string filepath)
+void Instance::read_standard(std::ifstream& file)
 {
-    std::ifstream data(filepath);
     ItemIdx n;
-    data >> n >> c_orig_;
+    file >> n >> c_orig_;
 
     f_ = 0;
     l_ = n - 1;
@@ -61,16 +67,15 @@ void Instance::read_standard(std::string filepath)
     Weight w;
     Profit p;
     for (ItemPos j=0; j<n; ++j) {
-        data >> w >> p;
+        file >> w >> p;
         add_item(w, p);
     }
 }
 
-void Instance::read_subsetsum_standard(std::string filepath)
+void Instance::read_subsetsum_standard(std::ifstream& file)
 {
-    std::ifstream data(filepath);
     ItemIdx n;
-    data >> n >> c_orig_;
+    file >> n >> c_orig_;
 
     f_ = 0;
     l_ = n-1;
@@ -78,17 +83,13 @@ void Instance::read_subsetsum_standard(std::string filepath)
     items_.reserve(n);
     Weight w;
     for (ItemPos j=0; j<n; ++j) {
-        data >> w;
+        file >> w;
         add_item(w,w);
     }
 }
 
-void Instance::read_standard_solution(std::string filepath)
+void Instance::read_standard_solution(std::ifstream& file)
 {
-    std::ifstream file(filepath, std::ios_base::in);
-    if (!file.is_open())
-        return;
-
     sol_opt_ = new Solution(*this);
     int x = 0;
     for (ItemPos j=0; j<total_item_number(); ++j) {
@@ -156,9 +157,11 @@ Instance::~Instance()
 
 Profit Instance::check(std::string cert_file)
 {
-    std::ifstream file(cert_file, std::ios::in);
-    if (!file.is_open())
+    std::ifstream file(cert_file);
+    if (!file.is_open()) {
+        std::cerr << "\033[31m" << "ERROR, unable to open file \"" << cert_file << "\"" << "\033[0m" << std::endl;
         return -1;
+    }
 
     std::vector<int> so(total_item_number(), 0);
     for (ItemPos j=0; j<total_item_number(); ++j)
@@ -1273,36 +1276,60 @@ std::ostream& knapsack::operator<<(std::ostream& os, const Instance& ins)
     return os;
 }
 
-void Instance::plot(std::string filename)
+void Instance::plot(std::string filepath)
 {
-    std::ofstream file(filename);
+    std::ofstream file(filepath);
+    if (!file.good()) {
+        std::cerr << "\033[31m" << "ERROR, unable to open file \"" << filepath << "\"" << "\033[0m" << std::endl;
+        assert(false);
+        return;
+    }
+
     file << "w p" << std::endl;
     for (ItemIdx i=0; i<item_number(); ++i)
         file << item(i).w << " " << item(i).p << std::endl;
     file.close();
 }
 
-void Instance::write(std::string filename)
+void Instance::write(std::string filepath)
 {
-    std::ofstream file(filename);
+    std::ofstream file(filepath);
+    if (!file.good()) {
+        std::cerr << "\033[31m" << "ERROR, unable to open file \"" << filepath << "\"" << "\033[0m" << std::endl;
+        assert(false);
+        return;
+    }
+
     file << total_item_number() << " " << total_capacity() << std::endl << std::endl;
     for (ItemIdx i=0; i<total_item_number(); ++i)
         file << item(i).w << " " << item(i).p << std::endl;
     file.close();
 }
 
-void Instance::plot_reduced(std::string filename)
+void Instance::plot_reduced(std::string filepath)
 {
-    std::ofstream file(filename);
+    std::ofstream file(filepath);
+    if (!file.good()) {
+        std::cerr << "\033[31m" << "ERROR, unable to open file \"" << filepath << "\"" << "\033[0m" << std::endl;
+        assert(false);
+        return;
+    }
+
     file << "w p" << std::endl;
     for (ItemIdx i=f_; i<=l_; ++i)
         file << item(i).w << " " << item(i).p << std::endl;
     file.close();
 }
 
-void Instance::write_reduced(std::string filename)
+void Instance::write_reduced(std::string filepath)
 {
-    std::ofstream file(filename);
+    std::ofstream file(filepath);
+    if (!file.good()) {
+        std::cerr << "\033[31m" << "ERROR, unable to open file \"" << filepath << "\"" << "\033[0m" << std::endl;
+        assert(false);
+        return;
+    }
+
     file << item_number() << " " << capacity() << std::endl << std::endl;
     for (ItemIdx i=f_; i<=l_; ++i)
         file << item(i).w << " " << item(i).p << std::endl;
