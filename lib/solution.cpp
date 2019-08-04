@@ -4,27 +4,31 @@
 
 using namespace knapsack;
 
-Solution::Solution(const Instance& instance): instance_(instance),
-    x_(std::vector<int>(instance.total_item_number(), 0)) { }
+Solution::Solution(const Instance& ins): instance_(ins),
+    x_(std::vector<int>(ins.total_item_number(), 0)) { }
 
-Solution::Solution(const Solution& solution):
-    instance_(solution.instance()), k_(solution.item_number()),
-    p_(solution.profit()), w_(solution.weight()), x_(solution.data()) { }
+Solution::Solution(const Solution& sol):
+    instance_(sol.instance_),
+    k_(sol.k_),
+    p_(sol.p_),
+    w_(sol.w_),
+    x_(sol.x_)
+{ }
 
-Solution& Solution::operator=(const Solution& solution)
+Solution& Solution::operator=(const Solution& sol)
 {
-    if (this != &solution) {
-        if (&this->instance() == &solution.instance()) {
-            k_ = solution.item_number();
-            p_ = solution.profit();
-            w_ = solution.weight();
-            x_ = solution.data();
+    if (this != &sol) {
+        if (&this->instance() == &sol.instance()) {
+            k_ = sol.k_;
+            p_ = sol.p_;
+            w_ = sol.w_;
+            x_ = sol.x_;
         } else {
             // Used to convert a solution of a surrogate instance to a
             // solution of its original instance.
-            k_ = solution.item_number();
-            x_ = solution.data();
-            p_ = solution.profit();
+            k_ = sol.k_;
+            x_ = sol.x_;
+            p_ = sol.p_;
             w_ = 0;
             for (ItemPos j=0; j<instance().total_item_number(); ++j)
                 if (contains(j))
@@ -75,21 +79,25 @@ void Solution::clear()
     std::fill(x_.begin(), x_.end(), 0);
 }
 
-void Solution::write_cert(std::string file)
+void Solution::write_cert(std::string filepath)
 {
-    if (file != "") {
-        std::ofstream cert;
-        cert.open(file);
-        cert << *this;
-        cert.close();
+    if (filepath == "")
+        return;
+    std::ofstream cert(filepath);
+    if (!cert.good()) {
+        std::cerr << "\033[31m" << "ERROR, unable to open file \"" << filepath << "\"" << "\033[0m" << std::endl;
+        assert(false);
+        return;
     }
+
+    cert << *this;
+    cert.close();
 }
 
-std::ostream& knapsack::operator<<(std::ostream& os, const Solution& solution)
+std::ostream& knapsack::operator<<(std::ostream& os, const Solution& sol)
 {
-    const Instance& instance = solution.instance();
-    for (ItemPos j=0; j<instance.total_item_number(); ++j)
-        os << solution.data()[j] << std::endl;
+    for (ItemPos j=0; j<sol.instance().total_item_number(); ++j)
+        os << sol.data()[j] << std::endl;
     return os;
 }
 
