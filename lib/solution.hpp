@@ -11,9 +11,10 @@ class Solution
 public:
 
     Solution(const Instance& instance);
+    Solution(const Instance& instance, std::string filepath);
     Solution(const Solution& solution);
     Solution& operator=(const Solution& solution);
-    ~Solution() { };
+    ~Solution() { }
 
     inline const Instance& instance()  const { return instance_; }
     inline Weight weight()             const { return w_; }

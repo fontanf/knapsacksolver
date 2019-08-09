@@ -231,15 +231,16 @@ private:
 
 void test(Instances& inss, std::vector<Profit (*)(Instance&)> fs, TestType tt)
 {
-    Instance ins(0, 0);
-    do {
-        ins = inss.next();
+    for (;;) {
+        Instance ins(inss.next());
         bool b = test(ins, fs, tt);
         if (!b) {
             std::cout << "error" << std::endl;
             return;
         }
-    } while (ins.item_number() != 0);
+        if (ins.item_number() == 0)
+            break;
+    }
     std::cout << "ok" << std::endl;
 }
 

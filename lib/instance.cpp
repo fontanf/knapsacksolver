@@ -9,6 +9,8 @@ using namespace knapsack;
 
 /****************************** Create instances ******************************/
 
+Instance::Instance() { }
+
 Instance::Instance(ItemIdx n, Weight c):
     c_orig_(c), f_(0), l_(-1)
 {
@@ -43,12 +45,8 @@ Instance::Instance(std::string filepath, std::string format)
 
     if (format == "knapsack_standard") {
         read_standard(file);
-        if (file_sol.good())
-            read_standard_solution(file_sol);
     } else if (format == "subsetsum_standard") {
         read_subsetsum_standard(file);
-        if (file_sol.good())
-            read_standard_solution(file_sol);
     } else {
         std::cerr << "\033[31m" << "ERROR, unknown instance format: \"" << format << "\"" << "\033[0m" << std::endl;
         assert(false);
@@ -88,16 +86,6 @@ void Instance::read_subsetsum_standard(std::ifstream& file)
     }
 }
 
-void Instance::read_standard_solution(std::ifstream& file)
-{
-    sol_opt_ = new Solution(*this);
-    int x = 0;
-    for (ItemPos j=0; j<total_item_number(); ++j) {
-        file >> x;
-        sol_opt_->set(j, x);
-    }
-}
-
 Instance::Instance(const Instance& ins)
 {
     items_ = ins.items_;
@@ -105,15 +93,15 @@ Instance::Instance(const Instance& ins)
     sort_type_ = ins.sort_type_;
 
     if (ins.optimal_solution() != NULL) {
-        sol_opt_ = new Solution(*this);
+        sol_opt_ = std::unique_ptr<Solution>(new Solution(*this));
         *sol_opt_ = *ins.optimal_solution();
     }
     if (ins.break_solution() != NULL) {
-        sol_break_ = new Solution(*this);
+        sol_break_ = std::unique_ptr<Solution>(new Solution(*this));
         *sol_break_ = *ins.break_solution();
     }
     if (ins.reduced_solution() != NULL) {
-        sol_red_ = new Solution(*this);
+        sol_red_ = std::unique_ptr<Solution>(new Solution(*this));
         *sol_red_ = *ins.reduced_solution();
     }
 
@@ -139,6 +127,11 @@ Instance Instance::reset(const Instance& instance)
     return ins;
 }
 
+void Instance::set_optimal_solution(Solution& sol)
+{
+    sol_opt_ = std::unique_ptr<Solution>(new Solution(sol));
+}
+
 bool Instance::check()
 {
     for (ItemPos j=0; j<item_number(); ++j)
@@ -147,13 +140,7 @@ bool Instance::check()
     return true;
 }
 
-Instance::~Instance()
-{
-    if (optimal_solution() != NULL)
-        delete sol_opt_;
-    if (reduced_solution() != NULL)
-        delete sol_red_;
-}
+Instance::~Instance() { }
 
 Profit Instance::check(std::string cert_file)
 {
@@ -193,7 +180,7 @@ ItemPos Instance::before_break_item(Info& info) const
 {
     ItemPos k = -1;
     for (ItemPos j=first_item(); j<break_item(); ++j)
-        if (k == -1 || (item(j).p * item(k).w < item(k).p * item(j).w))
+        if (k == -1 || (item(k).p * item(j).w > item(j).p * item(k).w))
             k = j;
     LOG(info, "before_break_item " << k << std::endl);
     return k;
@@ -319,11 +306,11 @@ Profit Instance::optimum() const
 
 void Instance::compute_break_item(Info& info)
 {
-    LOG_FOLD_START(info, "compute_break_item" << std::endl);
+    LOG_FOLD_START(info, "compute_break_item f " << first_item() << std::endl);
     LOG(info, "reduced solution " << reduced_solution()->to_string_items() << std::endl);
 
     if (sol_break_ == NULL) {
-        sol_break_ = new Solution(*reduced_solution());
+        sol_break_ = std::unique_ptr<Solution>(new Solution(*reduced_solution()));
     } else {
         *sol_break_ = *reduced_solution();
     }
@@ -333,7 +320,7 @@ void Instance::compute_break_item(Info& info)
         sol_break_->set(b_, true);
     }
     LOG(info, "break solution " << sol_break_->to_string_items() << std::endl);
-    LOG_FOLD_END(info, "compute_break_item");
+    LOG_FOLD_END(info, "compute_break_item b " << b_);
 }
 
 Profit Instance::break_profit() const
@@ -367,7 +354,7 @@ void Instance::sort(Info& info)
         return;
     }
     if (reduced_solution() == NULL)
-        sol_red_ = new Solution(*this);
+        sol_red_ = std::unique_ptr<Solution>(new Solution(*this));
     sort_type_ = 2;
     if (item_number() > 1)
         std::sort(items_.begin()+first_item(), items_.begin()+last_item()+1,
@@ -467,7 +454,7 @@ void Instance::sort_partially(Info& info, ItemIdx limit)
     }
 
     if (reduced_solution() == NULL)
-        sol_red_ = new Solution(*this);
+        sol_red_ = std::unique_ptr<Solution>(new Solution(*this));
 
     srand(0);
     int_right_.clear();
@@ -753,13 +740,26 @@ bool Instance::check_partialsort(Info& info) const
 {
     LOG_FOLD(info, *this);
 
+    if (item_number() == 0) {
+        if (break_item() != last_item() + 1) {
+            std::cout << 0 << std::endl;
+            LOG_FOLD_END(info, "b " << break_item() << " != l + 1 " << last_item() + 1);
+            return false;
+        }
+        return true;
+    }
+
     Weight w_total = reduced_solution()->weight();
     for (ItemPos j=first_item(); j<=last_item(); ++j)
         w_total += item(j).w;
     if (w_total <= total_capacity()) {
         if (break_item() != last_item() + 1) {
             std::cout << 1 << std::endl;
-            LOG_FOLD_END(info, "b " << break_item() << " != l + 1 " << last_item() + 1);
+            LOG_FOLD_END(info, "w_red " << reduced_solution()->weight()
+                    << " w_tot " << w_total
+                    << " c_tot " << total_capacity()
+                    << " b " << break_item()
+                    << " != l + 1 " << last_item() + 1);
             return false;
         }
         return true;
@@ -1125,10 +1125,8 @@ void Instance::surrogate(Info& info, Weight multiplier, ItemIdx bound)
 void Instance::surrogate(Info& info, Weight multiplier, ItemIdx bound, ItemPos first)
 {
     sol_break_->clear();
-    if (sol_opt_ != NULL) {
-        delete sol_opt_;
+    if (sol_opt_ != NULL)
         sol_opt_ = NULL;
-    }
     f_ = first;
     l_ = last_item();
     for (ItemIdx j=f_; j<=l_; ++j)

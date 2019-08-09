@@ -4,8 +4,29 @@
 
 using namespace knapsack;
 
-Solution::Solution(const Instance& ins): instance_(ins),
-    x_(std::vector<int>(ins.total_item_number(), 0)) { }
+Solution::Solution(const Instance& ins):
+    instance_(ins),
+    x_(ins.total_item_number(), 0)
+{ }
+
+Solution::Solution(const Instance& ins, std::string filepath):
+    instance_(ins),
+    x_(ins.total_item_number(), 0)
+{
+    if (filepath.empty())
+        return;
+    std::ifstream file(filepath);
+    if (!file.good()) {
+        std::cerr << "\033[31m" << "ERROR, unable to open file \"" << filepath << "\"" << "\033[0m" << std::endl;
+        return;
+    }
+
+    int x = 0;
+    for (ItemPos j=0; j<ins.total_item_number(); ++j) {
+        file >> x;
+        set(j, x);
+    }
+}
 
 Solution::Solution(const Solution& sol):
     instance_(sol.instance_),
@@ -81,7 +102,7 @@ void Solution::clear()
 
 void Solution::write_cert(std::string filepath)
 {
-    if (filepath == "")
+    if (filepath.empty())
         return;
     std::ofstream cert(filepath);
     if (!cert.good()) {

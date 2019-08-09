@@ -47,32 +47,23 @@ class Instance
 public:
 
     /**
-     * Constructors
+     * Constructors and destructor
      */
 
-    /**
-     * Manual constructor.
-     */
+    Instance(std::string filepath, std::string format);
+
+    Instance();
     Instance(ItemIdx n, Weight c);
     ItemIdx add_item(Weight w, Profit p);
     void add_items(const std::vector<std::pair<Weight, Profit>>& wp);
     void set_capacity(Weight c) { c_orig_ = c; }
 
-    /**
-     * Create instance from file.
-     */
-    Instance(std::string filepath, std::string format);
-
-    /**
-     * Copy constructor
-     */
     Instance(const Instance& ins);
 
-    Instance() {  }
+    void set_optimal_solution(Solution& sol);
     static Instance reset(const Instance& ins);
 
     ~Instance();
-
 
     /**
      * Getters
@@ -82,7 +73,7 @@ public:
     inline Weight  total_capacity()    const { return c_orig_; }
     inline const Item& item(ItemIdx j) const { assert(j >= 0 && j < total_item_number()); return items_[j]; }
 
-    const Solution* optimal_solution() const { return sol_opt_; }
+    const Solution* optimal_solution() const { return sol_opt_.get(); }
     Profit optimum() const;
 
     ItemPos max_efficiency_item(Info& info) const;
@@ -169,7 +160,7 @@ public:
      */
     void reduce1(Profit lb, Info& info);
     void reduce2(Profit lb, Info& info);
-    const Solution* reduced_solution() const { return sol_red_; }
+    const Solution* reduced_solution() const { return sol_red_.get(); }
 
     inline ItemIdx item_number() const { return l_-f_+1; }
     inline ItemPos first_item()  const { return f_; }
@@ -199,7 +190,7 @@ public:
     void surrogate(Info& info, Weight multiplier, ItemIdx bound, ItemPos first);
     void surrogate(Info& info, Weight multiplier, ItemIdx bound);
 
-    const Solution* break_solution()   const { return sol_break_; }
+    const Solution* break_solution() const { return sol_break_.get(); }
     ItemPos break_item()     const { return b_; }
     Profit  break_profit()   const;
     Weight  break_weight()   const;
@@ -233,7 +224,6 @@ private:
 
     void read_standard(std::ifstream& file);
     void read_subsetsum_standard(std::ifstream& file);
-    void read_standard_solution(std::ifstream& file);
 
     std::pair<ItemPos, ItemPos> partition(ItemPos f, ItemPos l, Info& info);
     bool check();
@@ -259,7 +249,7 @@ private:
 
     std::vector<Item> items_;
     Weight c_orig_;
-    Solution* sol_opt_ = NULL; // Optimal solution
+    std::unique_ptr<Solution> sol_opt_; // Optimal solution
 
     ItemPos b_ = -1; // Break item
 
@@ -285,8 +275,9 @@ private:
     std::vector<Interval> int_right_;
     std::vector<Interval> int_left_;
 
-    Solution* sol_red_   = NULL; // Reduced solution
-    Solution* sol_break_ = NULL; // Break solution
+    std::unique_ptr<Solution> sol_red_; // Reduced solution
+    std::unique_ptr<Solution> sol_break_; // Break solution
+
 };
 
 std::ostream& operator<<(std::ostream &os, const Item& item);
