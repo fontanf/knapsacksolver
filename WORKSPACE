@@ -27,7 +27,7 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 git_repository(
     name = "benchtools",
     remote = "https://github.com/fontanf/benchtools.git",
-    commit = "05883deff50e329875ea1bd8ddd5f6076da9d7d4",
+    commit = "bde763e809f3aa429591f91f438afc8a95b64b5d",
 )
 
 local_repository(
