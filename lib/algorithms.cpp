@@ -9,7 +9,7 @@ func knapsack::get_algorithm(std::string str)
     benchtools::Algorithm algo(str);
 
     if (algo.name == "") {
-        std::cerr << "\033[32m" << "ERROR, missing algo.namerithm." << "\033[0m" << std::endl;
+        std::cerr << "\033[32m" << "ERROR, missing algorithm." << "\033[0m" << std::endl;
         return [](Instance&, Solution&, Profit&, std::mt19937_64&, Info) { };
 
     /*
@@ -37,7 +37,7 @@ func knapsack::get_algorithm(std::string str)
         };
 
     /*
-     * Exact algo.namerithms
+     * Exact algorithms
      */
     } else if (algo.name == "bellman_array") { // Bellman
         return [](Instance& ins, Solution&, Profit& ub, std::mt19937_64&, Info info) {
@@ -184,7 +184,7 @@ func knapsack::get_algorithm(std::string str)
 
 
     } else {
-        std::cerr << "\033[31m" << "ERROR, unknown algo.namerithm: " << algo.name << "\033[0m" << std::endl;
+        std::cerr << "\033[31m" << "ERROR, unknown algorithm: " << algo.name << "\033[0m" << std::endl;
         assert(false);
         return [](Instance&, Solution&, Profit&, std::mt19937_64&, Info) { };
     }
