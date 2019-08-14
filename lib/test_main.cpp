@@ -1,14 +1,4 @@
-#include "knapsack/opt_bab/bab.hpp"
-#include "knapsack/opt_astar/astar.hpp"
-#include "knapsack/opt_bellman/bellman.hpp"
-#include "knapsack/opt_dpprofits/dpprofits.hpp"
-#include "knapsack/opt_expknap/expknap.hpp"
-#include "knapsack/opt_balknap/balknap.hpp"
-#include "knapsack/opt_minknap/minknap.hpp"
-#include "knapsack/lb_greedy/greedy.hpp"
-#include "knapsack/lb_greedynlogn/greedynlogn.hpp"
-#include "knapsack/ub_surrogate/surrogate.hpp"
-
+#include "knapsack/lib/algorithms.hpp"
 #include "knapsack/lib/tester.hpp"
 #include "knapsack/lib/generator.hpp"
 
@@ -20,23 +10,28 @@ int main(int argc, char *argv[])
     (void)argv;
 
     GenerateData data;
-    data.n = 50;
-    data.t = "u";
-    data.r = 100;
-    data.h = 40;
-    data.s = 2;
+    data.n = 2000;
+    data.t = "asc";
+    data.r = 100000;
+    data.h = 80;
+    data.s = 102080;
     Instance ins = generate(data);
+    //std::cout << ins << std::endl;
+
     Info info = Info()
         .set_verbose(true)
-        .set_log2stderr(true)
+        //.set_log2stderr(true)
         .set_logfile("log.txt")
         ;
-    //opt_bellman_array(ins, info);
+    //Profit opt = opt_bellman_array(ins, info);
+    //std::cout << opt << std::endl;
+    //Solution sol = sopt_bellman_array_all(ins, info);
+    //std::cout << "profit " << sol.profit() << std::endl;
+    //for (ItemIdx j=0; j<ins.item_number(); ++j)
+        //std::cout << j << ":" << sol.contains(j) << " ";
+    //std::cout << std::endl;
 
-    MinknapParams p = MinknapParams::pure();
-    //p.ub_surrogate = -1;
-    p.pairing = 10;
-    Minknap(ins, p).run(info);
+    Solution sol_minknap = Minknap(ins, MinknapParams::combo()).run(info);
 
 }
 

@@ -52,6 +52,19 @@ struct MinknapParams
             .combo_core = true,
         };
     }
+
+    MinknapParams& set_params(const std::map<std::string, std::string>& args)
+    {
+        auto it = args.end();
+        if ((it = args.find("k"))  != args.end()) k           = std::stol(it->second);
+        if ((it = args.find("g"))  != args.end()) greedy      = std::stol(it->second);
+        if ((it = args.find("gn")) != args.end()) greedynlogn = std::stol(it->second);
+        if ((it = args.find("p"))  != args.end()) pairing     = std::stol(it->second);
+        if ((it = args.find("s"))  != args.end()) surrogate   = std::stol(it->second);
+        if ((it = args.find("c"))  != args.end()) combo_core  = (it->second == "1");
+        return *this;
+    }
+
 };
 
 class Minknap

@@ -83,19 +83,19 @@ https://github.com/fontanf/gap/blob/master/lb_lagrelax_lbfgs/lagrelax_lbfgs.cpp
 
 ### Classical algorithms
 
-For Dynamic programming algorithms:
-- option `-m` selects the type of memory used. Possible values are (if implemented) `array` or `list`. Lists are slower but eliminate dominated states and allow the use of Upper bounds.
-- option `-r` selects the method used to retrieve the optimal solution. Possible values (if implemented) are
-  - `none`: no solution retrieved, only the optimal value is returned
+- `array` and `list` refer to the type of memory used. Lists are slower but eliminate dominated states and allow the use of Upper bounds.
+- `all`, `one`, `part` and `rec` refer to the method used to retrieve the optimal solution:
+  - none: no solution retrieved, only the optimal value is returned
   - `all`: keep all states in memory and backtrack
   - `one`: keep only the last states in memory, retrieve the last item added and run the algorithm again to retrieve the complete optimal solution
-  - `part`: keep a partial solution in each state and run the algorithm again while the global solution is not complete
+  - `part`: keep a partial solution in each state and run the algorithm again while the global solution is not complete. `k` indicates the size of the partial solution (<=64).
   - `rec`: use the recursive scheme
+- `sort` indicates that the items are fully sorted at the beginning, allowing the use of better Upper bounds.
 
 Algorithms:
 - Dynamic programming with Bellman recursion
   - Top-down (recursive): `-a bellmanrec_array` :heavy_check_mark:
-  - Bottom-up (iterative), array: `-a bellman_array` :heavy_check_mark: `-a bellman_array_all` :heavy_check_mark: `-a bellman_array_one` :heavy_check_mark: `-a bellman_array_part` :heavy_check_mark: `-a bellman_array_rec` :heavy_check_mark:
+  - Bottom-up (iterative), array: `-a bellman_array` :heavy_check_mark: `-a bellman_array_all` :heavy_check_mark: `-a bellman_array_one` :heavy_check_mark: `-a bellman_array_part k 64` :heavy_check_mark: `-a bellman_array_rec` :heavy_check_mark:
   - Bottom-up (iterative), lists: `-a bellman_list` :heavy_check_mark: `-a bellman_list_sort` :heavy_check_mark: `-a bellman_list_rec` :heavy_check_mark:
   - Bottom-up (iterative), array, parallel: `-a bellmanpar_array` :heavy_check_mark:
 - Dynamic programming by Profits `-a dpprofits_array` :heavy_check_mark: `-a dpprofits_array_all` :heavy_check_mark:
@@ -103,16 +103,17 @@ Algorithms:
 
 ### State of the art algorithms
 
-`combo` improvements are implemented:
-- Option `-n`: use `combo` core
-- Option `-g X`: `greedynlogn` will be executed at Xth node / if state number goes over X
-- Option `-p X`: state pairing with items outside the core will be executed if state number goes over X
-- Option `-s X`: surrogate relaxation and instance will be solved at Xth node / if state number goes over X
+Options
+- `c 1`: use `combo` core
+- `g X`: `greedy` will be executed at Xth node / if state number goes over X
+- `gn X`: `greedynlogn` will be executed at Xth node / if state number goes over X
+- `p X`: state pairing with items outside the core will be executed if state number goes over X
+- `s X`: surrogate relaxation and instance will be solved at Xth node / if state number goes over X
 
 Algorithms:
-- Balanced Dynamic programming `-a balknap -u t`. The list implementation requires a map. Therefore, its asymptotical complexity is slightly greater than the one with an array. However, the possiblity of combining the dynamic programming with bouding makes it more performant. Still, two versions are implemented. Options `-u` can be set to `b` (partial sorting, Dembo Upper bound with break item) or `t` (complete sorting, better Upper Bound) :heavy_check_mark: (with options `-g` :heavy_check_mark: `-s` :heavy_check_mark:)
-- Primal-dual Dynamic programming (only with list) (`minknap`, `combo`) :heavy_check_mark: (with options `-n` :heavy_check_mark: `-g` :heavy_check_mark: `-p` :heavy_check_mark: `-s` :heavy_check_mark:)
-- Primal-dual Branch-and-bound (`expknap`) `opt_expknap/main` :heavy_check_mark: (with options `-n` :heavy_check_mark: `-g` :heavy_check_mark: `-s`  :heavy_check_mark:)
+- Balanced Dynamic programming. The list implementation requires a map. Therefore, its asymptotical complexity is slightly greater than the one with an array. However, the possiblity of combining the dynamic programming with bouding makes it more performant. Still, two versions are implemented. Options `u` can be set to `b` (partial sorting, Dembo Upper bound with break item) or `t` (complete sorting, better Upper Bound) `-a "balknap u t k 64 g 0 gn -1 s -1"`
+- Primal-dual Dynamic programming (only with list) `-a minknap k 64 g 0 gn -1 p -1 s -1 c 0`, `-a combo` :heavy_check_mark: 
+- Primal-dual Branch-and-bound `-a "expknap g 0 gn -1 s -1 c 0"`, `-a expknap_combo` :heavy_check_mark:
 
 ## Results
 

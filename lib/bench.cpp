@@ -1,119 +1,12 @@
 #include "knapsack/lib/generator.hpp"
-#include "knapsack/opt_bellman/bellman.hpp"
-#include "knapsack/opt_dpprofits/dpprofits.hpp"
-#include "knapsack/opt_bab/bab.hpp"
-#include "knapsack/opt_astar/astar.hpp"
-#include "knapsack/opt_balknap/balknap.hpp"
-#include "knapsack/opt_minknap/minknap.hpp"
-#include "knapsack/opt_expknap/expknap.hpp"
-#include "knapsack/lb_greedy/greedy.hpp"
-#include "knapsack/lb_greedynlogn/greedynlogn.hpp"
-#include "knapsack/ub_dantzig/dantzig.hpp"
-#include "knapsack/ub_surrogate/surrogate.hpp"
+
+#include "knapsack/lib/algorithms.hpp"
 
 #include <boost/program_options.hpp>
 
 using namespace knapsack;
 
-std::function<Profit (Instance&, Info)> get_algorithm(std::string s)
-{
-    if (s == "bellman_array") { // bellman
-        return opt_bellman_array;
-    } else if (s == "bellmanpar_array") {
-        return opt_bellmanpar_array;
-    } else if (s == "bellmanrec") {
-        return [](Instance& ins, Info info) { return sopt_bellmanrec(ins, info).profit(); };
-    } else if (s == "bellman_array_all") {
-        return [](Instance& ins, Info info) { return sopt_bellman_array_all(ins, info).profit(); };
-    } else if (s == "bellman_array_one") {
-        return [](Instance& ins, Info info) { return sopt_bellman_array_one(ins, info).profit(); };
-    } else if (s == "bellman_array_part") {
-        return [](Instance& ins, Info info) { return sopt_bellman_array_part(ins, 64, info).profit(); };
-    } else if (s == "bellman_array_rec") {
-        return [](Instance& ins, Info info) { return sopt_bellman_array_rec(ins, info).profit(); };
-    } else if (s == "bellman_list") {
-        return [](Instance& ins, Info info) { return opt_bellman_list(ins, false, info); };
-    } else if (s == "bellman_list_sort") {
-        return [](Instance& ins, Info info) { return opt_bellman_list(ins, true, info); };
-    } else if (s == "bellman_list_rec") {
-        return [](Instance& ins, Info info) { return sopt_bellman_list_rec(ins, info).profit(); };
-    } else if (s == "dpprofits_array") { // dpprofits
-        return opt_dpprofits_array;
-    } else if (s == "dpprofits_array_all") {
-        return [](Instance& ins, Info info) { return sopt_dpprofits_array_all(ins, info).profit(); };
-    } else if (s == "bab") { // bab
-        return [](Instance& ins, Info info) { return sopt_bab(ins, false, info).profit(); };
-    } else if (s == "bab_sort") {
-        return [](Instance& ins, Info info) { return sopt_bab(ins, true, info).profit(); };
-    } else if (s == "astar") { // astar
-        return [](Instance& ins, Info info) { return sopt_astar(ins, info).profit(); };
-    } else if (s == "expknap") { // expknap
-        return [](Instance& ins, Info info) { return Expknap(ins, ExpknapParams::pure()).run(info).profit(); };
-    } else if (s == "expknap_combo") { // expknap
-        return [](Instance& ins, Info info) { return Expknap(ins, ExpknapParams::combo()).run(info).profit(); };
-    } else if (s == "balknap_b") { // balknap
-        return [](Instance& ins, Info info) {
-            BalknapParams p = BalknapParams::pure();
-            p.greedy = 0;
-            p.ub = 'b';
-            return Balknap(ins, p).run(info).profit();
-        };
-    } else if (s == "balknap_t") { // balknap
-        return [](Instance& ins, Info info) {
-            BalknapParams p = BalknapParams::pure();
-            p.greedynlogn = 0;
-            p.ub = 't';
-            return Balknap(ins, p).run(info).profit();
-        };
-    } else if (s == "balknap_combo") {
-        return [](Instance& ins, Info info) { return Balknap(ins, BalknapParams::combo()).run(info).profit(); };
-    } else if (s == "minknap") { // minknap
-        return [](Instance& ins, Info info) {
-            return Minknap(ins, MinknapParams::pure()).run(info).profit();
-        };
-    } else if (s == "minknap_combocore") {
-        return [](Instance& ins, Info info) {
-            MinknapParams p = MinknapParams::pure();
-            p.combo_core = true;
-            return Minknap(ins, p).run(info).profit();
-        };
-    } else if (s == "minknap_combo") {
-        return [](Instance& ins, Info info) {
-            return Minknap(ins, MinknapParams::combo()).run(info).profit();
-        };
-    } else if (s == "greedy") { // greedy
-        return [](Instance& ins, Info info) {
-            ins.sort_partially(info);
-            return sol_greedy(ins, info).profit();
-        };
-    } else if (s == "greedynlogn") { // greedynlogn
-        return [](Instance& ins, Info info) {
-            ins.sort_partially(info);
-            return sol_greedynlogn(ins, info).profit();
-        };
-    } else if (s == "greedynlogn_for") {
-        return [](Instance& ins, Info info) { return sol_forwardgreedynlogn(ins, info).profit(); };
-    } else if (s == "greedynlogn_back") {
-        return [](Instance& ins, Info info) { return sol_backwardgreedynlogn(ins, info).profit(); };
-    } else if (s == "dantzig") { // dantzig
-        return [](Instance& ins, Info info) { return ub_dantzig(ins, info); };
-    /*
-    } else if (s == "surrelax") { // surrelax
-        return [](Instance& ins, Info info) {
-            ins.sort_partially(info);
-            //Solution sol = sol_greedynlogn(ins, Info(info, false, "greedynlogn"));
-            Solution sol = sol_greedy(ins, Info(info, false, "greedy"));
-            return ub_surrogate(ins, sol.profit(), info).ub;
-        };
-    */
-    } else {
-        exit(1);
-        return opt_bellman_array;
-    }
-}
-
-template<typename Function>
-double bench(Function func, GenerateData d, bool verbose = false)
+double bench(func f, GenerateData d, std::mt19937_64& gen, bool verbose = false)
 {
     double t_max = 300;
     double t_total = 0.0;
@@ -123,12 +16,14 @@ double bench(Function func, GenerateData d, bool verbose = false)
         if (verbose)
             std::cout << std::endl << d << std::endl;
         Instance ins = generate(d);
+        Solution sol(ins);
+        Profit ub = INT_MAX;
         Info info = Info()
             .set_timelimit(t_max - t_total)
             .set_verbose(verbose)
             ;
         try {
-            func(ins, info);
+            f(ins, sol, ub, gen, info);
             double t = info.elapsed_time();
             t_total += t;
             if (t_total > t_max) {
@@ -149,7 +44,7 @@ double bench(Function func, GenerateData d, bool verbose = false)
                 .set_verbose(true)
                 .set_log2stderr(true)
                 ;
-            func(ins, info);
+            f(ins, sol, ub, gen, info);
             exit(1);
             return -1;
         }
@@ -166,10 +61,10 @@ double bench(Function func, GenerateData d, bool verbose = false)
     return mean;
 }
 
-void bench_easy(std::string algorithm, bool verbose = false)
+void bench_easy(std::string algorithm, std::mt19937_64& gen, bool verbose = false)
 {
     std::ofstream file(algorithm + "_easy.csv");
-    std::function<Profit (Instance&, Info)> func = get_algorithm(algorithm);
+    func f = get_algorithm(algorithm);
     GenerateData d;
     std::vector<std::pair<std::string, Profit>> vec {
         {"u",   1000}, {"u",   10000},
@@ -187,7 +82,7 @@ void bench_easy(std::string algorithm, bool verbose = false)
         for (auto p: vec) {
             d.t = p.first;
             d.r = p.second;
-            double res = bench(func, d, verbose);
+            double res = bench(f, d, gen, verbose);
             if (res < 0) {
                 file << ",x" << std::flush;
             } else {
@@ -201,10 +96,10 @@ void bench_easy(std::string algorithm, bool verbose = false)
     file.close();
 }
 
-void bench_difficult_large(std::string algorithm, bool verbose = false)
+void bench_difficult_large(std::string algorithm, std::mt19937_64& gen, bool verbose = false)
 {
     std::ofstream file(algorithm + "_difficult-large.csv");
-    std::function<Profit (Instance&, Info)> func = get_algorithm(algorithm);
+    func f = get_algorithm(algorithm);
     GenerateData d;
     std::vector<std::pair<std::string, Profit>> vec {
         {"u",   100000}, {"u",   1000000}, {"u",   10000000},
@@ -230,7 +125,7 @@ void bench_difficult_large(std::string algorithm, bool verbose = false)
         for (auto p: vec) {
             d.t = p.first;
             d.r = p.second;
-            double res = bench(func, d, verbose);
+            double res = bench(f, d, gen, verbose);
             if (res < 0) {
                 file << ",x" << std::flush;
             } else {
@@ -244,10 +139,10 @@ void bench_difficult_large(std::string algorithm, bool verbose = false)
     file.close();
 }
 
-void bench_difficult_small(std::string algorithm, bool verbose = false)
+void bench_difficult_small(std::string algorithm, std::mt19937_64& gen, bool verbose = false)
 {
     std::ofstream file(algorithm + "_difficult-small.csv");
-    std::function<Profit (Instance&, Info)> func = get_algorithm(algorithm);
+    func f = get_algorithm(algorithm);
     std::vector<GenerateData> vec {
         GenerateData::gen_spanner("u", 1000, 2, 10),
         GenerateData::gen_spanner("wc", 1000, 2, 10),
@@ -265,7 +160,7 @@ void bench_difficult_small(std::string algorithm, bool verbose = false)
         file << n << std::flush;
         for (GenerateData d: vec) {
             d.n = n;
-            double res = bench(func, d, verbose);
+            double res = bench(f, d, gen, verbose);
             if (res < 0) {
                 file << ",x" << std::flush;
             } else {
@@ -279,10 +174,10 @@ void bench_difficult_small(std::string algorithm, bool verbose = false)
     file.close();
 }
 
-void bench_miscellaneous(std::string algorithm, bool verbose = false)
+void bench_miscellaneous(std::string algorithm, std::mt19937_64& gen, bool verbose = false)
 {
     std::ofstream file(algorithm + "_miscellaneous.csv");
-    std::function<Profit (Instance&, Info)> func = get_algorithm(algorithm);
+    func f = get_algorithm(algorithm);
     std::vector<GenerateData> vec {
         GenerateData::gen_normal(1000, 100),
         GenerateData::gen_normal(1000, 50),
@@ -296,7 +191,7 @@ void bench_miscellaneous(std::string algorithm, bool verbose = false)
         file << n << std::flush;
         for (GenerateData d: vec) {
             d.n = n;
-            double res = bench(func, d, verbose);
+            double res = bench(f, d, gen, verbose);
             if (res < 0) {
                 file << ",x" << std::flush;
             } else {
@@ -340,15 +235,18 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    Seed seed = 0;
+    std::mt19937_64 gen(seed);
+
     bool verbose = vm.count("verbose");
     if (vm.count("easy"))
-        bench_easy(algorithm, verbose);
+        bench_easy(algorithm, gen, verbose);
     if (vm.count("difficult-small"))
-        bench_difficult_small(algorithm, verbose);
+        bench_difficult_small(algorithm, gen, verbose);
     if (vm.count("difficult-large"))
-        bench_difficult_large(algorithm, verbose);
+        bench_difficult_large(algorithm, gen, verbose);
     if (vm.count("miscellaneous"))
-        bench_miscellaneous(algorithm, verbose);
+        bench_miscellaneous(algorithm, gen, verbose);
 
     return 0;
 }

@@ -79,9 +79,10 @@ cc_binary(
         deps = ["//lib:cpp"],
 )
 
-cc_binary(
-        name = "main",
-        srcs = ["main.cpp"],
+cc_library(
+        name = "algorithms",
+        hdrs = ["algorithms.hpp"],
+        srcs = ["algorithms.cpp"],
         deps = [
                 "//lb_greedy:greedy",
                 "//lb_greedynlogn:greedynlogn",
@@ -95,6 +96,14 @@ cc_binary(
                 "//opt_balknap:balknap",
                 "//opt_minknap:minknap",
         ],
+        visibility = ["//visibility:public"],
+        include_prefix = "knapsack/lib/",
+)
+
+cc_binary(
+        name = "main",
+        srcs = ["main.cpp"],
+        deps = [":algorithms"],
         linkopts = ["-lboost_program_options"],
 )
 
@@ -102,17 +111,7 @@ cc_binary(
         name = "bench",
         srcs = ["bench.cpp"],
         deps = [
-                "//lb_greedy:greedy",
-                "//lb_greedynlogn:greedynlogn",
-                "//ub_dembo:dembo",
-                "//ub_surrogate:surrogate",
-                "//opt_bab:bab",
-                "//opt_astar:astar",
-                "//opt_expknap:expknap",
-                "//opt_bellman:bellman",
-                "//opt_dpprofits:dpprofits",
-                "//opt_balknap:balknap",
-                "//opt_minknap:minknap",
+                ":algorithms",
                 ":generator",
         ],
         linkopts = ["-lboost_program_options"],
@@ -122,17 +121,7 @@ cc_binary(
         name = "test_main",
         srcs = ["test_main.cpp"],
         deps = [
-                "//lb_greedy:greedy",
-                "//lb_greedynlogn:greedynlogn",
-                "//ub_dembo:dembo",
-                "//ub_surrogate:surrogate",
-                "//opt_bab:bab",
-                "//opt_astar:astar",
-                "//opt_expknap:expknap",
-                "//opt_bellman:bellman",
-                "//opt_dpprofits:dpprofits",
-                "//opt_balknap:balknap",
-                "//opt_minknap:minknap",
+                ":algorithms",
                 ":generator",
                 ":tester",
         ],
