@@ -111,8 +111,8 @@ Options
 - `s X`: surrogate relaxation and instance will be solved at Xth node / if state number goes over X
 
 Algorithms:
-- Balanced Dynamic programming. The list implementation requires a map. Therefore, its asymptotical complexity is slightly greater than the one with an array. However, the possiblity of combining the dynamic programming with bouding makes it more performant. Still, two versions are implemented. Options `u` can be set to `b` (partial sorting, Dembo Upper bound with break item) or `t` (complete sorting, better Upper Bound) `-a "balknap u t k 64 g 0 gn -1 s -1"`
-- Primal-dual Dynamic programming (only with list) `-a minknap k 64 g 0 gn -1 p -1 s -1 c 0`, `-a combo` :heavy_check_mark: 
+- Balanced Dynamic programming. The list implementation requires a map. Therefore, its asymptotical complexity is slightly greater than the one with an array. However, the possiblity of combining the dynamic programming with bouding makes it more performant. Still, two versions are implemented. Options `u` can be set to `b` (partial sorting, Dembo Upper bound with break item) or `t` (complete sorting, better Upper Bound) `-a "balknap u t k 64 g 0 gn -1 s -1"` :heavy_check_mark:
+- Primal-dual Dynamic programming (only with list) `-a "minknap k 64 g 0 gn -1 p -1 s -1 c 0"`, `-a combo` :heavy_check_mark: 
 - Primal-dual Branch-and-bound `-a "expknap g 0 gn -1 s -1 c 0"`, `-a expknap_combo` :heavy_check_mark:
 
 ## Results
@@ -152,10 +152,10 @@ The parallel algorithm is implemented as follows: items are divided in two sets 
 | Algorithm                               | Instances                                                                                                                                                          |
 | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `expknap`                               | ![easy](bench/expknap_easy.csv),        ![difficult large](bench/expknap_difficult-large.csv),        ![difficult small](bench/expknap_difficult-small.csv)        |
-| `expknap -n -s 20000 -g 50000`          | ![easy](bench/expknap_combo_easy.csv),  ![difficult large](bench/expknap_combo_difficult-large.csv),  ![difficult small](bench/expknap_combo_difficult-small.csv)  |
+| `expknap c 1 s 20000 g 50000`          | ![easy](bench/expknap_combo_easy.csv),  ![difficult large](bench/expknap_combo_difficult-large.csv),  ![difficult small](bench/expknap_combo_difficult-small.csv)  |
 | `minknap`                               | ![easy](bench/minknap_easy.csv),        ![difficult large](bench/minknap_difficult-large.csv),        ![difficult small](bench/minknap_difficult-small.csv)        |
-| `minknap -n -s 2000 -p 10000` (`combo`) | ![easy](bench/minknap_combo_easy.csv),  ![difficult large](bench/minknap_combo_difficult-large.csv),  ![difficult small](bench/minknap_combo_difficult-small.csv)  |
-| `balknap -t -g 0`                       | ![easy](bench/balknap_t_easy.csv),      ![difficult large](bench/balknap_t_difficult-large.csv),      ![difficult small](bench/balknap_t_difficult-small.csv)      |
+| `minknap c 1 s 2000 p 10000` (`combo`) | ![easy](bench/minknap_combo_easy.csv),  ![difficult large](bench/minknap_combo_difficult-large.csv),  ![difficult small](bench/minknap_combo_difficult-small.csv)  |
+| `balknap u t g 0`                       | ![easy](bench/balknap_t_easy.csv),      ![difficult large](bench/balknap_t_difficult-large.csv),      ![difficult small](bench/balknap_t_difficult-small.csv)      |
 
 Remarks:
 - Spanner instances are among the worst cases of the `minknap` recursion, since many items of the break solution won't be in an optimal solution. It is interesting to note that the `bellman` recursion performs better ![on those instances](bench/bellman_list_sort_difficult-small.csv). However, the worst case of the `bellman` recursion is worse than the worst case of the `minknap` recursion.
