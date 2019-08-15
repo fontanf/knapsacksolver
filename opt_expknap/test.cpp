@@ -4,13 +4,19 @@
 
 using namespace knapsack;
 
+Profit opt_minknap(Instance& ins)
+{
+    Info info;
+    return sopt_minknap(ins, MinknapParams(), info).profit();
+}
+
 Profit opt_expknap_test(Instance& ins)
 {
     Info info = Info()
         .set_verbose(true)
         .set_log2stderr(true)
         ;
-    return Expknap(ins, ExpknapParams::pure()).run(info).profit();
+    return sopt_expknap(ins, ExpknapParams::pure(), info).profit();
 }
 
 Profit opt_expknap_combocore_test(Instance& ins)
@@ -21,7 +27,7 @@ Profit opt_expknap_combocore_test(Instance& ins)
         ;
     ExpknapParams p = ExpknapParams::pure();
     p.combo_core = true;
-    return Expknap(ins, p).run(info).profit();
+    return sopt_expknap(ins, p, info).profit();
 }
 
 std::vector<Profit (*)(Instance&)> f = {

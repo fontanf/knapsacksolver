@@ -7,6 +7,47 @@
 
 using namespace knapsack;
 
+class Expknap
+{
+
+public:
+
+    Expknap(Instance& ins, ExpknapParams p, bool* end = NULL):
+        instance_(ins), params_(p), sol_curr_(ins), sol_best_(ins), end_(end)
+    {
+        sur_ = (end_ != NULL);
+        if (end_ == NULL)
+            end_ = new bool(false);
+    }
+
+    ~Expknap()
+    {
+        if (!sur_)
+            delete end_;
+    }
+
+    Solution run(Info info = Info());
+
+private:
+
+    void rec(ItemPos s, ItemPos t, Info& info);
+    void update_bounds(Info& info);
+
+    Instance& instance_;
+    ExpknapParams params_;
+
+    Profit opt_ = -1;
+    Profit ub_ = -1;
+    Solution sol_curr_;
+    Solution sol_best_;
+    Cpt node_number_ = 0;
+
+    bool sur_ = false;
+    bool* end_ = NULL;
+    std::vector<std::thread> threads_;
+
+};
+
 void Expknap::update_bounds(Info& info)
 {
     if (params_.surrogate >= 0 && params_.surrogate <= node_number_) {
@@ -138,5 +179,10 @@ Solution Expknap::run(Info info)
         thread.join();
     PUT(info, "Algorithm.NodeNumber", node_number_);
     return algorithm_end(sol_best_, info);
+}
+
+Solution knapsack::sopt_expknap(Instance& ins, ExpknapParams p, Info info)
+{
+    return Expknap(ins, p).run(info);
 }
 

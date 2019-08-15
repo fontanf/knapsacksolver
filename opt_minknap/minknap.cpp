@@ -8,7 +8,71 @@
 
 using namespace knapsack;
 
-std::ostream& knapsack::operator<<(std::ostream& os, const MinknapState& s)
+struct MinknapState
+{
+    Weight w;
+    Profit p;
+    PartSol2 sol;
+};
+
+std::ostream& operator<<(std::ostream& os, const MinknapState& s);
+
+class Minknap
+{
+
+public:
+
+    Minknap(Instance& ins, MinknapParams p, bool* end = NULL):
+        instance_(ins),
+        params_(p),
+        sol_best_(ins),
+        psolf_(ins, p.k),
+        end_(end)
+    {
+        sur_ = (end_ != NULL);
+        if (end_ == NULL)
+            end_ = new bool(false);
+    }
+
+    ~Minknap()
+    {
+        if (!sur_)
+            delete end_;
+    }
+
+    Solution run(Info info = Info());
+
+private:
+
+    void add_item(Info& info);
+    void remove_item(Info& info);
+    ItemPos find_state(bool left, Info& info);
+
+    void update_bounds(Info& info);
+
+    Instance& instance_;
+    MinknapParams params_;
+
+    Profit lb_ = 0;
+    Profit ub_ = -1;
+    Solution sol_best_;
+    ItemPos s_;
+    ItemPos t_;
+    std::vector<MinknapState> l0_;
+    std::vector<MinknapState> l_;
+    PartSolFactory2 psolf_;
+    MinknapState best_state_;
+
+    StateIdx state_number_ = 0;
+    StateIdx distinct_state_number_ = 0;
+
+    bool sur_ = false;
+    bool* end_ = NULL;
+    std::vector<std::thread> threads_;
+
+};
+
+std::ostream& operator<<(std::ostream& os, const MinknapState& s)
 {
     os << "(" << s.w << " " << s.p << ")";
     return os;
@@ -479,13 +543,8 @@ Solution Minknap::run(Info info)
     return algorithm_end(sol_best_, info);
 }
 
-Profit knapsack::opt_minknap(Instance& ins, Info info)
+Solution knapsack::sopt_minknap(Instance& ins, MinknapParams p, Info info)
 {
-    return Minknap(ins, MinknapParams()).run(info).profit();
-}
-
-Profit knapsack::opt_minknap(Instance& ins)
-{
-    return Minknap(ins, MinknapParams()).run().profit();
+    return Minknap(ins, p).run(info);
 }
 

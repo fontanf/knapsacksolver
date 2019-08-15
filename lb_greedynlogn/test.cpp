@@ -4,6 +4,7 @@
 
 using namespace knapsack;
 
+Profit opt_minknap(Instance& ins)                  { Info info; return sopt_minknap(ins, MinknapParams(), info).profit(); }
 Profit opt_forwardgreedynlogn_test(Instance& ins)  { Info info; ins.sort_partially(info); return sol_forwardgreedynlogn(ins, info).profit(); }
 Profit opt_backwardgreedynlogn_test(Instance& ins) { Info info; ins.sort_partially(info); return sol_backwardgreedynlogn(ins, info).profit(); }
 Profit opt_greedynlogn_test(Instance& ins)         { Info info; ins.sort_partially(info); return sol_greedynlogn(ins, info).profit(); }

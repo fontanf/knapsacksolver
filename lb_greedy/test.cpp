@@ -4,6 +4,7 @@
 
 using namespace knapsack;
 
+Profit opt_minknap(Instance& ins)      { Info info; return sopt_minknap(ins, MinknapParams(), info).profit(); }
 Profit opt_greedy_test(Instance& ins)  { Info info; ins.sort_partially(info); return sol_greedy(ins, info).profit(); }
 
 std::vector<Profit (*)(Instance&)> f = {

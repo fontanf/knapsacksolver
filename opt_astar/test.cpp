@@ -4,6 +4,7 @@
 
 using namespace knapsack;
 
+Profit opt_minknap(Instance& ins)       { Info info; return sopt_minknap(ins, MinknapParams(), info).profit(); }
 Profit opt_astar_test(Instance& ins)    { return sopt_astar(ins).profit(); }
 Profit opt_astar_dp_test(Instance& ins) { return sopt_astar_dp(ins).profit(); }
 

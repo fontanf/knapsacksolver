@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
         //std::cout << j << ":" << sol.contains(j) << " ";
     //std::cout << std::endl;
 
-    Solution sol_minknap = Minknap(ins, MinknapParams::combo()).run(info);
+    Solution sol_minknap = sopt_minknap(ins, MinknapParams::combo(), info);
 
 }
 

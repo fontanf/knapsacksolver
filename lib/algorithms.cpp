@@ -131,37 +131,37 @@ func knapsack::get_algorithm(std::string str)
         };
     } else if (algo.name == "expknap") { // Expknap
         return [algo](Instance& ins, Solution& sol, Profit& ub, std::mt19937_64&, Info info) {
-            sol = Expknap(ins, ExpknapParams().set_params(algo.args)).run(info);
+            sol = sopt_expknap(ins, ExpknapParams().set_params(algo.args), info);
             if (info.check_time())
                 ub = sol.profit();
         };
     } else if (algo.name == "expknap_combo") {
         return [](Instance& ins, Solution& sol, Profit& ub, std::mt19937_64&, Info info) {
-            sol = Expknap(ins, ExpknapParams::combo()).run(info);
+            sol = sopt_expknap(ins, ExpknapParams::combo(), info);
             if (info.check_time())
                 ub = sol.profit();
         };
     } else if (algo.name == "balknap") { // Balknap
         return [algo](Instance& ins, Solution& sol, Profit& ub, std::mt19937_64&, Info info) {
-            sol = Balknap(ins, BalknapParams().set_params(algo.args)).run(info);
+            sol = sopt_balknap(ins, BalknapParams().set_params(algo.args), info);
             if (info.check_time())
                 ub = sol.profit();
         };
     } else if (algo.name == "balknap_combo") {
         return [](Instance& ins, Solution& sol, Profit& ub, std::mt19937_64&, Info info) {
-            sol = Balknap(ins, BalknapParams::combo()).run(info);
+            sol = sopt_balknap(ins, BalknapParams::combo(), info);
             if (info.check_time())
                 ub = sol.profit();
         };
     } else if (algo.name == "minknap") { // Minknap
         return [algo](Instance& ins, Solution& sol, Profit& ub, std::mt19937_64&, Info info) {
-            sol = Minknap(ins, MinknapParams().set_params(algo.args)).run(info);
+            sol = sopt_minknap(ins, MinknapParams().set_params(algo.args), info);
             if (info.check_time())
                 ub = sol.profit();
         };
     } else if (algo.name == "minknap_combo" || algo.name == "combo") {
         return [](Instance& ins, Solution& sol, Profit& ub, std::mt19937_64&, Info info) {
-            sol = Minknap(ins, MinknapParams::combo()).run(info);
+            sol = sopt_minknap(ins, MinknapParams::combo(), info);
             if (info.check_time())
                 ub = sol.profit();
         };
