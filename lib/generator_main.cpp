@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
     namespace po = boost::program_options;
 
     // Parse program options
-    GenerateData data;
+    Generator data;
     std::string output_file = "";
     std::string plot_file = "";
     po::options_description desc("Allowed options");
@@ -18,14 +18,16 @@ int main(int argc, char *argv[])
         (",t", po::value<std::string>(&data.t)->required(), "set instance type (u, wc, sc, isc, asc, ss, sw, mstr, pceil, circle)")
         (",n", po::value<ItemIdx>(&data.n)->required(), "set item number")
         (",r", po::value<Profit>(&data.r), "set R")
-        ("ka,", po::value<Profit>(&data.k1), "set k1 (for mstr instances)")
-        ("kb,", po::value<Profit>(&data.k2), "set k2 (for mstr instances)")
+        ("k1", po::value<Profit>(&data.k1), "set k1 (for mstr instances)")
+        ("k2", po::value<Profit>(&data.k2), "set k2 (for mstr instances)")
         (",d", po::value<double>(&data.d), "set d (for mstr (6), pceil (3) and circle (3/2) instances)")
         (",H", po::value<int>(&data.h), "set h")
+        ("hmax", po::value<int>(&data.hmax), "set hmax")
         (",s", po::value<Seed>(&data.s), "set seed")
-        ("spanner,S", "set spanner")
-        ("normal,N", "set normal")
-        ("sigma,", po::value<Weight>(&data.sigma), "set sigma")
+        ("spanner", "set spanner")
+        ("normal", "set normal")
+        ("sigma0", po::value<double>(&data.sigma0), "set sigma0")
+        ("sigma", po::value<double>(&data.sigma), "set sigma")
         (",m", po::value<Profit>(&data.m), "set m (for spanner instances)")
         (",v", po::value<Profit>(&data.v), "set v (for spanner instances)")
         (",o", po::value<std::string>(&output_file), "set output file")
@@ -47,7 +49,7 @@ int main(int argc, char *argv[])
     data.normal = vm.count("normal");
 
     std::cout << data << std::endl;
-    Instance ins = generate(data);
+    Instance ins = data.generate();
 
     if (plot_file != "")
         ins.plot(plot_file);

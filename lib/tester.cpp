@@ -147,7 +147,7 @@ public:
             }
         }
 
-        GenerateData data;
+        Generator data;
         data.n = n;
         data.r = r;
         data.t = "u";
@@ -155,7 +155,7 @@ public:
         data.s = s;
 
         std::cout << "data " << data << std::endl;
-        return generate(data);
+        return data.generate();
     }
 
 private:
@@ -204,7 +204,7 @@ public:
             }
         }
 
-        GenerateData data;
+        Generator data;
         data.n = ns[ni];
         data.r = rs[ri];
         data.t = ts[ti];
@@ -212,7 +212,7 @@ public:
         data.s = s;
 
         std::cout << "data " << data << std::endl;
-        return generate(data);
+        return data.generate();
     }
 
 private:

@@ -9,131 +9,134 @@
 
 using namespace knapsack;
 
-std::ostream& knapsack::operator<<(std::ostream& os, const GenerateData& data)
+std::ostream& knapsack::operator<<(std::ostream& os, const Generator& data)
 {
     os << "n " << data.n;
     if (data.normal)
-        os << " w/normal sigma " << data.sigma;
+        os << " w/normal sigma " << data.sigma0;
     if (data.spanner) {
         os << " t spanner," << data.t << " v " << data.v << " m " << data.m;
     } else {
         os << " t " << data.t;
     }
-    if (data.t != "sw")
-        os << " r " << data.r;
+    os << " r " << data.r;
     if (data.t == "mstr")
-        os << " k1 " << data.k1 << " k2 " << data.k2;
-    if (data.t == "mstr" || data.t == "pceil" || data.t == "circle" || data.t == "normal")
+        os << " k1 " << data.k1 << " k2 " << data.k2 << " d " << data.d;
+    if (data.t == "normal")
+        os << " sigma " << data.sigma;
+    if (data.t == "pceil" || data.t == "circle")
         os << " d " << data.d;
     if (data.h != -1)
-        os << " h " << data.h;
-    if (data.s != 0)
-        os << " s " << data.s;
+        os << " h " << data.h << "/" << data.hmax;
+    os << " s " << data.s;
     return os;
 }
 
-std::pair<Weight, Profit> item(GenerateData& data)
+std::pair<Weight, Profit> Generator::item()
 {
     Weight w = -1;
     Profit p = -1;
-    if (!data.normal) {
-        std::uniform_int_distribution<Weight> d(1,data.r);
-        w = d(data.g);
+    if (!normal) {
+        std::uniform_int_distribution<Weight> dist(1, r);
+        w = dist(g);
     } else {
-        std::normal_distribution<double> d(data.r / 2, data.sigma);
-        w = std::min(data.r, std::max((Weight)1, (Weight)d(data.g)));
+        std::normal_distribution<double> dist(r / 2, sigma0);
+        do {
+            w = (Weight)dist(g);
+        } while (w < 1 || w > r);
     }
 
-    if (data.t == "u") {
-        std::uniform_int_distribution<Weight> d(1, data.r);
-        p = d(data.g);
-    } else if (data.t == "wc") {
-        std::uniform_int_distribution<Profit> d2(-(data.r + 1) / 10, data.r / 10);
-        p = std::max((Profit)1, w + d2(data.g));
-    } else if (data.t == "sc") {
-        p = w + data.r / 10;
-    } else if (data.t == "isc") {
+    if (t == "u") {
+        std::uniform_int_distribution<Weight> dist(1, r);
+        p = dist(g);
+    } else if (t == "wc") {
+        std::uniform_int_distribution<Profit> dist2(-(r + 1) / 10, r / 10);
+        p = std::max((Profit)1, w + dist2(g));
+    } else if (t == "sc") {
+        p = w + r / 10;
+    } else if (t == "isc") {
         p = w;
-        w = p + data.r / 10;
-    } else if (data.t == "asc") {
-        std::uniform_int_distribution<Profit> d2(-(data.r + 1) / 500, data.r / 500);
-        p = w + data.r / 10 + d2(data.g);
-    } else if (data.t == "ss") {
+        w = p + r / 10;
+    } else if (t == "asc") {
+        std::uniform_int_distribution<Profit> dist(-(r + 1) / 500, r / 500);
+        p = w + r / 10 + dist(g);
+    } else if (t == "ss") {
         p = w;
-    } else if (data.t == "sw") {
-        if (!data.normal) {
-            std::uniform_int_distribution<Weight> d(data.r, data.r + data.r / 1000);
-            w = d(data.g);
+    } else if (t == "sw") {
+        if (!normal) {
+            std::uniform_int_distribution<Weight> dist(r, r + r / 1000);
+            w = dist(g);
         } else {
-            std::normal_distribution<double> d(data.r + data.r / 2000, data.sigma);
-            w = d(data.g);
+            std::normal_distribution<double> dist(r + r / 2000, sigma);
+            w = dist(g);
         }
-        std::uniform_int_distribution<Profit> d2(1, data.r / 100);
-        p = d2(data.g);
-    } else if (data.t == "mstr") {
-        p = (w % (Profit)data.d == 0)? w + data.k1: w + data.k2;
-    } else if (data.t == "pceil") {
-        p = data.d * ((w - 1) / (Profit)data.d + 1);
-    } else if (data.t == "circle") {
-        p = data.d * sqrt(4 * data.r * data.r - (w - 2 * data.r) * (w - 2 * data.r));
-    } else if (data.t == "normal") {
-        std::normal_distribution<double> d(w, data.d);
-        p = std::min(data.r, std::max((Profit)1, w + (Profit)d(data.g)));
+        std::uniform_int_distribution<Profit> dist2(1, r / 100);
+        p = dist2(g);
+    } else if (t == "mstr") {
+        p = (w % (Profit)d == 0)? w + k1: w + k2;
+    } else if (t == "pceil") {
+        p = d * ((w - 1) / (Profit)d + 1);
+    } else if (t == "circle") {
+        p = d * sqrt(4 * r * r - (w - 2 * r) * (w - 2 * r));
+    } else if (t == "normal") {
+        std::normal_distribution<double> dist(w, sigma);
+        do {
+            p = (Profit)dist(g);
+        } while (p < 1 || p > r);
     } else {
         exit(1);
     }
     return {w, p};
 }
 
-Instance generate_standard(GenerateData& data)
+Instance Generator::generate_standard()
 {
-    Instance ins(data.n, 0);
+    Instance ins(n, 0);
 
     Weight wsum = 0;
     Weight wmax = 0;
-    for (ItemIdx j=0; j<data.n; ++j) {
-        auto wp = item(data);
+    for (ItemIdx j=0; j<n; ++j) {
+        auto wp = item();
         ins.add_item(wp.first, wp.second);
         wsum += wp.first;
         wmax = std::max(wmax, wp.first);
     }
-    ins.set_capacity(std::max(wmax, (data.h * wsum) / 100));
+    ins.set_capacity(std::max(wmax, (h * wsum) / (hmax + 1)));
     return ins;
 }
 
-Instance generate_spanner(GenerateData& data)
+Instance Generator::generate_spanner()
 {
     std::vector<std::pair<Weight, Profit>> vec;
-    for (ItemIdx j=0; j<data.v; ++j) {
-        auto wp = item(data);
-        Weight w = (2 * wp.first  - 1 + data.m) / data.m;
-        Weight p = (2 * wp.second - 1 + data.m) / data.m;
+    for (ItemIdx j=0; j<v; ++j) {
+        auto wp = item();
+        Weight w = (2 * wp.first  - 1 + m) / m;
+        Weight p = (2 * wp.second - 1 + m) / m;
         vec.push_back({w, p});
     }
 
-    Instance ins(data.n, 0);
+    Instance ins(n, 0);
     ItemIdx i = 0;
-    std::uniform_int_distribution<Cpt> dist(1, data.m);
+    std::uniform_int_distribution<Cpt> dist(1, m);
     Weight wsum = 0;
     Weight wmax = 0;
-    while (ins.item_number() < data.n) {
+    while (ins.item_number() < n) {
         auto wp = vec[i];
-        i = (i + 1) % data.v;
-        ItemIdx a = dist(data.g);
+        i = (i + 1) % v;
+        ItemIdx a = dist(g);
         Weight w = a * wp.first;
         Profit p = a * wp.second;
         ins.add_item(w, p);
         wsum += wp.first;
         wmax = std::max(wmax, w);
     }
-    ins.set_capacity(std::max(wmax, (data.h * wsum) / 101));
+    ins.set_capacity(std::max(wmax, (h * wsum) / (hmax + 1)));
     return ins;
 }
 
-Instance knapsack::generate(GenerateData data)
+Instance Generator::generate()
 {
-    data.g.seed(data.s);
-    Instance ins = (data.spanner)? generate_spanner(data): generate_standard(data);
-    return ins;
+    g.seed(s);
+    return (spanner)? generate_spanner(): generate_standard();
 }
 

@@ -30,7 +30,6 @@ Examples:
 - `-n 100 -t mstr -r 1000 -k1 300 -k2 200 -d 6`
 - `-n 100 -t pceil -r 1000 -d 3`
 - `-n 100 -t circle -r 1000 -d 0.66`
-- `-n 100 --normal --sigma 50 -t normal -r 1000 -d 50`
 
 Solve:
 ```
@@ -122,8 +121,7 @@ Algorithms:
 
 Bench:
 ```
-bazel build --cxxopt='-std=c++14' --compilation_mode=opt -- //lib:bench
-./bazel-bin/lib/bench -a minknap_combo --easy --difficult-small --difficult-large
+bazel run //lib:bench -- -a minknap_combo -d easy difficult-small difficult-large
 ```
 
 ### Dynamic Programming: recursive vs iterative implementation

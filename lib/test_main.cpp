@@ -9,13 +9,13 @@ int main(int argc, char *argv[])
     (void)argc;
     (void)argv;
 
-    GenerateData data;
+    Generator data;
     data.n = 2000;
     data.t = "asc";
     data.r = 100000;
     data.h = 80;
     data.s = 102080;
-    Instance ins = generate(data);
+    Instance ins = data.generate();
     //std::cout << ins << std::endl;
 
     Info info = Info()

@@ -101,13 +101,13 @@ TEST(minknap, MEDIUM) { test(MEDIUM, f); }
 
 TEST(minknap, TEST1)
 {
-    GenerateData data;
+    Generator data;
     data.n = 500;
     data.t = "asc";
     data.r = 10000;
     data.h = 31;
     data.s = 10531;
-    Instance ins = generate(data);
+    Instance ins = data.generate();
     Info info = Info()
         //.set_verbose(true)
         //.set_log2stderr(true)
@@ -118,13 +118,13 @@ TEST(minknap, TEST1)
 
 TEST(minknap, TEST2)
 {
-    GenerateData data;
+    Generator data;
     data.n = 1000;
     data.t = "wc";
     data.r = 10000;
     data.h = 6;
     data.s = 11006;
-    Instance ins = generate(data);
+    Instance ins = data.generate();
     Info info = Info()
         //.set_verbose(true)
         ;
