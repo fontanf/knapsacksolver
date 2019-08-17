@@ -27,7 +27,7 @@ bazel build -- //lib:generator_main
 Examples:
 - `-n 100 -t u/wc/sc/isc/asc/ss/sw -r 1000`
 - `-n 100 --spanner -t u/wc/sc/isc/asc/ss/sw -r 1000 -v 2 -m 10`
-- `-n 100 -t mstr -r 1000 -k1 300 -k2 200 -d 6`
+- `-n 100 -t mstr -r 1000 -ka 300 -kb 200 -d 6`
 - `-n 100 -t pceil -r 1000 -d 3`
 - `-n 100 -t circle -r 1000 -d 0.66`
 
@@ -167,10 +167,10 @@ The Knapsack Problem is NP-complete since it contains the Subset Sum Problem as 
 | Algorithm                               | Instances                                                                                                                                                          |
 | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `expknap`                               | ![easy](bench/expknap_easy.csv),        ![difficult large](bench/expknap_difficult-large.csv),        ![difficult small](bench/expknap_difficult-small.csv)        |
-| `expknap c 1 s 20000 g 50000`           | ![easy](bench/expknap_combo_easy.csv),  ![difficult large](bench/expknap_combo_difficult-large.csv),  ![difficult small](bench/expknap_combo_difficult-small.csv)  |
+| `expknap_combo`                         | ![easy](bench/expknap_combo_easy.csv),  ![difficult large](bench/expknap_combo_difficult-large.csv),  ![difficult small](bench/expknap_combo_difficult-small.csv)  |
 | `minknap`                               | ![easy](bench/minknap_easy.csv),        ![difficult large](bench/minknap_difficult-large.csv),        ![difficult small](bench/minknap_difficult-small.csv)        |
-| `minknap c 1 s 2000 p 10000` (`combo`)  | ![easy](bench/minknap_combo_easy.csv),  ![difficult large](bench/minknap_combo_difficult-large.csv),  ![difficult small](bench/minknap_combo_difficult-small.csv)  |
-| `balknap u t g 0`                       | ![easy](bench/balknap_t_easy.csv),      ![difficult large](bench/balknap_t_difficult-large.csv),      ![difficult small](bench/balknap_t_difficult-small.csv)      |
+| `combo`                                 | ![easy](bench/minknap_combo_easy.csv),  ![difficult large](bench/minknap_combo_difficult-large.csv),  ![difficult small](bench/minknap_combo_difficult-small.csv)  |
+| `balknap`                               | ![easy](bench/balknap_t_easy.csv),      ![difficult large](bench/balknap_t_difficult-large.csv),      ![difficult small](bench/balknap_t_difficult-small.csv)      |
 
 Remarks:
 - Spanner instances are among the worst cases of the `minknap` recursion, since many items of the break solution won't be in an optimal solution. It is interesting to note that the `bellman` recursion performs better ![on those instances](bench/bellman_list_sort_difficult-small.csv). However, the worst case of the `bellman` recursion is worse than the worst case of the `minknap` recursion.
