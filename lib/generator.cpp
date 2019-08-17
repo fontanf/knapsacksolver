@@ -13,7 +13,7 @@ std::ostream& knapsack::operator<<(std::ostream& os, const Generator& data)
 {
     os << "n " << data.n;
     if (data.normal)
-        os << " w/normal sigma " << data.sigma0;
+        os << " w/normal dw " << data.dw;
     if (data.spanner) {
         os << " t spanner," << data.t << " v " << data.v << " m " << data.m;
     } else {
@@ -23,12 +23,13 @@ std::ostream& knapsack::operator<<(std::ostream& os, const Generator& data)
     if (data.t == "mstr")
         os << " k1 " << data.k1 << " k2 " << data.k2 << " d " << data.d;
     if (data.t == "normal")
-        os << " sigma " << data.sigma;
+        os << " d " << data.d;
     if (data.t == "pceil" || data.t == "circle")
         os << " d " << data.d;
     if (data.h != -1)
         os << " h " << data.h << "/" << data.hmax;
-    os << " s " << data.s;
+    if (data.s != -1)
+        os << " s " << data.s;
     return os;
 }
 
@@ -40,7 +41,7 @@ std::pair<Weight, Profit> Generator::item()
         std::uniform_int_distribution<Weight> dist(1, r);
         w = dist(g);
     } else {
-        std::normal_distribution<double> dist(r / 2, sigma0);
+        std::normal_distribution<double> dist(r / 2, (double)r / dw);
         do {
             w = (Weight)dist(g);
         } while (w < 1 || w > r);
@@ -67,7 +68,7 @@ std::pair<Weight, Profit> Generator::item()
             std::uniform_int_distribution<Weight> dist(r, r + r / 1000);
             w = dist(g);
         } else {
-            std::normal_distribution<double> dist(r + r / 2000, sigma);
+            std::normal_distribution<double> dist(r + r / 2000, (double)r / dw);
             w = dist(g);
         }
         std::uniform_int_distribution<Profit> dist2(1, r / 100);
@@ -79,7 +80,7 @@ std::pair<Weight, Profit> Generator::item()
     } else if (t == "circle") {
         p = d * sqrt(4 * r * r - (w - 2 * r) * (w - 2 * r));
     } else if (t == "normal") {
-        std::normal_distribution<double> dist(w, sigma);
+        std::normal_distribution<double> dist(w, (double)w / d);
         do {
             p = (Profit)dist(g);
         } while (p < 1 || p > r);

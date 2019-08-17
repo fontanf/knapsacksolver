@@ -12,7 +12,7 @@ typedef int_fast64_t Seed;
  *
  * Weights:
  * wj ~ U[1, r]                     if !normal
- *    ~ N(r / 2, sigma0), wj >= 1   otherwise
+ *    ~ N(r / 2, r / dw), wj >= 1   otherwise
  *
  * The profits depend on the value of t:
  * - "u" (uniform)
@@ -22,7 +22,7 @@ typedef int_fast64_t Seed;
  * - "sc" (strongly correlated)
  *      pj = wj + r / 10
  * - "isc" (inverse strongly correlated)
- *      pj ~ U(1, r) if !normal else pj ~ N(r / 2, sigma), pj >= 1
+ *      pj ~ U(1, r) if !normal else pj ~ N(r / 2, r / dw), pj >= 1
  *      wj = wj - r / 10
  * - "asc" (almost strongly correlated)
  *      pj ~ U(wj + r / 10 - r / 500, wj + r / 10 - r / 500)
@@ -39,7 +39,7 @@ typedef int_fast64_t Seed;
  * - "circle" (circle)
  *      pj = d sqrt(4r^2 - (wj - 2r)^2)
  * - "normal" (normal)
- *      pj ~ N(r / 2, sigma)
+ *      pj ~ N(r / 2, r / d)
  *
  * If spanner == true, v items with
  *      wj0 ~ U(1, r)
@@ -66,10 +66,9 @@ public:
 
     ItemIdx n = 1000;
     bool normal = false;
-    double sigma0 = 100;
+    double dw = 10;
     std::string t = "u";
     Profit r = 1000;
-    double sigma = 100;
     ItemIdx v = 2;
     Profit m = 10;
     ItemIdx k1 = 300; // 3*R / 10
@@ -80,7 +79,18 @@ public:
     int hmax = 100;
     Seed s = 0;
 
-    static Generator gen_spanner(std::string type, Profit r, ItemIdx v, Profit m)
+    /**
+     * t: "u", "wc", "sc", "isc", "asc", "sw" or "ss"
+     */
+    static Generator classical_generator(std::string type, Profit r)
+    {
+        Generator d;
+        d.r = r;
+        d.t = type;
+        return d;
+    };
+
+    static Generator spanner_generator(std::string type, Profit r, ItemIdx v, Profit m)
     {
         Generator d;
         d.r = r;
@@ -91,7 +101,7 @@ public:
         return d;
     };
 
-    static Generator gen_mstr(Profit r, ItemIdx k1, ItemIdx k2, double d)
+    static Generator mstr_generator(Profit r, ItemIdx k1, ItemIdx k2, double d)
     {
         Generator data;
         data.t = "mstr";
@@ -102,7 +112,7 @@ public:
         return data;
     };
 
-    static Generator gen_pceil(Profit r, double d)
+    static Generator pceil_generator(Profit r, double d)
     {
         Generator data;
         data.t = "pceil";
@@ -111,7 +121,7 @@ public:
         return data;
     };
 
-    static Generator gen_circle(Profit r, double d)
+    static Generator circle_generator(Profit r, double d)
     {
         Generator data;
         data.t = "circle";
@@ -120,12 +130,12 @@ public:
         return data;
     };
 
-    static Generator gen_normal(Profit r, double d)
+    static Generator normal_generator(Profit r, double d = 10)
     {
         Generator data;
         data.normal = true;
-        data.sigma0 = d;
-        data.sigma = d;
+        data.dw = d;
+        data.d = d;
         data.t = "normal";
         data.r = r;
         data.d = d;

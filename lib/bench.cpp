@@ -6,198 +6,91 @@
 
 using namespace knapsack;
 
-double bench(func f, Generator d, std::mt19937_64& gen, bool verbose = false)
+void bench(
+        std::string algorithm,
+        std::string dataset_name,
+        std::vector<std::pair<std::string, Generator>>& dataset,
+        std::mt19937_64& gen,
+        ItemIdx n_max = 10000,
+        bool verbose = false)
 {
-    double t_max = 300;
-    double t_total = 0.0;
-    std::cout << d << std::flush;
-    for (d.h=1; d.h<=d.hmax; ++d.h) {
-        d.s = d.n + d.r + d.h;
-        if (verbose)
-            std::cout << std::endl << d << std::endl;
-        Instance ins = d.generate();
-        Solution sol(ins);
-        Profit ub = INT_MAX;
-        Info info = Info()
-            .set_timelimit(t_max - t_total)
-            .set_verbose(verbose)
-            ;
-        try {
-            f(ins, sol, ub, gen, info);
-            double t = info.elapsed_time();
-            t_total += t;
-            if (t_total > t_max) {
+    std::ofstream file(algorithm + "_" + dataset_name + ".csv");
+    func f = get_algorithm(algorithm);
+    std::vector<int8_t> ok(dataset.size(), 1);
+
+    file << "n \\ ds";
+    for (auto& p: dataset)
+        file << "," << p.first;
+    file << std::endl;
+
+    for (ItemIdx n: {50,
+            100, 200, 500,
+            1000, 2000, 5000,
+            10000, 20000, 50000,
+            100000, 200000, 500000,
+            1000000}) {
+        if (n > n_max)
+            break;
+        file << n << std::flush;
+        for (Cpt k=0; k<(Cpt)dataset.size(); ++k) {
+            Generator& d = dataset[k].second;
+            d.n = n;
+            std::cout << d << "..." << std::flush;
+
+            double t_max = 300;
+            double t_total = 0.0;
+            double mean = -1;
+            if (ok[k]) {
+                for (d.h=1; d.h<=d.hmax && ok[k]; ++d.h) {
+                    d.s = d.n + d.r + d.h;
+                    if (verbose)
+                        std::cout << std::endl << d << std::endl;
+                    Instance ins = d.generate();
+                    Solution sol(ins);
+                    Profit ub = INT_MAX;
+                    Info info = Info()
+                        .set_timelimit(t_max - t_total)
+                        .set_verbose(verbose)
+                        ;
+                    try {
+                        f(ins, sol, ub, gen, info);
+                        double t = info.elapsed_time();
+                        t_total += t;
+                        if (t_total > t_max) {
+                            ok[k] = 0;
+                            mean = -1;
+                        }
+                    } catch (...) {
+                        std::cout << " x" << std::endl;
+                        std::cout << std::endl << d << std::flush;
+                        Instance ins = d.generate();
+                        Info info = Info()
+                            .set_timelimit(t_max - t_total)
+                            .set_verbose(true)
+                            .set_log2stderr(true)
+                            ;
+                        f(ins, sol, ub, gen, info);
+                        exit(1);
+                        mean = -1;
+                    }
+                }
+                d.h = -1;
+                d.s = -1;
+
+                mean = round(t_total * 100) / 10;
                 if (verbose) {
                     std::cout << std::endl;
                 } else {
                     std::cout << " ";
                 }
-                std::cout << "mean > " << t_max*10 << std::endl;
-                return -1;
             }
-        } catch (...) {
-            std::cout << " x" << std::endl;
-            std::cout << std::endl << d << std::flush;
-            Instance ins = d.generate();
-            Info info = Info()
-                .set_timelimit(t_max - t_total)
-                .set_verbose(true)
-                .set_log2stderr(true)
-                ;
-            f(ins, sol, ub, gen, info);
-            exit(1);
-            return -1;
-        }
-    }
-    d.h = -1;
 
-    double mean = round(t_total * 100) / 10;
-    if (verbose) {
-        std::cout << std::endl;
-    } else {
-        std::cout << " ";
-    }
-    std::cout << "mean " << mean << std::endl;
-    return mean;
-}
-
-void bench_easy(std::string algorithm, std::mt19937_64& gen, bool verbose = false)
-{
-    std::ofstream file(algorithm + "_easy.csv");
-    func f = get_algorithm(algorithm);
-    Generator d;
-    std::vector<std::pair<std::string, Profit>> vec {
-        {"u",   1000}, {"u",   10000},
-        {"wc",  1000}, {"wc",  10000},
-        {"sc",  1000}, {"sc",  10000},
-        {"isc", 1000}, {"isc", 10000},
-        {"asc", 1000}, {"asc", 10000},
-        {"ss",  1000}, {"ss",  10000},
-        {"sw", 100000}};
-
-    file << "n \\ Type R,U 10^3,U 10^4,WC 10^3,WC 10^4,SC 10^3,SC 10^4,ISC 10^3,ISC 10^4,ASC 10^3,ASC 10^4,SS 10^3,SS 10^4,SW 10^5" << std::endl;
-    for (ItemIdx n: {50, 100, 200, 500, 1000, 2000, 5000, 10000}) {
-        d.n = n;
-        file << n << std::flush;
-        for (auto p: vec) {
-            d.t = p.first;
-            d.r = p.second;
-            double res = bench(f, d, gen, verbose);
-            if (res < 0) {
-                file << ",x" << std::flush;
+            if (ok[k]) {
+                std::cout << "mean " << mean << std::endl;
+                file << "," << mean << std::flush;
             } else {
-                file << "," << res << std::flush;
-            }
-        }
-        file << std::endl;
-    }
-    std::cout << std::endl;
-    file << std::endl;
-    file.close();
-}
-
-void bench_difficult_large(std::string algorithm, std::mt19937_64& gen, bool verbose = false)
-{
-    std::ofstream file(algorithm + "_difficult-large.csv");
-    func f = get_algorithm(algorithm);
-    Generator d;
-    std::vector<std::pair<std::string, Profit>> vec {
-        {"u",   100000}, {"u",   1000000}, {"u",   10000000},
-        {"wc",  100000}, {"wc",  1000000}, {"wc",  10000000},
-        {"sc",  100000}, {"sc",  1000000}, {"sc",  10000000},
-        {"isc", 100000}, {"isc", 1000000}, {"isc", 10000000},
-        {"asc", 100000}, {"asc", 1000000}, {"asc", 10000000},
-        {"ss",  100000}, {"ss",  1000000}, {"ss",  10000000},
-                                           {"sw",  10000000}, {"sw", 100000000}};
-
-    file << "n \\ Type R"
-        ",U 10^5,U 10^6,U 10^7"
-        ",WC 10^5,WC 10^6,WC 10^7"
-        ",SC 10^5,SC 10^6,SC 10^7"
-        ",ISC 10^5,ISC 10^6,ISC 10^7"
-        ",ASC 10^5,ASC 10^6,ASC 10^7"
-        ",SS 10^5,SS 10^6,SS 10^7"
-        ",SW 10^7,SW 10^8"
-        << std::endl;
-    for (ItemIdx n: {50, 100, 200, 500, 1000, 2000, 5000, 10000}) {
-        d.n = n;
-        file << n << std::flush;
-        for (auto p: vec) {
-            d.t = p.first;
-            d.r = p.second;
-            double res = bench(f, d, gen, verbose);
-            if (res < 0) {
+                std::cout << "mean > " << t_max * 10 << std::endl;
                 file << ",x" << std::flush;
-            } else {
-                file << "," << res << std::flush;
-            }
-        }
-        file << std::endl;
-    }
-    std::cout << std::endl;
-    file << std::endl;
-    file.close();
-}
-
-void bench_difficult_small(std::string algorithm, std::mt19937_64& gen, bool verbose = false)
-{
-    std::ofstream file(algorithm + "_difficult-small.csv");
-    func f = get_algorithm(algorithm);
-    std::vector<Generator> vec {
-        Generator::gen_spanner("u", 1000, 2, 10),
-        Generator::gen_spanner("wc", 1000, 2, 10),
-        Generator::gen_spanner("sc", 1000, 2, 10),
-        Generator::gen_mstr(1000, 300, 200, 6),
-        Generator::gen_pceil(1000, 3),
-        Generator::gen_circle(1000, 2.0/3),
-        };
-
-    file << "n \\ Type"
-        ",SP U 2 10,SP WC 2 10,SP SC 2 10"
-        ",MSTR 3R/10 2R/10 6,PCEIL 3,CIRCLE 2/3"
-        << std::endl;
-    for (ItemIdx n: {50, 100, 200, 500, 1000, 2000, 5000, 10000}) {
-        file << n << std::flush;
-        for (Generator d: vec) {
-            d.n = n;
-            double res = bench(f, d, gen, verbose);
-            if (res < 0) {
-                file << ",x" << std::flush;
-            } else {
-                file << "," << res << std::flush;
-            }
-        }
-        file << std::endl;
-    }
-    std::cout << std::endl;
-    file << std::endl;
-    file.close();
-}
-
-void bench_miscellaneous(std::string algorithm, std::mt19937_64& gen, bool verbose = false)
-{
-    std::ofstream file(algorithm + "_miscellaneous.csv");
-    func f = get_algorithm(algorithm);
-    std::vector<Generator> vec {
-        Generator::gen_spanner("u", 10000, 2, 10),
-        Generator::gen_spanner("wc", 10000, 2, 10),
-        Generator::gen_spanner("sc", 10000, 2, 10),
-        Generator::gen_mstr(10000, 3000, 2000, 6),
-        Generator::gen_pceil(10000, 3),
-        Generator::gen_circle(10000, 2.0/3),
-    };
-
-    file << "n \\ Type,N 100,N 100,"
-        << std::endl;
-    for (ItemIdx n: {50, 100, 200, 500, 1000, 2000, 5000, 10000}) {
-        file << n << std::flush;
-        for (Generator d: vec) {
-            d.n = n;
-            double res = bench(f, d, gen, verbose);
-            if (res < 0) {
-                file << ",x" << std::flush;
-            } else {
-                file << "," << res << std::flush;
             }
         }
         file << std::endl;
@@ -212,15 +105,15 @@ int main(int argc, char *argv[])
     namespace po = boost::program_options;
 
     // Parse program options
-    std::string algorithm = "bellman_array";
+    std::vector<std::string> algorithms;
     std::vector<std::string> datasets;
 
     po::options_description desc("Allowed options");
     desc.add_options()
         ("help,h", "produce help message")
-        ("algorithm,a", po::value<std::string>(&algorithm), "set algorithm")
+        ("algorithm,a", po::value<std::vector<std::string>>(&algorithms)->multitoken(), "set algorithms")
+        ("datasets,d", po::value<std::vector<std::string>>(&datasets)->multitoken(), "datasets (easy, difficultlarge, difficultsmall)")
         ("verbose,v", "")
-        ("datasets,d", po::value<std::vector<std::string>>(&datasets)->multitoken(), "datasets (easy, difficult-large, difficult-small)")
         ;
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -238,16 +131,77 @@ int main(int argc, char *argv[])
     Seed seed = 0;
     std::mt19937_64 gen(seed);
 
+    std::vector<std::pair<std::string, Generator>> dataset_easy {
+            {"u3", Generator::classical_generator("u", 1000)},
+            {"u4", Generator::classical_generator("u", 10000)},
+            {"wc3", Generator::classical_generator("wc", 1000)},
+            {"wc4", Generator::classical_generator("wc", 10000)},
+            {"sc3", Generator::classical_generator("sc", 1000)},
+            {"sc4", Generator::classical_generator("sc", 10000)},
+            {"isc3", Generator::classical_generator("isc", 1000)},
+            {"isc4", Generator::classical_generator("isc", 10000)},
+            {"asc3", Generator::classical_generator("asc", 1000)},
+            {"asc4", Generator::classical_generator("asc", 10000)},
+            {"ss3", Generator::classical_generator("ss", 1000)},
+            {"ss4", Generator::classical_generator("ss", 10000)},
+            {"sw5", Generator::classical_generator("sw", 100000)},
+    };
+
+    std::vector<std::pair<std::string, Generator>> dataset_difficultlarge {
+            {"u5", Generator::classical_generator("u", 100000)},
+            {"u6", Generator::classical_generator("u", 1000000)},
+            {"u7", Generator::classical_generator("u", 10000000)},
+            {"wc5", Generator::classical_generator("wc", 100000)},
+            {"wc6", Generator::classical_generator("wc", 1000000)},
+            {"wc7", Generator::classical_generator("wc", 10000000)},
+            {"sc5", Generator::classical_generator("sc", 100000)},
+            {"sc6", Generator::classical_generator("sc", 1000000)},
+            {"sc7", Generator::classical_generator("sc", 10000000)},
+            {"isc5", Generator::classical_generator("isc", 100000)},
+            {"isc6", Generator::classical_generator("isc", 1000000)},
+            {"isc7", Generator::classical_generator("isc", 10000000)},
+            {"asc5", Generator::classical_generator("asc", 100000)},
+            {"asc6", Generator::classical_generator("asc", 1000000)},
+            {"asc7", Generator::classical_generator("asc", 10000000)},
+            {"ss5", Generator::classical_generator("ss", 100000)},
+            {"ss6", Generator::classical_generator("ss", 1000000)},
+            {"ss7", Generator::classical_generator("ss", 10000000)},
+            {"sw6", Generator::classical_generator("sw", 1000000)},
+            {"sw7", Generator::classical_generator("sw", 10000000)},
+            {"sw8", Generator::classical_generator("sw", 100000000)},
+    };
+
+    std::vector<std::pair<std::string, Generator>> dataset_difficultsmall {
+            {"sp/u3", Generator::spanner_generator("u", 1000, 2, 10)},
+            {"sp/wc3", Generator::spanner_generator("wc", 1000, 2, 10)},
+            {"sp/sc3", Generator::spanner_generator("sc", 1000, 2, 10)},
+            {"mstr3", Generator::mstr_generator(1000, 300, 200, 6)},
+            {"pceil3", Generator::pceil_generator(1000, 3)},
+            {"circle3", Generator::circle_generator(1000, 2.0/3)},
+    };
+
+    std::vector<std::pair<std::string, Generator>> dataset_normal {
+            {"n3", Generator::normal_generator(1000) },
+            {"n4", Generator::normal_generator(10000)},
+            {"n5", Generator::normal_generator(100000)},
+            {"n6", Generator::normal_generator(1000000)},
+            {"n7", Generator::normal_generator(10000000)},
+            {"n8", Generator::normal_generator(100000000)},
+    };
+
     bool verbose = vm.count("verbose");
-    for (std::string dataset: datasets) {
-        if (dataset == "easy") {
-            bench_easy(algorithm, gen, verbose);
-        } else if (dataset == "difficult-small") {
-            bench_difficult_small(algorithm, gen, verbose);
-        } else if (dataset == "difficult-large") {
-            bench_difficult_large(algorithm, gen, verbose);
-        } else if (dataset == "miscellaneous") {
-            bench_miscellaneous(algorithm, gen, verbose);
+    for (std::string algorithm: algorithms) {
+        std::cout << "*** " << algorithm << " ***" << std::endl;
+        for (std::string dataset: datasets) {
+            if (dataset == "easy") {
+                bench(algorithm, "easy", dataset_easy, gen, 10000, verbose);
+            } else if (dataset == "difficultsmall") {
+                bench(algorithm, "difficultsmall", dataset_difficultsmall, gen, 10000, verbose);
+            } else if (dataset == "difficultlarge") {
+                bench(algorithm, "difficultlarge", dataset_difficultlarge, gen, 10000, verbose);
+            } else if (dataset == "normal") {
+                bench(algorithm, "normal", dataset_normal, gen, 1000000, verbose);
+            }
         }
     }
 

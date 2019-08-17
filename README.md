@@ -94,7 +94,7 @@ https://github.com/fontanf/gap/blob/master/lb_lagrelax_lbfgs/lagrelax_lbfgs.cpp
 Algorithms:
 - Dynamic programming with Bellman recursion
   - Top-down (recursive): `-a bellmanrec_array` :heavy_check_mark:
-  - Bottom-up (iterative), array: `-a bellman_array` :heavy_check_mark: `-a bellman_array_all` :heavy_check_mark: `-a bellman_array_one` :heavy_check_mark: `-a bellman_array_part k 64` :heavy_check_mark: `-a bellman_array_rec` :heavy_check_mark:
+  - Bottom-up (iterative), array: `-a bellman_array` :heavy_check_mark: `-a bellman_array_all` :heavy_check_mark: `-a bellman_array_one` :heavy_check_mark: `-a bellman_array_part` :heavy_check_mark: `-a bellman_array_rec` :heavy_check_mark:
   - Bottom-up (iterative), lists: `-a bellman_list` :heavy_check_mark: `-a bellman_list_sort` :heavy_check_mark: `-a bellman_list_rec` :heavy_check_mark:
   - Bottom-up (iterative), array, parallel: `-a bellmanpar_array` :heavy_check_mark:
 - Dynamic programming by Profits `-a dpprofits_array` :heavy_check_mark: `-a dpprofits_array_all` :heavy_check_mark:
@@ -118,10 +118,13 @@ Algorithms:
 
 - Processor: Intel® Core™ i5-8500 CPU @ 3.00GHz × 6
 - Time limit: 3000s for each cell.
+- Lines correspond to different values of item numbers (50, 100...).
+- Column correspond to distribution for the weights and profits (n, u, wc...) and their range (3 means 1000, 4 means 10000...).
+- Given a number of items, a range, and a distribution for the weights and profits, a cell contains the mean time (in ms) to solve 100 instances with these parameters and a capacity from 1% to 100% of the sum of all weights of the instance.
 
 Bench:
 ```
-bazel run //lib:bench -- -a minknap_combo -d easy difficult-small difficult-large
+bazel run //lib:bench -- -a minknap balknap -d normal easy difficultsmall difficultlarge
 ```
 
 ### Dynamic Programming: recursive vs iterative implementation
@@ -145,14 +148,28 @@ The parallel algorithm is implemented as follows: items are divided in two sets 
 - ![Sequencial](bench/bellman_array_easy.csv)
 - ![Parallel](bench/bellmanpar_array_easy.csv)
 
-### State of the art algorithms
+### Normal dataset
+
+All instances from the normal dataset that can fit into the computer's memory happen to be solved exactly by the `minknap` algorithm in less than a few seconds:
+* ![bellman_array_rec](bench/bellman_array_rec_normal.csv)
+* ![bellman_list_rec](bench/bellman_list_rec_normal.csv)
+* ![expknap](bench/expknap_normal.csv)
+* ![expknap_combo](bench/expknap_combo_normal.csv)
+* ![balknap](bench/balknap_normal.csv)
+* ![balknap_combo](bench/balknap_combo_normal.csv)
+* ![minknap](bench/minknap_normal.csv)
+* ![combo](bench/combo_normal.csv)
+
+### Hard dataset
+
+The Knapsack Problem is NP-complete since it contains the Subset Sum Problem as subproblem. Therefore, the hardest instances of the Knapasck Problem are the hard instances of the Subset Sum Problem. Still, researchers have tried to find some hard Knapsack instances that are not instances of the Subset Sum Problem. The `minknap` algorithm with `combo` improvments is able to solve all the hard instances from the litterature. Note that, interestingly, those improvements make it 5 times slower on the normal dataset. Furthermore, the code of `combo` is more complex, increasing the probability that it contains bugs. Therefore, for practical use, unless you know that your instances will be shaped like the ones from the hard dataset, I would recommend using `minknap` and not `combo`.
 
 | Algorithm                               | Instances                                                                                                                                                          |
 | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `expknap`                               | ![easy](bench/expknap_easy.csv),        ![difficult large](bench/expknap_difficult-large.csv),        ![difficult small](bench/expknap_difficult-small.csv)        |
-| `expknap c 1 s 20000 g 50000`          | ![easy](bench/expknap_combo_easy.csv),  ![difficult large](bench/expknap_combo_difficult-large.csv),  ![difficult small](bench/expknap_combo_difficult-small.csv)  |
+| `expknap c 1 s 20000 g 50000`           | ![easy](bench/expknap_combo_easy.csv),  ![difficult large](bench/expknap_combo_difficult-large.csv),  ![difficult small](bench/expknap_combo_difficult-small.csv)  |
 | `minknap`                               | ![easy](bench/minknap_easy.csv),        ![difficult large](bench/minknap_difficult-large.csv),        ![difficult small](bench/minknap_difficult-small.csv)        |
-| `minknap c 1 s 2000 p 10000` (`combo`) | ![easy](bench/minknap_combo_easy.csv),  ![difficult large](bench/minknap_combo_difficult-large.csv),  ![difficult small](bench/minknap_combo_difficult-small.csv)  |
+| `minknap c 1 s 2000 p 10000` (`combo`)  | ![easy](bench/minknap_combo_easy.csv),  ![difficult large](bench/minknap_combo_difficult-large.csv),  ![difficult small](bench/minknap_combo_difficult-small.csv)  |
 | `balknap u t g 0`                       | ![easy](bench/balknap_t_easy.csv),      ![difficult large](bench/balknap_t_difficult-large.csv),      ![difficult small](bench/balknap_t_difficult-small.csv)      |
 
 Remarks:
