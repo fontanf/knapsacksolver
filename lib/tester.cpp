@@ -36,6 +36,7 @@ public:
     virtual Instance next() = 0;
 };
 
+typedef std::vector<std::pair<Weight, Profit>> v;
 class TestInstances: public Instances
 {
 
@@ -49,72 +50,41 @@ public:
 
     Instance test_instance(Cpt i)
     {
-        Instance ins(0, 0);
         switch (i) {
         case 0: // 0 item
-            return ins;
+            return Instance(0, {});
         case 1: // 1 item
-            ins.set_capacity(8);
-            ins.add_items({{6, 8}});
-            return ins;
+            return Instance(8, {{6, 8}});
         case 2: // 2 items
-            ins.set_capacity(10);
-            ins.add_items({{9, 8}, {7, 6}});
-            return ins;
+            return Instance(10, {{9, 8}, {7, 6}});
         case 3:
-            ins.set_capacity(10);
-            ins.add_items({{9, 5}, {7, 6}});
-            return ins;
+            return Instance(10, {{9, 5}, {7, 6}});
         case 4:
-            ins.set_capacity(10);
-            ins.add_items({{5, 5}, {4, 6}});
-            return ins;
+            return Instance(10, {{5, 5}, {4, 6}});
         case 5:
-            ins.set_capacity(12);
-            ins.add_items({{5, 7}, {4, 5}, {3, 11}});
-            return ins;
+            return Instance(12, {{5, 7}, {4, 5}, {3, 11}});
         case 6:
-            ins.set_capacity(10);
-            ins.add_items({{5, 7}, {4, 5}, {3, 11}});
-            return ins;
+            return Instance(10, {{5, 7}, {4, 5}, {3, 11}});
         case 7:
-            ins.set_capacity(10);
-            ins.add_items({{1, 1}, {2, 2}, {9, 10}});
-            return ins;
+            return Instance(10, {{1, 1}, {2, 2}, {9, 10}});
         case 8: // 4 items
-            ins.set_capacity(95);
-            ins.add_items({{24, 34}, {42, 52}, {32, 42}, {4, 14}});
-            return ins;
+            return Instance(95, {{24, 34}, {42, 52}, {32, 42}, {4, 14}});
         case 9: // 5 items
-            ins.set_capacity(100);
-            ins.add_items({{10, 10}, {10, 15}, {10, 5}, {10, 12}, {10, 20}});
-            return ins;
+            return Instance(100, {{10, 10}, {10, 15}, {10, 5}, {10, 12}, {10, 20}});
         case 10:
-            ins.set_capacity(15);
-            ins.add_items({{6, 7}, {6, 7}, {5, 5}, {5, 5}, {5, 5}});
-            return ins;
+            return Instance(15, {{6, 7}, {6, 7}, {5, 5}, {5, 5}, {5, 5}});
         case 11:
-            ins.set_capacity(12);
-            ins.add_items({{3, 3}, {2, 2}, {4, 4}, {10, 9}, {10, 8}});
-            return ins;
+            return Instance(12, {{3, 3}, {2, 2}, {4, 4}, {10, 9}, {10, 8}});
         case 12: // 6 items
-            ins.set_capacity(25);
-            ins.add_items({{10, 100}, {6, 7}, {6, 7}, {5, 5}, {5, 5}, {5, 5}});
-            return ins;
+            return Instance(25, {{10, 100}, {6, 7}, {6, 7}, {5, 5}, {5, 5}, {5, 5}});
         case 13:
-            ins.set_capacity(1884);
-            ins.add_items({{829, 729}, {785, 685}, {710, 610}, {781, 681}, {128, 28}, {243, 143}});
-            return ins;
+            return Instance(1884, {{829, 729}, {785, 685}, {710, 610}, {781, 681}, {128, 28}, {243, 143}});
         case 14: // 7 items
-            ins.set_capacity(40);
-            ins.add_items({{11, 12}, {11, 12}, {11, 12}, {10, 10}, {10, 10}, {10, 10}, {10, 10}});
-            return ins;
+            return Instance(40, {{11, 12}, {11, 12}, {11, 12}, {10, 10}, {10, 10}, {10, 10}, {10, 10}});
         case 15:
-            ins.set_capacity(9);
-            ins.add_items({{2, 6}, {3, 5}, {6, 8}, {7, 9}, {5, 6}, {9, 7}, {4, 3}});
-            return ins;
+            return Instance(9, {{2, 6}, {3, 5}, {6, 8}, {7, 9}, {5, 6}, {9, 7}, {4, 3}});
         default:
-            return ins;
+            return Instance(0, {});
         }
     }
 
@@ -142,7 +112,7 @@ public:
                     r = 2;
                     n += 1;
                     if (n > n_max)
-                        return Instance(0, 0);
+                        return Instance(0, {});
                 }
             }
         }
@@ -198,7 +168,7 @@ public:
                         ti = 0;
                         ni += 1;
                         if (ni >= (Cpt)ns.size())
-                            return Instance(0, 0);
+                            return Instance(0, {});
                     }
                 }
             }
@@ -233,6 +203,7 @@ void test(Instances& inss, std::vector<Profit (*)(Instance&)> fs, TestType tt)
 {
     for (;;) {
         Instance ins(inss.next());
+        std::cout << ins << std::endl;
         bool b = test(ins, fs, tt);
         if (!b) {
             std::cout << "error" << std::endl;
@@ -240,6 +211,7 @@ void test(Instances& inss, std::vector<Profit (*)(Instance&)> fs, TestType tt)
         }
         if (ins.item_number() == 0)
             break;
+        std::cout << "toto" << std::endl;
     }
     std::cout << "ok" << std::endl;
 }

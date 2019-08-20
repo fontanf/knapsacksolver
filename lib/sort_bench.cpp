@@ -9,15 +9,18 @@ int main(int argc, char *argv[])
 
     ItemIdx n = 10000000;
     Weight c = 64 * n;
-    Instance ins_eff(n, c);
-    Instance ins_peff(n, c);
-    std::vector<std::pair<Weight, Profit>> wp;
-    for (ItemPos j=0; j<n; ++j)
-        wp.push_back({j,1});
-    std::random_shuffle(wp.begin(), wp.end());
+    Instance ins_eff;
+    Instance ins_peff;
+    ins_eff.set_capacity(c);
+    ins_peff.set_capacity(c);
 
-    ins_eff.add_items(wp);
-    ins_peff.add_items(wp);
+    std::vector<Weight> w(n);
+    std::iota(w.begin(), w.end(), 0);
+    std::random_shuffle(w.begin(), w.end());
+    for (Weight weight: w) {
+        ins_eff.add_item(weight, 1);
+        ins_peff.add_item(weight, 1);
+    }
 
     Info info_1;
     std::cout << "Conmplete sorting" << std::endl;
@@ -29,3 +32,4 @@ int main(int argc, char *argv[])
 
     return 0;
 }
+

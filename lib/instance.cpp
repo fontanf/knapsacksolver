@@ -9,28 +9,44 @@ using namespace knapsack;
 
 /****************************** Create instances ******************************/
 
-Instance::Instance() { }
+Instance::Instance(): f_(0), l_(-1) { }
 
-Instance::Instance(ItemIdx n, Weight c):
-    c_orig_(c), f_(0), l_(-1)
-{
-    items_.reserve(n);
-}
-
-ItemIdx Instance::add_item(Weight w, Profit p)
+void Instance::add_item(Weight w, Profit p)
 {
     ItemIdx j = items_.size();
     items_.push_back({j, w, p});
     l_ = j;
-    sol_opt_ = NULL;
-    sol_break_ = NULL;
-    return j;
 }
 
-void Instance::add_items(const std::vector<std::pair<Weight, Profit>>& wp)
+void Instance::clear()
 {
-    for (auto i: wp)
-        add_item(i.first, i.second);
+    items_.clear();
+    c_orig_ = 0;
+    sol_opt_ = NULL;
+    b_ = -1;
+    f_ = 0;
+    l_ = -1;
+    s_init_ = -1;
+    t_init_ = -1;
+    s_prime_ = -1;
+    t_prime_ = -1;
+    sort_type_ = 0;
+    int_right_.clear();
+    int_left_.clear();
+    sol_red_ = NULL;
+    sol_break_ = NULL;
+}
+
+Instance::Instance(Weight c, const std::vector<std::pair<Weight, Profit>>& wp):
+    c_orig_(c), f_(0), l_(-1)
+{
+    for (const auto& p: wp)
+        add_item(p.first, p.second);
+}
+
+void Instance::set_optimal_solution(Solution& sol)
+{
+    sol_opt_ = std::unique_ptr<Solution>(new Solution(sol));
 }
 
 Instance::Instance(std::string filepath, std::string format)
@@ -76,7 +92,7 @@ void Instance::read_subsetsum_standard(std::ifstream& file)
     file >> n >> c_orig_;
 
     f_ = 0;
-    l_ = n-1;
+    l_ = n - 1;
 
     items_.reserve(n);
     Weight w;
@@ -127,11 +143,6 @@ Instance Instance::reset(const Instance& instance)
     return ins;
 }
 
-void Instance::set_optimal_solution(Solution& sol)
-{
-    sol_opt_ = std::unique_ptr<Solution>(new Solution(sol));
-}
-
 bool Instance::check()
 {
     for (ItemPos j=0; j<item_number(); ++j)
@@ -141,28 +152,6 @@ bool Instance::check()
 }
 
 Instance::~Instance() { }
-
-Profit Instance::check(std::string cert_file)
-{
-    std::ifstream file(cert_file);
-    if (!file.is_open()) {
-        std::cerr << "\033[31m" << "ERROR, unable to open file \"" << cert_file << "\"" << "\033[0m" << std::endl;
-        return -1;
-    }
-
-    std::vector<int> so(total_item_number(), 0);
-    for (ItemPos j=0; j<total_item_number(); ++j)
-        file >> so[j];
-
-    Solution sol(*this);
-    for (ItemPos j=0; j<total_item_number(); ++j)
-        if (so[item(j).j] == 1)
-            sol.set(j, true);
-
-    if (sol.weight() > capacity())
-        return -1;
-    return sol.profit();
-}
 
 /******************************************************************************/
 

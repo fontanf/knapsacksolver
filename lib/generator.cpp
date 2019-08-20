@@ -92,8 +92,7 @@ std::pair<Weight, Profit> Generator::item()
 
 Instance Generator::generate_standard()
 {
-    Instance ins(n, 0);
-
+    Instance ins;
     Weight wsum = 0;
     Weight wmax = 0;
     for (ItemIdx j=0; j<n; ++j) {
@@ -116,7 +115,7 @@ Instance Generator::generate_spanner()
         vec.push_back({w, p});
     }
 
-    Instance ins(n, 0);
+    Instance ins;
     ItemIdx i = 0;
     std::uniform_int_distribution<Cpt> dist(1, m);
     Weight wsum = 0;

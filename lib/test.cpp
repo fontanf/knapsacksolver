@@ -9,8 +9,7 @@ using namespace knapsack;
 
 TEST(Instance, Sort)
 {
-    Instance instance(5, 100);
-    instance.add_items({
+    Instance instance(100, {
             {10, 10},
             {10, 15},
             {10, 5},
@@ -34,8 +33,7 @@ TEST(Instance, Sort)
 
 TEST(Instance, SortPartially)
 {
-    Instance instance(9, 4); // break item b = 3 (1, 3)
-    instance.add_items({
+    Instance instance(4, {
             {1, 1},
             {2, 1},
             {3, 1},
@@ -52,8 +50,7 @@ TEST(Instance, SortPartially)
 
 TEST(Instance, SortPartially2)
 {
-    Instance instance(9, 5);
-    instance.add_items({ // break item b = 3 (1, 3)
+    Instance instance(5, { // break item b = 3 (1, 3)
             {1, 1},
             {9, 1},
             {2, 1},
@@ -76,7 +73,7 @@ TEST(Instance, SortPartially3)
         for (Cpt h=1; h<100; ++h) {
             Weight wmax = d1(g);
             std::uniform_int_distribution<int> d2(1, wmax);
-            Instance ins(n, 0);
+            Instance ins;
             Weight wsum = 0;
             for (ItemIdx j=0; j<n; ++j) {
                 Weight w = d2(g);

@@ -30,9 +30,12 @@ class PartSolFactory2;
 struct Item
 {
     Item(ItemIdx j, Weight w, Profit p): j(j), w(w), p(p) { }
-    ItemIdx j = -1; // Index, 0 <= j < n, must be different for each item
-    Weight  w = -1; // Weight, w >= 0
-    Profit  p = -1; // Profit, p >= 0
+    /** Index, 0 <= j < n, must be different for each item. */
+    ItemIdx j = -1;
+    /** Weight, w >= 0. */
+    Weight w = -1;
+    /** Profit, p >= 0 */
+    Profit p = -1;
     Effciency efficiency() const { return (double)p/(double)w; }
 };
 
@@ -51,17 +54,23 @@ public:
      * Constructors and destructor
      */
 
+    /** Create instance from file. */
     Instance(std::string filepath, std::string format);
 
+    /** Manual constructor when using as C++ library. */
     Instance();
-    Instance(ItemIdx n, Weight c);
-    ItemIdx add_item(Weight w, Profit p);
-    void add_items(const std::vector<std::pair<Weight, Profit>>& wp);
+    void add_item(Weight w, Profit p);
     void set_capacity(Weight c) { c_orig_ = c; }
+    void clear();
 
+    /** Constructor for test instances. */
+    Instance(Weight c, const std::vector<std::pair<Weight, Profit>>& wp);
+    void set_optimal_solution(Solution& sol);
+
+    /** Copy constructor. */
     Instance(const Instance& ins);
 
-    void set_optimal_solution(Solution& sol);
+    /** Copy constructor without algorithmic informations. */
     static Instance reset(const Instance& ins);
 
     ~Instance();
@@ -83,30 +92,20 @@ public:
     ItemPos min_weight_item(Info& info) const;
     ItemPos max_profit_item(Info& info) const;
     ItemPos min_profit_item(Info& info) const;
-    /*
-     * Item of highest profit that can be added to the break solution once item
-     * b - 1 has been removed.
-     */
+    /** Item of highest profit that can be added to the break solution once
+     * item b - 1 has been removed.  */
     ItemPos gamma1(Info& info) const;
-    /*
-     * Item of lowest profit which has to be removed from the break solution so
-     * that item b can be added.
-     */
+    /** Item of lowest profit which has to be removed from the break solution
+     * so that item b can be added.  */
     ItemPos gamma2(Info& info) const;
-    /*
-     * Item of highest profit that can be added to the break solution.
-     */
+    /** Item of highest profit that can be added to the break solution.  */
     ItemPos beta1(Info& info) const;
-    /*
-     * Item of lowest profit which has to be removed from the break solution so
-     * that item b and b + 1 can be added.
-     */
+    /** Item of lowest profit which has to be removed from the break solution
+     * so that item b and b + 1 can be added.  */
     ItemPos beta2(Info& info) const;
     std::vector<Weight> min_weights() const;
 
-    /*
-     * Sort items according to non-increasing profit-to-weight ratio.
-     */
+    /** Sort items according to non-increasing profit-to-weight ratio.  */
     void sort(Info& info);
     int sort_type() const { return sort_type_; }
     void set_sort_type(int type) { sort_type_ = type; }
@@ -168,13 +167,9 @@ public:
     inline ItemPos last_item()   const { return l_; }
     Weight capacity() const;
 
-    /**
-     * Reduce item f..j-1, and add them to the reduced solution
-     */
+    /** Reduce item f..j-1, and add them to the reduced solution */
     void set_first_item(ItemPos k, Info& info);
-    /**
-     * Reduce items j+1..l (there are not added in the reduced solution)
-     */
+    /** Reduce items j+1..l (there are not added in the reduced solution) */
     void set_last_item(ItemPos k);
 
     void fix(Info& info, const std::vector<int> vec);
@@ -204,19 +199,6 @@ public:
     void plot_reduced(std::string filepath);
     void write_reduced(std::string filepath);
 
-    /**
-     * Return the profit of the certificate file.
-     */
-    Profit check(std::string cert_file);
-
-    /**
-     * return "LB XXXX GAP XXXX" if optimal_solution() != NULL,
-     *        "LB XXXX" otherwise.
-     */
-    std::string print_lb(Profit lb) const;
-    std::string print_ub(Profit ub) const;
-    std::string print_opt(Profit opt) const;
-
 private:
 
     /*
@@ -235,9 +217,7 @@ private:
     std::vector<Item> get_isum() const;
     ItemPos ub_item(const std::vector<Item>& isum, Item item) const;
     void compute_break_item(Info& info);
-    /*
-     * Remove items which weight is greater than the updated capacity
-     */
+    /** Remove items which weight is greater than the updated capacity */
     void remove_big_items(Info& info);
 
     void sort_right(Info& info, Profit lb);
@@ -250,16 +230,17 @@ private:
 
     std::vector<Item> items_;
     Weight c_orig_;
-    std::unique_ptr<Solution> sol_opt_; // Optimal solution
+    std::unique_ptr<Solution> sol_opt_;
 
-    ItemPos b_ = -1; // Break item
+    /** Break item. */
+    ItemPos b_ = -1;
 
-    // First and last items. Items moved before f_ or after l_ have their value
-    // fixed in the reduced solution.
+    /** First and last items. Items moved before f_ or after l_ have their
+     * value fixed in the reduced solution. */
     ItemPos f_ = -1;
     ItemPos l_ = -1;
 
-    // Initial core.
+    /** Initial core. */
     ItemPos s_init_ = -1;
     ItemPos t_init_ = -1;
 
@@ -276,8 +257,10 @@ private:
     std::vector<Interval> int_right_;
     std::vector<Interval> int_left_;
 
-    std::unique_ptr<Solution> sol_red_; // Reduced solution
-    std::unique_ptr<Solution> sol_break_; // Break solution
+    /** Reduced solution. */
+    std::unique_ptr<Solution> sol_red_;
+    /** Break solution. */
+    std::unique_ptr<Solution> sol_break_;
 
 };
 
