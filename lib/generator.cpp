@@ -26,8 +26,11 @@ std::ostream& knapsack::operator<<(std::ostream& os, const Generator& data)
         os << " d " << data.d;
     if (data.t == "pceil" || data.t == "circle")
         os << " d " << data.d;
-    if (data.h != -1)
+    if (data.h != -1) {
         os << " h " << data.h << "/" << data.hmax;
+    } else {
+        os << " x " << data.x;
+    }
     if (data.s != -1)
         os << " s " << data.s;
     return os;
@@ -101,7 +104,11 @@ Instance Generator::generate_standard()
         wsum += wp.first;
         wmax = std::max(wmax, wp.first);
     }
-    ins.set_capacity(std::max(wmax, (h * wsum) / (hmax + 1)));
+    if (h != -1) {
+        ins.set_capacity(std::max(wmax, (h * wsum) / (hmax + 1)));
+    } else {
+        ins.set_capacity(r * (1 - x) + wsum * x);
+    }
     return ins;
 }
 
@@ -130,7 +137,11 @@ Instance Generator::generate_spanner()
         wsum += wp.first;
         wmax = std::max(wmax, w);
     }
-    ins.set_capacity(std::max(wmax, (h * wsum) / (hmax + 1)));
+    if (h != -1) {
+        ins.set_capacity(std::max(wmax, (h * wsum) / (hmax + 1)));
+    } else {
+        ins.set_capacity(r * (1 - x) + wsum * x);
+    }
     return ins;
 }
 

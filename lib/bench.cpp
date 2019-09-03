@@ -2,6 +2,9 @@
 
 #include "knapsack/lib/algorithms.hpp"
 
+#include <iomanip>
+#include <sstream>
+
 #include <boost/program_options.hpp>
 
 using namespace knapsack;
@@ -100,6 +103,107 @@ void bench(
     file.close();
 }
 
+void bench_normal(std::string algorithm, std::mt19937_64& gen)
+{
+    func f = get_algorithm(algorithm);
+    std::vector<ItemIdx> ns {100, 1000, 10000, 100000, 1000000};
+    std::vector<Weight> rs {1000, 10000, 100000, 1000000, 10000000, 100000000};
+    std::vector<double> xs {0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9};
+    std::vector<std::vector<std::vector<std::string>>> res(ns.size(),
+            std::vector<std::vector<std::string>>(rs.size(),
+                std::vector<std::string>(xs.size())));
+
+    std::ofstream file(algorithm + ".json");
+    file << "{" << std::endl;
+    file << "\"lab\":[" << std::endl;
+    file << "[\"n\",[\"100\", \"1000\", \"10000\", \"100000\", \"1000000\"]]," << std::endl;
+    file << "[\"r\",[\"1000\", \"10000\", \"100000\", \"1000000\", \"10000000\", \"100000000\"]]," << std::endl;
+    file << "[\"x\",[\"0.0\", \"0.1\", \"0.2\", \"0.3\", \"0.4\", \"0.5\", \"0.6\", \"0.7\", \"0.8\", \"0.9\"]]" << std::endl;
+    file << "]," << std::endl;
+
+    file << "\"tab\":[" << std::endl;
+    Generator d;
+    d.normal = true;
+    d.t = "normal";
+    d.dw = 10;
+    d.d = 10;
+    d.s = 0;
+    double t_max = 2.0;
+    std::cout
+        << std::setw(10) << "n"
+        << std::setw(10) << "r"
+        << std::setw(10) << "x"
+        << std::setw(10) << "t"
+        << std::endl;
+    for (Cpt in = 0; in < (Cpt)ns.size(); ++in) {
+        file << "[" << std::endl;
+        ItemIdx n = ns[in];
+        d.n = n;
+        for (Cpt ir = 0; ir < (Cpt)rs.size(); ++ir) {
+            file << "[";
+            Weight r = rs[ir];
+            d.r = r;
+            for (Cpt ix = 0; ix < (Cpt)xs.size(); ++ix) {
+                double x = xs[ix];
+                std::cout
+                    << std::setw(10) << n
+                    << std::setw(10) << r
+                    << std::setw(10) << x
+                    << std::flush;
+                d.x = x;
+                d.s++;
+                Instance ins = d.generate();
+                Solution sol(ins);
+                Profit ub = INT_MAX;
+                Info info = Info()
+                    .set_timelimit(t_max)
+                    //.set_verbose(true)
+                    ;
+                double t = -1;
+                std::stringstream t_str;
+                try {
+                    f(ins, sol, ub, gen, info);
+                    t = info.elapsed_time();
+                    t_str << (double)std::round(t * 10000) / 10;
+                } catch (...) {
+                }
+                if (t < 0)
+                    t_str << "×";
+                std::cout << std::setw(10) << t_str.str() << std::endl;
+                int val_max_r = 255 - 52;
+                int val_max_g = 255 - 101;
+                int val_max_b = 255 - 164;
+                int col_r = (t > t_max)? 0: 255 - (int)(val_max_r * cbrt(t / t_max));
+                int col_g = (t > t_max)? 0: 255 - (int)(val_max_g * cbrt(t / t_max));
+                int col_b = (t > t_max)? 0: 255 - (int)(val_max_b * cbrt(t / t_max));
+                file << "["
+                    << "{\"c\":"
+                    << "\"rgb("
+                    << col_r << ","
+                    << col_g << ","
+                    << col_b << ")\","
+                    << "\"t\":\"" << t_str.str() << " ms\""
+                    << "}"
+                    << "]";
+                if (ix != (Cpt)xs.size() - 1)
+                    file << ",";
+            }
+            file << "]";
+            if (ir != (Cpt)rs.size() - 1)
+                file << ",";
+            file << std::endl;
+        }
+        file << "]";
+        if (in != (Cpt)ns.size() - 1)
+            file << ",";
+        file << std::endl;
+    }
+
+    file << "]" << std::endl;
+    file << "}" << std::endl;
+    file.close();
+}
+
 int main(int argc, char *argv[])
 {
     namespace po = boost::program_options;
@@ -193,14 +297,14 @@ int main(int argc, char *argv[])
     for (std::string algorithm: algorithms) {
         std::cout << "*** " << algorithm << " ***" << std::endl;
         for (std::string dataset: datasets) {
-            if (dataset == "easy") {
+            if (dataset == "easy" || dataset == "literature") {
                 bench(algorithm, "easy", dataset_easy, gen, 10000, verbose);
-            } else if (dataset == "difficultsmall") {
+            } else if (dataset == "difficultsmall" || dataset == "literature") {
                 bench(algorithm, "difficultsmall", dataset_difficultsmall, gen, 10000, verbose);
-            } else if (dataset == "difficultlarge") {
+            } else if (dataset == "difficultlarge" || dataset == "literature") {
                 bench(algorithm, "difficultlarge", dataset_difficultlarge, gen, 10000, verbose);
             } else if (dataset == "normal") {
-                bench(algorithm, "normal", dataset_normal, gen, 1000000, verbose);
+                bench_normal(algorithm, gen);
             }
         }
     }

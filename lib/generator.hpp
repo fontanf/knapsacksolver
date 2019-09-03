@@ -54,7 +54,9 @@ typedef int_fast64_t Seed;
  *      pj = mj pk
  *
  * The capacity c is computed as follows:
- * c = max(wmax, sum(wj) * h / (hmax + 1))
+ *   c = max(wmax, sum(wj) * h / (hmax + 1))
+ * of if h = -1:
+ *   c = r * (1 - x) + wsum * x
  *
  * The seed used for the random generator is s.
  *
@@ -77,6 +79,7 @@ public:
     bool spanner = false;
     int h = -1;
     int hmax = 100;
+    double x = 0.0;
     Seed s = 0;
 
     /**
@@ -135,7 +138,6 @@ public:
         Generator data;
         data.normal = true;
         data.dw = d;
-        data.d = d;
         data.t = "normal";
         data.r = r;
         data.d = d;
