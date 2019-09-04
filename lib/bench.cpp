@@ -103,20 +103,18 @@ void bench(
     file.close();
 }
 
-void bench_normal(std::string algorithm, double t_limit, std::mt19937_64& gen)
+void bench_normal(std::string algorithm, double time_limit, std::mt19937_64& gen)
 {
     func f = get_algorithm(algorithm);
+
     std::vector<ItemIdx> ns {100, 1000, 10000, 100000, 1000000};
     std::vector<Weight> rs {1000, 10000, 100000, 1000000, 10000000, 100000000};
     std::vector<double> xs {0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9};
-    std::vector<std::vector<std::vector<std::string>>> res(ns.size(),
-            std::vector<std::vector<std::string>>(rs.size(),
-                std::vector<std::string>(xs.size())));
 
     nlohmann::json json;
-    json["lab"][0] = {"n", {"100", "1000", "10000", "100000", "1000000"}};
-    json["lab"][1] = {"r", {"1000", "10000", "100000", "1000000", "10000000", "100000000"}};
-    json["lab"][2] = {"x", {"0.0", "0.1", "0.2", "0.3", "0.4", "0.5", "0.6", "0.7", "0.8", "0.9"}};
+    json["lab"][0] = {"n", ns};
+    json["lab"][1] = {"r", rs};
+    json["lab"][2] = {"x", xs};
 
     int val_max_r = 255 - 52;
     int val_max_g = 255 - 101;
@@ -156,10 +154,10 @@ void bench_normal(std::string algorithm, double t_limit, std::mt19937_64& gen)
                 Instance ins = d.generate();
                 Solution sol(ins);
                 Profit ub = INT_MAX;
-                double t = t_limit + 1;
+                double t = time_limit + 1;
                 try {
                     Info info = Info()
-                        .set_timelimit(t_limit)
+                        .set_timelimit(time_limit)
                         //.set_verbose(true)
                         ;
                     f(ins, sol, ub, gen, info);
@@ -167,15 +165,15 @@ void bench_normal(std::string algorithm, double t_limit, std::mt19937_64& gen)
                 } catch (...) {
                 }
                 std::stringstream t_str;
-                if (t > t_limit) {
-                    t_str << "> " << t_limit * 1000;
+                if (t > time_limit) {
+                    t_str << "> " << time_limit * 1000;
                 } else {
                     t_str << (double)std::round(t * 10000) / 10;
                 }
                 std::cout << std::setw(10) << t_str.str() << std::endl;
-                int col_r = (t > t_limit)? 0: 255 - (int)(val_max_r * cbrt(t / t_limit));
-                int col_g = (t > t_limit)? 0: 255 - (int)(val_max_g * cbrt(t / t_limit));
-                int col_b = (t > t_limit)? 0: 255 - (int)(val_max_b * cbrt(t / t_limit));
+                int col_r = (t > time_limit)? 0: 255 - (int)(val_max_r * cbrt(t / time_limit));
+                int col_g = (t > time_limit)? 0: 255 - (int)(val_max_g * cbrt(t / time_limit));
+                int col_b = (t > time_limit)? 0: 255 - (int)(val_max_b * cbrt(t / time_limit));
                 std::string rgb_str = "rgb("
                     + std::to_string(col_r) + ","
                     + std::to_string(col_g) + ","
@@ -197,15 +195,14 @@ int main(int argc, char *argv[])
     // Parse program options
     std::vector<std::string> algorithms;
     std::vector<std::string> datasets;
-    double t_limit = 1;
+    double time_limit = 1;
 
     po::options_description desc("Allowed options");
     desc.add_options()
         ("help,h", "produce help message")
-        ("algorithm,a", po::value<std::vector<std::string>>(&algorithms)->multitoken(), "set algorithms")
+        ("algorithms,a", po::value<std::vector<std::string>>(&algorithms)->multitoken(), "set algorithms")
         ("datasets,d", po::value<std::vector<std::string>>(&datasets)->multitoken(), "datasets (easy, difficultlarge, difficultsmall)")
-        ("timelimit,t", po::value<double>(&t_limit), "time limit")
-        ("verbose,v", "")
+        ("time-limit,t", po::value<double>(&time_limit), "time limit")
         ;
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -283,7 +280,7 @@ int main(int argc, char *argv[])
             } else if (dataset == "difficultlarge" || dataset == "literature") {
                 bench(algorithm, "difficultlarge", dataset_difficultlarge, gen, 10000, verbose);
             } else if (dataset == "normal") {
-                bench_normal(algorithm, t_limit, gen);
+                bench_normal(algorithm, time_limit, gen);
             }
         }
     }
