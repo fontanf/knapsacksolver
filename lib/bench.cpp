@@ -127,30 +127,28 @@ void bench_normal(std::string algorithm, double time_limit, std::mt19937_64& gen
     d.d = 10;
     d.s = 0;
 
-    std::cout
-        << std::setw(10) << "n"
-        << std::setw(10) << "r"
-        << std::setw(10) << "x"
-        << std::setw(10) << "t"
-        << std::endl;
-
     for (Cpt in = 0; in < (Cpt)ns.size(); ++in) {
         ItemIdx n = ns[in];
         d.n = n;
         for (Cpt ir = 0; ir < (Cpt)rs.size(); ++ir) {
             Weight r = rs[ir];
             d.r = r;
+
+            // Standard output
+            std::string s = "--- n " + std::to_string(n) + " r " + std::to_string(r) + " --- ";
+            int pos = (int)((70 - s.length())/2);
+            for(int i=0; i<pos; i++)
+                std::cout << " ";
+            std::cout << s << std::endl;
+
             for (Cpt ix = 0; ix < (Cpt)xs.size(); ++ix) {
                 double x = xs[ix];
-
-                std::cout
-                    << std::setw(10) << n
-                    << std::setw(10) << r
-                    << std::setw(10) << x
-                    << std::flush;
-
                 d.x = x;
                 d.s++;
+
+                // Standard output
+                std::cout << "x " << std::right << std::setw(6) << x << std::flush;
+
                 Instance ins = d.generate();
                 Solution sol(ins);
                 Profit ub = INT_MAX;
@@ -164,13 +162,16 @@ void bench_normal(std::string algorithm, double time_limit, std::mt19937_64& gen
                     t = info.elapsed_time();
                 } catch (...) {
                 }
+
                 std::stringstream t_str;
                 if (t > time_limit) {
                     t_str << "> " << time_limit * 1000;
                 } else {
                     t_str << (double)std::round(t * 10000) / 10;
+                    std::cout << "\033[32m";
                 }
-                std::cout << std::setw(10) << t_str.str() << std::endl;
+
+                // Json
                 int col_r = (t > time_limit)? 0: 255 - (int)(val_max_r * cbrt(t / time_limit));
                 int col_g = (t > time_limit)? 0: 255 - (int)(val_max_g * cbrt(t / time_limit));
                 int col_b = (t > time_limit)? 0: 255 - (int)(val_max_b * cbrt(t / time_limit));
@@ -180,6 +181,12 @@ void bench_normal(std::string algorithm, double time_limit, std::mt19937_64& gen
                     + std::to_string(col_b) + ")";
                 json["tab"][in][ir][ix][0]["c"] = rgb_str;
                 json["tab"][in][ir][ix][0]["t"] = t_str.str();
+
+                // Standard output
+                std::cout << " | LB" << std::right << std::setw(16) << sol.profit();
+                std::cout << " | UB" << std::right << std::setw(16) << ub;
+                std::cout << " | T (s)" << std::right << std::setw(8) << t_str.str();
+                std::cout << "\033[0m" << std::endl;
             }
         }
     }
