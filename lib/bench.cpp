@@ -119,6 +119,9 @@ void bench_normal(std::string algorithm, double time_limit, std::mt19937_64& gen
     int val_max_r = 255 - 52;
     int val_max_g = 255 - 101;
     int val_max_b = 255 - 164;
+    int col_r = 0;
+    int col_g = 0;
+    int col_b = 0;
 
     Generator d;
     d.normal = true;
@@ -167,14 +170,17 @@ void bench_normal(std::string algorithm, double time_limit, std::mt19937_64& gen
                 if (t <= time_limit && sol.profit() == ub) {
                     t_str << (double)std::round(t * 10000) / 10;
                     std::cout << "\033[32m";
+                    col_r = 255 - (int)(val_max_r * cbrt(t / time_limit));
+                    col_g = 255 - (int)(val_max_g * cbrt(t / time_limit));
+                    col_b = 255 - (int)(val_max_b * cbrt(t / time_limit));
                 } else {
                     t_str << "> " << time_limit * 1000;
+                    col_r = 0;
+                    col_g = 0;
+                    col_b = 0;
                 }
 
                 // Json
-                int col_r = (t > time_limit)? 0: 255 - (int)(val_max_r * cbrt(t / time_limit));
-                int col_g = (t > time_limit)? 0: 255 - (int)(val_max_g * cbrt(t / time_limit));
-                int col_b = (t > time_limit)? 0: 255 - (int)(val_max_b * cbrt(t / time_limit));
                 std::string rgb_str = "rgb("
                     + std::to_string(col_r) + ","
                     + std::to_string(col_g) + ","
