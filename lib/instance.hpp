@@ -57,7 +57,7 @@ public:
     /** Create instance from file. */
     Instance(std::string filepath, std::string format);
 
-    /** Manual constructor when using as C++ library. */
+    /** Manual constructor. */
     Instance();
     void add_item(Weight w, Profit p);
     void set_capacity(Weight c) { c_orig_ = c; }

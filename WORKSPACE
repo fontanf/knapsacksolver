@@ -27,11 +27,25 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 git_repository(
     name = "benchtools",
     remote = "https://github.com/fontanf/benchtools.git",
-    commit = "bde763e809f3aa429591f91f438afc8a95b64b5d",
+    commit = "0257329b5401096c1cdee352f2e1d8f3b2335af2",
 )
 
 local_repository(
     name = "benchtools_",
     path = "/home/florian/Dev/benchtools/",
+)
+
+new_git_repository(
+    name = "json",
+    build_file_content = """
+cc_library(
+        name = "json",
+        hdrs = ["single_include/nlohmann/json.hpp"],
+        visibility = ["//visibility:public"],
+        strip_include_prefix = "single_include/"
+)
+""",
+    remote = "https://github.com/nlohmann/json",
+    tag = "v3.7.0",
 )
 

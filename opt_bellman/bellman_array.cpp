@@ -233,7 +233,7 @@ end:
         LOG(info, " p(S) " << sol.profit() << std::endl);
     }
 
-    PUT(info, "Algorithm.Iterations", it);
+    PUT(info, "Algorithm", "Iterations", it);
     return algorithm_end(sol, info);
 }
 
@@ -308,7 +308,7 @@ end:
         LOG(info, " p(S) " << sol.profit() << std::endl);
     }
 
-    PUT(info, "Algorithm.Iterations", it);
+    PUT(info, "Algorithm", "Iterations", it);
     return algorithm_end(sol, info);
 }
 

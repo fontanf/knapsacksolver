@@ -178,7 +178,7 @@ Solution knapsack::sol_greedynlogn(const Instance& ins, Info info)
         best = "backward";
     }
 
-    PUT(info, "Algorithm.Best", best);
+    PUT(info, "Algorithm", "Best", best);
     LOG_FOLD_END(info, "");
     return algorithm_end(sol, info);
 }

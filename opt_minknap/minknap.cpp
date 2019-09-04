@@ -522,8 +522,8 @@ Solution Minknap::run(Info info)
     if (!sur_)
         *end_ = false;
 
-    PUT(info, "Algorithm.TotalStateNumber", state_number_);
-    PUT(info, "Algorithm.DistinctStateNumber", distinct_state_number_);
+    PUT(info, "Algorithm", "TotalStateNumber", state_number_);
+    PUT(info, "Algorithm", "DistinctStateNumber", distinct_state_number_);
 
     if (lb_ == sol_best_.profit())
         return algorithm_end(sol_best_, info);

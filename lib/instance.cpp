@@ -1143,8 +1143,8 @@ Solution knapsack::algorithm_end(const Solution& sol, Info& info)
 {
     double t = info.elapsed_time();
     LOG(info, "sol " << sol.to_string_items() << " p " << sol.profit() << std::endl);
-    PUT(info, "Solution.Value", sol.profit());
-    PUT(info, "Solution.Time", t);
+    PUT(info, "Solution", "Value", sol.profit());
+    PUT(info, "Solution", "Time", t);
     VER(info, "---" << std::endl
             << "Value: " << sol.profit() << std::endl
             << "Time (ms): " << t*1000 << std::endl);
@@ -1154,8 +1154,8 @@ Solution knapsack::algorithm_end(const Solution& sol, Info& info)
 Profit knapsack::algorithm_end(Profit val, Info& info)
 {
     double t = info.elapsed_time();
-    PUT(info, "Solution.Value", val);
-    PUT(info, "Solution.Time", t);
+    PUT(info, "Solution", "Value", val);
+    PUT(info, "Solution", "Time", t);
     VER(info, "---" << std::endl
             << "Value: " << val << std::endl
             << "Time (ms): " << t*1000 << std::endl);

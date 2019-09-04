@@ -121,9 +121,9 @@ Solution knapsack::sopt_astar(Instance& ins, Info info)
 
     }
 
-    PUT(info, "Algorithm.NodeNumber", node_number);
-    PUT(info, "Algorithm.QueueMaxSize", q_max_size);
-    PUT(info, "Algorithm.QueueAverageSize", q_average_size / node_number);
+    PUT(info, "Algorithm", "NodeNumber", node_number);
+    PUT(info, "Algorithm", "QueueMaxSize", q_max_size);
+    PUT(info, "Algorithm", "QueueAverageSize", q_average_size / node_number);
     return algorithm_end(sol_best, info);
 }
 
@@ -351,9 +351,9 @@ Solution knapsack::sopt_astar_dp(Instance& ins, Info info)
 
     n0.cut_child(q, info);
 
-    PUT(info, "Algorithm.NodeNumber", node_number);
-    PUT(info, "Algorithm.QueueMaxSize", q_max_size);
-    PUT(info, "Algorithm.QueueAverageSize", q_average_size / node_number);
+    PUT(info, "Algorithm", "NodeNumber", node_number);
+    PUT(info, "Algorithm", "QueueMaxSize", q_max_size);
+    PUT(info, "Algorithm", "QueueAverageSize", q_average_size / node_number);
     return algorithm_end(sol_best, info);
 }
 
@@ -540,9 +540,9 @@ Solution knapsack::sopt_starknap(Instance& ins, StarknapParams params, Info info
     if (n0.child != NULL)
         n0.cut_child(q, info);
 
-    PUT(info, "Algorithm.NodeNumber", node_number);
-    PUT(info, "Algorithm.QueueMaxSize", q_max_size);
-    PUT(info, "Algorithm.QueueAverageSize", q_average_size / node_number);
+    PUT(info, "Algorithm", "NodeNumber", node_number);
+    PUT(info, "Algorithm", "QueueMaxSize", q_max_size);
+    PUT(info, "Algorithm", "QueueAverageSize", q_average_size / node_number);
     return algorithm_end(sol, info);
 }
 

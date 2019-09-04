@@ -177,7 +177,7 @@ Solution Expknap::run(Info info)
         *end_ = true;
     for (std::thread& thread: threads_)
         thread.join();
-    PUT(info, "Algorithm.NodeNumber", node_number_);
+    PUT(info, "Algorithm", "NodeNumber", node_number_);
     return algorithm_end(sol_best_, info);
 }
 
