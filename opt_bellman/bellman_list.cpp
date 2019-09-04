@@ -38,6 +38,11 @@ Profit knapsack::opt_bellman_list(Instance& ins, bool sort, Info info)
         return algorithm_end(0, info);
     }
 
+    if (INT_FAST64_MAX / ins.item(j_max).p < ins.total_capacity()) {
+        LOG_FOLD_END(info, "");
+        return algorithm_end(0, info);
+    }
+
     Profit lb = 0;
     if (sort) {
         ins.sort(info);
@@ -146,41 +151,54 @@ std::vector<BellmanState> opts_bellman_list(const Instance& ins,
             break;
         Weight wj = ins.item(j).w;
         Profit pj = ins.item(j).p;
+        LOG(info, "j " << j << " wj " << wj << " pj " << pj << std::endl);
         std::vector<BellmanState> l;
         std::vector<BellmanState>::iterator it = l0.begin();
         std::vector<BellmanState>::iterator it1 = l0.begin();
         while (it != l0.end() || it1 != l0.end()) {
             if (it1 != l0.end() && (it == l0.end() || it->w > it1->w + wj)) {
                 BellmanState s1{it1->w+wj, it1->p+pj};
+                LOG(info, "s1 " << s1);
                 if (s1.w > c) {
+                    LOG(info, " too large" << std::endl);
                     break;
                 }
                 if (s1.p > l.back().p) {
                     if (s1.p > lb) // Update lower bound
                         lb = s1.p;
                     if (s1.w == l.back().w) {
+                        LOG(info, " replace" << std::endl);
                         l.back() = s1;
                     } else {
                         Profit ub = ub_0(ins, j, s1.p, c - s1.w, j_max);
+                        LOG(info, " ub " << ub << " lb " << lb);
                         if (ub >= lb) {
                             l.push_back(s1);
+                            LOG(info, " added" << std::endl);
                         } else {
+                            LOG(info, " ×" << std::endl);
                         }
                     }
                 } else {
+                    LOG(info, " ×" << std::endl);
                 }
                 it1++;
             } else {
+                LOG(info, "s0 " << *it);
                 if (l.empty()) {
+                    LOG(info, " added" << std::endl);
                     l.push_back(*it);
                 } else {
                     if (it->p > l.back().p) {
                         if (it->w == l.back().w) {
+                            LOG(info, " replace" << std::endl);
                             l.back() = *it;
                         } else {
+                            LOG(info, " added" << std::endl);
                             l.push_back(*it);
                         }
                     } else {
+                        LOG(info, " ×" << std::endl);
                     }
                 }
                 ++it;
@@ -199,6 +217,7 @@ void sopt_bellman_list_rec_rec(BellmanListRecData d)
 
     std::vector<BellmanState> l1 = opts_bellman_list(d.ins, d.n1, k, d.c, d.j_max, d.info);
     std::vector<BellmanState> l2 = opts_bellman_list(d.ins, k, d.n2, d.c, d.j_max, d.info);
+    LOG(d.info, "l1.size() " << l1.size() << " l2.size() " << l2.size() << std::endl);
 
     Profit z_max  = -1;
     Weight i1_opt = 0;
@@ -207,6 +226,7 @@ void sopt_bellman_list_rec_rec(BellmanListRecData d)
     for (StateIdx i1=0; i1<(StateIdx)l1.size(); ++i1) {
         while (l1[i1].w + l2[i2].w > d.c)
             i2--;
+        LOG(d.info, "i1 " << i1 << " l1[i1].w " << l1[i1].w << " i2 " << i2 << " l2[i2].w " << l2[i2].w << std::endl);
         assert(i2 >= 0);
         Profit z = l1[i1].p + l2[i2].p;
         if (z_max < z) {
@@ -273,13 +293,19 @@ Solution knapsack::sopt_bellman_list_rec(const Instance& ins, Info info)
         return algorithm_end(sol, info);
     }
 
+    ItemPos j_max = ins.max_efficiency_item(info);
+    if (INT_FAST64_MAX / ins.item(j_max).p < ins.total_capacity()) {
+        LOG_FOLD_END(info, "");
+        return algorithm_end(sol, info);
+    }
+
     sopt_bellman_list_rec_rec({
         .ins = ins,
         .n1 = 0,
         .n2 = ins.total_item_number(),
         .c = ins.total_capacity(),
         .sol = sol,
-        .j_max = ins.max_efficiency_item(info),
+        .j_max = j_max,
         .info = info});
 
     LOG_FOLD_END(info, "");

@@ -36,20 +36,25 @@ std::ostream& knapsack::operator<<(std::ostream& os, const Generator& data)
     return os;
 }
 
-std::pair<Weight, Profit> Generator::item()
+Weight Generator::weight()
 {
     Weight w = -1;
-    Profit p = -1;
     if (!normal) {
         std::uniform_int_distribution<Weight> dist(1, r);
         w = dist(g);
     } else {
         std::normal_distribution<double> dist(r / 2, (double)r / dw);
         do {
-            w = (Weight)dist(g);
+            w = std::round(dist(g));
         } while (w < 1 || w > r);
     }
+    return w;
+}
 
+std::pair<Weight, Profit> Generator::item()
+{
+    Weight w = weight();
+    Profit p = -1;
     if (t == "u") {
         std::uniform_int_distribution<Weight> dist(1, r);
         p = dist(g);
@@ -83,10 +88,13 @@ std::pair<Weight, Profit> Generator::item()
     } else if (t == "circle") {
         p = d * sqrt(4 * r * r - (w - 2 * r) * (w - 2 * r));
     } else if (t == "normal") {
-        std::normal_distribution<double> dist(w, (double)w / d);
-        do {
-            p = (Profit)dist(g);
-        } while (p < 1 || p > r);
+        for (;;) {
+            std::normal_distribution<double> dist(w, (double)w / d);
+            p = std::round(dist(g));
+            if (1 <= p && p <= r)
+                break;
+            w = weight();
+        }
     } else {
         exit(1);
     }

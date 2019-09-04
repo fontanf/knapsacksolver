@@ -84,19 +84,20 @@ func knapsack::get_algorithm(std::string str)
     } else if (algo.name == "bellman_list") {
         return [](Instance& ins, Solution&, Profit& ub, std::mt19937_64&, Info info) {
             Profit p = opt_bellman_list(ins, false, info);
-            if (info.check_time())
+            if (!(p == 0 && ins.total_item_number() != 0) && info.check_time())
                 ub = p;
         };
     } else if (algo.name == "bellman_list_sort") {
         return [](Instance& ins, Solution&, Profit& ub, std::mt19937_64&, Info info) {
             Profit p = opt_bellman_list(ins, true, info);
             if (info.check_time())
+            if (!(p == 0 && ins.total_item_number() != 0) && info.check_time())
                 ub = p;
         };
     } else if (algo.name == "bellman_list_rec") {
         return [](Instance& ins, Solution& sol, Profit& ub, std::mt19937_64&, Info info) {
             sol = sopt_bellman_list_rec(ins, info);
-            if (info.check_time())
+            if (!(sol.item_number() == 0 && ins.total_item_number() != 0) && info.check_time())
                 ub = sol.profit();
         };
     } else if (algo.name == "dpprofits_array") { // DPProfits

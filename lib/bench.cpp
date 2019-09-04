@@ -136,7 +136,7 @@ void bench_normal(std::string algorithm, double time_limit, std::mt19937_64& gen
 
             // Standard output
             std::string s = "--- n " + std::to_string(n) + " r " + std::to_string(r) + " --- ";
-            int pos = (int)((70 - s.length())/2);
+            int pos = (int)((80 - s.length())/2);
             for(int i=0; i<pos; i++)
                 std::cout << " ";
             std::cout << s << std::endl;
@@ -151,7 +151,7 @@ void bench_normal(std::string algorithm, double time_limit, std::mt19937_64& gen
 
                 Instance ins = d.generate();
                 Solution sol(ins);
-                Profit ub = INT_MAX;
+                Profit ub = LLONG_MAX;
                 double t = time_limit + 1;
                 try {
                     Info info = Info()
@@ -164,11 +164,11 @@ void bench_normal(std::string algorithm, double time_limit, std::mt19937_64& gen
                 }
 
                 std::stringstream t_str;
-                if (t > time_limit) {
-                    t_str << "> " << time_limit * 1000;
-                } else {
+                if (t <= time_limit && sol.profit() == ub) {
                     t_str << (double)std::round(t * 10000) / 10;
                     std::cout << "\033[32m";
+                } else {
+                    t_str << "> " << time_limit * 1000;
                 }
 
                 // Json
@@ -183,8 +183,8 @@ void bench_normal(std::string algorithm, double time_limit, std::mt19937_64& gen
                 json["tab"][in][ir][ix][0]["t"] = t_str.str();
 
                 // Standard output
-                std::cout << " | LB" << std::right << std::setw(16) << sol.profit();
-                std::cout << " | UB" << std::right << std::setw(16) << ub;
+                std::cout << " | LB" << std::right << std::setw(20) << sol.profit();
+                std::cout << " | UB" << std::right << std::setw(20) << ub;
                 std::cout << " | T (s)" << std::right << std::setw(8) << t_str.str();
                 std::cout << "\033[0m" << std::endl;
             }

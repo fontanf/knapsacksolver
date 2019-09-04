@@ -150,6 +150,7 @@ private:
 
     std::mt19937_64 g;
     std::pair<Weight, Profit> item();
+    Weight weight();
     Instance generate_standard();
     Instance generate_spanner();
 
