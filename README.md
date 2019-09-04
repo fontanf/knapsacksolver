@@ -150,6 +150,15 @@ The parallel algorithm is implemented as follows: items are divided in two sets 
 
 ### Normal dataset
 
+```
+n ∈ {100, 1000, 10000, 100000, 1000000}
+r ∈ {1000, 10000, 100000, 1000000, 10000000, 100000000}
+x ∈ {0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9}
+wj ~ N(r, r / 10)
+pj ~ N(wj, wj / 10), pj >= 0
+c = r * (1 - x) + ∑wj * x;
+```
+
 All instances from the normal dataset that can fit into the computer's memory happen to be solved exactly by the `minknap` algorithm in less than a few seconds:
 * ![bellman_array_rec](bench/bellman_array_rec_normal.csv)
 * ![bellman_list_rec](bench/bellman_list_rec_normal.csv)
@@ -157,7 +166,7 @@ All instances from the normal dataset that can fit into the computer's memory ha
 * ![expknap_combo](bench/expknap_combo_normal.csv)
 * ![balknap](bench/balknap_normal.csv)
 * ![balknap_combo](bench/balknap_combo_normal.csv)
-* ![minknap](bench/minknap_normal.csv)
+* [minknap](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/knapsack/master/bench/minknap.json)
 * ![combo](bench/combo_normal.csv)
 
 ### Hard dataset
