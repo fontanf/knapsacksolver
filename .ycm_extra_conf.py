@@ -90,6 +90,7 @@ def FlagsForFile( filename, **kwargs ):
     '-DUSE_CLANG_COMPLETER',
     '-I', '../',
     '-I', './bazel-knapsack/external/benchtools/',
+    '-I', './bazel-knapsack/external/json/single_include',
     '-I', './bazel-knapsack/external/googletest/googletest/include/',
     '-I', './bazel-knapsack/external/',
     '-I', '/usr/lib/gcc/x86_64-linux-gnu/7.3.0/include/',

@@ -103,7 +103,7 @@ void bench(
     file.close();
 }
 
-void bench_normal(std::string algorithm, std::mt19937_64& gen)
+void bench_normal(std::string algorithm, double t_limit, std::mt19937_64& gen)
 {
     func f = get_algorithm(algorithm);
     std::vector<ItemIdx> ns {100, 1000, 10000, 100000, 1000000};
@@ -113,95 +113,81 @@ void bench_normal(std::string algorithm, std::mt19937_64& gen)
             std::vector<std::vector<std::string>>(rs.size(),
                 std::vector<std::string>(xs.size())));
 
-    std::ofstream file(algorithm + ".json");
-    file << "{" << std::endl;
-    file << "\"lab\":[" << std::endl;
-    file << "[\"n\",[\"100\", \"1000\", \"10000\", \"100000\", \"1000000\"]]," << std::endl;
-    file << "[\"r\",[\"1000\", \"10000\", \"100000\", \"1000000\", \"10000000\", \"100000000\"]]," << std::endl;
-    file << "[\"x\",[\"0.0\", \"0.1\", \"0.2\", \"0.3\", \"0.4\", \"0.5\", \"0.6\", \"0.7\", \"0.8\", \"0.9\"]]" << std::endl;
-    file << "]," << std::endl;
+    nlohmann::json json;
+    json["lab"][0] = {"n", {"100", "1000", "10000", "100000", "1000000"}};
+    json["lab"][1] = {"r", {"1000", "10000", "100000", "1000000", "10000000", "100000000"}};
+    json["lab"][2] = {"x", {"0.0", "0.1", "0.2", "0.3", "0.4", "0.5", "0.6", "0.7", "0.8", "0.9"}};
 
-    file << "\"tab\":[" << std::endl;
+    int val_max_r = 255 - 52;
+    int val_max_g = 255 - 101;
+    int val_max_b = 255 - 164;
+
     Generator d;
     d.normal = true;
     d.t = "normal";
     d.dw = 10;
     d.d = 10;
     d.s = 0;
-    double t_max = 2.0;
+
     std::cout
         << std::setw(10) << "n"
         << std::setw(10) << "r"
         << std::setw(10) << "x"
         << std::setw(10) << "t"
         << std::endl;
+
     for (Cpt in = 0; in < (Cpt)ns.size(); ++in) {
-        file << "[" << std::endl;
         ItemIdx n = ns[in];
         d.n = n;
         for (Cpt ir = 0; ir < (Cpt)rs.size(); ++ir) {
-            file << "[";
             Weight r = rs[ir];
             d.r = r;
             for (Cpt ix = 0; ix < (Cpt)xs.size(); ++ix) {
                 double x = xs[ix];
+
                 std::cout
                     << std::setw(10) << n
                     << std::setw(10) << r
                     << std::setw(10) << x
                     << std::flush;
+
                 d.x = x;
                 d.s++;
                 Instance ins = d.generate();
                 Solution sol(ins);
                 Profit ub = INT_MAX;
-                Info info = Info()
-                    .set_timelimit(t_max)
-                    //.set_verbose(true)
-                    ;
-                double t = -1;
-                std::stringstream t_str;
+                double t = t_limit + 1;
                 try {
+                    Info info = Info()
+                        .set_timelimit(t_limit)
+                        //.set_verbose(true)
+                        ;
                     f(ins, sol, ub, gen, info);
                     t = info.elapsed_time();
-                    t_str << (double)std::round(t * 10000) / 10;
                 } catch (...) {
                 }
-                if (t < 0)
-                    t_str << "×";
+                std::stringstream t_str;
+                if (t > t_limit) {
+                    t_str << "> " << t_limit * 1000;
+                } else {
+                    t_str << (double)std::round(t * 10000) / 10;
+                }
                 std::cout << std::setw(10) << t_str.str() << std::endl;
-                int val_max_r = 255 - 52;
-                int val_max_g = 255 - 101;
-                int val_max_b = 255 - 164;
-                int col_r = (t > t_max)? 0: 255 - (int)(val_max_r * cbrt(t / t_max));
-                int col_g = (t > t_max)? 0: 255 - (int)(val_max_g * cbrt(t / t_max));
-                int col_b = (t > t_max)? 0: 255 - (int)(val_max_b * cbrt(t / t_max));
-                file << "["
-                    << "{\"c\":"
-                    << "\"rgb("
-                    << col_r << ","
-                    << col_g << ","
-                    << col_b << ")\","
-                    << "\"t\":\"" << t_str.str() << " ms\""
-                    << "}"
-                    << "]";
-                if (ix != (Cpt)xs.size() - 1)
-                    file << ",";
+                int col_r = (t > t_limit)? 0: 255 - (int)(val_max_r * cbrt(t / t_limit));
+                int col_g = (t > t_limit)? 0: 255 - (int)(val_max_g * cbrt(t / t_limit));
+                int col_b = (t > t_limit)? 0: 255 - (int)(val_max_b * cbrt(t / t_limit));
+                std::string rgb_str = "rgb("
+                    + std::to_string(col_r) + ","
+                    + std::to_string(col_g) + ","
+                    + std::to_string(col_b) + ")";
+                json["tab"][in][ir][ix][0]["c"] = rgb_str;
+                json["tab"][in][ir][ix][0]["t"] = t_str.str();
             }
-            file << "]";
-            if (ir != (Cpt)rs.size() - 1)
-                file << ",";
-            file << std::endl;
         }
-        file << "]";
-        if (in != (Cpt)ns.size() - 1)
-            file << ",";
-        file << std::endl;
     }
 
-    file << "]" << std::endl;
-    file << "}" << std::endl;
-    file.close();
+    std::ofstream o(algorithm + ".json");
+    o << std::setw(4) << json << std::endl;
 }
 
 int main(int argc, char *argv[])
@@ -211,12 +197,14 @@ int main(int argc, char *argv[])
     // Parse program options
     std::vector<std::string> algorithms;
     std::vector<std::string> datasets;
+    double t_limit = 1;
 
     po::options_description desc("Allowed options");
     desc.add_options()
         ("help,h", "produce help message")
         ("algorithm,a", po::value<std::vector<std::string>>(&algorithms)->multitoken(), "set algorithms")
         ("datasets,d", po::value<std::vector<std::string>>(&datasets)->multitoken(), "datasets (easy, difficultlarge, difficultsmall)")
+        ("timelimit,t", po::value<double>(&t_limit), "time limit")
         ("verbose,v", "")
         ;
     po::variables_map vm;
@@ -284,15 +272,6 @@ int main(int argc, char *argv[])
             {"circle3", Generator::circle_generator(1000, 2.0/3)},
     };
 
-    std::vector<std::pair<std::string, Generator>> dataset_normal {
-            {"n3", Generator::normal_generator(1000) },
-            {"n4", Generator::normal_generator(10000)},
-            {"n5", Generator::normal_generator(100000)},
-            {"n6", Generator::normal_generator(1000000)},
-            {"n7", Generator::normal_generator(10000000)},
-            {"n8", Generator::normal_generator(100000000)},
-    };
-
     bool verbose = vm.count("verbose");
     for (std::string algorithm: algorithms) {
         std::cout << "*** " << algorithm << " ***" << std::endl;
@@ -304,7 +283,7 @@ int main(int argc, char *argv[])
             } else if (dataset == "difficultlarge" || dataset == "literature") {
                 bench(algorithm, "difficultlarge", dataset_difficultlarge, gen, 10000, verbose);
             } else if (dataset == "normal") {
-                bench_normal(algorithm, gen);
+                bench_normal(algorithm, t_limit, gen);
             }
         }
     }
