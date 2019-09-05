@@ -18,34 +18,37 @@ void bench_literature(
     std::ofstream file(algorithm + "_" + dataset_name + ".csv");
     func f = get_algorithm(algorithm);
 
+    // CSV
     file << "n \\ ds";
     for (auto& p: dataset)
         file << "," << p.first;
     file << std::endl;
 
-    for (ItemIdx n: {50,
-            100, 200, 500,
-            1000, 2000, 5000,
-            10000}) {
-        file << n << std::flush;
+    Seed s = 0;
+    for (ItemIdx n: {50, 100, 200, 500, 1000, 2000, 5000, 10000}) {
+
+        file << n << std::flush; // CSV
+
         for (Cpt k=0; k<(Cpt)dataset.size(); ++k) {
             Generator& d = dataset[k].second;
             d.n = n;
-            std::cout << d << "..." << std::flush;
+
+            std::cout << d << "..." << std::flush; // Standard output
 
             double t_max = 300;
             double t_total = 0.0;
             double mean = -1;
             for (d.h=1; d.h<=d.hmax; ++d.h) {
-                d.s = d.n + d.r + d.h;
+                s++;
+                d.s = s;
                 Instance ins = d.generate();
                 Solution sol(ins);
                 Profit ub = INT_MAX;
-                Info info = Info()
-                    .set_timelimit(t_max - t_total)
-                    //.set_verbose(true)
-                    ;
                 try {
+                    Info info = Info()
+                        .set_timelimit(t_max - t_total)
+                        //.set_verbose(true)
+                        ;
                     f(ins, sol, ub, gen, info);
                     double t = info.elapsed_time();
                     t_total += t;
@@ -53,33 +56,21 @@ void bench_literature(
                         mean = -1;
                     }
                 } catch (...) {
-                    std::cout << " x" << std::endl;
-                    std::cout << std::endl << d << std::flush;
-                    Instance ins = d.generate();
-                    Info info = Info()
-                        .set_timelimit(t_max - t_total)
-                        .set_verbose(true)
-                        .set_log2stderr(true)
-                        ;
-                    f(ins, sol, ub, gen, info);
-                    exit(1);
-                    mean = -1;
                 }
             }
-                d.h = -1;
-                d.s = -1;
 
-                mean = round(t_total * 100) / 10;
-                std::cout << " ";
-
-            std::cout << "mean " << mean << std::endl;
-            file << "," << mean << std::flush;
+            mean = round(t_total * 100) / 10;
+            std::cout << " mean " << mean << std::endl; // Standard output
+            file << "," << mean << std::flush; // CSV
+            d.h = 0;
+            d.s = -1;
         }
-        file << std::endl;
+
+        file << std::endl; // CSV
     }
-    std::cout << std::endl;
-    file << std::endl;
-    file.close();
+
+    std::cout << std::endl; // Standard output
+    file << std::endl; // CSV
 }
 
 void bench_normal(std::string algorithm, double time_limit, std::mt19937_64& gen)
