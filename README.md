@@ -10,6 +10,7 @@ Note: the code of `minknap` with all its optimizations is rather complex. I trie
 [image source](https://commons.wikimedia.org/wiki/File:Knapsack.svg)
 
 Table of Contents:
+
       * [Usage](#usage)
          * [Command line](#command-line)
          * [C++ library](#c-library)
