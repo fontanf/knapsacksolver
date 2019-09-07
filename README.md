@@ -9,7 +9,26 @@ Note: the code of `minknap` with all its optimizations is rather complex. I trie
 
 [image source](https://commons.wikimedia.org/wiki/File:Knapsack.svg)
 
-## Usage (command line)
+Table of Contents:
+      * [Usage](#usage)
+         * [Command line](#command-line)
+         * [C++ library](#c-library)
+      * [Implemented algorithms](#implemented-algorithms)
+         * [Lower bounds](#lower-bounds)
+         * [Upper bounds](#upper-bounds)
+         * [Exact algorithms](#exact-algorithms)
+            * [Classical algorithms](#classical-algorithms)
+            * [State of the art algorithms](#state-of-the-art-algorithms)
+      * [Results](#results)
+         * [Dynamic Programming: recursive vs iterative implementation](#dynamic-programming-recursive-vs-iterative-implementation)
+         * [Dynamic Programming: cost of retrieving an optimal solution](#dynamic-programming-cost-of-retrieving-an-optimal-solution)
+         * [When cache makes parallel algorithms slower](#when-cache-makes-parallel-algorithms-slower)
+         * [Normal dataset](#normal-dataset)
+         * [Literature dataset](#literature-dataset)
+
+## Usage
+
+### Command line
 
 This project uses Bazel https://bazel.build/
 
@@ -48,7 +67,7 @@ Unit tests:
 bazel test -- //...
 ```
 
-## Usage (C++ library)
+### C++ library
 
 * Import this repository into your project. The include directory is the root.
 If you use Bazel, just add the following lines to the `WORKSPACE` file:
@@ -68,19 +87,21 @@ And then in the `BUILD` file, add the dependency to the concerned rule:
 * Then an example of how to create an instance and solve it can be found here:
 https://github.com/fontanf/gap/blob/master/lb_lagrelax_lbfgs/lagrelax_lbfgs.cpp
 
-## Lower bounds
+## Implemented algorithms
+
+### Lower bounds
 
 - O(n) Greedy `-a greedy` run Forward and Backward Greedy algorithms and return the best solution :heavy_check_mark:
 - O(n log n) Greedy `-a greedynlogn`  run a Complete Greedy (continue filling the knapsack after the break item) and a Forward and Backward Greedy algorithm similar to the one described in "A fast algorithm for strongly correlated knapsack problems" (Pisinger, 1998), and return the best solution found :heavy_check_mark:
 
-## Upper bounds
+### Upper bounds
 
 - Dantzig Upper bound `-a dantzig` :heavy_check_mark:
 - Surrogate relaxation Upper bound `-a surrelax` :heavy_check_mark:
 
-## Exact algorithms
+### Exact algorithms
 
-### Classical algorithms
+#### Classical algorithms
 
 - `array` and `list` refer to the type of memory used. Lists are slower but eliminate dominated states and allow the use of Upper bounds.
 - `all`, `one`, `part` and `rec` refer to the method used to retrieve the optimal solution:
@@ -100,7 +121,7 @@ Algorithms:
 - Dynamic programming by Profits `-a dpprofits_array` :heavy_check_mark: `-a dpprofits_array_all` :heavy_check_mark:
 - Primal Branch-and-bound `-a bab` :heavy_check_mark: `-a bab_sort` :heavy_check_mark:
 
-### State of the art algorithms
+#### State of the art algorithms
 
 Options
 - `c 1`: use `combo` core
