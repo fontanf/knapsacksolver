@@ -9,23 +9,23 @@ Note: the code of `minknap` with all its optimizations is rather complex. I trie
 
 [image source](https://commons.wikimedia.org/wiki/File:Knapsack.svg)
 
-Table of Contents:
+##### Table of Contents
 
-      * [Usage](#usage)
-         * [Command line](#command-line)
-         * [C++ library](#c-library)
-      * [Implemented algorithms](#implemented-algorithms)
-         * [Lower bounds](#lower-bounds)
-         * [Upper bounds](#upper-bounds)
-         * [Exact algorithms](#exact-algorithms)
-            * [Classical algorithms](#classical-algorithms)
-            * [State of the art algorithms](#state-of-the-art-algorithms)
-      * [Results](#results)
-         * [Dynamic Programming: recursive vs iterative implementation](#dynamic-programming-recursive-vs-iterative-implementation)
-         * [Dynamic Programming: cost of retrieving an optimal solution](#dynamic-programming-cost-of-retrieving-an-optimal-solution)
-         * [When cache makes parallel algorithms slower](#when-cache-makes-parallel-algorithms-slower)
-         * [Normal dataset](#normal-dataset)
-         * [Literature dataset](#literature-dataset)
+ * [Usage](#usage)
+   * [Command line](#command-line)
+   * [C++ library](#c-library)
+ * [Implemented algorithms](#implemented-algorithms)
+   * [Lower bounds](#lower-bounds)
+   * [Upper bounds](#upper-bounds)
+   * [Exact algorithms](#exact-algorithms)
+     * [Classical algorithms](#classical-algorithms)
+     * [State of the art algorithms](#state-of-the-art-algorithms)
+ * [Results](#results)
+   * [Dynamic Programming: recursive vs iterative implementation](#dynamic-programming-recursive-vs-iterative-implementation)
+   * [Dynamic Programming: cost of retrieving an optimal solution](#dynamic-programming-cost-of-retrieving-an-optimal-solution)
+   * [When cache makes parallel algorithms slower](#when-cache-makes-parallel-algorithms-slower)
+   * [Normal dataset](#normal-dataset)
+   * [Literature dataset](#literature-dataset)
 
 ## Usage
 
