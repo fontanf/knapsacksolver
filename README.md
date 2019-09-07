@@ -154,12 +154,12 @@ The parallel algorithm is implemented as follows: items are divided in two sets 
 n ∈ {100, 1000, 10000, 100000, 1000000}
 r ∈ {1000, 10000, 100000, 1000000, 10000000, 100000000}
 x ∈ {0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9}
-wj ~ N(r, r / 10)
+wj ~ N(r / 2, r / 10)
 pj ~ N(wj, wj / 10), 1 <= pj <= r
 c = r * (1 - x) + ∑wj * x;
 ```
 
-Each instance of the normal dataset happens to be solved exactly by `minknap` in less than a second:
+Each instance (except one) of the normal dataset happens to be solved exactly by `minknap` in less than a second:
 * [bellman_list_rec](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/knapsack/master/bench/bellman_list_rec.json)
 * [expknap](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/knapsack/master/bench/expknap.json)
 * [expknap_combo](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/knapsack/master/bench/expknap_combo.json)
@@ -169,8 +169,6 @@ Each instance of the normal dataset happens to be solved exactly by `minknap` in
 * [combo](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/knapsack/master/bench/combo.json)
 
 ### Literature dataset
-
-The Knapsack Problem is NP-complete since it contains the Subset Sum Problem as subproblem. Therefore, the hardest instances of the Knapasck Problem are the hard instances of the Subset Sum Problem. Still, researchers have tried to find some hard Knapsack instances that are not instances of the Subset Sum Problem. The `minknap` algorithm with `combo` improvments is able to solve all the hard instances from the litterature. Note that, interestingly, those improvements make it slower on the normal dataset. Furthermore, the code of `combo` is more complex, increasing the probability that it contains bugs. Therefore, for practical use, unless you know that your instances will be shaped like the ones from the hard dataset, I would recommend using `minknap` and not `combo`.
 
 | Algorithm                               | Instances                                                                                                                                                          |
 | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
