@@ -95,15 +95,15 @@ void sopt_minknap_main(Instance& ins, MinknapOptionalParameters& p, MinknapOutpu
     // Trivial cases
     if (n == 0 || c == 0) {
         Solution sol_tmp = (ins.reduced_solution() == NULL)? Solution(ins): *ins.reduced_solution();
-        update_sol(output, sol_tmp, std::stringstream("no item or null capacity"), p.info);
-        update_ub(output, output.lower_bound, std::stringstream("no item of null capacity"), p.info);
+        update_sol(output, sol_tmp, std::stringstream("no item or null capacity (lb)"), p.info);
+        update_ub(output, output.lower_bound, std::stringstream("no item of null capacity (ub)"), p.info);
         LOG_FOLD_END(p.info, "no item or null capacity");
         return;
     } else if (n == 1) {
         Solution sol_tmp = (ins.reduced_solution() == NULL)? Solution(ins): *ins.reduced_solution();
         sol_tmp.set(ins.first_item(), true);
-        update_sol(output, sol_tmp, std::stringstream("one item"), p.info);
-        update_ub(output, output.lower_bound, std::stringstream("one item"), p.info);
+        update_sol(output, sol_tmp, std::stringstream("one item (lb)"), p.info);
+        update_ub(output, output.lower_bound, std::stringstream("one item (ub)"), p.info);
         LOG_FOLD_END(p.info, "one item");
         return;
     }
@@ -157,7 +157,8 @@ void sopt_minknap_main(Instance& ins, MinknapOptionalParameters& p, MinknapOutpu
             LOG_FOLD_END(p.info, "end");
             return;
         }
-        if (output.lower_bound == output.upper_bound)
+        if (output.solution.profit() == output.upper_bound
+                || d.best_state.p == output.upper_bound)
             break;
 
         if (d.t <= ins.last_item()) {
@@ -179,7 +180,7 @@ void sopt_minknap_main(Instance& ins, MinknapOptionalParameters& p, MinknapOutpu
                 LOG_FOLD_END(p.info, "end");
                 return;
             }
-            if (output.lower_bound == output.upper_bound)
+            if (d.best_state.p == output.upper_bound)
                 break;
         }
 
@@ -202,7 +203,7 @@ void sopt_minknap_main(Instance& ins, MinknapOptionalParameters& p, MinknapOutpu
                 LOG_FOLD_END(p.info, "end");
                 return;
             }
-            if (output.lower_bound == output.upper_bound)
+            if (d.best_state.p == output.upper_bound)
                 break;
         }
     }
@@ -230,8 +231,8 @@ void sopt_minknap_main(Instance& ins, MinknapOptionalParameters& p, MinknapOutpu
     ins.fix(p.info, d.psolf.vector(d.best_state.sol));
     assert(ins.capacity() >= 0);
 
-    sopt_minknap_main(ins, p, output);
     LOG_FOLD_END(p.info, "minknap_main");
+    sopt_minknap_main(ins, p, output);
 }
 
 /******************************************************************************/
@@ -282,7 +283,7 @@ void add_item(MinknapInternData& d)
                     }
                     d.best_state = s1;
                     assert(d.output.lower_bound <= d.output.upper_bound);
-                    if (d.output.lower_bound == d.output.upper_bound) {
+                    if (d.best_state.p == d.output.upper_bound) {
                         LOG_FOLD_END(info, " lb == ub");
                         return;
                     }
@@ -404,7 +405,7 @@ void remove_item(MinknapInternData& d)
                     }
                     d.best_state = s1;
                     assert(d.output.lower_bound <= d.output.upper_bound);
-                    if (d.output.lower_bound == d.output.upper_bound) {
+                    if (d.best_state.p == d.output.upper_bound) {
                         LOG_FOLD_END(info, " lb == ub");
                         return;
                     }
@@ -527,7 +528,7 @@ void update_bounds(MinknapInternData& d)
                 ins.add_item_to_core(d.s, d.t, j, info);
                 ++d.t;
                 add_item(d);
-                if (d.output.lower_bound == d.output.upper_bound
+                if (d.output.solution.profit() == d.output.upper_bound
                         || !info.check_time()
                         || (d.p.stop_if_end && *(d.p.end)))
                     return;

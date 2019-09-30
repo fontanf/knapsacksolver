@@ -9,16 +9,18 @@ int main(int argc, char *argv[])
     (void)argc;
     (void)argv;
 
-    Generator data;
-    data.n = 10000;
-    data.normal = true;
-    data.dw = 10;
-    data.t = "normal";
-    data.r = 100000000;
-    data.d = 10;
-    data.x = 0.3;
-    data.s = 174;
-    Instance ins = data.generate();
+    //Generator data;
+    //data.n = 10000;
+    //data.normal = true;
+    //data.dw = 10;
+    //data.t = "normal";
+    //data.r = 100000000;
+    //data.d = 10;
+    //data.x = 0.3;
+    //data.s = 174;
+    //Instance ins = data.generate();
+    //Instance ins(95, {{24, 34}, {42, 52}, {32, 42}, {4, 14}});
+    Instance ins(40, {{11, 12}, {11, 12}, {11, 12}, {10, 10}, {10, 10}, {10, 10}, {10, 10}});
     //std::cout << ins << std::endl;
 
     Info info = Info()
@@ -26,17 +28,12 @@ int main(int argc, char *argv[])
         //.set_log2stderr(true)
         .set_logfile("log.txt")
         ;
-    //Profit opt = opt_bellman_array(ins, info);
-    //std::cout << opt << std::endl;
-    //Solution sol = sopt_bellman_array_all(ins, info);
-    //std::cout << "profit " << sol.profit() << std::endl;
-    //for (ItemIdx j=0; j<ins.item_number(); ++j)
-        //std::cout << j << ":" << sol.contains(j) << " ";
-    //std::cout << std::endl;
 
-    //Solution sol_minknap = sopt_minknap(ins, MinknapParams::combo(), info);
-    Solution sol(ins);
-    //sol = sopt_bellman_list_rec(ins, info);
+    MinknapOptionalParameters p;
+    p.info = info;
+    //p.partial_solution_size = 1;
+    p.pairing = 10;
+    auto output = sopt_minknap(ins, p);
 
 }
 
