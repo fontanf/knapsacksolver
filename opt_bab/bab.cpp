@@ -109,7 +109,8 @@ knapsack::Output knapsack::sopt_bab(Instance& ins, bool sort, Info info)
         j_max = ins.max_efficiency_item(info);
     }
 
-    Profit ub = (!sort)? ub_0(ins, 0, 0, ins.total_capacity(), j_max): ub_dantzig(ins);
+    Profit ub = (!sort)? ub_0(ins, 0, 0, ins.total_capacity(), j_max):
+        std::max(ub_dantzig(ins), output.lower_bound);
     update_ub(output, ub, std::stringstream("initial upper bound"), info);
 
     BabData d {

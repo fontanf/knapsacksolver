@@ -68,8 +68,8 @@ struct MinknapOptionalParameters
 struct MinknapOutput: Output
 {
     MinknapOutput(const Instance& ins): Output(ins) { }
-    StateIdx state_number;
-    Cpt recursive_call_number;
+    StateIdx state_number = 0;
+    Cpt recursive_call_number = 0;
 };
 
 MinknapOutput sopt_minknap(Instance& ins, MinknapOptionalParameters p = {});

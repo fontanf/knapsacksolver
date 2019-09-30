@@ -7,7 +7,7 @@ using namespace knapsack;
 
 bool test(const Instance& ins, std::vector<knapsack::Output (*)(Instance&)> fs, TestType tt)
 {
-    Profit opt = ins.optimum();
+    Profit opt = -1;
     for (auto f: fs) {
         Instance ins_tmp = ins;
         knapsack::Output output = f(ins_tmp);
@@ -215,9 +215,7 @@ void test(Instances& inss, std::vector<knapsack::Output (*)(Instance&)> fs, Test
         }
         if (ins.item_number() == 0)
             break;
-        std::cout << "toto" << std::endl;
     }
-    std::cout << "ok" << std::endl;
 }
 
 void knapsack::test(InstacesType it, std::vector<knapsack::Output (*)(Instance&)> fs, TestType tt)

@@ -8,6 +8,7 @@ using namespace knapsack;
 knapsack::Output opt_bellman_array_test(Instance& ins)
 {
     Info info = Info()
+        //.set_verbose(true)
         //.set_log2stderr(true)
         ;
     return opt_bellman_array(ins, info);
@@ -16,6 +17,7 @@ knapsack::Output opt_bellman_array_test(Instance& ins)
 knapsack::Output sopt_minknap_1_test(Instance& ins)
 {
     Info info = Info()
+        //.set_verbose(true)
         //.set_log2stderr(true)
         ;
     MinknapOptionalParameters p;
@@ -28,6 +30,7 @@ knapsack::Output sopt_minknap_1_test(Instance& ins)
 knapsack::Output sopt_minknap_2_test(Instance& ins)
 {
     Info info = Info()
+        //.set_verbose(true)
         //.set_log2stderr(true)
         ;
     MinknapOptionalParameters p;
@@ -40,6 +43,7 @@ knapsack::Output sopt_minknap_2_test(Instance& ins)
 knapsack::Output sopt_minknap_3_test(Instance& ins)
 {
     Info info = Info()
+        //.set_verbose(true)
         //.set_log2stderr(true)
         ;
     MinknapOptionalParameters p;
@@ -52,6 +56,7 @@ knapsack::Output sopt_minknap_3_test(Instance& ins)
 knapsack::Output sopt_minknap_combocore_k1_test(Instance& ins)
 {
     Info info = Info()
+        //.set_verbose(true)
         //.set_log2stderr(true)
         ;
     MinknapOptionalParameters p;
@@ -65,6 +70,7 @@ knapsack::Output sopt_minknap_combocore_k1_test(Instance& ins)
 knapsack::Output sopt_minknap_combocore_k2_test(Instance& ins)
 {
     Info info = Info()
+        //.set_verbose(true)
         //.set_log2stderr(true)
         ;
     MinknapOptionalParameters p;
@@ -78,6 +84,7 @@ knapsack::Output sopt_minknap_combocore_k2_test(Instance& ins)
 knapsack::Output sopt_minknap_combocore_k3_test(Instance& ins)
 {
     Info info = Info()
+        //.set_verbose(true)
         //.set_log2stderr(true)
         ;
     MinknapOptionalParameters p;
@@ -91,6 +98,7 @@ knapsack::Output sopt_minknap_combocore_k3_test(Instance& ins)
 knapsack::Output sopt_minknap_pairing_test(Instance& ins)
 {
     Info info = Info()
+        //.set_verbose(true)
         //.set_log2stderr(true)
         ;
     MinknapOptionalParameters p;

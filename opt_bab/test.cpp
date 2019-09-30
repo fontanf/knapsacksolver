@@ -6,13 +6,18 @@ using namespace knapsack;
 
 knapsack::Output sopt_minknap_test(Instance& ins)
 {
-    return sopt_minknap(ins);
+    Info info = Info()
+        .set_verbose(true)
+        ;
+    MinknapOptionalParameters p;
+    p.info = info;
+    return sopt_minknap(ins, p);
 }
 
 knapsack::Output sopt_bab_test(Instance& ins)
 {
     Info info = Info()
-        .set_verbose(false)
+        .set_verbose(true)
         ;
     return sopt_bab(ins, false, info);
 }
@@ -20,7 +25,7 @@ knapsack::Output sopt_bab_test(Instance& ins)
 knapsack::Output sopt_bab_sort_test(Instance& ins)
 {
     Info info = Info()
-        .set_verbose(false)
+        .set_verbose(true)
         ;
     return sopt_bab(ins, true, info);
 }
