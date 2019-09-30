@@ -13,6 +13,7 @@ Profit knapsack::ub_dantzig(const Instance& ins, Info info)
     if (b <= ins.last_item() && r > 0)
         p += (ins.item(b).p * r) / ins.item(b).w;
 
-    return algorithm_end(p, info);
+    algorithm_end(p, info);
+    return p;
 }
 

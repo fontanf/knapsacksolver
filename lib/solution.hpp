@@ -61,10 +61,23 @@ private:
 
 std::ostream& operator<<(std::ostream &os, const Solution& solution);
 
+struct Output
+{
+    Output(const Instance& ins): solution(ins) { }
+    Solution solution;
+    Profit lower_bound = 0;
+    Profit upper_bound = -1;
+};
+
+/********************************** Display ***********************************/
+
 void init_display(Profit lb, Profit ub, Info& info);
-void update_sol(Solution* sol, Profit* lb, Profit ub, const Solution& sol_new, const std::stringstream& s, Info& info);
+
 void update_lb(Profit& lb, Profit ub, Profit lb_new, const std::stringstream& s, Info& info);
 void update_ub(Profit lb, Profit& ub, Profit ub_new, const std::stringstream& s, Info& info);
+
+void algorithm_end(Profit upper_bound, Info& info);
+void algorithm_end(const knapsack::Output&, Info& info);
 
 }
 

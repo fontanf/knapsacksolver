@@ -6,8 +6,8 @@
 namespace knapsack
 {
 
-Profit    opt_dpprofits_array(const Instance& ins, Info info = Info());
-Solution sopt_dpprofits_array_all(const Instance& ins, Info info = Info());
+knapsack::Output opt_dpprofits_array(const Instance& ins, Info info = Info());
+knapsack::Output sopt_dpprofits_array_all(const Instance& ins, Info info = Info());
 
 }
 

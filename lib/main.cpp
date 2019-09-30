@@ -50,8 +50,6 @@ int main(int argc, char *argv[])
     std::mt19937_64 gen(seed);
     auto func = get_algorithm(algorithm);
     Instance ins(instancefile, format);
-    Solution sol(ins);
-    Profit ub = INT_MAX;
 
     Info info = Info()
         .set_verbose(vm.count("verbose"))
@@ -64,10 +62,10 @@ int main(int argc, char *argv[])
         .set_loglevelmax(loglevelmax)
         ;
 
-    func(ins, sol, ub, gen, info);
+    knapsack::Output output = func(ins, gen, info);
 
     info.write_ini(outputfile);
-    sol.write_cert(certfile);
+    output.solution.write_cert(certfile);
     return 0;
 }
 

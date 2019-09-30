@@ -11,54 +11,68 @@ namespace knapsack
 
 using namespace knapsack;
 
-struct MinknapParams
+struct MinknapOptionalParameters
 {
-    Cpt k = 64;
-    StateIdx greedy = 0;
-    StateIdx greedynlogn = -1;
+    Info info = Info();
+
+    bool greedy = 0;
     StateIdx pairing = -1;
     StateIdx surrogate = -1;
     bool combo_core = false;
+    ItemIdx partial_solution_size = 64;
 
-    static MinknapParams pure()
+    // If "stop_if_end" == true, the algorithm will stop when *end"" becomes
+    // equal to "true".
+    // If end == NULL, then a new pointer will be allocated and deallocated.
+    // If set_end == true, then "*end" will be set to "true" at the end of the
+    // algorithm.
+    // This is used for parallelization.
+    // Normal users should not need to change "end" and "set_end" default values.
+    bool* end = NULL;
+    bool stop_if_end = false;
+    bool set_end = true;
+
+    MinknapOptionalParameters& pure()
     {
-        return {
-            .k = 64,
-            .greedy = -1,
-            .greedynlogn = -1,
-            .pairing = -1,
-            .surrogate = -1,
-            .combo_core = false,
-        };
+        greedy = -1;
+        pairing = -1;
+        surrogate = -1;
+        combo_core = false;
+        partial_solution_size = 64;
+        return *this;
     }
 
-    static MinknapParams combo()
+    MinknapOptionalParameters& combo()
     {
-        return {
-            .k = 64,
-            .greedy = 0,
-            .greedynlogn = -1,
-            .pairing = 10000,
-            .surrogate = 2000,
-            .combo_core = true,
-        };
+        greedy = 0;
+        pairing = 10000;
+        surrogate = 2000;
+        combo_core = true;
+        partial_solution_size = 64;
+        return *this;
     }
 
-    MinknapParams& set_params(const std::map<std::string, std::string>& args)
+    MinknapOptionalParameters& set_params(const std::map<std::string, std::string>& args)
     {
         auto it = args.end();
-        if ((it = args.find("k"))  != args.end()) k           = std::stol(it->second);
-        if ((it = args.find("g"))  != args.end()) greedy      = std::stol(it->second);
-        if ((it = args.find("gn")) != args.end()) greedynlogn = std::stol(it->second);
-        if ((it = args.find("p"))  != args.end()) pairing     = std::stol(it->second);
-        if ((it = args.find("s"))  != args.end()) surrogate   = std::stol(it->second);
-        if ((it = args.find("c"))  != args.end()) combo_core  = (it->second == "1");
+        if ((it = args.find("k"))  != args.end()) partial_solution_size = std::stol(it->second);
+        if ((it = args.find("g"))  != args.end()) greedy                = (it->second == "true");
+        if ((it = args.find("p"))  != args.end()) pairing               = std::stol(it->second);
+        if ((it = args.find("s"))  != args.end()) surrogate             = std::stol(it->second);
+        if ((it = args.find("c"))  != args.end()) combo_core            = (it->second == "true");
         return *this;
     }
 
 };
 
-Solution sopt_minknap(Instance& ins, MinknapParams p, Info info = Info());
+struct MinknapOutput: Output
+{
+    MinknapOutput(const Instance& ins): Output(ins) { }
+    StateIdx state_number;
+    Cpt recursive_call_number;
+};
+
+MinknapOutput sopt_minknap(Instance& ins, MinknapOptionalParameters p = {});
 
 }
 

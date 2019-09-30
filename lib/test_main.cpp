@@ -10,11 +10,14 @@ int main(int argc, char *argv[])
     (void)argv;
 
     Generator data;
-    data.n = 2000;
-    data.t = "asc";
-    data.r = 100000;
-    data.h = 80;
-    data.s = 102080;
+    data.n = 10000;
+    data.normal = true;
+    data.dw = 10;
+    data.t = "normal";
+    data.r = 100000000;
+    data.d = 10;
+    data.x = 0.3;
+    data.s = 174;
     Instance ins = data.generate();
     //std::cout << ins << std::endl;
 
@@ -31,7 +34,9 @@ int main(int argc, char *argv[])
         //std::cout << j << ":" << sol.contains(j) << " ";
     //std::cout << std::endl;
 
-    Solution sol_minknap = sopt_minknap(ins, MinknapParams::combo(), info);
+    //Solution sol_minknap = sopt_minknap(ins, MinknapParams::combo(), info);
+    Solution sol(ins);
+    sol = sopt_bellman_list_rec(ins, info);
 
 }
 
