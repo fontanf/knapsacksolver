@@ -73,8 +73,9 @@ struct Output
 
 void init_display(Profit lb, Profit ub, Info& info);
 
-void update_lb(Profit& lb, Profit ub, Profit lb_new, const std::stringstream& s, Info& info);
-void update_ub(Profit lb, Profit& ub, Profit ub_new, const std::stringstream& s, Info& info);
+void update_lb(knapsack::Output& output, Profit lb_new, const std::stringstream& s, Info& info);
+void update_sol(knapsack::Output& output, const Solution& sol, const std::stringstream& s, Info& info);
+void update_ub(knapsack::Output& output, Profit ub_new, const std::stringstream& s, Info& info);
 
 void algorithm_end(Profit upper_bound, Info& info);
 void algorithm_end(const knapsack::Output&, Info& info);

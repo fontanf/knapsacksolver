@@ -4,16 +4,36 @@
 
 using namespace knapsack;
 
-Profit opt_minknap(Instance& ins)                  { Info info; return sopt_minknap(ins, MinknapParams(), info).profit(); }
-Profit opt_forwardgreedynlogn_test(Instance& ins)  { Info info; ins.sort_partially(info); return sol_forwardgreedynlogn(ins, info).profit(); }
-Profit opt_backwardgreedynlogn_test(Instance& ins) { Info info; ins.sort_partially(info); return sol_backwardgreedynlogn(ins, info).profit(); }
-Profit opt_greedynlogn_test(Instance& ins)         { Info info; ins.sort_partially(info); return sol_greedynlogn(ins, info).profit(); }
+knapsack::Output sopt_minknap_test(Instance& ins)
+{
+    return sopt_minknap(ins);
+}
 
-std::vector<Profit (*)(Instance&)> f = {
-        opt_minknap,
-        opt_forwardgreedynlogn_test,
-        opt_backwardgreedynlogn_test,
-        opt_greedynlogn_test,
+knapsack::Output sol_forwardgreedynlogn_test(Instance& ins)
+{
+    Info info;
+    ins.sort_partially(info);
+    return sol_forwardgreedynlogn(ins, info);
+}
+
+knapsack::Output sol_backwardgreedynlogn_test(Instance& ins)
+{
+    Info info;
+    ins.sort_partially(info);
+    return sol_backwardgreedynlogn(ins, info);
+}
+
+knapsack::Output sol_greedynlogn_test(Instance& ins)
+{
+    Info info; ins.sort_partially(info);
+    return sol_greedynlogn(ins, info);
+}
+
+std::vector<knapsack::Output (*)(Instance&)> f = {
+        sopt_minknap_test,
+        sol_forwardgreedynlogn_test,
+        sol_backwardgreedynlogn_test,
+        sol_greedynlogn_test,
 };
 
 TEST(greedynlogn, TEST)  { test(TEST, f, LB); }

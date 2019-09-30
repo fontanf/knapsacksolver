@@ -10,6 +10,7 @@
 namespace knapsack
 {
 
+/*
 struct BalknapParams
 {
     ItemPos k            = 64;
@@ -54,6 +55,7 @@ struct BalknapParams
 };
 
 Solution sopt_balknap(Instance& ins, BalknapParams p, Info info = Info());
+*/
 
 }
 

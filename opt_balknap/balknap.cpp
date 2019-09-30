@@ -10,6 +10,7 @@
 #include <bitset>
 
 using namespace knapsack;
+/*
 
 struct BalknapState
 {
@@ -443,4 +444,5 @@ Solution knapsack::sopt_balknap(Instance& ins, BalknapParams p, Info info)
 {
     return Balknap(ins, p).run(info);
 }
+*/
 

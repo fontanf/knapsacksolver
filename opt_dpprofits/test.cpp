@@ -4,19 +4,22 @@
 
 using namespace knapsack;
 
-Profit opt_bellman_array_test(Instance& ins)         { return opt_bellman_array(ins); }
-Profit opt_dpprofits_array_test(Instance& ins)       { return opt_dpprofits_array(ins); }
-Profit opt_dpprofits_array_all_test(Instance& ins)   { return sopt_dpprofits_array_all(ins).profit(); }
+knapsack::Output  opt_bellman_array_test(Instance& ins)       { return opt_bellman_array(ins); }
+knapsack::Output  opt_dpprofits_array_test(Instance& ins)     { return opt_dpprofits_array(ins); }
+knapsack::Output sopt_dpprofits_array_all_test(Instance& ins) { return sopt_dpprofits_array_all(ins); }
 
-std::vector<Profit (*)(Instance&)> tested_functions()
-{
-    return {
+std::vector<knapsack::Output (*)(Instance&)> f_opt {
         opt_bellman_array_test,
         opt_dpprofits_array_test,
-        opt_dpprofits_array_all_test,
-    };
-}
+};
 
-TEST(dpprofits, TEST)  { test(TEST, tested_functions()); }
-TEST(dpprofits, SMALL) { test(SMALL, tested_functions()); }
+std::vector<knapsack::Output (*)(Instance&)> f_sopt {
+        opt_bellman_array_test,
+        sopt_dpprofits_array_all_test,
+};
+
+TEST(dpprofits, TEST_SOPT)  { test(TEST, f_sopt, SOPT); }
+TEST(dpprofits, SMALL_SOPT) { test(SMALL, f_sopt, SOPT); }
+TEST(dpprofits, TEST_OPT)  { test(TEST, f_opt, OPT); }
+TEST(dpprofits, SMALL_OPT) { test(SMALL, f_opt, OPT); }
 

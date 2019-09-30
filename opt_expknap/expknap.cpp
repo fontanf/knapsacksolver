@@ -7,6 +7,7 @@
 
 using namespace knapsack;
 
+/*
 class Expknap
 {
 
@@ -185,4 +186,5 @@ Solution knapsack::sopt_expknap(Instance& ins, ExpknapParams p, Info info)
 {
     return Expknap(ins, p).run(info);
 }
+*/
 

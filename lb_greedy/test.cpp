@@ -4,12 +4,21 @@
 
 using namespace knapsack;
 
-Profit opt_minknap(Instance& ins)      { Info info; return sopt_minknap(ins, MinknapParams(), info).profit(); }
-Profit opt_greedy_test(Instance& ins)  { Info info; ins.sort_partially(info); return sol_greedy(ins, info).profit(); }
+knapsack::Output sopt_minknap_test(Instance& ins)
+{
+    return sopt_minknap(ins);
+}
 
-std::vector<Profit (*)(Instance&)> f = {
-        opt_minknap,
-        opt_greedy_test,
+knapsack::Output sol_greedy_test(Instance& ins)
+{
+    Info info;
+    ins.sort_partially(info);
+    return sol_greedy(ins, info);
+}
+
+std::vector<knapsack::Output (*)(Instance&)> f = {
+        sopt_minknap_test,
+        sol_greedy_test,
 };
 
 TEST(greedy, TEST)  { test(TEST, f, LB); }

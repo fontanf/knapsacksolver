@@ -4,6 +4,7 @@
 
 using namespace knapsack;
 
+/*
 Profit opt_minknap(Instance& ins)          { Info info; return sopt_minknap(ins, MinknapParams(), info).profit(); }
 Profit opt_balknap_1_b_test(Instance& ins) { BalknapParams p; p.ub = 'b'; p.k = 1; return sopt_balknap(ins, p, Info()).profit(); }
 Profit opt_balknap_2_b_test(Instance& ins) { BalknapParams p; p.ub = 'b'; p.k = 2; return sopt_balknap(ins, p, Info()).profit(); }
@@ -24,4 +25,6 @@ std::vector<Profit (*)(Instance&)> f = {
 
 TEST(balknap, TEST)  { test(TEST, f); }
 TEST(balknap, SMALL) { test(SMALL, f); }
+
+*/
 

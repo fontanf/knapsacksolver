@@ -42,14 +42,12 @@ void bench_literature(
                 s++;
                 d.s = s;
                 Instance ins = d.generate();
-                Solution sol(ins);
-                Profit ub = INT_MAX;
                 try {
                     Info info = Info()
                         .set_timelimit(t_max - t_total)
                         //.set_verbose(true)
                         ;
-                    f(ins, sol, ub, gen, info);
+                    f(ins, gen, info);
                     double t = info.elapsed_time();
                     t_total += t;
                     if (t_total > t_max) {
@@ -123,21 +121,20 @@ void bench_normal(std::string algorithm, double time_limit, std::mt19937_64& gen
                 std::cout << "x " << std::right << std::setw(6) << x << std::flush;
 
                 Instance ins = d.generate();
-                Solution sol(ins);
-                Profit ub = LLONG_MAX;
+                knapsack::Output output(ins);
                 double t = time_limit + 1;
                 try {
                     Info info = Info()
                         .set_timelimit(time_limit)
                         //.set_verbose(true)
                         ;
-                    f(ins, sol, ub, gen, info);
+                    output = f(ins, gen, info);
                     t = info.elapsed_time();
                 } catch (...) {
                 }
 
                 std::stringstream t_str;
-                if (t <= time_limit && sol.profit() == ub) {
+                if (t <= time_limit && output.solution.profit() == output.upper_bound) {
                     t_str << (double)std::round(t * 10000) / 10;
                     std::cout << "\033[32m";
                     col_r = 255 - (int)(val_max_r * cbrt(t / time_limit));
@@ -159,8 +156,8 @@ void bench_normal(std::string algorithm, double time_limit, std::mt19937_64& gen
                 json["tab"][in][ir][ix][0]["t"] = t_str.str();
 
                 // Standard output
-                std::cout << " | LB" << std::right << std::setw(20) << sol.profit();
-                std::cout << " | UB" << std::right << std::setw(20) << ub;
+                std::cout << " | LB" << std::right << std::setw(20) << output.solution.profit();
+                std::cout << " | UB" << std::right << std::setw(20) << output.upper_bound;
                 std::cout << " | T (s)" << std::right << std::setw(8) << t_str.str();
                 std::cout << "\033[0m" << std::endl;
             }

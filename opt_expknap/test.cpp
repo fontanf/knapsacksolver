@@ -4,6 +4,8 @@
 
 using namespace knapsack;
 
+/*
+
 Profit opt_minknap(Instance& ins)
 {
     Info info;
@@ -38,4 +40,6 @@ std::vector<Profit (*)(Instance&)> f = {
 
 TEST(expknap, TEST)  { test(TEST, f); }
 TEST(expknap, SMALL) { test(SMALL, f); }
+
+*/
 

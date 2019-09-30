@@ -5,26 +5,30 @@
 
 using namespace knapsack;
 
-bool test(const Instance& ins, std::vector<Profit (*)(Instance&)> fs, TestType tt)
+bool test(const Instance& ins, std::vector<knapsack::Output (*)(Instance&)> fs, TestType tt)
 {
     Profit opt = ins.optimum();
     for (auto f: fs) {
         Instance ins_tmp = ins;
-        Profit val = f(ins_tmp);
-        if (opt == -1)
-            opt = val;
-        if (tt == OPT) {
-            EXPECT_EQ(val, opt);
-            if (val != opt)
-                return false;
+        knapsack::Output output = f(ins_tmp);
+        if (opt == -1) {
+            opt = output.lower_bound;
+            continue;
+        }
+        if (tt == SOPT) {
+            EXPECT_EQ(output.lower_bound, opt);
+            EXPECT_EQ(output.lower_bound, output.upper_bound);
+            EXPECT_TRUE(output.solution.feasible());
+            EXPECT_EQ(output.solution.profit(), output.lower_bound);
+        } else if (tt == OPT) {
+            EXPECT_EQ(output.lower_bound, opt);
+            EXPECT_EQ(output.lower_bound, output.upper_bound);
         } else if (tt == UB) {
-            EXPECT_GE(val, opt);
-            if (val < opt)
-                return false;
+            EXPECT_GE(output.upper_bound, opt);
         } else if (tt == LB) {
-            EXPECT_LE(val, opt);
-            if (val > opt)
-                return false;
+            EXPECT_LE(output.lower_bound, opt);
+            EXPECT_TRUE(output.solution.feasible());
+            EXPECT_EQ(output.solution.profit(), output.lower_bound);
         }
     }
     return true;
@@ -199,7 +203,7 @@ private:
 
 };
 
-void test(Instances& inss, std::vector<Profit (*)(Instance&)> fs, TestType tt)
+void test(Instances& inss, std::vector<knapsack::Output (*)(Instance&)> fs, TestType tt)
 {
     for (;;) {
         Instance ins(inss.next());
@@ -216,7 +220,7 @@ void test(Instances& inss, std::vector<Profit (*)(Instance&)> fs, TestType tt)
     std::cout << "ok" << std::endl;
 }
 
-void knapsack::test(InstacesType it, std::vector<Profit (*)(Instance&)> fs, TestType tt)
+void knapsack::test(InstacesType it, std::vector<knapsack::Output (*)(Instance&)> fs, TestType tt)
 {
     if (it == TEST) {
         TestInstances ti;

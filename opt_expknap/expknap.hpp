@@ -9,6 +9,7 @@
 namespace knapsack
 {
 
+/*
 struct ExpknapParams
 {
     StateIdx greedy = 0;
@@ -49,6 +50,7 @@ struct ExpknapParams
 };
 
 Solution sopt_expknap(Instance& ins, ExpknapParams p, Info info = Info());
+*/
 
 }
 

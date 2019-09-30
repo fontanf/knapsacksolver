@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
 
     //Solution sol_minknap = sopt_minknap(ins, MinknapParams::combo(), info);
     Solution sol(ins);
-    sol = sopt_bellman_list_rec(ins, info);
+    //sol = sopt_bellman_list_rec(ins, info);
 
 }
 

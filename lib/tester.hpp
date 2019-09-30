@@ -1,16 +1,16 @@
 #pragma once
 
-#include "knapsack/lib/instance.hpp"
+#include "knapsack/lib/solution.hpp"
 
 #include <gtest/gtest.h>
 
 namespace knapsack
 {
 
-enum TestType { OPT, LB, UB };
+enum TestType { SOPT, OPT, LB, UB };
 enum InstacesType { TEST, SMALL, MEDIUM, SC };
 
-void test(InstacesType it, std::vector<Profit (*)(Instance&)> fs, TestType tt = OPT);
+void test(InstacesType it, std::vector<knapsack::Output (*)(Instance&)> fs, TestType tt = SOPT);
 
 }
 

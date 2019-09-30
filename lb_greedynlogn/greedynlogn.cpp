@@ -25,9 +25,9 @@ knapsack::Output knapsack::sol_forwardgreedynlogn(const Instance& ins, Info info
             << " n " << ins.total_item_number() << std::endl;);
     VER(info, "*** forwardgreedynlogn ***" << std::endl);
     knapsack::Output output(ins);
+    init_display(output.lower_bound, output.upper_bound, info);
 
-    output.solution = *ins.break_solution();
-    output.lower_bound = output.solution.profit();
+    Solution sol = *ins.break_solution();
 
     // If all items fit in the knapsack or if the break solution doesn't
     // contain any item, return sol.
@@ -44,7 +44,7 @@ knapsack::Output knapsack::sol_forwardgreedynlogn(const Instance& ins, Info info
     for (ItemPos j=0; j<ins.total_item_number(); ++j) {
         Item item = ins.item(j);
         item.j = j;
-        if (output.solution.contains(j)) {
+        if (sol.contains(j)) {
             taken.push_back(item);
         } else {
             left.push_back(item);
@@ -60,7 +60,7 @@ knapsack::Output knapsack::sol_forwardgreedynlogn(const Instance& ins, Info info
     std::vector<Item> l = remove_dominated_items(left);
 
     // Find best exchange.
-    Weight r = output.solution.remaining_capacity();
+    Weight r = sol.remaining_capacity();
     Profit pmax = -1;
     auto it_max = t.end();
     auto il_max = l.end();
@@ -78,11 +78,11 @@ knapsack::Output knapsack::sol_forwardgreedynlogn(const Instance& ins, Info info
         }
     }
     if (pmax != -1) {
-        output.solution.set(it_max->j, false);
-        output.solution.set(il_max->j, true);
-        output.lower_bound = output.solution.profit();
+        sol.set(it_max->j, false);
+        sol.set(il_max->j, true);
     }
 
+    update_sol(output, sol, std::stringstream(), info);
     algorithm_end(output, info);
     LOG_FOLD_END(info, "");
     return output;
@@ -96,9 +96,9 @@ knapsack::Output knapsack::sol_backwardgreedynlogn(const Instance& ins, Info inf
             << " n " << ins.total_item_number() << std::endl;);
     VER(info, "*** backwardgreedynlogn ***" << std::endl);
     knapsack::Output output(ins);
+    init_display(output.lower_bound, output.upper_bound, info);
 
-    output.solution = *ins.break_solution();
-    output.lower_bound = output.solution.profit();
+    update_sol(output, *ins.break_solution(), std::stringstream("break"), info);
 
     // If all items fit in the knapsack or if the break solution doesn't
     // contain any item, return sol.
@@ -157,8 +157,7 @@ knapsack::Output knapsack::sol_backwardgreedynlogn(const Instance& ins, Info inf
     if (it_max != t.end()) {
         sol.set(it_max->j, false);
         sol.set(il_max->j, true);
-        output.solution = sol;
-        output.lower_bound = output.solution.profit();
+        update_sol(output, sol, std::stringstream(), info);
     }
 
     algorithm_end(output, info);
@@ -174,23 +173,21 @@ knapsack::Output knapsack::sol_greedynlogn(const Instance& ins, Info info)
     VER(info, "*** greedynlogn ***" << std::endl);
     LOG_FOLD_START(info, "greedynlogn" << std::endl;);
     knapsack::Output output(ins);
+    init_display(output.lower_bound, output.upper_bound, info);
 
     auto g_output = sol_greedy(ins);
-    output.solution = g_output.solution;
-    output.lower_bound = output.solution.profit();
+    update_sol(output, g_output.solution, std::stringstream("greedy"), info);
     std::string best = "greedy";
 
     auto f_output = sol_forwardgreedynlogn(ins);
     if (output.lower_bound < f_output.lower_bound) {
-        output.solution = f_output.solution;
-        output.lower_bound = output.solution.profit();
+        update_sol(output, f_output.solution, std::stringstream("forward"), info);
         best = "forward";
     }
 
     auto b_output = sol_backwardgreedynlogn(ins);
     if (output.lower_bound < b_output.lower_bound) {
-        output.solution = b_output.solution;
-        output.lower_bound = output.solution.profit();
+        update_sol(output, b_output.solution, std::stringstream("backward"), info);
         best = "backward";
     }
 
