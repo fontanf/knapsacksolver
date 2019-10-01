@@ -4,42 +4,45 @@
 
 using namespace knapsack;
 
-/*
-
-Profit opt_minknap(Instance& ins)
-{
-    Info info;
-    return sopt_minknap(ins, MinknapParams(), info).profit();
-}
-
-Profit opt_expknap_test(Instance& ins)
+knapsack::Output sopt_minknap_test(Instance& ins)
 {
     Info info = Info()
-        .set_verbose(true)
-        .set_log2stderr(true)
+        //.set_verbose(true)
         ;
-    return sopt_expknap(ins, ExpknapParams::pure(), info).profit();
+    MinknapOptionalParameters p;
+    p.info = info;
+    return sopt_minknap(ins, p);
 }
 
-Profit opt_expknap_combocore_test(Instance& ins)
+knapsack::Output sopt_expknap_test(Instance& ins)
 {
     Info info = Info()
-        .set_verbose(true)
-        .set_log2stderr(true)
+        //.set_verbose(true)
+        //.set_log2stderr(true)
         ;
-    ExpknapParams p = ExpknapParams::pure();
+    ExpknapOptionalParameters p;
+    p.info = info;
+    return sopt_expknap(ins, p);
+}
+
+knapsack::Output sopt_expknap_combocore_test(Instance& ins)
+{
+    Info info = Info()
+        //.set_verbose(true)
+        //.set_log2stderr(true)
+        ;
+    ExpknapOptionalParameters p;
+    p.info = info;
     p.combo_core = true;
-    return sopt_expknap(ins, p, info).profit();
+    return sopt_expknap(ins, p);
 }
 
-std::vector<Profit (*)(Instance&)> f = {
-        opt_minknap,
-        opt_expknap_test,
-        opt_expknap_combocore_test,
+std::vector<knapsack::Output (*)(Instance&)> f = {
+        sopt_minknap_test,
+        sopt_expknap_test,
+        sopt_expknap_combocore_test,
 };
 
-TEST(expknap, TEST)  { test(TEST, f); }
-TEST(expknap, SMALL) { test(SMALL, f); }
-
-*/
+TEST(expknap, TEST)  { test(TEST, f, SOPT); }
+TEST(expknap, SMALL) { test(SMALL, f, SOPT); }
 

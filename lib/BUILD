@@ -89,7 +89,7 @@ cc_library(
                 "//ub_dembo:dembo",
                 "//ub_surrogate:surrogate",
                 "//opt_bab:bab",
-                #"//opt_expknap:expknap",
+                "//opt_expknap:expknap",
                 "//opt_bellman:bellman",
                 "//opt_dpprofits:dpprofits",
                 #"//opt_balknap:balknap",

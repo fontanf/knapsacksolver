@@ -15,7 +15,7 @@ struct MinknapOptionalParameters
 {
     Info info = Info();
 
-    bool greedy = 0;
+    bool greedy = true;
     StateIdx pairing = -1;
     StateIdx surrogate = -1;
     bool combo_core = false;
@@ -68,7 +68,6 @@ struct MinknapOptionalParameters
 struct MinknapOutput: Output
 {
     MinknapOutput(const Instance& ins): Output(ins) { }
-    StateIdx state_number = 0;
     Cpt recursive_call_number = 0;
 };
 

@@ -242,12 +242,12 @@ void knapsack::update_ub(knapsack::Output& output, Profit ub_new, const std::str
 
 void knapsack::algorithm_end(Profit upper_bound, Info& info)
 {
-    double t = info.elapsed_time();
+    double t = round(info.elapsed_time() * 10000) / 10;
     PUT(info, "Bound", "Value", upper_bound);
     PUT(info, "Bound", "Time", t);
     VER(info, "---" << std::endl
             << "Bound: " << upper_bound << std::endl
-            << "Time (ms): " << t*1000 << std::endl);
+            << "Time (ms): " << t << std::endl);
 }
 
 void knapsack::algorithm_end(const knapsack::Output& output, Info& info)
@@ -269,6 +269,6 @@ void knapsack::algorithm_end(const knapsack::Output& output, Info& info)
             << "Gap: " << gap_str << std::endl
             << "Gap (%): " << gap << std::endl
             << "Solution: " << sol_str << std::endl
-            << "Time (ms): " << t*1000 << std::endl);
+            << "Time (ms): " << t << std::endl);
 }
 

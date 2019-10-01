@@ -9,48 +9,56 @@
 namespace knapsack
 {
 
-/*
-struct ExpknapParams
+struct ExpknapOptionalParameters
 {
-    StateIdx greedy = 0;
+    Info info = Info();
+
+    bool greedy = true;
     StateIdx greedynlogn = -1;
     StateIdx surrogate = -1;
     bool combo_core = false;
 
-    static ExpknapParams pure()
+    bool* end = NULL;
+    bool stop_if_end = false;
+    bool set_end = true;
+
+    ExpknapOptionalParameters& pure()
     {
-        return {
-            .greedy = -1,
-            .greedynlogn = -1,
-            .surrogate = -1,
-            .combo_core = false,
-        };
+        greedy = false;
+        greedynlogn = -1;
+        surrogate = -1;
+        combo_core = false;
+        return *this;
     }
 
-    static ExpknapParams combo()
+    ExpknapOptionalParameters& combo()
     {
-        return {
-            .greedy = 0,
-            .greedynlogn = 50000,
-            .surrogate = 20000,
-            .combo_core = true,
-        };
+        greedy = true;
+        greedynlogn = 50000;
+        surrogate = 20000;
+        combo_core = true;
+        return *this;
     }
 
-    ExpknapParams& set_params(const std::map<std::string, std::string>& args)
+    ExpknapOptionalParameters& set_params(const std::map<std::string, std::string>& args)
     {
         auto it = args.end();
-        if ((it = args.find("g"))  != args.end()) greedy      = std::stol(it->second);
+        if ((it = args.find("g"))  != args.end()) greedy      = (it->second == "true");
         if ((it = args.find("gn")) != args.end()) greedynlogn = std::stol(it->second);
         if ((it = args.find("s"))  != args.end()) surrogate   = std::stol(it->second);
-        if ((it = args.find("c"))  != args.end()) combo_core  = (it->second == "1");
+        if ((it = args.find("c"))  != args.end()) combo_core  = (it->second == "true");
         return *this;
     }
 
 };
 
-Solution sopt_expknap(Instance& ins, ExpknapParams p, Info info = Info());
-*/
+struct ExpknapOutput: Output
+{
+    ExpknapOutput(const Instance& ins): Output(ins) { }
+    Cpt node_number = 0;
+};
+
+ExpknapOutput sopt_expknap(Instance& ins, ExpknapOptionalParameters p);
 
 }
 

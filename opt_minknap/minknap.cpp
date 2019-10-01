@@ -33,8 +33,9 @@ MinknapOutput knapsack::sopt_minknap(Instance& ins, MinknapOptionalParameters p)
             << " combo_core " << p.combo_core
             << std::endl);
 
+    std::unique_ptr<bool> end_uptr(new bool(false));
     if (p.end == NULL)
-        p.end = new bool(false);
+        p.end = end_uptr.get();
 
     MinknapOutput output(ins);
     init_display(output.lower_bound, output.upper_bound, p.info);
@@ -60,9 +61,9 @@ std::ostream& operator<<(std::ostream& os, const MinknapState& s)
     return os;
 }
 
-struct MinknapInternData
+struct MinknapInternalData
 {
-    MinknapInternData(Instance& ins, MinknapOptionalParameters& p, MinknapOutput& output):
+    MinknapInternalData(Instance& ins, MinknapOptionalParameters& p, MinknapOutput& output):
         ins(ins), p(p), output(output), psolf(ins, p.partial_solution_size) { }
     Instance& ins;
     MinknapOptionalParameters& p;
@@ -76,9 +77,9 @@ struct MinknapInternData
     std::vector<std::thread> threads;
 };
 
-void add_item(MinknapInternData& d);
-void remove_item(MinknapInternData& d);
-void update_bounds(MinknapInternData& d);
+void add_item(MinknapInternalData& d);
+void remove_item(MinknapInternalData& d);
+void update_bounds(MinknapInternalData& d);
 
 void sopt_minknap_main(Instance& ins, MinknapOptionalParameters& p, MinknapOutput& output)
 {
@@ -88,7 +89,7 @@ void sopt_minknap_main(Instance& ins, MinknapOptionalParameters& p, MinknapOutpu
             << std::endl);
     LOG_FOLD(p.info, ins);
 
-    MinknapInternData d(ins, p, output);
+    MinknapInternalData d(ins, p, output);
     Weight  c = ins.capacity();
     ItemPos n = ins.item_number();
 
@@ -237,7 +238,7 @@ void sopt_minknap_main(Instance& ins, MinknapOptionalParameters& p, MinknapOutpu
 
 /******************************************************************************/
 
-void add_item(MinknapInternData& d)
+void add_item(MinknapInternalData& d)
 {
     Instance& ins = d.ins;
     Info& info = d.p.info;
@@ -337,7 +338,7 @@ void add_item(MinknapInternData& d)
     LOG_FOLD_END(info, "add_item");
 }
 
-void remove_item(MinknapInternData& d)
+void remove_item(MinknapInternalData& d)
 {
     Instance& ins = d.ins;
     Info& info = d.p.info;
@@ -437,7 +438,7 @@ void remove_item(MinknapInternData& d)
 
 /******************************************************************************/
 
-ItemPos find_state(MinknapInternData& d, bool right)
+ItemPos find_state(MinknapInternalData& d, bool right)
 {
     Instance& ins = d.ins;
     LOG_FOLD_START(d.p.info, "find_state" << std::endl);
@@ -489,7 +490,7 @@ ItemPos find_state(MinknapInternData& d, bool right)
     return j;
 }
 
-void update_bounds(MinknapInternData& d)
+void update_bounds(MinknapInternalData& d)
 {
     Instance& ins = d.ins;
     Info& info = d.p.info;

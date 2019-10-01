@@ -95,19 +95,21 @@ func knapsack::get_algorithm(std::string str)
         return [](Instance& ins, std::mt19937_64&, Info info) {
             return sopt_bab(ins, true, info);
         };
-    /*
     } else if (algo.name == "expknap") { // Expknap
-        return [algo](Instance& ins, Solution& sol, Profit& ub, std::mt19937_64&, Info info) {
-            sol = sopt_expknap(ins, ExpknapParams().set_params(algo.args), info);
-            if (info.check_time())
-                ub = sol.profit();
+        return [algo](Instance& ins, std::mt19937_64&, Info info) {
+            ExpknapOptionalParameters p;
+            p.info = info;
+            p.set_params(algo.args);
+            return sopt_expknap(ins, p);
         };
     } else if (algo.name == "expknap_combo") {
-        return [](Instance& ins, Solution& sol, Profit& ub, std::mt19937_64&, Info info) {
-            sol = sopt_expknap(ins, ExpknapParams::combo(), info);
-            if (info.check_time())
-                ub = sol.profit();
+        return [](Instance& ins, std::mt19937_64&, Info info) {
+            ExpknapOptionalParameters p;
+            p.info = info;
+            p.combo();
+            return sopt_expknap(ins, p);
         };
+    /*
     } else if (algo.name == "balknap") { // Balknap
         return [algo](Instance& ins, Solution& sol, Profit& ub, std::mt19937_64&, Info info) {
             sol = sopt_balknap(ins, BalknapParams().set_params(algo.args), info);

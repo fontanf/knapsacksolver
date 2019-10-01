@@ -134,7 +134,7 @@ void bench_normal(std::string algorithm, double time_limit, std::mt19937_64& gen
                 }
 
                 std::stringstream t_str;
-                if (t <= time_limit && output.solution.profit() == output.upper_bound) {
+                if (t <= time_limit && output.lower_bound == output.upper_bound) {
                     t_str << (double)std::round(t * 10000) / 10;
                     std::cout << "\033[32m";
                     col_r = 255 - (int)(val_max_r * cbrt(t / time_limit));

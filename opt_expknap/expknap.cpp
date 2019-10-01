@@ -7,184 +7,205 @@
 
 using namespace knapsack;
 
-/*
-class Expknap
+struct ExpknapInternalData
 {
-
-public:
-
-    Expknap(Instance& ins, ExpknapParams p, bool* end = NULL):
-        instance_(ins), params_(p), sol_curr_(ins), sol_best_(ins), end_(end)
-    {
-        sur_ = (end_ != NULL);
-        if (end_ == NULL)
-            end_ = new bool(false);
-    }
-
-    ~Expknap()
-    {
-        if (!sur_)
-            delete end_;
-    }
-
-    Solution run(Info info = Info());
-
-private:
-
-    void rec(ItemPos s, ItemPos t, Info& info);
-    void update_bounds(Info& info);
-
-    Instance& instance_;
-    ExpknapParams params_;
-
-    Profit opt_ = -1;
-    Profit ub_ = -1;
-    Solution sol_curr_;
-    Solution sol_best_;
-    Cpt node_number_ = 0;
-
-    bool sur_ = false;
-    bool* end_ = NULL;
-    std::vector<std::thread> threads_;
-
+    ExpknapInternalData(Instance& ins, ExpknapOptionalParameters& p, ExpknapOutput& output):
+        ins(ins), p(p), output(output), sol_curr(*ins.break_solution()) { }
+    Instance& ins;
+    ExpknapOptionalParameters& p;
+    ExpknapOutput& output;
+    Solution sol_curr;
+    std::vector<std::thread> threads;
 };
 
-void Expknap::update_bounds(Info& info)
+void update_bounds(ExpknapInternalData& d)
 {
-    if (params_.surrogate >= 0 && params_.surrogate <= node_number_) {
-        params_.surrogate = -1;
-        std::function<Solution (Instance&, Info, bool*)> func
-            = [this](Instance& ins, Info info, bool* end) {
-                return Expknap(ins, params_, end).run(info); };
-        threads_.push_back(std::thread(ub_solvesurrelax, SurrelaxData{
-                    .ins      = Instance::reset(instance_),
-                    .lb       = NULL,
-                    .sol_best = &sol_best_,
-                    .ub       = ub_,
+    if (d.p.surrogate >= 0 && d.p.surrogate <= d.output.node_number) {
+        d.p.surrogate = -1;
+        std::function<knapsack::Output (Instance&, Info, bool*)> func
+            = [&d](Instance& ins, Info info, bool* end)
+            {
+                ExpknapOptionalParameters p;
+                p.info = info;
+                p.greedy = d.p.greedy;
+                p.greedynlogn = d.p.greedynlogn;
+                p.surrogate = -1;
+                p.combo_core = d.p.combo_core;
+                p.end = end;
+                p.stop_if_end = true;
+                p.set_end = false;
+                return sopt_expknap(ins, p);
+            };
+        d.threads.push_back(std::thread(ub_solvesurrelax, SurrelaxData{
+                    .ins      = Instance::reset(d.ins),
+                    .output   = d.output,
                     .func     = func,
-                    .end      = end_,
-                    .info     = Info(info, true, "surrelax")}));
+                    .end      = d.p.end,
+                    .info     = Info(d.p.info, true, "surrelax")}));
     }
-    if (params_.greedynlogn >= 0 && params_.greedynlogn <= node_number_) {
-        params_.greedynlogn = -1;
-        Solution sol = sol_greedynlogn(instance_);
-        if (sol_best_.profit() < sol.profit())
-            update_sol(&sol_best_, NULL, ub_, sol, std::stringstream("greedynlogn"), info);
+    if (d.p.greedynlogn >= 0 && d.p.greedynlogn <= d.output.node_number) {
+        d.p.greedynlogn = -1;
+        auto gn_output = sol_greedynlogn(d.ins);
+        update_sol(d.output, gn_output.solution, std::stringstream("greedynlogn"), d.p.info);
     }
 }
 
-void Expknap::rec(ItemPos s, ItemPos t, Info& info)
+void sopt_expknap_rec(ExpknapInternalData& d, ItemPos s, ItemPos t)
 {
-    node_number_++; // Increment node number
-    LOG_FOLD_START(info, "node number " << node_number_
+    Info& info = d.p.info;
+    d.output.node_number++; // Increment node number
+    LOG_FOLD_START(info, "node number " << d.output.node_number
             << " s " << s << " t " << t
-            << " w " << sol_curr_.weight() << " p " << sol_curr_.profit()
+            << " w " << d.sol_curr.weight() << " p " << d.sol_curr.profit()
             << std::endl);
 
-    if (*end_) {
+    // Check end
+    if (d.p.stop_if_end && *(d.p.end)) {
         LOG_FOLD_END(info, "end");
         return;
     }
-    if (!info.check_time()) { // Check time
+
+    // Check time
+    if (!info.check_time()) {
         LOG_FOLD_END(info, "time");
         return;
     }
-    if (sol_best_.profit() == ub_) { // If UB reached, then stop
+
+    // If UB reached, then stop
+    if (d.output.solution.profit() == d.output.upper_bound) {
         LOG_FOLD_END(info, "lb == ub");
         return;
     }
-    update_bounds(info); // Update bounds
 
-    if (sol_curr_.remaining_capacity() >= 0) {
-        if (sol_best_.profit() < sol_curr_.profit()) {
+    // Update bounds
+    update_bounds(d);
+
+    if (d.sol_curr.remaining_capacity() >= 0) {
+        // Update best solution
+        if (d.output.solution.profit() < d.sol_curr.profit()) {
             std::stringstream ss;
-            ss << "node " << node_number_;
-            update_sol(&sol_best_, NULL, ub_, sol_curr_, ss, info);
+            ss << "node " << d.output.node_number;
+            update_sol(d.output, d.sol_curr, ss, info);
         }
+
         for (;;t++) {
             // Bounding test
-            Profit ub = ub_dembo(instance_, instance_.bound_item_right(t, sol_best_.profit(), info), sol_curr_);
-            LOG(info, "t " << t << " ub " << ub << " lb " << sol_best_.profit());
-            if (ub <= sol_best_.profit()) {
+            Profit ub = ub_dembo(d.ins, d.ins.bound_item_right(t, d.output.solution.profit(), info), d.sol_curr);
+            LOG(info, "t " << t << " ub " << ub << " lb " << d.output.solution.profit());
+            if (ub <= d.output.solution.profit()) {
                 LOG_FOLD_END(info, " bound");
                 return;
             }
 
             // Recursive call
-            assert(t <= instance_.last_item());
-            LOG(info, " add (" << instance_.item(t) << ")" << std::endl);
-            sol_curr_.set(t, true); // Add item t
-            rec(s, t + 1, info);
-            sol_curr_.set(t, false); // Remove item t
+            assert(t <= d.ins.last_item());
+            LOG(info, " add (" << d.ins.item(t) << ")" << std::endl);
+            d.sol_curr.set(t, true); // Add item t
+            sopt_expknap_rec(d, s, t + 1);
+            d.sol_curr.set(t, false); // Remove item t
         }
     } else {
         for (;;s--) {
             // Bounding test
-            Profit ub = ub_dembo_rev(instance_, instance_.bound_item_left(s, sol_best_.profit(), info), sol_curr_);
-            LOG(info, "s " << s << " ub " << ub << " lb " << sol_best_.profit());
-            if (ub <= sol_best_.profit()) {
+            Profit ub = ub_dembo_rev(d.ins, d.ins.bound_item_left(s, d.output.solution.profit(), info), d.sol_curr);
+            LOG(info, "s " << s << " ub " << ub << " lb " << d.output.solution.profit());
+            if (ub <= d.output.solution.profit()) {
                 LOG_FOLD_END(info, " bound");
                 return;
             }
 
             // Recursive call
-            assert(s >= instance_.first_item());
-            LOG(info, " remove (" << instance_.item(s) << ")" << std::endl);
-            sol_curr_.set(s, false); // Remove item s
-            rec(s - 1, t, info);
-            sol_curr_.set(s, true); // Add item s
+            assert(s >= d.ins.first_item());
+            LOG(info, " remove (" << d.ins.item(s) << ")" << std::endl);
+            d.sol_curr.set(s, false); // Remove item s
+            sopt_expknap_rec(d, s - 1, t);
+            d.sol_curr.set(s, true); // Add item s
         }
     }
     assert(false);
 }
 
-Solution Expknap::run(Info info)
+ExpknapOutput knapsack::sopt_expknap(Instance& ins, ExpknapOptionalParameters p)
 {
-    VER(info, "*** expknap ***" << std::endl);
+    VER(p.info, "*** expknap" << std::endl);
+    if (!p.greedy)
+        VER(p.info, " g " << p.greedy);
+    if (p.surrogate != -1)
+        VER(p.info, " s " << p.surrogate);
+    if (p.greedynlogn != -1)
+        VER(p.info, " gn " << p.greedynlogn);
+    if (p.combo_core)
+        VER(p.info, " cc " << p.combo_core);
+    VER(p.info, " ***" << std::endl);
 
-    if (instance_.item_number() == 0) {
-        LOG(info, "empty instance" << std::endl);
-        Solution sol(instance_);
-        return algorithm_end(sol, info);
+    LOG_FOLD_START(p.info, "expknap"
+            << " g " << p.greedy
+            << " gn " << p.greedynlogn
+            << " s " << p.surrogate
+            << " combo_core " << p.combo_core
+            << std::endl);
+
+    std::unique_ptr<bool> end_uptr(new bool(false));
+    if (p.end == NULL)
+        p.end = end_uptr.get();
+
+    ExpknapOutput output(ins);
+    init_display(output.lower_bound, output.upper_bound, p.info);
+
+    if (ins.item_number() == 0) {
+        update_ub(output, output.lower_bound, std::stringstream("no item (ub)"), p.info);
+        algorithm_end(output, p.info);
+        LOG(p.info, "no item" << std::endl);
+        return output;
     }
 
-    instance_.sort_partially(info);
-    if (instance_.break_item() == instance_.last_item()+1) {
-        LOG(info, "all items fit in the knapsack" << std::endl);
-        Solution sol = *instance_.break_solution();
-        return algorithm_end(sol, info);
+    ins.sort_partially(p.info);
+    if (ins.break_item() == ins.last_item() + 1) {
+        if (output.lower_bound < ins.break_solution()->profit())
+            update_sol(output, *ins.break_solution(), std::stringstream("all items fit"), p.info);
+        update_ub(output, ins.break_solution()->profit(), std::stringstream(""), p.info);
+        algorithm_end(output, p.info);
+        LOG_FOLD_END(p.info, "all items fit in the knapsack");
+        return output;
     }
-    if (params_.combo_core)
-        instance_.init_combo_core(info);
+    if (p.combo_core)
+        ins.init_combo_core(p.info);
 
-    // Initial bounds
-    if (params_.greedy < 0) {
-        sol_best_ = *instance_.break_solution();
+    // Compute initial lower bound
+    Solution sol_tmp(ins);
+    if (p.greedy) {
+        auto g_output = sol_greedy(ins);
+        sol_tmp = g_output.solution;
     } else {
-        sol_best_ = sol_greedy(instance_);
+        sol_tmp = *ins.break_solution();
     }
-    ub_ = ub_dantzig(instance_);
-    init_display(sol_best_.profit(), ub_, info);
-    if (sol_best_.profit() == ub_)
-        return algorithm_end(sol_best_, info);
+    if (output.lower_bound < sol_tmp.profit())
+        update_sol(output, sol_tmp, std::stringstream("initial solution"), p.info);
 
-    ItemPos b = instance_.break_item();
-    sol_curr_ = *instance_.break_solution();
-    rec(b - 1, b, info);
-    if (info.check_time() && sol_best_.profit() != ub_)
-        update_ub(sol_best_.profit(), ub_, sol_best_.profit(),
-                std::stringstream("tree search completed"), info);
-    if (!sur_)
-        *end_ = true;
-    for (std::thread& thread: threads_)
+    // Compute initial upper bound
+    Profit ub_tmp = ub_dantzig(ins);
+    update_ub(output, ub_tmp, std::stringstream("dantzig upper bound"), p.info);
+
+    if (output.solution.profit() == output.upper_bound) {
+        algorithm_end(output, p.info);
+        return output;
+    }
+
+    ExpknapInternalData d(ins, p, output);
+    ItemPos b = ins.break_item();
+    sopt_expknap_rec(d, b - 1, b);
+    if (p.info.check_time())
+        update_ub(output, output.lower_bound, std::stringstream("tree search completed (ub)"), p.info);
+
+    if (p.set_end)
+        *(p.end) = true;
+    for (std::thread& thread: d.threads)
         thread.join();
-    PUT(info, "Algorithm", "NodeNumber", node_number_);
-    return algorithm_end(sol_best_, info);
-}
+    d.threads.clear();
 
-Solution knapsack::sopt_expknap(Instance& ins, ExpknapParams p, Info info)
-{
-    return Expknap(ins, p).run(info);
+    algorithm_end(output, p.info);
+    PUT(p.info, "Algorithm", "NodeNumber", output.node_number);
+    VER(p.info, "Node number: " << output.node_number << std::endl);
+    return output;
 }
-*/
 
