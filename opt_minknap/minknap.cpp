@@ -17,10 +17,10 @@ MinknapOutput knapsack::sopt_minknap(Instance& ins, MinknapOptionalParameters p)
         VER(p.info, " k " << p.partial_solution_size);
     if (!p.greedy)
         VER(p.info, " g " << p.greedy);
-    if (p.surrogate != -1)
-        VER(p.info, " s " << p.surrogate);
     if (p.pairing != -1)
         VER(p.info, " p " << p.pairing);
+    if (p.surrogate != -1)
+        VER(p.info, " s " << p.surrogate);
     if (p.combo_core)
         VER(p.info, " cc " << p.combo_core);
     VER(p.info, " ***" << std::endl);
@@ -28,8 +28,8 @@ MinknapOutput knapsack::sopt_minknap(Instance& ins, MinknapOptionalParameters p)
     LOG_FOLD_START(p.info, "minknap"
             << " k " << p.partial_solution_size
             << " g " << p.greedy
-            << " s " << p.surrogate
             << " p " << p.pairing
+            << " s " << p.surrogate
             << " combo_core " << p.combo_core
             << std::endl);
 
@@ -79,7 +79,7 @@ struct MinknapInternalData
 
 void add_item(MinknapInternalData& d);
 void remove_item(MinknapInternalData& d);
-void update_bounds(MinknapInternalData& d);
+void sopt_minknap_update_bounds(MinknapInternalData& d);
 
 void sopt_minknap_main(Instance& ins, MinknapOptionalParameters& p, MinknapOutput& output)
 {
@@ -112,8 +112,8 @@ void sopt_minknap_main(Instance& ins, MinknapOptionalParameters& p, MinknapOutpu
     // Sort partially
     ins.sort_partially(p.info);
     if (ins.break_item() == ins.last_item() + 1) {
-        update_sol(output, *ins.break_solution(), std::stringstream("all items fit in the knapsack"), p.info);
-        update_ub(output, output.lower_bound, std::stringstream("all items fit in the knapsack"), p.info);
+        update_sol(output, *ins.break_solution(), std::stringstream("all items fit in the knapsack (lb)"), p.info);
+        update_ub(output, output.lower_bound, std::stringstream("all items fit in the knapsack (ub)"), p.info);
         LOG_FOLD_END(p.info, "all items fit in the knapsack");
         return;
     }
@@ -151,7 +151,7 @@ void sopt_minknap_main(Instance& ins, MinknapOptionalParameters& p, MinknapOutpu
     d.best_state = d.l0.front();
     LOG_FOLD(p.info, ins);
     while (!d.l0.empty()) {
-        update_bounds(d); // Update bounds
+        sopt_minknap_update_bounds(d); // Update bounds
         if (!p.info.check_time())
             return;
         if (p.stop_if_end && *(p.end)) {
@@ -281,6 +281,7 @@ void add_item(MinknapInternalData& d)
                         std::stringstream ss;
                         ss << "it " << d.t - d.s << " (lb)";
                         update_lb(d.output, s1.p, ss, info);
+                        lb = s1.p;
                     }
                     d.best_state = s1;
                     assert(d.output.lower_bound <= d.output.upper_bound);
@@ -403,6 +404,7 @@ void remove_item(MinknapInternalData& d)
                         std::stringstream ss;
                         ss << "it " << d.t - d.s << " (lb)";
                         update_lb(d.output, s1.p, ss, info);
+                        lb = s1.p;
                     }
                     d.best_state = s1;
                     assert(d.output.lower_bound <= d.output.upper_bound);
@@ -438,10 +440,10 @@ void remove_item(MinknapInternalData& d)
 
 /******************************************************************************/
 
-ItemPos find_state(MinknapInternalData& d, bool right)
+ItemPos sopt_minknap_find_state(MinknapInternalData& d, bool right)
 {
     Instance& ins = d.ins;
-    LOG_FOLD_START(d.p.info, "find_state" << std::endl);
+    LOG_FOLD_START(d.p.info, "sopt_minknap_find_state" << std::endl);
 
     Profit lb0 = 0;
     ItemIdx j = -1;
@@ -486,11 +488,11 @@ ItemPos find_state(MinknapInternalData& d, bool right)
             lb0 = lb;
         }
     }
-    LOG_FOLD_END(d.p.info, "find_state");
+    LOG_FOLD_END(d.p.info, "sopt_minknap_find_state");
     return j;
 }
 
-void update_bounds(MinknapInternalData& d)
+void sopt_minknap_update_bounds(MinknapInternalData& d)
 {
     Instance& ins = d.ins;
     Info& info = d.p.info;
@@ -524,7 +526,7 @@ void update_bounds(MinknapInternalData& d)
         d.p.pairing *= 10;
 
         if (d.t <= ins.last_item()) {
-            ItemPos j = find_state(d, true);
+            ItemPos j = sopt_minknap_find_state(d, true);
             if (j != -1) {
                 ins.add_item_to_core(d.s, d.t, j, info);
                 ++d.t;
@@ -537,7 +539,7 @@ void update_bounds(MinknapInternalData& d)
         }
 
         if (d.s >= ins.first_item()) {
-            ItemPos j = find_state(d, false);
+            ItemPos j = sopt_minknap_find_state(d, false);
             if (j != -1) {
                 ins.add_item_to_core(d.s, d.t, j, info);
                 --d.s;

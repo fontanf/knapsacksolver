@@ -19,8 +19,8 @@ int main(int argc, char *argv[])
     //data.x = 0.3;
     //data.s = 174;
     //Instance ins = data.generate();
-    //Instance ins(95, {{24, 34}, {42, 52}, {32, 42}, {4, 14}});
-    Instance ins(40, {{11, 12}, {11, 12}, {11, 12}, {10, 10}, {10, 10}, {10, 10}, {10, 10}});
+    Instance ins(95, {{24, 34}, {42, 52}, {32, 42}, {4, 14}});
+    //Instance ins(40, {{11, 12}, {11, 12}, {11, 12}, {10, 10}, {10, 10}, {10, 10}, {10, 10}});
     //std::cout << ins << std::endl;
 
     Info info = Info()
@@ -29,11 +29,10 @@ int main(int argc, char *argv[])
         .set_logfile("log.txt")
         ;
 
-    MinknapOptionalParameters p;
+    BalknapOptionalParameters p;
     p.info = info;
-    //p.partial_solution_size = 1;
-    p.pairing = 10;
-    auto output = sopt_minknap(ins, p);
+    p.partial_solution_size = 1;
+    auto output = sopt_balknap(ins, p);
 
 }
 

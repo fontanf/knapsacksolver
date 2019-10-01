@@ -18,7 +18,7 @@ struct ExpknapInternalData
     std::vector<std::thread> threads;
 };
 
-void update_bounds(ExpknapInternalData& d)
+void sopt_expknap_update_bounds(ExpknapInternalData& d)
 {
     if (d.p.surrogate >= 0 && d.p.surrogate <= d.output.node_number) {
         d.p.surrogate = -1;
@@ -78,7 +78,7 @@ void sopt_expknap_rec(ExpknapInternalData& d, ItemPos s, ItemPos t)
     }
 
     // Update bounds
-    update_bounds(d);
+    sopt_expknap_update_bounds(d);
 
     if (d.sol_curr.remaining_capacity() >= 0) {
         // Update best solution
@@ -162,8 +162,8 @@ ExpknapOutput knapsack::sopt_expknap(Instance& ins, ExpknapOptionalParameters p)
     ins.sort_partially(p.info);
     if (ins.break_item() == ins.last_item() + 1) {
         if (output.lower_bound < ins.break_solution()->profit())
-            update_sol(output, *ins.break_solution(), std::stringstream("all items fit"), p.info);
-        update_ub(output, ins.break_solution()->profit(), std::stringstream(""), p.info);
+            update_sol(output, *ins.break_solution(), std::stringstream("all items fit (lb)"), p.info);
+        update_ub(output, ins.break_solution()->profit(), std::stringstream("all items fit (ub)"), p.info);
         algorithm_end(output, p.info);
         LOG_FOLD_END(p.info, "all items fit in the knapsack");
         return output;
@@ -185,6 +185,7 @@ ExpknapOutput knapsack::sopt_expknap(Instance& ins, ExpknapOptionalParameters p)
     // Compute initial upper bound
     Profit ub_tmp = ub_dantzig(ins);
     update_ub(output, ub_tmp, std::stringstream("dantzig upper bound"), p.info);
+                    std::cout << "toto" << std::endl;
 
     if (output.solution.profit() == output.upper_bound) {
         algorithm_end(output, p.info);

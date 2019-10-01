@@ -58,7 +58,7 @@ struct ExpknapOutput: Output
     Cpt node_number = 0;
 };
 
-ExpknapOutput sopt_expknap(Instance& ins, ExpknapOptionalParameters p);
+ExpknapOutput sopt_expknap(Instance& ins, ExpknapOptionalParameters p = {});
 
 }
 

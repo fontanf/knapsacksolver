@@ -92,7 +92,7 @@ cc_library(
                 "//opt_expknap:expknap",
                 "//opt_bellman:bellman",
                 "//opt_dpprofits:dpprofits",
-                #"//opt_balknap:balknap",
+                "//opt_balknap:balknap",
                 "//opt_minknap:minknap",
         ],
         visibility = ["//visibility:public"],
