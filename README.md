@@ -192,19 +192,19 @@ Each instance (except one) of the normal dataset happens to be solved exactly by
 
 ### Literature dataset
 
-| Algorithm                               | Instances                                                                                                                                                          |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `expknap`                               | ![easy](bench/expknap_easy.csv),        ![difficult large](bench/expknap_difficult-large.csv),        ![difficult small](bench/expknap_difficult-small.csv)        |
-| `expknap_combo`                         | ![easy](bench/expknap_combo_easy.csv),  ![difficult large](bench/expknap_combo_difficult-large.csv),  ![difficult small](bench/expknap_combo_difficult-small.csv)  |
-| `balknap`                               | ![easy](bench/balknap_t_easy.csv),      ![difficult large](bench/balknap_t_difficult-large.csv),      ![difficult small](bench/balknap_t_difficult-small.csv)      |
-| `minknap`                               | ![easy](bench/minknap_easy.csv),        ![difficult large](bench/minknap_difficult-large.csv),        ![difficult small](bench/minknap_difficult-small.csv)        |
-| `combo`                                 | ![easy](bench/combo_easy.csv),          ![difficult large](bench/combo_difficult-large.csv),          ![difficult small](bench/combo_difficult-small.csv)          |
+| Algorithm                               | Instances                                                                                                                                                        |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `expknap`                               | ![easy](bench/expknap_easy.csv),        ![difficult large](bench/expknap_difficultlarge.csv),        ![difficult small](bench/expknap_difficultsmall.csv)        |
+| `expknap_combo`                         | ![easy](bench/expknap_combo_easy.csv),  ![difficult large](bench/expknap_combo_difficultlarge.csv),  ![difficult small](bench/expknap_combo_difficultsmall.csv)  |
+| `balknap`                               | ![easy](bench/balknap_t_easy.csv),      ![difficult large](bench/balknap_t_difficultlarge.csv),      ![difficult small](bench/balknap_t_difficultsmall.csv)      |
+| `minknap`                               | ![easy](bench/minknap_easy.csv),        ![difficult large](bench/minknap_difficultlarge.csv),        ![difficult small](bench/minknap_difficultsmall.csv)        |
+| `combo`                                 | ![easy](bench/combo_easy.csv),          ![difficult large](bench/combo_difficultlarge.csv),          ![difficult small](bench/combo_difficultsmall.csv)          |
 
 Remarks:
-- Spanner instances are among the worst cases of the `minknap` recursion, since many items of the break solution won't be in an optimal solution. It is interesting to note that the `bellman` recursion performs better ![on those instances](bench/bellman_list_sort_difficult-small.csv). However, the worst case of the `bellman` recursion is worse than the worst case of the `minknap` recursion.
+- Spanner instances are among the worst cases of the `minknap` recursion, since many items of the break solution won't be in an optimal solution. It is interesting to note that the `bellman` recursion performs better ![on those instances](bench/bellman_list_sort_difficultsmall.csv). However, the worst case of the `bellman` recursion is worse than the worst case of the `minknap` recursion.
 - These subset sum, strongly correlated and inverse strongly correlated instances are easy to solve since the upper bound happens to always be optimal.
 - With `combo` optimizations, `expknap` is able to solve strongly correlated and inverse strongly correlated instances. It also solves more almost strongly correlated instances.
-- Performances of `minknap` and `combo` seems to match the results from the literature. Furthermore, taking advantage of parallelization, this implementation of `combo` is able to solve all instances of the `difficult-large` dataset.
+- Performances of `minknap` and `combo` seems to match the results from the literature. Furthermore, taking advantage of parallelization, this implementation of `combo` is able to solve all instances of the `difficultlarge` dataset.
 - `balknap` is very competitive on small instances (R = 1000). Compared to `minknap`:
   - it performs a lot better on `sc`, `isc`, `spanner`, `mstr` and `pceil` instances.
   - it performs slighlty worse on `u`, `wc` and `ss` instances.
