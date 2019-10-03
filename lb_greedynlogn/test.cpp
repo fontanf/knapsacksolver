@@ -4,32 +4,32 @@
 
 using namespace knapsack;
 
-knapsack::Output sopt_minknap_test(Instance& ins)
+Output sopt_minknap_test(Instance& ins)
 {
     return sopt_minknap(ins);
 }
 
-knapsack::Output sol_forwardgreedynlogn_test(Instance& ins)
+Output sol_forwardgreedynlogn_test(Instance& ins)
 {
     Info info;
     ins.sort_partially(info);
     return sol_forwardgreedynlogn(ins, info);
 }
 
-knapsack::Output sol_backwardgreedynlogn_test(Instance& ins)
+Output sol_backwardgreedynlogn_test(Instance& ins)
 {
     Info info;
     ins.sort_partially(info);
     return sol_backwardgreedynlogn(ins, info);
 }
 
-knapsack::Output sol_greedynlogn_test(Instance& ins)
+Output sol_greedynlogn_test(Instance& ins)
 {
     Info info; ins.sort_partially(info);
     return sol_greedynlogn(ins, info);
 }
 
-std::vector<knapsack::Output (*)(Instance&)> f = {
+std::vector<Output (*)(Instance&)> f = {
         sopt_minknap_test,
         sol_forwardgreedynlogn_test,
         sol_backwardgreedynlogn_test,

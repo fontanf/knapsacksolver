@@ -6,7 +6,7 @@
 namespace knapsack
 {
 
-knapsack::Output sol_greedy(const Instance& ins, Info info = Info());
+Output sol_greedy(const Instance& ins, Info info = Info());
 
 }
 

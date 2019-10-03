@@ -13,17 +13,16 @@ using namespace knapsack;
 
 /***************************** opt_bellman_array ******************************/
 
-knapsack::Output knapsack::opt_bellman_array(const Instance& ins, Info info)
+Output knapsack::opt_bellman_array(const Instance& ins, Info info)
 {
     VER(info, "*** bellman (array) ***" << std::endl);
-    knapsack::Output output(ins);
-    init_display(output.lower_bound, output.upper_bound, info);
+    Output output(ins, info);
     Weight c = ins.total_capacity();
     std::vector<Profit> values(c + 1, 0);
     for (ItemPos j=0; j<ins.total_item_number(); ++j) {
         // Check time
         if (!info.check_time()) {
-            algorithm_end(output, info);
+            output.algorithm_end(info);
             return output;
         }
 
@@ -38,14 +37,14 @@ knapsack::Output knapsack::opt_bellman_array(const Instance& ins, Info info)
         if (output.lower_bound < values[c]) {
             std::stringstream ss;
             ss << "it " << j;
-            update_lb(output, values[c], ss, info);
+            output.update_lb(values[c], ss, info);
         }
     }
 
     // Update upper bound
-    update_ub(output, values[c], std::stringstream("tree search completed"), info);
+    output.update_ub(values[c], std::stringstream("tree search completed"), info);
 
-    algorithm_end(output, info);
+    output.algorithm_end(info);
     return output;
 }
 
@@ -65,22 +64,21 @@ void opts_bellmanpar_array(const Instance& ins, ItemPos n1, ItemPos n2,
     }
 }
 
-knapsack::Output knapsack::opt_bellmanpar_array(const Instance& ins, Info info)
+Output knapsack::opt_bellmanpar_array(const Instance& ins, Info info)
 {
     VER(info, "*** bellmanpar (array) ***" << std::endl);
-    knapsack::Output output(ins);
-    init_display(output.lower_bound, output.upper_bound, info);
+    Output output(ins, info);
     ItemIdx n = ins.total_item_number();
 
     // Trivial cases
     if (n == 0) {
-        update_ub(output, 0, std::stringstream("no item"), info);
-        algorithm_end(output, info);
+        output.update_ub(0, std::stringstream("no item"), info);
+        output.algorithm_end(info);
         return output;
     } else if (n == 1) {
-        update_lb(output, ins.item(0).p, std::stringstream("one item"), info);
-        update_ub(output, ins.item(0).p, std::stringstream(""), info);
-        algorithm_end(output, info);
+        output.update_lb(ins.item(0).p, std::stringstream("one item"), info);
+        output.update_ub(ins.item(0).p, std::stringstream(""), info);
+        output.algorithm_end(info);
         return output;
     }
 
@@ -93,7 +91,7 @@ knapsack::Output knapsack::opt_bellmanpar_array(const Instance& ins, Info info)
     opts_bellmanpar_array(std::ref(ins), k, n, values2.begin(), info);
     thread.join();
     if (!info.check_time()) {
-        algorithm_end(output, info);
+        output.algorithm_end(info);
         return output;
     }
 
@@ -105,9 +103,9 @@ knapsack::Output knapsack::opt_bellmanpar_array(const Instance& ins, Info info)
             opt = z;
     }
 
-    update_lb(output, opt, std::stringstream("tree search completed (lb)"), info);
-    update_ub(output, opt, std::stringstream("tree search completed (ub)"), info);
-    algorithm_end(output, info);
+    output.update_lb(opt, std::stringstream("tree search completed (lb)"), info);
+    output.update_ub(opt, std::stringstream("tree search completed (ub)"), info);
+    output.algorithm_end(info);
     return output;
 }
 
@@ -135,11 +133,10 @@ Profit sopt_bellmanrec_rec(const Instance& ins,
     return values[INDEX(j, w)];
 }
 
-knapsack::Output knapsack::sopt_bellmanrec(const Instance& ins, Info info)
+Output knapsack::sopt_bellmanrec(const Instance& ins, Info info)
 {
     VER(info, "*** bellmanrec ***" << std::endl);
-    knapsack::Output output(ins);
-    init_display(output.lower_bound, output.upper_bound, info);
+    Output output(ins, info);
 
     // Initialize memory table
     ItemPos n = ins.total_item_number();
@@ -150,11 +147,11 @@ knapsack::Output knapsack::sopt_bellmanrec(const Instance& ins, Info info)
     // Compute recursively
     Profit opt = sopt_bellmanrec_rec(ins, values, n - 1, c, info);
     if (!info.check_time()) {
-        algorithm_end(output, info);
+        output.algorithm_end(info);
         return output;
     }
-    update_lb(output, opt, std::stringstream("tree search completed (lb)"), info);
-    update_ub(output, opt, std::stringstream("tree search completed (ub)"), info);
+    output.update_lb(opt, std::stringstream("tree search completed (lb)"), info);
+    output.update_ub(opt, std::stringstream("tree search completed (ub)"), info);
 
     // Retrieve optimal solution
     Weight w = c;
@@ -165,19 +162,18 @@ knapsack::Output knapsack::sopt_bellmanrec(const Instance& ins, Info info)
             sol.set(j, true);
         }
     }
-    update_sol(output, sol, std::stringstream(), info);
+    output.update_sol(sol, std::stringstream(), info);
 
-    algorithm_end(output, info);
+    output.algorithm_end(info);
     return output;
 }
 
 /*************************** sopt_bellman_array_all ***************************/
 
-knapsack::Output knapsack::sopt_bellman_array_all(const Instance& ins, Info info)
+Output knapsack::sopt_bellman_array_all(const Instance& ins, Info info)
 {
     VER(info, "*** bellman (array, all) ***" << std::endl);
-    knapsack::Output output(ins);
-    init_display(output.lower_bound, output.upper_bound, info);
+    Output output(ins, info);
 
     // Initialize memory table
     ItemPos n = ins.total_item_number();
@@ -190,7 +186,7 @@ knapsack::Output knapsack::sopt_bellman_array_all(const Instance& ins, Info info
     for (ItemPos j=0; j<ins.total_item_number(); ++j) {
         // Check time
         if (!info.check_time()) {
-            algorithm_end(output, info);
+            output.algorithm_end(info);
             return output;
         }
 
@@ -209,12 +205,12 @@ knapsack::Output knapsack::sopt_bellman_array_all(const Instance& ins, Info info
         if (output.lower_bound < values[INDEX(j, c)]) {
             std::stringstream ss;
             ss << "it " << j;
-            update_lb(output, values[INDEX(j, c)], ss, info);
+            output.update_lb(values[INDEX(j, c)], ss, info);
         }
     }
 
     // Update upper bound
-    update_ub(output, output.lower_bound, std::stringstream("tree search completed"), info);
+    output.update_ub(output.lower_bound, std::stringstream("tree search completed"), info);
 
     // Retrieve optimal solution
     Weight w = c;
@@ -225,26 +221,25 @@ knapsack::Output knapsack::sopt_bellman_array_all(const Instance& ins, Info info
             sol.set(j, true);
         }
     }
-    update_sol(output, sol, std::stringstream(), info);
+    output.update_sol(sol, std::stringstream(), info);
 
-    algorithm_end(output, info);
+    output.algorithm_end(info);
     return output;
 }
 
 /*************************** sopt_bellman_array_one ***************************/
 
-knapsack::Output knapsack::sopt_bellman_array_one(const Instance& ins, Info info)
+Output knapsack::sopt_bellman_array_one(const Instance& ins, Info info)
 {
     VER(info, "*** bellman (array, one) ***" << std::endl);
-    knapsack::Output output(ins);
-    init_display(output.lower_bound, output.upper_bound, info);
+    Output output(ins, info);
 
     ItemPos n = ins.total_item_number();
     Weight  c = ins.total_capacity();
 
     if (n == 0) {
-        update_ub(output, 0, std::stringstream("no item"), info);
-        algorithm_end(output, info);
+        output.update_ub(0, std::stringstream("no item"), info);
+        output.algorithm_end(info);
         return output;
     }
 
@@ -266,7 +261,7 @@ knapsack::Output knapsack::sopt_bellman_array_one(const Instance& ins, Info info
         for (ItemPos j=0; j<n; ++j) {
             // Check time
             if (!info.check_time()) {
-                algorithm_end(output, info);
+                output.algorithm_end(info);
                 return output;
             }
 
@@ -299,7 +294,7 @@ knapsack::Output knapsack::sopt_bellman_array_one(const Instance& ins, Info info
             if (output.lower_bound < values[c]) {
                 std::stringstream ss;
                 ss << "it " << j;
-                update_lb(output, values[c], ss, info);
+                output.update_lb(values[c], ss, info);
             }
         }
 end:
@@ -307,7 +302,7 @@ end:
         // If first iteration, memorize optimal value
         if (n == ins.total_item_number()) {
             // Update upper bound
-            update_ub(output, values[c], std::stringstream("tree search completed"), info);
+            output.update_ub(values[c], std::stringstream("tree search completed"), info);
             opt = values[c];
             opt_local = opt;
             LOG(info, "opt " << opt);
@@ -321,9 +316,9 @@ end:
         n = last_item;
         LOG(info, " p(S) " << sol.profit() << std::endl);
     }
-    update_sol(output, sol, std::stringstream(), info);
+    output.update_sol(sol, std::stringstream(), info);
 
-    algorithm_end(output, info);
+    output.algorithm_end(info);
     PUT(info, "Algorithm", "Iterations", it);
     VER(info, "Iterations: " << it << std::endl);
     return output;
@@ -331,11 +326,10 @@ end:
 
 /************************** sopt_bellman_array_part ***************************/
 
-knapsack::Output knapsack::sopt_bellman_array_part(const Instance& ins, ItemPos k, Info info)
+Output knapsack::sopt_bellman_array_part(const Instance& ins, ItemPos k, Info info)
 {
     VER(info, "*** bellman (array, part " << k << ") ***" << std::endl);
-    knapsack::Output output(ins);
-    init_display(output.lower_bound, output.upper_bound, info);
+    Output output(ins, info);
 
     assert(0 <= k && k <= 64);
     ItemPos n = ins.total_item_number();
@@ -343,8 +337,8 @@ knapsack::Output knapsack::sopt_bellman_array_part(const Instance& ins, ItemPos 
     Solution sol(ins);
 
     if (n == 0) {
-        update_ub(output, 0, std::stringstream("no item"), info);
-        algorithm_end(output, info);
+        output.update_ub(0, std::stringstream("no item"), info);
+        output.algorithm_end(info);
         return output;
     }
 
@@ -389,7 +383,7 @@ knapsack::Output knapsack::sopt_bellman_array_part(const Instance& ins, ItemPos 
             if (output.lower_bound < values[c]) {
                 std::stringstream ss;
                 ss << "it " << j;
-                update_lb(output, values[c], ss, info);
+                output.update_lb(values[c], ss, info);
             }
         }
 end:
@@ -397,7 +391,7 @@ end:
         // If first iteration, memorize optimal value
         if (n == ins.total_item_number()) {
             // Update upper bound
-            update_ub(output, values[c], std::stringstream("tree search completed"), info);
+            output.update_ub(values[c], std::stringstream("tree search completed"), info);
             opt = values[w_opt];
             opt_local = opt;
             LOG(info, "opt " << opt);
@@ -412,9 +406,9 @@ end:
         opt_local = opt - sol.profit();
         LOG(info, " p(S) " << sol.profit() << std::endl);
     }
-    update_sol(output, sol, std::stringstream(), info);
+    output.update_sol(sol, std::stringstream(), info);
 
-    algorithm_end(output, info);
+    output.algorithm_end(info);
     PUT(info, "Algorithm", "Iterations", it);
     VER(info, "Iterations: " << it << std::endl);
     return output;
@@ -499,22 +493,21 @@ void sopt_bellman_array_rec_rec(RecData d)
                 .info = d.info});
 }
 
-knapsack::Output knapsack::sopt_bellman_array_rec(const Instance& ins, Info info)
+Output knapsack::sopt_bellman_array_rec(const Instance& ins, Info info)
 {
     VER(info, "*** bellman (array, rec) ***" << std::endl);
-    knapsack::Output output(ins);
-    init_display(output.lower_bound, output.upper_bound, info);
+    Output output(ins, info);
 
     if (ins.total_item_number() == 0) {
-        update_ub(output, 0, std::stringstream("no item"), info);
-        algorithm_end(output, info);
+        output.update_ub(0, std::stringstream("no item"), info);
+        output.algorithm_end(info);
         return output;
     } else if (ins.total_item_number() == 1) {
         Solution sol(ins);
         sol.set(0, true);
-        update_sol(output, sol, std::stringstream("one item (lb)"), info);
-        update_ub(output, sol.profit(), std::stringstream("one item (ub)"), info);
-        algorithm_end(output, info);
+        output.update_sol(sol, std::stringstream("one item (lb)"), info);
+        output.update_ub(sol.profit(), std::stringstream("one item (ub)"), info);
+        output.algorithm_end(info);
         return output;
     }
 
@@ -530,12 +523,12 @@ knapsack::Output knapsack::sopt_bellman_array_rec(const Instance& ins, Info info
         .info = info
     });
     if (!info.check_time()) {
-        algorithm_end(output, info);
+        output.algorithm_end(info);
         return output;
     }
-    update_sol(output, sol, std::stringstream("tree search completed (lb)"), info);
-    update_ub(output, sol.profit(), std::stringstream("tree search completed (ub)"), info);
-    algorithm_end(output, info);
+    output.update_sol(sol, std::stringstream("tree search completed (lb)"), info);
+    output.update_ub(sol.profit(), std::stringstream("tree search completed (ub)"), info);
+    output.algorithm_end(info);
     return output;
 }
 
@@ -559,26 +552,25 @@ std::ostream& operator<<(std::ostream& os, const std::vector<BellmanState>& l)
     return os;
 }
 
-knapsack::Output knapsack::opt_bellman_list(Instance& ins, bool sort, Info info)
+Output knapsack::opt_bellman_list(Instance& ins, bool sort, Info info)
 {
     VER(info, "*** bellman (list" << ((sort)? ", sort": "") << ") ***" << std::endl);
     LOG_FOLD_START(info, "bellman sort " << sort << std::endl);
-    knapsack::Output output(ins);
-    init_display(output.lower_bound, output.upper_bound, info);
+    Output output(ins, info);
 
     Weight  c = ins.total_capacity();
     ItemPos n = ins.total_item_number();
     ItemPos j_max = ins.max_efficiency_item(info);
 
     if (n == 0 || c == 0) {
-        update_ub(output, 0, std::stringstream("no item or null capacity"), info);
-        algorithm_end(output, info);
+        output.update_ub(0, std::stringstream("no item or null capacity"), info);
+        output.algorithm_end(info);
         LOG_FOLD_END(info, "no item or null capacity");
         return output;
     }
 
     if (!sort && INT_FAST64_MAX / ins.item(j_max).p < ins.total_capacity()) {
-        algorithm_end(output, info);
+        output.algorithm_end(info);
         LOG_FOLD_END(info, "");
         return output;
     }
@@ -586,31 +578,31 @@ knapsack::Output knapsack::opt_bellman_list(Instance& ins, bool sort, Info info)
     if (sort) {
         ins.sort(info);
         if (ins.break_item() == ins.last_item() + 1) {
-            update_lb(output, ins.break_solution()->profit(), std::stringstream("all items fit in the knapsack (lb)"), info);
-            update_ub(output, output.lower_bound, std::stringstream("all item fit in the knapsack (ub)"), info);
-            algorithm_end(output, info);
+            output.update_lb(ins.break_solution()->profit(), std::stringstream("all items fit in the knapsack (lb)"), info);
+            output.update_ub(output.lower_bound, std::stringstream("all item fit in the knapsack (ub)"), info);
+            output.algorithm_end(info);
             LOG_FOLD_END(info, "all items fit in the knapsack");
             return output;
         }
         auto g_output = sol_greedynlogn(ins);
-        update_sol(output, g_output.solution, std::stringstream("greedynlogn"), info);
+        output.update_sol(g_output.solution, std::stringstream("greedynlogn"), info);
 
         ins.reduce2(output.lower_bound, info);
         if (ins.capacity() < 0) {
-            update_ub(output, output.lower_bound, std::stringstream("negative capacity after reduction"), info);
-            algorithm_end(output, info);
+            output.update_ub(output.lower_bound, std::stringstream("negative capacity after reduction"), info);
+            output.algorithm_end(info);
             LOG_FOLD_END(info, "c < 0");
             return output;
         } else if (n == 0 || ins.capacity() == 0) {
-            update_sol(output, *ins.reduced_solution(), std::stringstream("no item or null capacity after reduction (lb)"), info);
-            update_ub(output, output.lower_bound, std::stringstream("no item or null capacity after reduction (ub)"), info);
-            algorithm_end(output, info);
+            output.update_sol(*ins.reduced_solution(), std::stringstream("no item or null capacity after reduction (lb)"), info);
+            output.update_ub(output.lower_bound, std::stringstream("no item or null capacity after reduction (ub)"), info);
+            output.algorithm_end(info);
             LOG_FOLD_END(info, "no item or null capacity after reduction");
             return output;
         } else if (ins.break_item() == ins.last_item() + 1) {
-            update_sol(output, *ins.break_solution(), std::stringstream("all items fit in the knapsack after reduction (lb)"), info);
-            update_ub(output, output.lower_bound, std::stringstream("all items fit in the knapsack after reduction (ub)"), info);
-            algorithm_end(output, info);
+            output.update_sol(*ins.break_solution(), std::stringstream("all items fit in the knapsack after reduction (lb)"), info);
+            output.update_ub(output.lower_bound, std::stringstream("all items fit in the knapsack after reduction (ub)"), info);
+            output.algorithm_end(info);
             LOG_FOLD_END(info, "all items fit in the knapsack after reduction");
             return output;
         }
@@ -618,14 +610,14 @@ knapsack::Output knapsack::opt_bellman_list(Instance& ins, bool sort, Info info)
 
     Profit ub = (!sort)? ub_0(ins, 0, 0, ins.total_capacity(), j_max):
         std::max(ub_dantzig(ins), output.lower_bound);
-    update_ub(output, ub, std::stringstream("initial upper bound"), info);
+    output.update_ub(ub, std::stringstream("initial upper bound"), info);
     std::vector<BellmanState> l0{{
         .w = (ins.reduced_solution() == NULL)? 0: ins.reduced_solution()->weight(),
         .p = (ins.reduced_solution() == NULL)? 0: ins.reduced_solution()->profit()}};
     for (ItemPos j=ins.first_item(); j<=ins.last_item() && !l0.empty(); ++j) {
         // Check time
         if (!info.check_time()) {
-            algorithm_end(output, info);
+            output.algorithm_end(info);
             LOG_FOLD_END(info, "no time left");
             return output;
         }
@@ -651,7 +643,7 @@ knapsack::Output knapsack::opt_bellman_list(Instance& ins, bool sort, Info info)
                     if (output.lower_bound < s1.p) {
                         std::stringstream ss;
                         ss << "it " << j - ins.first_item();
-                        update_lb(output, s1.p, ss, info);
+                        output.update_lb(s1.p, ss, info);
                     }
 
                     if (ub_max < ub_curr)
@@ -688,12 +680,12 @@ knapsack::Output knapsack::opt_bellman_list(Instance& ins, bool sort, Info info)
         if (ub_max != -1 && output.upper_bound > ub_max) {
             std::stringstream ss;
             ss << "it " << j - ins.first_item();
-            update_ub(output, ub_max, ss, info);
+            output.update_ub(ub_max, ss, info);
         }
     }
-    update_ub(output, output.lower_bound, std::stringstream("tree search completed"), info);
+    output.update_ub(output.lower_bound, std::stringstream("tree search completed"), info);
 
-    algorithm_end(output, info);
+    output.algorithm_end(info);
     LOG_FOLD_END(info, "");
     return output;
 }
@@ -853,31 +845,30 @@ void sopt_bellman_list_rec_rec(BellmanListRecData d)
     LOG_FOLD_END(d.info, "");
 }
 
-knapsack::Output knapsack::sopt_bellman_list_rec(const Instance& ins, Info info)
+Output knapsack::sopt_bellman_list_rec(const Instance& ins, Info info)
 {
     LOG_FOLD_START(info, "*** bellman (list, rec) ***" << std::endl);
     VER(info, "*** bellman (list, rec) ***" << std::endl);
-    knapsack::Output output(ins);
-    init_display(output.lower_bound, output.upper_bound, info);
+    Output output(ins, info);
     ItemPos n = ins.total_item_number();
 
     if (n == 0) {
-        update_ub(output, 0, std::stringstream("no item (ub)"), info);
-        algorithm_end(output, info);
+        output.update_ub(0, std::stringstream("no item (ub)"), info);
+        output.algorithm_end(info);
         return output;
     } else if (n == 1) {
         Solution sol(ins);
         sol.set(0, true);
-        update_sol(output, sol, std::stringstream("one item (lb)"), info);
-        update_ub(output, sol.profit(), std::stringstream("one item (ub)"), info);
-        algorithm_end(output, info);
+        output.update_sol(sol, std::stringstream("one item (lb)"), info);
+        output.update_ub(sol.profit(), std::stringstream("one item (ub)"), info);
+        output.algorithm_end(info);
         LOG_FOLD_END(info, "");
         return output;
     }
 
     ItemPos j_max = ins.max_efficiency_item(info);
     if (INT_FAST64_MAX / ins.item(j_max).p < ins.total_capacity()) {
-        algorithm_end(output, info);
+        output.algorithm_end(info);
         LOG_FOLD_END(info, "");
         return output;
     }
@@ -892,14 +883,14 @@ knapsack::Output knapsack::sopt_bellman_list_rec(const Instance& ins, Info info)
         .j_max = j_max,
         .info = info});
     if (!info.check_time()) {
-        algorithm_end(output, info);
+        output.algorithm_end(info);
         LOG_FOLD_END(info, "");
         return output;
     }
 
-    update_sol(output, sol, std::stringstream("tree search completed (lb)"), info);
-    update_ub(output, sol.profit(), std::stringstream("tree search completed (ub)"), info);
-    algorithm_end(output, info);
+    output.update_sol(sol, std::stringstream("tree search completed (lb)"), info);
+    output.update_ub(sol.profit(), std::stringstream("tree search completed (ub)"), info);
+    output.algorithm_end(info);
     LOG_FOLD_END(info, "");
     return output;
 }

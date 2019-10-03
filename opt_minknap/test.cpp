@@ -5,7 +5,7 @@
 
 using namespace knapsack;
 
-knapsack::Output opt_bellman_array_test(Instance& ins)
+Output opt_bellman_array_test(Instance& ins)
 {
     Info info = Info()
         //.set_verbose(true)
@@ -14,7 +14,7 @@ knapsack::Output opt_bellman_array_test(Instance& ins)
     return opt_bellman_array(ins, info);
 }
 
-knapsack::Output sopt_minknap_1_test(Instance& ins)
+Output sopt_minknap_1_test(Instance& ins)
 {
     Info info = Info()
         //.set_verbose(true)
@@ -27,7 +27,7 @@ knapsack::Output sopt_minknap_1_test(Instance& ins)
     return sopt_minknap(ins, p);
 }
 
-knapsack::Output sopt_minknap_2_test(Instance& ins)
+Output sopt_minknap_2_test(Instance& ins)
 {
     Info info = Info()
         //.set_verbose(true)
@@ -40,7 +40,7 @@ knapsack::Output sopt_minknap_2_test(Instance& ins)
     return sopt_minknap(ins, p);
 }
 
-knapsack::Output sopt_minknap_3_test(Instance& ins)
+Output sopt_minknap_3_test(Instance& ins)
 {
     Info info = Info()
         //.set_verbose(true)
@@ -53,7 +53,7 @@ knapsack::Output sopt_minknap_3_test(Instance& ins)
     return sopt_minknap(ins, p);
 }
 
-knapsack::Output sopt_minknap_combocore_k1_test(Instance& ins)
+Output sopt_minknap_combocore_k1_test(Instance& ins)
 {
     Info info = Info()
         //.set_verbose(true)
@@ -67,7 +67,7 @@ knapsack::Output sopt_minknap_combocore_k1_test(Instance& ins)
     return sopt_minknap(ins, p);
 }
 
-knapsack::Output sopt_minknap_combocore_k2_test(Instance& ins)
+Output sopt_minknap_combocore_k2_test(Instance& ins)
 {
     Info info = Info()
         //.set_verbose(true)
@@ -81,7 +81,7 @@ knapsack::Output sopt_minknap_combocore_k2_test(Instance& ins)
     return sopt_minknap(ins, p);
 }
 
-knapsack::Output sopt_minknap_combocore_k3_test(Instance& ins)
+Output sopt_minknap_combocore_k3_test(Instance& ins)
 {
     Info info = Info()
         //.set_verbose(true)
@@ -95,7 +95,7 @@ knapsack::Output sopt_minknap_combocore_k3_test(Instance& ins)
     return sopt_minknap(ins, p);
 }
 
-knapsack::Output sopt_minknap_pairing_test(Instance& ins)
+Output sopt_minknap_pairing_test(Instance& ins)
 {
     Info info = Info()
         //.set_verbose(true)
@@ -108,7 +108,7 @@ knapsack::Output sopt_minknap_pairing_test(Instance& ins)
     return sopt_minknap(ins, p);
 }
 
-std::vector<knapsack::Output (*)(Instance&)> f = {
+std::vector<Output (*)(Instance&)> f = {
         opt_bellman_array_test,
         sopt_minknap_1_test,
         sopt_minknap_2_test,

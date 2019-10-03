@@ -22,7 +22,7 @@ void sopt_expknap_update_bounds(ExpknapInternalData& d)
 {
     if (d.p.surrogate >= 0 && d.p.surrogate <= d.output.node_number) {
         d.p.surrogate = -1;
-        std::function<knapsack::Output (Instance&, Info, bool*)> func
+        std::function<Output (Instance&, Info, bool*)> func
             = [&d](Instance& ins, Info info, bool* end)
             {
                 ExpknapOptionalParameters p;
@@ -46,7 +46,7 @@ void sopt_expknap_update_bounds(ExpknapInternalData& d)
     if (d.p.greedynlogn >= 0 && d.p.greedynlogn <= d.output.node_number) {
         d.p.greedynlogn = -1;
         auto gn_output = sol_greedynlogn(d.ins);
-        update_sol(d.output, gn_output.solution, std::stringstream("greedynlogn"), d.p.info);
+        d.output.update_sol(gn_output.solution, std::stringstream("greedynlogn"), d.p.info);
     }
 }
 
@@ -85,7 +85,7 @@ void sopt_expknap_rec(ExpknapInternalData& d, ItemPos s, ItemPos t)
         if (d.output.solution.profit() < d.sol_curr.profit()) {
             std::stringstream ss;
             ss << "node " << d.output.node_number;
-            update_sol(d.output, d.sol_curr, ss, info);
+            d.output.update_sol(d.sol_curr, ss, info);
         }
 
         for (;;t++) {
@@ -149,12 +149,11 @@ ExpknapOutput knapsack::sopt_expknap(Instance& ins, ExpknapOptionalParameters p)
     if (p.end == NULL)
         p.end = end_uptr.get();
 
-    ExpknapOutput output(ins);
-    init_display(output.lower_bound, output.upper_bound, p.info);
+    ExpknapOutput output(ins, p.info);
 
     if (ins.item_number() == 0) {
-        update_ub(output, output.lower_bound, std::stringstream("no item (ub)"), p.info);
-        algorithm_end(output, p.info);
+        output.update_ub(output.lower_bound, std::stringstream("no item (ub)"), p.info);
+        output.algorithm_end(p.info);
         LOG(p.info, "no item" << std::endl);
         return output;
     }
@@ -162,9 +161,9 @@ ExpknapOutput knapsack::sopt_expknap(Instance& ins, ExpknapOptionalParameters p)
     ins.sort_partially(p.info);
     if (ins.break_item() == ins.last_item() + 1) {
         if (output.lower_bound < ins.break_solution()->profit())
-            update_sol(output, *ins.break_solution(), std::stringstream("all items fit (lb)"), p.info);
-        update_ub(output, ins.break_solution()->profit(), std::stringstream("all items fit (ub)"), p.info);
-        algorithm_end(output, p.info);
+            output.update_sol(*ins.break_solution(), std::stringstream("all items fit (lb)"), p.info);
+        output.update_ub(ins.break_solution()->profit(), std::stringstream("all items fit (ub)"), p.info);
+        output.algorithm_end(p.info);
         LOG_FOLD_END(p.info, "all items fit in the knapsack");
         return output;
     }
@@ -180,15 +179,14 @@ ExpknapOutput knapsack::sopt_expknap(Instance& ins, ExpknapOptionalParameters p)
         sol_tmp = *ins.break_solution();
     }
     if (output.lower_bound < sol_tmp.profit())
-        update_sol(output, sol_tmp, std::stringstream("initial solution"), p.info);
+        output.update_sol(sol_tmp, std::stringstream("initial solution"), p.info);
 
     // Compute initial upper bound
     Profit ub_tmp = ub_dantzig(ins);
-    update_ub(output, ub_tmp, std::stringstream("dantzig upper bound"), p.info);
-                    std::cout << "toto" << std::endl;
+    output.update_ub(ub_tmp, std::stringstream("dantzig upper bound"), p.info);
 
     if (output.solution.profit() == output.upper_bound) {
-        algorithm_end(output, p.info);
+        output.algorithm_end(p.info);
         return output;
     }
 
@@ -196,7 +194,7 @@ ExpknapOutput knapsack::sopt_expknap(Instance& ins, ExpknapOptionalParameters p)
     ItemPos b = ins.break_item();
     sopt_expknap_rec(d, b - 1, b);
     if (p.info.check_time())
-        update_ub(output, output.lower_bound, std::stringstream("tree search completed (ub)"), p.info);
+        output.update_ub(output.lower_bound, std::stringstream("tree search completed (ub)"), p.info);
 
     if (p.set_end)
         *(p.end) = true;
@@ -204,7 +202,7 @@ ExpknapOutput knapsack::sopt_expknap(Instance& ins, ExpknapOptionalParameters p)
         thread.join();
     d.threads.clear();
 
-    algorithm_end(output, p.info);
+    output.algorithm_end(p.info);
     PUT(p.info, "Algorithm", "NodeNumber", output.node_number);
     VER(p.info, "Node number: " << output.node_number << std::endl);
     return output;

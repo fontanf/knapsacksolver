@@ -4,7 +4,7 @@
 
 using namespace knapsack;
 
-knapsack::Output sopt_minknap_test(Instance& ins)
+Output sopt_minknap_test(Instance& ins)
 {
     Info info = Info()
         //.set_verbose(true)
@@ -14,7 +14,7 @@ knapsack::Output sopt_minknap_test(Instance& ins)
     return sopt_minknap(ins, p);
 }
 
-knapsack::Output sopt_expknap_test(Instance& ins)
+Output sopt_expknap_test(Instance& ins)
 {
     Info info = Info()
         //.set_verbose(true)
@@ -25,7 +25,7 @@ knapsack::Output sopt_expknap_test(Instance& ins)
     return sopt_expknap(ins, p);
 }
 
-knapsack::Output sopt_expknap_combocore_test(Instance& ins)
+Output sopt_expknap_combocore_test(Instance& ins)
 {
     Info info = Info()
         //.set_verbose(true)
@@ -37,7 +37,7 @@ knapsack::Output sopt_expknap_combocore_test(Instance& ins)
     return sopt_expknap(ins, p);
 }
 
-std::vector<knapsack::Output (*)(Instance&)> f = {
+std::vector<Output (*)(Instance&)> f = {
         sopt_minknap_test,
         sopt_expknap_test,
         sopt_expknap_combocore_test,

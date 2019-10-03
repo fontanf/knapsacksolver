@@ -121,13 +121,14 @@ void bench_normal(std::string algorithm, double time_limit, std::mt19937_64& gen
                 std::cout << "x " << std::right << std::setw(6) << x << std::flush;
 
                 Instance ins = d.generate();
-                knapsack::Output output(ins);
                 double t = time_limit + 1;
+                Info info = Info()
+                    .set_timelimit(time_limit)
+                    //.set_verbose(true)
+                    ;
+                Output output(ins, info);
                 try {
-                    Info info = Info()
-                        .set_timelimit(time_limit)
-                        //.set_verbose(true)
-                        ;
+                    info.reset_time();
                     output = f(ins, gen, info);
                     t = info.elapsed_time();
                 } catch (...) {

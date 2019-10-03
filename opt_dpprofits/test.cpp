@@ -4,16 +4,16 @@
 
 using namespace knapsack;
 
-knapsack::Output  opt_bellman_array_test(Instance& ins)       { return opt_bellman_array(ins); }
-knapsack::Output  opt_dpprofits_array_test(Instance& ins)     { return opt_dpprofits_array(ins); }
-knapsack::Output sopt_dpprofits_array_all_test(Instance& ins) { return sopt_dpprofits_array_all(ins); }
+Output  opt_bellman_array_test(Instance& ins)       { return opt_bellman_array(ins); }
+Output  opt_dpprofits_array_test(Instance& ins)     { return opt_dpprofits_array(ins); }
+Output sopt_dpprofits_array_all_test(Instance& ins) { return sopt_dpprofits_array_all(ins); }
 
-std::vector<knapsack::Output (*)(Instance&)> f_opt {
+std::vector<Output (*)(Instance&)> f_opt {
         opt_bellman_array_test,
         opt_dpprofits_array_test,
 };
 
-std::vector<knapsack::Output (*)(Instance&)> f_sopt {
+std::vector<Output (*)(Instance&)> f_sopt {
         opt_bellman_array_test,
         sopt_dpprofits_array_all_test,
 };

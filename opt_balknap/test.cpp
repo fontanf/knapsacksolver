@@ -4,7 +4,7 @@
 
 using namespace knapsack;
 
-knapsack::Output sopt_minknap_test(Instance& ins)
+Output sopt_minknap_test(Instance& ins)
 {
     Info info = Info()
         .set_verbose(true)
@@ -14,7 +14,7 @@ knapsack::Output sopt_minknap_test(Instance& ins)
     return sopt_minknap(ins, p);
 }
 
-knapsack::Output sopt_balknap_1_b_test(Instance& ins)
+Output sopt_balknap_1_b_test(Instance& ins)
 {
     Info info = Info()
         .set_verbose(true)
@@ -25,7 +25,7 @@ knapsack::Output sopt_balknap_1_b_test(Instance& ins)
     p.partial_solution_size = 1; return sopt_balknap(ins, p);
 }
 
-knapsack::Output sopt_balknap_2_b_test(Instance& ins)
+Output sopt_balknap_2_b_test(Instance& ins)
 {
     Info info = Info()
         .set_verbose(true)
@@ -37,7 +37,7 @@ knapsack::Output sopt_balknap_2_b_test(Instance& ins)
     return sopt_balknap(ins, p);
 }
 
-knapsack::Output sopt_balknap_3_b_test(Instance& ins)
+Output sopt_balknap_3_b_test(Instance& ins)
 {
     Info info = Info()
         .set_verbose(true)
@@ -49,7 +49,7 @@ knapsack::Output sopt_balknap_3_b_test(Instance& ins)
     return sopt_balknap(ins, p);
 }
 
-knapsack::Output sopt_balknap_1_t_test(Instance& ins)
+Output sopt_balknap_1_t_test(Instance& ins)
 {
     Info info = Info()
         .set_verbose(true)
@@ -61,7 +61,7 @@ knapsack::Output sopt_balknap_1_t_test(Instance& ins)
     return sopt_balknap(ins, p);
 }
 
-knapsack::Output sopt_balknap_2_t_test(Instance& ins)
+Output sopt_balknap_2_t_test(Instance& ins)
 {
     Info info = Info()
         .set_verbose(true)
@@ -73,7 +73,7 @@ knapsack::Output sopt_balknap_2_t_test(Instance& ins)
     return sopt_balknap(ins, p);
 }
 
-knapsack::Output sopt_balknap_3_t_test(Instance& ins)
+Output sopt_balknap_3_t_test(Instance& ins)
 {
     Info info = Info()
         .set_verbose(true)
@@ -85,7 +85,7 @@ knapsack::Output sopt_balknap_3_t_test(Instance& ins)
     return sopt_balknap(ins, p);
 }
 
-std::vector<knapsack::Output (*)(Instance&)> f = {
+std::vector<Output (*)(Instance&)> f = {
         sopt_minknap_test,
         sopt_balknap_1_b_test,
         sopt_balknap_2_b_test,

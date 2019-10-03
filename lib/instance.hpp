@@ -13,6 +13,8 @@
 namespace knapsack
 {
 
+using benchtools::Info;
+
 typedef int64_t Profit;
 typedef int64_t Weight;
 typedef int64_t ItemIdx;

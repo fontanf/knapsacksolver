@@ -5,12 +5,12 @@
 
 using namespace knapsack;
 
-bool test(const Instance& ins, std::vector<knapsack::Output (*)(Instance&)> fs, TestType tt)
+bool test(const Instance& ins, std::vector<Output (*)(Instance&)> fs, TestType tt)
 {
     Profit opt = -1;
     for (auto f: fs) {
         Instance ins_tmp = ins;
-        knapsack::Output output = f(ins_tmp);
+        Output output = f(ins_tmp);
         if (opt == -1) {
             opt = output.lower_bound;
             continue;
@@ -203,7 +203,7 @@ private:
 
 };
 
-void test(Instances& inss, std::vector<knapsack::Output (*)(Instance&)> fs, TestType tt)
+void test(Instances& inss, std::vector<Output (*)(Instance&)> fs, TestType tt)
 {
     for (;;) {
         Instance ins(inss.next());
@@ -218,7 +218,7 @@ void test(Instances& inss, std::vector<knapsack::Output (*)(Instance&)> fs, Test
     }
 }
 
-void knapsack::test(InstacesType it, std::vector<knapsack::Output (*)(Instance&)> fs, TestType tt)
+void knapsack::test(InstacesType it, std::vector<Output (*)(Instance&)> fs, TestType tt)
 {
     if (it == TEST) {
         TestInstances ti;

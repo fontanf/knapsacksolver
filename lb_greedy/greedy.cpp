@@ -2,16 +2,15 @@
 
 using namespace knapsack;
 
-knapsack::Output knapsack::sol_greedy(const Instance& ins, Info info)
+Output knapsack::sol_greedy(const Instance& ins, Info info)
 {
     LOG_FOLD_START(info, "sol_greedy" << std::endl);
     VER(info, "*** greedy ***" << std::endl);
-    knapsack::Output output(ins);
-    init_display(output.lower_bound, output.upper_bound, info);
+    Output output(ins, info);
 
     assert(ins.break_item() != -1);
 
-    update_sol(output, *ins.break_solution(), std::stringstream("break"), info);
+    output.update_sol(*ins.break_solution(), std::stringstream("break"), info);
     std::string best_algo = "break";
     LOG(info, "break " << output.solution.profit() << std::endl);
     ItemPos b = ins.break_item();
@@ -44,18 +43,18 @@ knapsack::Output knapsack::sol_greedy(const Instance& ins, Info info)
             Solution sol = output.solution;
             sol.set(b, true);
             sol.set(j, false);
-            update_sol(output, sol, std::stringstream("backward"), info);
+            output.update_sol(sol, std::stringstream("backward"), info);
         } else {
             best_algo = "forward";
             Solution sol = output.solution;
             sol.set(j, true);
-            update_sol(output, sol, std::stringstream("forward"), info);
+            output.update_sol(sol, std::stringstream("forward"), info);
         }
     }
 
     PUT(info, "Algorithm", "Best", best_algo);
     LOG_FOLD_END(info, "sol_greedy " << output.solution.profit());
-    algorithm_end(output, info);
+    output.algorithm_end(info);
     return output;
 }
 

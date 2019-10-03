@@ -6,9 +6,9 @@
 namespace knapsack
 {
 
-knapsack::Output sol_forwardgreedynlogn(const Instance& ins, Info info = Info());
-knapsack::Output sol_backwardgreedynlogn(const Instance& ins, Info info = Info());
-knapsack::Output sol_greedynlogn(const Instance& ins, Info info = Info());
+Output sol_forwardgreedynlogn(const Instance& ins, Info info = Info());
+Output sol_backwardgreedynlogn(const Instance& ins, Info info = Info());
+Output sol_greedynlogn(const Instance& ins, Info info = Info());
 
 }
 

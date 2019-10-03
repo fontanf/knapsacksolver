@@ -4,7 +4,7 @@
 
 using namespace knapsack;
 
-knapsack::Output sopt_minknap_test(Instance& ins)
+Output sopt_minknap_test(Instance& ins)
 {
     Info info = Info()
         //.set_verbose(true)
@@ -14,7 +14,7 @@ knapsack::Output sopt_minknap_test(Instance& ins)
     return sopt_minknap(ins, p);
 }
 
-knapsack::Output sopt_bab_test(Instance& ins)
+Output sopt_bab_test(Instance& ins)
 {
     Info info = Info()
         //.set_verbose(true)
@@ -22,7 +22,7 @@ knapsack::Output sopt_bab_test(Instance& ins)
     return sopt_bab(ins, false, info);
 }
 
-knapsack::Output sopt_bab_sort_test(Instance& ins)
+Output sopt_bab_sort_test(Instance& ins)
 {
     Info info = Info()
         //.set_verbose(true)
@@ -30,7 +30,7 @@ knapsack::Output sopt_bab_sort_test(Instance& ins)
     return sopt_bab(ins, true, info);
 }
 
-std::vector<knapsack::Output (*)(Instance&)> f = {
+std::vector<Output (*)(Instance&)> f = {
         sopt_minknap_test,
         sopt_bab_test,
         sopt_bab_sort_test,

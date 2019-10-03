@@ -17,7 +17,7 @@
 namespace knapsack
 {
 
-typedef std::function<knapsack::Output (Instance&, std::mt19937_64&, Info)> func;
+typedef std::function<Output (Instance&, std::mt19937_64&, Info)> func;
 
 func get_algorithm(std::string str);
 

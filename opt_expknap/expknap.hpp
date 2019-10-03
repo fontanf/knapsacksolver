@@ -54,7 +54,7 @@ struct ExpknapOptionalParameters
 
 struct ExpknapOutput: Output
 {
-    ExpknapOutput(const Instance& ins): Output(ins) { }
+    ExpknapOutput(const Instance& ins, Info& info): Output(ins, info) { }
     Cpt node_number = 0;
 };
 

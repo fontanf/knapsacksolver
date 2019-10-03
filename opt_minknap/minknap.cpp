@@ -37,11 +37,10 @@ MinknapOutput knapsack::sopt_minknap(Instance& ins, MinknapOptionalParameters p)
     if (p.end == NULL)
         p.end = end_uptr.get();
 
-    MinknapOutput output(ins);
-    init_display(output.lower_bound, output.upper_bound, p.info);
+    MinknapOutput output(ins, p.info);
     sopt_minknap_main(ins, p, output);
 
-    algorithm_end(output, p.info);
+    output.algorithm_end(p.info);
     LOG_FOLD_END(p.info, "minknap");
     return output;
 }
@@ -96,15 +95,15 @@ void sopt_minknap_main(Instance& ins, MinknapOptionalParameters& p, MinknapOutpu
     // Trivial cases
     if (n == 0 || c == 0) {
         Solution sol_tmp = (ins.reduced_solution() == NULL)? Solution(ins): *ins.reduced_solution();
-        update_sol(output, sol_tmp, std::stringstream("no item or null capacity (lb)"), p.info);
-        update_ub(output, output.lower_bound, std::stringstream("no item of null capacity (ub)"), p.info);
+        output.update_sol(sol_tmp, std::stringstream("no item or null capacity (lb)"), p.info);
+        output.update_ub(output.lower_bound, std::stringstream("no item of null capacity (ub)"), p.info);
         LOG_FOLD_END(p.info, "no item or null capacity");
         return;
     } else if (n == 1) {
         Solution sol_tmp = (ins.reduced_solution() == NULL)? Solution(ins): *ins.reduced_solution();
         sol_tmp.set(ins.first_item(), true);
-        update_sol(output, sol_tmp, std::stringstream("one item (lb)"), p.info);
-        update_ub(output, output.lower_bound, std::stringstream("one item (ub)"), p.info);
+        output.update_sol(sol_tmp, std::stringstream("one item (lb)"), p.info);
+        output.update_ub(output.lower_bound, std::stringstream("one item (ub)"), p.info);
         LOG_FOLD_END(p.info, "one item");
         return;
     }
@@ -112,8 +111,8 @@ void sopt_minknap_main(Instance& ins, MinknapOptionalParameters& p, MinknapOutpu
     // Sort partially
     ins.sort_partially(p.info);
     if (ins.break_item() == ins.last_item() + 1) {
-        update_sol(output, *ins.break_solution(), std::stringstream("all items fit in the knapsack (lb)"), p.info);
-        update_ub(output, output.lower_bound, std::stringstream("all items fit in the knapsack (ub)"), p.info);
+        output.update_sol(*ins.break_solution(), std::stringstream("all items fit in the knapsack (lb)"), p.info);
+        output.update_ub(output.lower_bound, std::stringstream("all items fit in the knapsack (ub)"), p.info);
         LOG_FOLD_END(p.info, "all items fit in the knapsack");
         return;
     }
@@ -131,11 +130,11 @@ void sopt_minknap_main(Instance& ins, MinknapOptionalParameters& p, MinknapOutpu
         sol_tmp = *ins.break_solution();
     }
     if (output.lower_bound < sol_tmp.profit())
-        update_sol(output, sol_tmp, std::stringstream("initial solution"), p.info);
+        output.update_sol(sol_tmp, std::stringstream("initial solution"), p.info);
 
     // Compute initial upper bound
     Profit ub_tmp = ub_dantzig(ins);
-    update_ub(output, ub_tmp, std::stringstream("dantzig upper bound"), p.info);
+    output.update_ub(ub_tmp, std::stringstream("dantzig upper bound"), p.info);
 
     if (output.solution.profit() == output.upper_bound) {
         LOG_FOLD_END(p.info, "lower bound == upper bound");
@@ -208,7 +207,7 @@ void sopt_minknap_main(Instance& ins, MinknapOptionalParameters& p, MinknapOutpu
                 break;
         }
     }
-    update_ub(output, output.lower_bound, std::stringstream("tree search completed"), p.info);
+    output.update_ub(output.lower_bound, std::stringstream("tree search completed"), p.info);
 
     if (p.set_end)
         *(p.end) = true;
@@ -280,7 +279,7 @@ void add_item(MinknapInternalData& d)
                     if (d.output.recursive_call_number == 1) {
                         std::stringstream ss;
                         ss << "it " << d.t - d.s << " (lb)";
-                        update_lb(d.output, s1.p, ss, info);
+                        d.output.update_lb(s1.p, ss, info);
                         lb = s1.p;
                     }
                     d.best_state = s1;
@@ -333,7 +332,7 @@ void add_item(MinknapInternalData& d)
     if (d.output.recursive_call_number == 1 && ub_max != -1 && d.output.upper_bound > ub_max) {
         std::stringstream ss;
         ss << "it " << d.t - d.s << " (ub)";
-        update_ub(d.output, ub_max, ss, info);
+        d.output.update_ub(ub_max, ss, info);
     }
     d.l0.swap(d.l);
     LOG_FOLD_END(info, "add_item");
@@ -403,7 +402,7 @@ void remove_item(MinknapInternalData& d)
                     if (d.output.recursive_call_number == 1) {
                         std::stringstream ss;
                         ss << "it " << d.t - d.s << " (lb)";
-                        update_lb(d.output, s1.p, ss, info);
+                        d.output.update_lb(s1.p, ss, info);
                         lb = s1.p;
                     }
                     d.best_state = s1;
@@ -432,7 +431,7 @@ void remove_item(MinknapInternalData& d)
     if (d.output.recursive_call_number == 1 && ub_max != -1 && d.output.upper_bound > ub_max) {
         std::stringstream ss;
         ss << "it " << d.t - d.s << " (ub)";
-        update_ub(d.output, ub_max, ss, info);
+        d.output.update_ub(ub_max, ss, info);
     }
     d.l0.swap(d.l);
     LOG_FOLD_END(info, "remove_item");
@@ -499,7 +498,7 @@ void sopt_minknap_update_bounds(MinknapInternalData& d)
 
     if (d.p.surrogate >= 0 && d.p.surrogate <= (StateIdx)d.l0.size()) {
         d.p.surrogate = -1;
-        std::function<knapsack::Output (Instance&, Info, bool*)> func
+        std::function<Output (Instance&, Info, bool*)> func
             = [&d](Instance& ins, Info info, bool* end)
             {
                 MinknapOptionalParameters p;

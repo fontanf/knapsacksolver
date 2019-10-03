@@ -67,7 +67,7 @@ struct MinknapOptionalParameters
 
 struct MinknapOutput: Output
 {
-    MinknapOutput(const Instance& ins): Output(ins) { }
+    MinknapOutput(const Instance& ins, Info& info): Output(ins, info) { }
     Cpt recursive_call_number = 0;
 };
 

@@ -6,7 +6,7 @@
 namespace knapsack
 {
 
-knapsack::Output sopt_bab(Instance& ins, bool sort = false, Info info = Info());
+Output sopt_bab(Instance& ins, bool sort = false, Info info = Info());
 
 }
 

@@ -37,11 +37,10 @@ BalknapOutput knapsack::sopt_balknap(Instance& ins, BalknapOptionalParameters p)
     if (p.end == NULL)
         p.end = end_uptr.get();
 
-    BalknapOutput output(ins);
-    init_display(output.lower_bound, output.upper_bound, p.info);
+    BalknapOutput output(ins, p.info);
     sopt_balknap_main(ins, p, output);
 
-    algorithm_end(output, p.info);
+    output.algorithm_end(p.info);
     LOG_FOLD_END(p.info, "balknap");
     return output;
 }
@@ -105,15 +104,15 @@ void sopt_balknap_main(Instance& ins, BalknapOptionalParameters& p, BalknapOutpu
     // Trivial cases
     if (ins.item_number() == 0 || ins.capacity() == 0) {
         Solution sol_tmp = (ins.reduced_solution() == NULL)? Solution(ins): *ins.reduced_solution();
-        update_sol(output, sol_tmp, std::stringstream("no item of null capacity (lb)"), p.info);
-        update_ub(output, output.lower_bound, std::stringstream("no item of null capacity (ub)"), p.info);
+        output.update_sol(sol_tmp, std::stringstream("no item of null capacity (lb)"), p.info);
+        output.update_ub(output.lower_bound, std::stringstream("no item of null capacity (ub)"), p.info);
         LOG_FOLD_END(info, "no item or null capacity");
         return;
     } else if (ins.item_number() == 1) {
         Solution sol_tmp = (ins.reduced_solution() == NULL)? Solution(ins): *ins.reduced_solution();
         sol_tmp.set(ins.first_item(), true);
-        update_sol(output, sol_tmp, std::stringstream("one item (lb)"), p.info);
-        update_ub(output, output.lower_bound, std::stringstream("one item (ub)"), p.info);
+        output.update_sol(sol_tmp, std::stringstream("one item (lb)"), p.info);
+        output.update_ub(output.lower_bound, std::stringstream("one item (ub)"), p.info);
         LOG_FOLD_END(p.info, "one item");
         return;
     }
@@ -125,8 +124,8 @@ void sopt_balknap_main(Instance& ins, BalknapOptionalParameters& p, BalknapOutpu
         ins.sort(info);
     }
     if (ins.break_item() == ins.last_item() + 1) {
-        update_sol(output, *ins.break_solution(), std::stringstream("all items fit in the knapsack (lb)"), p.info);
-        update_ub(output, output.lower_bound, std::stringstream("all items fit in the knapsack (ub)"), p.info);
+        output.update_sol(*ins.break_solution(), std::stringstream("all items fit in the knapsack (lb)"), p.info);
+        output.update_ub(output.lower_bound, std::stringstream("all items fit in the knapsack (ub)"), p.info);
         LOG_FOLD_END(p.info, "all items fit in the knapsack");
         return;
     }
@@ -140,7 +139,7 @@ void sopt_balknap_main(Instance& ins, BalknapOptionalParameters& p, BalknapOutpu
         sol_tmp = *ins.break_solution();
     }
     if (output.lower_bound < sol_tmp.profit())
-        update_sol(output, sol_tmp, std::stringstream("initial solution"), p.info);
+        output.update_sol(sol_tmp, std::stringstream("initial solution"), p.info);
 
     // Variable reduction
     // If we already know the optimal value, we can use opt-1 as lower bound
@@ -154,13 +153,13 @@ void sopt_balknap_main(Instance& ins, BalknapOptionalParameters& p, BalknapOutpu
         ins.reduce2(lb_red, info);
     }
     if (ins.capacity() < 0) {
-        update_ub(output, output.lower_bound, std::stringstream("negative capacity after reduction"), info);
+        output.update_ub(output.lower_bound, std::stringstream("negative capacity after reduction"), info);
         LOG_FOLD_END(info, "c < 0");
         return;
     }
 
     if (output.solution.profit() < ins.break_solution()->profit())
-        update_sol(output, *ins.break_solution(), std::stringstream("break solution after reduction"), p.info);
+        output.update_sol(*ins.break_solution(), std::stringstream("break solution after reduction"), p.info);
 
     Weight  c = ins.total_capacity();
     ItemPos f = ins.first_item();
@@ -170,20 +169,20 @@ void sopt_balknap_main(Instance& ins, BalknapOptionalParameters& p, BalknapOutpu
     // Trivial cases
     if (n == 0 || ins.capacity() == 0) {
         Solution sol_tmp = (ins.reduced_solution() == NULL)? Solution(ins): *ins.reduced_solution();
-        update_sol(output, sol_tmp, std::stringstream("no item or null capacity after reduction (lb)"), p.info);
-        update_ub(output, output.lower_bound, std::stringstream("no item of null capacity after reduction (ub)"), p.info);
+        output.update_sol(sol_tmp, std::stringstream("no item or null capacity after reduction (lb)"), p.info);
+        output.update_ub(output.lower_bound, std::stringstream("no item of null capacity after reduction (ub)"), p.info);
         LOG_FOLD_END(p.info, "no item or null capacity after reduction");
         return;
     } else if (n == 1) {
         Solution sol_tmp = (ins.reduced_solution() == NULL)? Solution(ins): *ins.reduced_solution();
         sol_tmp.set(ins.first_item(), true);
-        update_sol(output, sol_tmp, std::stringstream("one item after reduction (lb)"), p.info);
-        update_ub(output, output.lower_bound, std::stringstream("one item after reduction (ub)"), p.info);
+        output.update_sol(sol_tmp, std::stringstream("one item after reduction (lb)"), p.info);
+        output.update_ub(output.lower_bound, std::stringstream("one item after reduction (ub)"), p.info);
         LOG_FOLD_END(p.info, "one item after reduction");
         return;
     } else if (ins.break_item() == ins.last_item()+1) {
-        update_sol(output, *ins.break_solution(), std::stringstream("all items fit in the knapsack after reduction (lb)"), p.info);
-        update_ub(output, output.lower_bound, std::stringstream("all items fit in the knapsack after reduction (ub)"), p.info);
+        output.update_sol(*ins.break_solution(), std::stringstream("all items fit in the knapsack after reduction (lb)"), p.info);
+        output.update_ub(output.lower_bound, std::stringstream("all items fit in the knapsack after reduction (ub)"), p.info);
         LOG_FOLD_END(p.info, "all items fit in the knapsack after reduction");
         return;
     }
@@ -194,7 +193,7 @@ void sopt_balknap_main(Instance& ins, BalknapOptionalParameters& p, BalknapOutpu
 
     // Compute initial upper bound
     Profit ub_tmp = std::max(ub_dantzig(ins), output.lower_bound);
-    update_ub(output, ub_tmp, std::stringstream("dantzig upper bound"), p.info);
+    output.update_ub(ub_tmp, std::stringstream("dantzig upper bound"), p.info);
 
     if (output.solution.profit() == output.upper_bound) {
         LOG_FOLD_END(p.info, "lower bound == upper bound");
@@ -265,7 +264,7 @@ void sopt_balknap_main(Instance& ins, BalknapOptionalParameters& p, BalknapOutpu
         if (ub_t != -1 && output.upper_bound > ub_t) {
             std::stringstream ss;
             ss << "it " << t - b << " (ub)";
-            update_ub(output, ub_t, ss, info);
+            output.update_ub(ub_t, ss, info);
             if (output.solution.profit() == output.upper_bound
                     || best_state.first.pi == output.upper_bound)
                 goto end;
@@ -299,7 +298,7 @@ void sopt_balknap_main(Instance& ins, BalknapOptionalParameters& p, BalknapOutpu
                 if (d.output.recursive_call_number == 1) {
                     std::stringstream ss;
                     ss << "it " << t - b << " (lb)";
-                    update_lb(output, pi_, ss, info);
+                    output.update_lb(pi_, ss, info);
                     lb = pi_;
                 }
                 best_state = s1;
@@ -364,7 +363,7 @@ void sopt_balknap_main(Instance& ins, BalknapOptionalParameters& p, BalknapOutpu
                     if (d.output.recursive_call_number == 1) {
                         std::stringstream ss;
                         ss << "it " << t - b << " (lb)";
-                        update_lb(output, pi_, ss, info);
+                        output.update_lb(pi_, ss, info);
                         lb = pi_;
                     }
                     best_state = s1;
@@ -403,7 +402,7 @@ void sopt_balknap_main(Instance& ins, BalknapOptionalParameters& p, BalknapOutpu
 
     }
 end:
-    update_ub(output, output.lower_bound, std::stringstream("tree search completed"), p.info);
+    output.update_ub(output.lower_bound, std::stringstream("tree search completed"), p.info);
 
     if (p.set_end)
         *(p.end) = true;
@@ -439,7 +438,7 @@ void sopt_balknap_update_bounds(BalknapInternalData& d)
 
     if (d.p.surrogate >= 0 && d.p.surrogate <= (StateIdx)d.map.size()) {
         d.p.surrogate = -1;
-        std::function<knapsack::Output (Instance&, Info, bool*)> func
+        std::function<Output (Instance&, Info, bool*)> func
             = [&d](Instance& ins, Info info, bool* end)
             {
                 BalknapOptionalParameters p;
@@ -463,7 +462,7 @@ void sopt_balknap_update_bounds(BalknapInternalData& d)
     if (d.p.greedynlogn >= 0 && d.p.greedynlogn <= (StateIdx)d.map.size()) {
         d.p.greedynlogn = -1;
         auto gn_output = sol_greedynlogn(d.ins);
-        update_sol(d.output, gn_output.solution, std::stringstream("greedynlogn"), d.p.info);
+        d.output.update_sol(gn_output.solution, std::stringstream("greedynlogn"), d.p.info);
     }
 }
 

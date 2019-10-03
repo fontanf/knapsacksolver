@@ -19,13 +19,12 @@ std::vector<Item> remove_dominated_items(std::vector<Item>& v)
 
 /*************************** sol_forwardgreedynlogn ***************************/
 
-knapsack::Output knapsack::sol_forwardgreedynlogn(const Instance& ins, Info info)
+Output knapsack::sol_forwardgreedynlogn(const Instance& ins, Info info)
 {
     LOG_FOLD_START(info, "forwardgreedynlogn b " << ins.break_item()
             << " n " << ins.total_item_number() << std::endl;);
     VER(info, "*** forwardgreedynlogn ***" << std::endl);
-    knapsack::Output output(ins);
-    init_display(output.lower_bound, output.upper_bound, info);
+    Output output(ins, info);
 
     Solution sol = *ins.break_solution();
 
@@ -33,7 +32,7 @@ knapsack::Output knapsack::sol_forwardgreedynlogn(const Instance& ins, Info info
     // contain any item, return sol.
     if (ins.break_item() >= ins.total_item_number() - 1
             || ins.break_item() == 0) {
-        algorithm_end(output, info);
+        output.algorithm_end(info);
         LOG_FOLD_END(info, "");
         return output;
     }
@@ -82,30 +81,29 @@ knapsack::Output knapsack::sol_forwardgreedynlogn(const Instance& ins, Info info
         sol.set(il_max->j, true);
     }
 
-    update_sol(output, sol, std::stringstream(), info);
-    algorithm_end(output, info);
+    output.update_sol(sol, std::stringstream(), info);
+    output.algorithm_end(info);
     LOG_FOLD_END(info, "");
     return output;
 }
 
 /************************** sol_backwardgreedynlogn ***************************/
 
-knapsack::Output knapsack::sol_backwardgreedynlogn(const Instance& ins, Info info)
+Output knapsack::sol_backwardgreedynlogn(const Instance& ins, Info info)
 {
     LOG_FOLD_START(info, "backwardgreedynlogn b " << ins.break_item()
             << " n " << ins.total_item_number() << std::endl;);
     VER(info, "*** backwardgreedynlogn ***" << std::endl);
-    knapsack::Output output(ins);
-    init_display(output.lower_bound, output.upper_bound, info);
+    Output output(ins, info);
 
-    update_sol(output, *ins.break_solution(), std::stringstream("break"), info);
+    output.update_sol(*ins.break_solution(), std::stringstream("break"), info);
 
     // If all items fit in the knapsack or if the break solution doesn't
     // contain any item, return sol.
     if (ins.break_item() >= ins.total_item_number() - 1
             || ins.break_item() == 0) {
         LOG_FOLD_END(info, "");
-        algorithm_end(output, info);
+        output.algorithm_end(info);
         return output;
     }
 
@@ -157,10 +155,10 @@ knapsack::Output knapsack::sol_backwardgreedynlogn(const Instance& ins, Info inf
     if (it_max != t.end()) {
         sol.set(it_max->j, false);
         sol.set(il_max->j, true);
-        update_sol(output, sol, std::stringstream(), info);
+        output.update_sol(sol, std::stringstream(), info);
     }
 
-    algorithm_end(output, info);
+    output.algorithm_end(info);
     LOG_FOLD_END(info, "");
     return output;
 
@@ -168,32 +166,31 @@ knapsack::Output knapsack::sol_backwardgreedynlogn(const Instance& ins, Info inf
 
 /****************************** sol_greedynlogn *******************************/
 
-knapsack::Output knapsack::sol_greedynlogn(const Instance& ins, Info info)
+Output knapsack::sol_greedynlogn(const Instance& ins, Info info)
 {
     VER(info, "*** greedynlogn ***" << std::endl);
     LOG_FOLD_START(info, "greedynlogn" << std::endl;);
-    knapsack::Output output(ins);
-    init_display(output.lower_bound, output.upper_bound, info);
+    Output output(ins, info);
 
     auto g_output = sol_greedy(ins);
-    update_sol(output, g_output.solution, std::stringstream("greedy"), info);
+    output.update_sol(g_output.solution, std::stringstream("greedy"), info);
     std::string best = "greedy";
 
     auto f_output = sol_forwardgreedynlogn(ins);
     if (output.lower_bound < f_output.lower_bound) {
-        update_sol(output, f_output.solution, std::stringstream("forward"), info);
+        output.update_sol(f_output.solution, std::stringstream("forward"), info);
         best = "forward";
     }
 
     auto b_output = sol_backwardgreedynlogn(ins);
     if (output.lower_bound < b_output.lower_bound) {
-        update_sol(output, b_output.solution, std::stringstream("backward"), info);
+        output.update_sol(b_output.solution, std::stringstream("backward"), info);
         best = "backward";
     }
 
     PUT(info, "Algorithm", "Best", best);
     LOG_FOLD_END(info, "");
-    algorithm_end(output, info);
+    output.algorithm_end(info);
     return output;
 }
 

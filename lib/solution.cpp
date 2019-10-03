@@ -151,9 +151,9 @@ std::string Solution::to_string_items() const
     return s;
 }
 
-/********************************** Display ***********************************/
+/*********************************** Output ***********************************/
 
-void knapsack::init_display(Profit lb, Profit ub, Info& info)
+Output::Output(const Instance& ins, Info& info): solution(ins)
 {
     VER(info, std::left << std::setw(10) << "T (ms)");
     VER(info, std::left << std::setw(14) << "LB");
@@ -161,80 +161,63 @@ void knapsack::init_display(Profit lb, Profit ub, Info& info)
     VER(info, std::left << std::setw(10) << "GAP");
     VER(info, "");
     VER(info, std::endl);
+    print(info, std::stringstream(""));
+}
 
+void Output::print(Info& info, const std::stringstream& s) const
+{
     double t = round(info.elapsed_time() * 10000) / 10;
-    std::string ub_str = (ub == -1)? "inf": std::to_string(ub);
-    std::string gap_str = (ub == -1)? "inf": std::to_string(ub - lb);
     VER(info, std::left << std::setw(10) << t);
-    VER(info, std::left << std::setw(14) << lb);
-    VER(info, std::left << std::setw(14) << ub_str);
-    VER(info, std::left << std::setw(10) << gap_str);
-    VER(info, "" << std::endl);
+    VER(info, std::left << std::setw(14) << lower_bound);
+    VER(info, std::left << std::setw(14) << ub_str());
+    VER(info, std::left << std::setw(10) << gap_str());
+    VER(info, s.str() << std::endl);
 }
 
-void knapsack::update_lb(knapsack::Output& output, Profit lb_new, const std::stringstream& s, Info& info)
+void Output::update_lb(Profit lb_new, const std::stringstream& s, Info& info)
 {
-    if (output.lower_bound >= lb_new)
+    if (lower_bound >= lb_new)
         return;
 
     info.output->mutex_sol.lock();
 
-    if (output.lower_bound < lb_new) {
-        output.lower_bound = lb_new;
-        double t = round(info.elapsed_time() * 10000) / 10;
-        std::string ub_str = (output.upper_bound == -1)? "inf": std::to_string(output.upper_bound);
-        std::string gap_str = (output.upper_bound == -1)? "inf": std::to_string(output.upper_bound - output.lower_bound);
-        VER(info, std::left << std::setw(10) << t);
-        VER(info, std::left << std::setw(14) << output.lower_bound);
-        VER(info, std::left << std::setw(14) << ub_str);
-        VER(info, std::left << std::setw(10) << gap_str);
-        VER(info, s.str() << std::endl);
+    if (lower_bound < lb_new) {
+        lower_bound = lb_new;
+        print(info, s);
     }
 
     info.output->mutex_sol.unlock();
 }
 
-void knapsack::update_sol(knapsack::Output& output, const Solution& sol, const std::stringstream& s, Info& info)
+void Output::update_sol(const Solution& sol, const std::stringstream& s, Info& info)
 {
-    if (!output.solution.feasible() || output.solution.profit() >= sol.profit())
+    if (!solution.feasible() || solution.profit() >= sol.profit())
         return;
 
     info.output->mutex_sol.lock();
 
-    if (output.solution.profit() < sol.profit()) {
-        output.solution = sol;
+    if (solution.profit() < sol.profit()) {
+        solution = sol;
     }
 
-    if (output.lower_bound < sol.profit()) {
-        output.lower_bound = sol.profit();
-        double t = round(info.elapsed_time() * 10000) / 10;
-        std::string ub_str = (output.upper_bound == -1)? "inf": std::to_string(output.upper_bound);
-        std::string gap_str = (output.upper_bound == -1)? "inf": std::to_string(output.upper_bound - output.lower_bound);
-        VER(info, std::left << std::setw(10) << t);
-        VER(info, std::left << std::setw(14) << output.lower_bound);
-        VER(info, std::left << std::setw(14) << ub_str);
-        VER(info, std::left << std::setw(10) << gap_str);
-        VER(info, s.str() << std::endl);
+    if (lower_bound < sol.profit()) {
+        lower_bound = sol.profit();
+        print(info, s);
     }
 
     info.output->mutex_sol.unlock();
 }
 
-void knapsack::update_ub(knapsack::Output& output, Profit ub_new, const std::stringstream& s, Info& info)
+void Output::update_ub(Profit ub_new, const std::stringstream& s, Info& info)
 {
-    if (output.upper_bound != -1 && output.upper_bound <= ub_new)
+    if (upper_bound != -1 && upper_bound <= ub_new)
         return;
 
     info.output->mutex_sol.lock();
 
-    if (output.upper_bound == -1 || output.upper_bound > ub_new) {
-        output.upper_bound = ub_new;
-        double t = round(info.elapsed_time() * 10000) / 10;
-        VER(info, std::left << std::setw(10) << t);
-        VER(info, std::left << std::setw(14) << output.lower_bound);
-        VER(info, std::left << std::setw(14) << output.upper_bound);
-        VER(info, std::left << std::setw(10) << output.upper_bound - output.lower_bound);
-        VER(info, s.str() << std::endl);
+    if (upper_bound == -1 || upper_bound > ub_new) {
+        upper_bound = ub_new;
+        print(info, s);
     }
 
     info.output->mutex_sol.unlock();
@@ -250,21 +233,21 @@ void knapsack::algorithm_end(Profit upper_bound, Info& info)
             << "Time (ms): " << t << std::endl);
 }
 
-void knapsack::algorithm_end(const knapsack::Output& output, Info& info)
+void Output::algorithm_end(Info& info)
 {
     double t = round(info.elapsed_time() * 10000) / 10;
-    std::string ub_str = (output.upper_bound == -1)? "inf": std::to_string(output.upper_bound);
-    std::string gap_str = (output.upper_bound == -1)? "inf": std::to_string(output.upper_bound - output.lower_bound);
-    std::string sol_str = (output.solution.feasible() && output.solution.profit() == output.lower_bound)? "OK": "none";
-    double gap = (output.lower_bound == 0 || output.upper_bound == -1)?
+    std::string ub_str = (upper_bound == -1)? "inf": std::to_string(upper_bound);
+    std::string gap_str = (upper_bound == -1)? "inf": std::to_string(upper_bound - lower_bound);
+    std::string sol_str = (solution.feasible() && solution.profit() == lower_bound)? "OK": "none";
+    double gap = (lower_bound == 0 || upper_bound == -1)?
         std::numeric_limits<double>::infinity():
-        (double)(10000 * (output.upper_bound - output.lower_bound) / output.lower_bound) / 100;
-    PUT(info, "Solution", "Value", output.lower_bound);
-    PUT(info, "Bound", "Value", output.upper_bound);
+        (double)(10000 * (upper_bound - lower_bound) / lower_bound) / 100;
+    PUT(info, "Solution", "Value", lower_bound);
+    PUT(info, "Bound", "Value", upper_bound);
     PUT(info, "Solution", "Time", t);
     PUT(info, "Bound", "Time", t);
     VER(info, "---" << std::endl
-            << "Value: " << output.lower_bound << std::endl
+            << "Value: " << lower_bound << std::endl
             << "Bound: " << ub_str << std::endl
             << "Gap: " << gap_str << std::endl
             << "Gap (%): " << gap << std::endl

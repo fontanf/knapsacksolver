@@ -10,7 +10,7 @@ func knapsack::get_algorithm(std::string str)
 
     if (algo.name == "") {
         std::cerr << "\033[32m" << "ERROR, missing algorithm." << "\033[0m" << std::endl;
-        return [](Instance& ins, std::mt19937_64&, Info) { return knapsack::Output(ins); };
+        return [](Instance& ins, std::mt19937_64&, Info info) { return Output(ins, info); };
 
     /*
      * Lower bounds
@@ -143,7 +143,7 @@ func knapsack::get_algorithm(std::string str)
      */
     } else if (algo.name == "dantzig") { // Dantzig
         return [](Instance& ins, std::mt19937_64&, Info info) {
-            knapsack::Output output(ins);
+            Output output(ins, info);
             output.upper_bound = ub_dantzig(ins, info);
             return output;
         };
@@ -160,7 +160,7 @@ func knapsack::get_algorithm(std::string str)
     } else {
         std::cerr << "\033[31m" << "ERROR, unknown algorithm: " << algo.name << "\033[0m" << std::endl;
         assert(false);
-        return [](Instance& ins, std::mt19937_64&, Info) { return knapsack::Output(ins); };
+        return [](Instance& ins, std::mt19937_64&, Info info) { return Output(ins, info); };
     }
 }
 

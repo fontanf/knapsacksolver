@@ -8,16 +8,15 @@ using namespace knapsack;
 
 /**************************** opt_dpprofits_array *****************************/
 
-knapsack::Output knapsack::opt_dpprofits_array(const Instance& ins, Info info)
+Output knapsack::opt_dpprofits_array(const Instance& ins, Info info)
 {
     VER(info, "*** dpprofits (array) ***" << std::endl);
-    knapsack::Output output(ins);
-    init_display(output.lower_bound, output.upper_bound, info);
+    Output output(ins, info);
 
     ItemIdx n = ins.item_number();
     if (n == 0) {
-        update_ub(output, 0, std::stringstream("no item"), info);
-        algorithm_end(output, info);
+        output.update_ub(0, std::stringstream("no item"), info);
+        output.algorithm_end(info);
         return output;
     }
 
@@ -25,7 +24,7 @@ knapsack::Output knapsack::opt_dpprofits_array(const Instance& ins, Info info)
     Weight c = ins.total_capacity();
     ItemPos j_max = ins.max_efficiency_item(info);
     Profit ub = ub_0(ins, 0, 0, ins.total_capacity(), j_max);
-    update_ub(output, ub, std::stringstream("initial upper bound"), info);
+    output.update_ub(ub, std::stringstream("initial upper bound"), info);
     std::vector<Weight> values(ub + 1, c + 1);
 
     // Compute optimal value
@@ -33,7 +32,7 @@ knapsack::Output knapsack::opt_dpprofits_array(const Instance& ins, Info info)
     for (ItemPos j=0; j<n; ++j) {
         // Check time
         if (!info.check_time()) {
-            algorithm_end(output, info);
+            output.algorithm_end(info);
             return output;
         }
 
@@ -48,31 +47,30 @@ knapsack::Output knapsack::opt_dpprofits_array(const Instance& ins, Info info)
                 if (w <= c && output.lower_bound < q) {
                     std::stringstream ss;
                     ss << "it " << j;
-                    update_lb(output, q, ss, info);
+                    output.update_lb(q, ss, info);
                 }
             }
         }
     }
 
     // Update upper bound
-    update_ub(output, output.lower_bound, std::stringstream("tree search completed"), info);
+    output.update_ub(output.lower_bound, std::stringstream("tree search completed"), info);
 
-    algorithm_end(output, info);
+    output.algorithm_end(info);
     return output;
 }
 
 /************************** sopt_dpprofits_array_all **************************/
 
-knapsack::Output knapsack::sopt_dpprofits_array_all(const Instance& ins, Info info)
+Output knapsack::sopt_dpprofits_array_all(const Instance& ins, Info info)
 {
     VER(info, "*** dpprofits (array, all) ***" << std::endl);
-    knapsack::Output output(ins);
-    init_display(output.lower_bound, output.upper_bound, info);
+    Output output(ins, info);
 
     ItemIdx n = ins.item_number();
     if (n == 0) {
-        update_ub(output, 0, std::stringstream("no item"), info);
-        algorithm_end(output, info);
+        output.update_ub(0, std::stringstream("no item"), info);
+        output.algorithm_end(info);
         return output;
     }
 
@@ -80,7 +78,7 @@ knapsack::Output knapsack::sopt_dpprofits_array_all(const Instance& ins, Info in
     Weight c = ins.total_capacity();
     ItemPos j_max = ins.max_efficiency_item(info);
     Profit ub = ub_0(ins, 0, 0, ins.total_capacity(), j_max);
-    update_ub(output, ub, std::stringstream("initial upper bound"), info);
+    output.update_ub(ub, std::stringstream("initial upper bound"), info);
     StateIdx values_size = (n + 1) * (ub + 1);
     std::vector<Weight> values(values_size);
 
@@ -105,14 +103,14 @@ knapsack::Output knapsack::sopt_dpprofits_array_all(const Instance& ins, Info in
                 if (v1 <= c && output.lower_bound < q) {
                     std::stringstream ss;
                     ss << "it " << j;
-                    update_lb(output, q, ss, info);
+                    output.update_lb(q, ss, info);
                 }
             }
         }
     }
 
     // Update upper bound
-    update_ub(output, output.lower_bound, std::stringstream("tree search completed"), info);
+    output.update_ub(output.lower_bound, std::stringstream("tree search completed"), info);
 
     // Retrieve optimal solution
     Weight q = output.lower_bound;
@@ -123,9 +121,9 @@ knapsack::Output knapsack::sopt_dpprofits_array_all(const Instance& ins, Info in
             sol.set(j, true);
         }
     }
-    update_sol(output, sol, std::stringstream(), info);
+    output.update_sol(sol, std::stringstream(), info);
 
-    algorithm_end(output, info);
+    output.algorithm_end(info);
     return output;
 }
 

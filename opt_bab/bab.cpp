@@ -11,7 +11,7 @@ struct BabData
     const Instance& ins;
     Solution sol_curr;
     ItemPos j;
-    knapsack::Output& output;
+    Output& output;
     bool sort;
     ItemPos j_max;
     std::vector<Weight> min_weight;
@@ -29,7 +29,7 @@ void bab_rec(BabData& d)
     if (d.output.lower_bound < d.sol_curr.profit()) {
         std::stringstream ss;
         ss << "node " << d.node_number;
-        update_sol(d.output, d.sol_curr, ss, d.info);
+        d.output.update_sol(d.sol_curr, ss, d.info);
     }
 
     for (ItemPos j=d.j; j<=d.ins.last_item(); j++) {
@@ -55,16 +55,15 @@ void bab_rec(BabData& d)
     }
 }
 
-knapsack::Output knapsack::sopt_bab(Instance& ins, bool sort, Info info)
+Output knapsack::sopt_bab(Instance& ins, bool sort, Info info)
 {
     VER(info, "*** bab" << ((sort)? " (sort)": "") << " ***" << std::endl);
-    knapsack::Output output(ins);
-    init_display(output.lower_bound, output.upper_bound, info);
+    Output output(ins, info);
 
     ItemIdx n = ins.item_number();
     if (n == 0) {
-        update_ub(output, 0, std::stringstream("no item"), info);
-        algorithm_end(output, info);
+        output.update_ub(0, std::stringstream("no item"), info);
+        output.algorithm_end(info);
         LOG_FOLD_END(info, "no item");
         return output;
     }
@@ -74,34 +73,34 @@ knapsack::Output knapsack::sopt_bab(Instance& ins, bool sort, Info info)
         ins.sort(info);
         if (ins.break_item() == ins.last_item() + 1) {
             if (output.lower_bound < ins.break_solution()->profit())
-                update_sol(output, *ins.break_solution(), std::stringstream("all items fit"), info);
-            update_ub(output, ins.break_solution()->profit(), std::stringstream(""), info);
-            algorithm_end(output, info);
+                output.update_sol(*ins.break_solution(), std::stringstream("all items fit"), info);
+            output.update_ub(ins.break_solution()->profit(), std::stringstream(""), info);
+            output.algorithm_end(info);
             LOG_FOLD_END(info, "all items fit in the knapsack");
             return output;
         }
         auto g_output = sol_greedynlogn(ins);
         if (output.lower_bound < g_output.lower_bound)
-            update_sol(output, g_output.solution, std::stringstream("greedynlogn"), info);
+            output.update_sol(g_output.solution, std::stringstream("greedynlogn"), info);
 
         ins.reduce2(output.lower_bound, info);
         if (ins.capacity() < 0) {
-            update_ub(output, output.lower_bound, std::stringstream("negative capacity after reduction"), info);
-            algorithm_end(output, info);
+            output.update_ub(output.lower_bound, std::stringstream("negative capacity after reduction"), info);
+            output.algorithm_end(info);
             LOG_FOLD_END(info, "c < 0");
             return output;
         } else if (n == 0 || ins.capacity() == 0) {
             if (output.lower_bound < ins.reduced_solution()->profit())
-                update_sol(output, *ins.reduced_solution(), std::stringstream("no item or null capacity after reduction"), info);
-            update_ub(output, output.lower_bound, std::stringstream(""), info);
-            algorithm_end(output, info);
+                output.update_sol(*ins.reduced_solution(), std::stringstream("no item or null capacity after reduction"), info);
+            output.update_ub(output.lower_bound, std::stringstream(""), info);
+            output.algorithm_end(info);
             LOG_FOLD_END(info, "no item or null capacity after reduction");
             return output;
         } else if (ins.break_item() == ins.last_item() + 1) {
             if (output.lower_bound < ins.break_solution()->profit())
-                update_sol(output, *ins.break_solution(), std::stringstream("all items fit in the knapsack after reduction"), info);
-            update_ub(output, output.lower_bound, std::stringstream(""), info);
-            algorithm_end(output, info);
+                output.update_sol(*ins.break_solution(), std::stringstream("all items fit in the knapsack after reduction"), info);
+            output.update_ub(output.lower_bound, std::stringstream(""), info);
+            output.algorithm_end(info);
             LOG_FOLD_END(info, "all items fit in the knapsack after reduction");
             return output;
         }
@@ -111,7 +110,7 @@ knapsack::Output knapsack::sopt_bab(Instance& ins, bool sort, Info info)
 
     Profit ub = (!sort)? ub_0(ins, 0, 0, ins.total_capacity(), j_max):
         std::max(ub_dantzig(ins), output.lower_bound);
-    update_ub(output, ub, std::stringstream("initial upper bound"), info);
+    output.update_ub(ub, std::stringstream("initial upper bound"), info);
 
     BabData d {
         .ins = ins,
@@ -126,9 +125,9 @@ knapsack::Output knapsack::sopt_bab(Instance& ins, bool sort, Info info)
     };
     bab_rec(d);
     if (info.check_time() && output.upper_bound > output.lower_bound)
-        update_ub(output, output.lower_bound, std::stringstream("tree search completed"), info);
+        output.update_ub(output.lower_bound, std::stringstream("tree search completed"), info);
 
-    algorithm_end(output, info);
+    output.algorithm_end(info);
     LOG_FOLD_END(info, "");
     return output;
 }

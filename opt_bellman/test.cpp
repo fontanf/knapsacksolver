@@ -3,7 +3,7 @@
 
 using namespace knapsack;
 
-knapsack::Output opt_bellman_array_test(Instance& ins)
+Output opt_bellman_array_test(Instance& ins)
 {
     Info info = Info()
         //.set_verbose(true)
@@ -11,7 +11,7 @@ knapsack::Output opt_bellman_array_test(Instance& ins)
     return opt_bellman_array(ins, info);
 }
 
-knapsack::Output opt_bellmanpar_array_test(Instance& ins)
+Output opt_bellmanpar_array_test(Instance& ins)
 {
     Info info = Info()
         //.set_verbose(true)
@@ -19,7 +19,7 @@ knapsack::Output opt_bellmanpar_array_test(Instance& ins)
     return opt_bellmanpar_array(ins, info);
 }
 
-knapsack::Output sopt_bellmanrec_test(Instance& ins)
+Output sopt_bellmanrec_test(Instance& ins)
 {
     Info info = Info()
         //.set_verbose(true)
@@ -27,7 +27,7 @@ knapsack::Output sopt_bellmanrec_test(Instance& ins)
     return sopt_bellmanrec(ins, info);
 }
 
-knapsack::Output sopt_bellman_array_all_test(Instance& ins)
+Output sopt_bellman_array_all_test(Instance& ins)
 {
     Info info = Info()
         //.set_verbose(true)
@@ -35,7 +35,7 @@ knapsack::Output sopt_bellman_array_all_test(Instance& ins)
     return sopt_bellman_array_all(ins, info);
 }
 
-knapsack::Output sopt_bellman_array_one_test(Instance& ins)
+Output sopt_bellman_array_one_test(Instance& ins)
 {
     Info info = Info()
         //.set_verbose(true)
@@ -43,7 +43,7 @@ knapsack::Output sopt_bellman_array_one_test(Instance& ins)
     return sopt_bellman_array_one(ins, info);
 }
 
-knapsack::Output sopt_bellman_array_part1_test(Instance& ins)
+Output sopt_bellman_array_part1_test(Instance& ins)
 {
     Info info = Info()
         //.set_verbose(true)
@@ -51,7 +51,7 @@ knapsack::Output sopt_bellman_array_part1_test(Instance& ins)
     return sopt_bellman_array_part(ins, 1, info);
 }
 
-knapsack::Output sopt_bellman_array_part2_test(Instance& ins)
+Output sopt_bellman_array_part2_test(Instance& ins)
 {
     Info info = Info()
         //.set_verbose(true)
@@ -59,7 +59,7 @@ knapsack::Output sopt_bellman_array_part2_test(Instance& ins)
     return sopt_bellman_array_part(ins, 2, info);
 }
 
-knapsack::Output sopt_bellman_array_part3_test(Instance& ins)
+Output sopt_bellman_array_part3_test(Instance& ins)
 {
     Info info = Info()
         //.set_verbose(true)
@@ -67,7 +67,7 @@ knapsack::Output sopt_bellman_array_part3_test(Instance& ins)
     return sopt_bellman_array_part(ins, 3, info);
 }
 
-knapsack::Output sopt_bellman_array_rec_test(Instance& ins)
+Output sopt_bellman_array_rec_test(Instance& ins)
 {
     Info info = Info()
         //.set_verbose(true)
@@ -75,7 +75,7 @@ knapsack::Output sopt_bellman_array_rec_test(Instance& ins)
     return sopt_bellman_array_rec(ins, info);
 }
 
-knapsack::Output opt_bellman_list_test(Instance& ins)
+Output opt_bellman_list_test(Instance& ins)
 {
     Info info = Info()
         //.set_verbose(true)
@@ -83,7 +83,7 @@ knapsack::Output opt_bellman_list_test(Instance& ins)
     return opt_bellman_list(ins, false, info);
 }
 
-knapsack::Output opt_bellman_list_sort_test(Instance& ins)
+Output opt_bellman_list_sort_test(Instance& ins)
 {
     Info info = Info()
         //.set_verbose(true)
@@ -91,7 +91,7 @@ knapsack::Output opt_bellman_list_sort_test(Instance& ins)
     return opt_bellman_list(ins, true, info);
 }
 
-knapsack::Output sopt_bellman_list_rec_test(Instance& ins)
+Output sopt_bellman_list_rec_test(Instance& ins)
 {
     Info info = Info()
         //.set_verbose(true)
@@ -99,7 +99,7 @@ knapsack::Output sopt_bellman_list_rec_test(Instance& ins)
     return sopt_bellman_list_rec(ins, info);
 }
 
-std::vector<knapsack::Output (*)(Instance&)> f_sopt {
+std::vector<Output (*)(Instance&)> f_sopt {
         opt_bellman_array_test,
         sopt_bellmanrec_test,
         sopt_bellman_array_all_test,
@@ -111,7 +111,7 @@ std::vector<knapsack::Output (*)(Instance&)> f_sopt {
         sopt_bellman_list_rec_test,
 };
 
-std::vector<knapsack::Output (*)(Instance&)> f_opt {
+std::vector<Output (*)(Instance&)> f_opt {
         opt_bellman_array_test,
         opt_bellmanpar_array_test,
         opt_bellman_list_test,

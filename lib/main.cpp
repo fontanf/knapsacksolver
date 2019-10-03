@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
         .set_loglevelmax(loglevelmax)
         ;
 
-    knapsack::Output output = func(ins, gen, info);
+    Output output = func(ins, gen, info);
 
     info.write_ini(outputfile);
     output.solution.write_cert(certfile);

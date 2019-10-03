@@ -61,24 +61,27 @@ private:
 
 std::ostream& operator<<(std::ostream &os, const Solution& solution);
 
+/*********************************** Output ***********************************/
+
 struct Output
 {
-    Output(const Instance& ins): solution(ins) { }
+    Output(const Instance& ins, Info& info);
     Solution solution;
     Profit lower_bound = 0;
     Profit upper_bound = -1;
+
+    std::string ub_str()  const { return (upper_bound == -1)? "inf": std::to_string(upper_bound); };
+    std::string gap_str() const { return (upper_bound == -1)? "inf": std::to_string(upper_bound - lower_bound); };
+    void print(Info& info, const std::stringstream& s) const;
+
+    void update_lb(Profit lb_new, const std::stringstream& s, Info& info);
+    void update_sol(const Solution& sol, const std::stringstream& s, Info& info);
+    void update_ub(Profit ub_new, const std::stringstream& s, Info& info);
+
+    void algorithm_end(Info& info);
 };
 
-/********************************** Display ***********************************/
-
-void init_display(Profit lb, Profit ub, Info& info);
-
-void update_lb(knapsack::Output& output, Profit lb_new, const std::stringstream& s, Info& info);
-void update_sol(knapsack::Output& output, const Solution& sol, const std::stringstream& s, Info& info);
-void update_ub(knapsack::Output& output, Profit ub_new, const std::stringstream& s, Info& info);
-
 void algorithm_end(Profit upper_bound, Info& info);
-void algorithm_end(const knapsack::Output&, Info& info);
 
 }
 

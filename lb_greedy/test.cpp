@@ -4,19 +4,19 @@
 
 using namespace knapsack;
 
-knapsack::Output sopt_minknap_test(Instance& ins)
+Output sopt_minknap_test(Instance& ins)
 {
     return sopt_minknap(ins);
 }
 
-knapsack::Output sol_greedy_test(Instance& ins)
+Output sol_greedy_test(Instance& ins)
 {
     Info info;
     ins.sort_partially(info);
     return sol_greedy(ins, info);
 }
 
-std::vector<knapsack::Output (*)(Instance&)> f = {
+std::vector<Output (*)(Instance&)> f = {
         sopt_minknap_test,
         sol_greedy_test,
 };

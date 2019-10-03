@@ -9,8 +9,8 @@ namespace knapsack
 struct SurrelaxData
 {
     Instance ins;
-    knapsack::Output& output;
-    std::function<knapsack::Output (Instance&, Info, bool*)> func;
+    Output& output;
+    std::function<Output (Instance&, Info, bool*)> func;
     bool* end;
     Info info = Info();
 };

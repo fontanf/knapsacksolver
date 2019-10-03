@@ -59,7 +59,7 @@ struct BalknapOptionalParameters
 
 struct BalknapOutput: Output
 {
-    BalknapOutput(const Instance& ins): Output(ins) { }
+    BalknapOutput(const Instance& ins, Info& info): Output(ins, info) { }
     Cpt recursive_call_number = 0;
 };
 
