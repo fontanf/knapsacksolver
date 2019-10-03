@@ -67,6 +67,11 @@ void sopt_expknap_rec(ExpknapInternalData& d, ItemPos s, ItemPos t)
 
     // Check time
     if (!info.check_time()) {
+        if (d.p.set_end)
+            *(d.p.end) = true;
+        for (std::thread& thread: d.threads)
+            thread.join();
+        d.threads.clear();
         LOG_FOLD_END(info, "time");
         return;
     }

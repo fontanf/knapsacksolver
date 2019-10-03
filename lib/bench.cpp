@@ -118,7 +118,10 @@ void bench_normal(std::string algorithm, double time_limit, std::mt19937_64& gen
                 d.s++;
 
                 // Standard output
-                std::cout << "x " << std::right << std::setw(6) << x << std::flush;
+                std::cout
+                    << "x " << std::right << std::setw(5) << x
+                    << " s " << std::right << std::setw(5) << d.s
+                    << std::flush;
 
                 Instance ins = d.generate();
                 double t = time_limit + 1;

@@ -156,8 +156,8 @@ std::string Solution::to_string_items() const
 Output::Output(const Instance& ins, Info& info): solution(ins)
 {
     VER(info, std::left << std::setw(10) << "T (ms)");
-    VER(info, std::left << std::setw(14) << "LB");
-    VER(info, std::left << std::setw(14) << "UB");
+    VER(info, std::left << std::setw(15) << "LB");
+    VER(info, std::left << std::setw(15) << "UB");
     VER(info, std::left << std::setw(10) << "GAP");
     VER(info, "");
     VER(info, std::endl);
@@ -168,8 +168,8 @@ void Output::print(Info& info, const std::stringstream& s) const
 {
     double t = round(info.elapsed_time() * 10000) / 10;
     VER(info, std::left << std::setw(10) << t);
-    VER(info, std::left << std::setw(14) << lower_bound);
-    VER(info, std::left << std::setw(14) << ub_str());
+    VER(info, std::left << std::setw(15) << lower_bound);
+    VER(info, std::left << std::setw(15) << ub_str());
     VER(info, std::left << std::setw(10) << gap_str());
     VER(info, s.str() << std::endl);
 }

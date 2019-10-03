@@ -151,8 +151,14 @@ void sopt_minknap_main(Instance& ins, MinknapOptionalParameters& p, MinknapOutpu
     LOG_FOLD(p.info, ins);
     while (!d.l0.empty()) {
         sopt_minknap_update_bounds(d); // Update bounds
-        if (!p.info.check_time())
+        if (!p.info.check_time()) {
+            if (p.set_end)
+                *(p.end) = true;
+            for (std::thread& thread: d.threads)
+                thread.join();
+            d.threads.clear();
             return;
+        }
         if (p.stop_if_end && *(p.end)) {
             LOG_FOLD_END(p.info, "end");
             return;
@@ -174,8 +180,14 @@ void sopt_minknap_main(Instance& ins, MinknapOptionalParameters& p, MinknapOutpu
                     << std::endl);
             ++d.t;
             add_item(d);
-            if (!p.info.check_time())
+            if (!p.info.check_time()) {
+                if (p.set_end)
+                    *(p.end) = true;
+                for (std::thread& thread: d.threads)
+                    thread.join();
+                d.threads.clear();
                 return;
+            }
             if (p.stop_if_end && *(p.end)) {
                 LOG_FOLD_END(p.info, "end");
                 return;

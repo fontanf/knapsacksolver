@@ -222,8 +222,14 @@ void sopt_balknap_main(Instance& ins, BalknapOptionalParameters& p, BalknapOutpu
     // Recursion
     for (ItemPos t=b; t<=l; ++t) {
         sopt_balknap_update_bounds(d);
-        if (!p.info.check_time())
+        if (!p.info.check_time()) {
+            if (p.set_end)
+                *(p.end) = true;
+            for (std::thread& thread: d.threads)
+                thread.join();
+            d.threads.clear();
             return;
+        }
         if (p.stop_if_end && *(p.end)) {
             LOG_FOLD_END(p.info, "end");
             return;
@@ -340,8 +346,14 @@ void sopt_balknap_main(Instance& ins, BalknapOptionalParameters& p, BalknapOutpu
             LOG(info, *s << std::endl);
 
             sopt_balknap_update_bounds(d);
-            if (!p.info.check_time())
+            if (!p.info.check_time()) {
+                if (p.set_end)
+                    *(p.end) = true;
+                for (std::thread& thread: d.threads)
+                    thread.join();
+                d.threads.clear();
                 return;
+            }
             if (p.stop_if_end && *(p.end)) {
                 LOG_FOLD_END(p.info, "end");
                 return;
