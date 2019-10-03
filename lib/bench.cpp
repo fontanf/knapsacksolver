@@ -32,6 +32,8 @@ void bench_literature(
         for (Cpt k=0; k<(Cpt)dataset.size(); ++k) {
             Generator& d = dataset[k].second;
             d.n = n;
+            d.s = -1;
+            d.h = -1;
 
             std::cout << d << "..." << std::flush; // Standard output
 
@@ -60,8 +62,6 @@ void bench_literature(
             mean = round(t_total * 100) / 10;
             std::cout << " mean " << mean << std::endl; // Standard output
             file << "," << mean << std::flush; // CSV
-            d.h = -1;
-            d.s = -1;
         }
 
         file << std::endl; // CSV

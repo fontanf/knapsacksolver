@@ -28,7 +28,7 @@ std::ostream& knapsack::operator<<(std::ostream& os, const Generator& data)
         os << " d " << data.d;
     if (data.h != -1) {
         os << " h " << data.h << "/" << data.hmax;
-    } else {
+    } else if (data.x >= 0) {
         os << " x " << data.x;
     }
     if (data.s != -1)

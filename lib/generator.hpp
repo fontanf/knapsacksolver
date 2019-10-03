@@ -79,7 +79,7 @@ public:
     bool spanner = false;
     int h = -1;
     int hmax = 100;
-    double x = 0.0;
+    double x = -1;
     Seed s = 0;
 
     /**

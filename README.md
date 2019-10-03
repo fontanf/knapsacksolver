@@ -1,7 +1,7 @@
 # Knapsack
 
 Classical and state of the art algorithm implementations for the Knapsack Problem. Most algorithms are detailed in the "Knapsack Problem" book (Kellerer et al., 2004).
-These implementations of `minknap` and `minknap_combo` are the best **free** knapsack solvers I am aware of (Pisinger's codes are not free).
+These implementations of `minknap` and `combo` are the best **free** knapsack solvers I am aware of (Pisinger's codes are not free).
 
 Note: the code of `minknap` with all its optimizations is rather complex. I tried to test it to the best of my ability, however, some bugs might remain. If you wish to use it, do not hesitate to compare the returned values with a simpler algorithm like `opt_bellman_array` during development phase. If you find an instance (preferably a small one) for which two exact algorithms do not return the same value, please open an issue or contact me.
 
@@ -132,9 +132,9 @@ Options
 - `s X`: surrogate relaxation and instance will be solved at Xth node / if state number goes over X
 
 Algorithms:
+- Primal-dual Branch-and-bound `-a "expknap g 0 gn -1 s -1 c false"`, `-a expknap_combo` :heavy_check_mark:
 - Balanced Dynamic programming. The list implementation requires a map. Therefore, its asymptotical complexity is slightly greater than the one with an array. However, the possiblity of combining the dynamic programming with bouding makes it more performant. Still, two versions are implemented. Options `u` can be set to `b` (partial sorting, Dembo Upper bound with break item) or `t` (complete sorting, better Upper Bound) `-a "balknap u t k 64 g 0 gn -1 s -1"` :heavy_check_mark:
-- Primal-dual Dynamic programming (only with list) `-a "minknap k 64 g 0 gn -1 p -1 s -1 c 0"`, `-a combo` :heavy_check_mark: 
-- Primal-dual Branch-and-bound `-a "expknap g 0 gn -1 s -1 c 0"`, `-a expknap_combo` :heavy_check_mark:
+- Primal-dual Dynamic programming (only with list) `-a "minknap k 64 g 0 p -1 s -1 c false"`, `-a combo` :heavy_check_mark:
 
 ## Results
 
@@ -196,9 +196,9 @@ Each instance (except one) of the normal dataset happens to be solved exactly by
 | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `expknap`                               | ![easy](bench/expknap_easy.csv),        ![difficult large](bench/expknap_difficult-large.csv),        ![difficult small](bench/expknap_difficult-small.csv)        |
 | `expknap_combo`                         | ![easy](bench/expknap_combo_easy.csv),  ![difficult large](bench/expknap_combo_difficult-large.csv),  ![difficult small](bench/expknap_combo_difficult-small.csv)  |
-| `minknap`                               | ![easy](bench/minknap_easy.csv),        ![difficult large](bench/minknap_difficult-large.csv),        ![difficult small](bench/minknap_difficult-small.csv)        |
-| `combo`                                 | ![easy](bench/minknap_combo_easy.csv),  ![difficult large](bench/minknap_combo_difficult-large.csv),  ![difficult small](bench/minknap_combo_difficult-small.csv)  |
 | `balknap`                               | ![easy](bench/balknap_t_easy.csv),      ![difficult large](bench/balknap_t_difficult-large.csv),      ![difficult small](bench/balknap_t_difficult-small.csv)      |
+| `minknap`                               | ![easy](bench/minknap_easy.csv),        ![difficult large](bench/minknap_difficult-large.csv),        ![difficult small](bench/minknap_difficult-small.csv)        |
+| `combo`                                 | ![easy](bench/combo_easy.csv),          ![difficult large](bench/combo_difficult-large.csv),          ![difficult small](bench/combo_difficult-small.csv)          |
 
 Remarks:
 - Spanner instances are among the worst cases of the `minknap` recursion, since many items of the break solution won't be in an optimal solution. It is interesting to note that the `bellman` recursion performs better ![on those instances](bench/bellman_list_sort_difficult-small.csv). However, the worst case of the `bellman` recursion is worse than the worst case of the `minknap` recursion.
