@@ -69,6 +69,12 @@ struct MinknapOutput: Output
 {
     MinknapOutput(const Instance& ins, Info& info): Output(ins, info) { }
     Cpt recursive_call_number = 0;
+    void algorithm_end(Info& info)
+    {
+        Output::algorithm_end(info);
+        PUT(info, "Algorithm", "RecursiveCallNumber", recursive_call_number);
+        VER(info, "Recursive call number: " << recursive_call_number << std::endl);
+    }
 };
 
 MinknapOutput sopt_minknap(Instance& ins, MinknapOptionalParameters p = {});
