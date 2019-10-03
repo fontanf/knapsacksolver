@@ -19,7 +19,7 @@ BalknapOutput knapsack::sopt_balknap(Instance& ins, BalknapOptionalParameters p)
     if (p.partial_solution_size != 64)
         VER(p.info, " k " << p.partial_solution_size);
     if (!p.greedy)
-        VER(p.info, " g " << p.greedy);
+        VER(p.info, " g false");
     if (p.greedynlogn != -1)
         VER(p.info, " gn " << p.greedynlogn);
     if (p.surrogate != -1)

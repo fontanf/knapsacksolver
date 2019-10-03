@@ -129,7 +129,7 @@ ExpknapOutput knapsack::sopt_expknap(Instance& ins, ExpknapOptionalParameters p)
 {
     VER(p.info, "*** expknap" << std::endl);
     if (!p.greedy)
-        VER(p.info, " g " << p.greedy);
+        VER(p.info, " g false");
     if (p.surrogate != -1)
         VER(p.info, " s " << p.surrogate);
     if (p.greedynlogn != -1)

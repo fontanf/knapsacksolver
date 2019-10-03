@@ -16,7 +16,7 @@ MinknapOutput knapsack::sopt_minknap(Instance& ins, MinknapOptionalParameters p)
     if (p.partial_solution_size != 64)
         VER(p.info, " k " << p.partial_solution_size);
     if (!p.greedy)
-        VER(p.info, " g " << p.greedy);
+        VER(p.info, " g false");
     if (p.pairing != -1)
         VER(p.info, " p " << p.pairing);
     if (p.surrogate != -1)
