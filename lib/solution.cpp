@@ -205,7 +205,7 @@ void Output::update_lb(Profit lb_new, const std::stringstream& s, Info& info)
 
 void Output::update_sol(const Solution& sol, const std::stringstream& s, Info& info)
 {
-    if (!solution.feasible() || solution.profit() >= sol.profit())
+    if (!sol.feasible() || solution.profit() >= sol.profit())
         return;
 
     info.output->mutex_sol.lock();

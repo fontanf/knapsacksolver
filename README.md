@@ -1,7 +1,6 @@
 # Knapsack
 
 Classical and state of the art algorithm implementations for the Knapsack Problem. Most algorithms are detailed in the "Knapsack Problem" book (Kellerer et al., 2004).
-These implementations of `minknap` and `combo` are the best **free** knapsack solvers I am aware of (Pisinger's codes are not free).
 
 Note: the code of `minknap` with all its optimizations is rather complex. I tried to test it to the best of my ability, however, some bugs might remain. If you wish to use it, do not hesitate to compare the returned values with a simpler algorithm like `opt_bellman_array` during development phase. If you find an instance (preferably a small one) for which two exact algorithms do not return the same value, please open an issue or contact me.
 
