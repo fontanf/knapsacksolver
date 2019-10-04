@@ -63,9 +63,6 @@ int main(int argc, char *argv[])
         ;
 
     Output output = func(ins, gen, info);
-
-    info.write_ini(outputfile);
-    output.solution.write_cert(certfile);
     return 0;
 }
 

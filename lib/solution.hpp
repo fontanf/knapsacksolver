@@ -70,8 +70,6 @@ struct Output
     Profit lower_bound = 0;
     Profit upper_bound = -1;
 
-    std::string ub_str()  const { return (upper_bound == -1)? "inf": std::to_string(upper_bound); };
-    std::string gap_str() const { return (upper_bound == -1)? "inf": std::to_string(upper_bound - lower_bound); };
     void print(Info& info, const std::stringstream& s) const;
 
     void update_lb(Profit lb_new, const std::stringstream& s, Info& info);
