@@ -34,7 +34,7 @@ struct MinknapOptionalParameters
 
     MinknapOptionalParameters& pure()
     {
-        greedy = -1;
+        greedy = false;
         pairing = -1;
         surrogate = -1;
         combo_core = false;
@@ -44,7 +44,7 @@ struct MinknapOptionalParameters
 
     MinknapOptionalParameters& combo()
     {
-        greedy = 0;
+        greedy = true;
         pairing = 10000;
         surrogate = 2000;
         combo_core = true;

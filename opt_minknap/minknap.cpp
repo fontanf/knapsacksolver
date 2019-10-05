@@ -22,7 +22,7 @@ MinknapOutput knapsack::sopt_minknap(Instance& ins, MinknapOptionalParameters p)
     if (p.surrogate != -1)
         VER(p.info, " s " << p.surrogate);
     if (p.combo_core)
-        VER(p.info, " cc " << p.combo_core);
+        VER(p.info, " cc true");
     VER(p.info, " ***" << std::endl);
 
     LOG_FOLD_START(p.info, "minknap"
@@ -70,6 +70,7 @@ struct MinknapInternalData
     PartSolFactory2 psolf;
     ItemPos s;
     ItemPos t;
+    Weight w_max;
     std::vector<MinknapState> l0;
     std::vector<MinknapState> l;
     MinknapState best_state;
@@ -147,6 +148,7 @@ void sopt_minknap_main(Instance& ins, MinknapOptionalParameters& p, MinknapOutpu
     d.l0 = {{.w = w_bar, .p = p_bar, .sol = 0}};
     d.s = ins.break_item() - 1;
     d.t = ins.break_item();
+    d.w_max = w_bar;
     d.best_state = d.l0.front();
     LOG_FOLD(p.info, ins);
     while (!d.l0.empty()) {
@@ -285,7 +287,9 @@ void add_item(MinknapInternalData& d)
                 ub_dembo_rev(ins, sx, s1.p, c - s1.w);
             LOG(info, " ub " << ub << " lb " << lb);
 
-            if (ub > lb && (d.l.empty() || s1.p > d.l.back().p)) {
+            if (s1.w <= ins.total_capacity() + d.w_max - ins.reduced_solution()->weight()
+                    && ub > lb
+                    && (d.l.empty() || s1.p > d.l.back().p)) {
                 // Update lower bound
                 if (s1.w <= c && s1.p > lb) {
                     if (d.output.recursive_call_number == 1) {
@@ -368,6 +372,7 @@ void remove_item(MinknapInternalData& d)
     Weight c = ins.total_capacity();
     Weight ws = ins.item(d.s + 1).w;
     Profit ps = ins.item(d.s + 1).p;
+    d.w_max -= ws;
     ItemPos sx = ins.bound_item_left(d.s, lb, info);
     ItemPos tx = ins.bound_item_right(d.t, lb, info);
     Profit ub_max = -1;
