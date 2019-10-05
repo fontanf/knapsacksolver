@@ -273,6 +273,7 @@ void add_item(MinknapInternalData& d)
     ItemPos sx = ins.bound_item_left(d.s, lb, info);
     ItemPos tx = ins.bound_item_right(d.t, lb, info);
     Profit ub_max = -1;
+    Weight w_max = ins.total_capacity() + d.w_max - ins.reduced_solution()->weight();
 
     d.l.clear();
     std::vector<MinknapState>::iterator it = d.l0.begin();
@@ -287,7 +288,7 @@ void add_item(MinknapInternalData& d)
                 ub_dembo_rev(ins, sx, s1.p, c - s1.w);
             LOG(info, " ub " << ub << " lb " << lb);
 
-            if (s1.w <= ins.total_capacity() + d.w_max - ins.reduced_solution()->weight()
+            if (s1.w <= w_max
                     && ub > lb
                     && (d.l.empty() || s1.p > d.l.back().p)) {
                 // Update lower bound
@@ -328,7 +329,9 @@ void add_item(MinknapInternalData& d)
                 ub_dembo_rev(ins, sx, it->p, c - it->w);
             LOG(info, " ub " << ub << " lb " << lb);
 
-            if (ub > lb && (d.l.empty() || it->p > d.l.back().p)) {
+            if (it->w <= w_max
+                    && ub > lb
+                    && (d.l.empty() || it->p > d.l.back().p)) {
                 if (ub_max < ub)
                     ub_max = ub;
                 it->sol = d.psolf.remove(it->sol);
@@ -376,6 +379,7 @@ void remove_item(MinknapInternalData& d)
     ItemPos sx = ins.bound_item_left(d.s, lb, info);
     ItemPos tx = ins.bound_item_right(d.t, lb, info);
     Profit ub_max = -1;
+    Weight w_max = ins.total_capacity() + d.w_max - ins.reduced_solution()->weight();
 
     d.l.clear();
     std::vector<MinknapState>::iterator it = d.l0.begin();
@@ -389,7 +393,9 @@ void remove_item(MinknapInternalData& d)
                 ub_dembo_rev(ins, sx, it->p, c - it->w);
             LOG(info, " ub " << ub << " lb " << lb);
 
-            if (ub > lb && (d.l.empty() || it->p > d.l.back().p)) {
+            if (it->w <= w_max
+                    && ub > lb
+                    && (d.l.empty() || it->p > d.l.back().p)) {
                 if (ub_max < ub)
                     ub_max = ub;
                 it->sol = d.psolf.add(it->sol);
@@ -413,7 +419,9 @@ void remove_item(MinknapInternalData& d)
                 ub_dembo_rev(ins, sx, s1.p, c - s1.w);
             LOG(info, " ub " << ub << " lb " << lb);
 
-            if (ub > lb && (d.l.empty() || s1.p > d.l.back().p)) {
+            if (s1.w <= w_max
+                    && ub > lb
+                    && (d.l.empty() || s1.p > d.l.back().p)) {
                 // Update lower bound
                 if (s1.w <= c && s1.p > lb) {
                     if (d.output.recursive_call_number == 1) {
