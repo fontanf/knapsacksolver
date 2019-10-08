@@ -4,7 +4,8 @@ cc_library(
         srcs = ["surrogate.cpp"],
         deps = [
                 "//lib:cpp",
-                "//ub_dantzig:dantzig"
+                "//ub_dantzig:dantzig",
+                "//opt_minknap:minknap_hpp",
         ],
         visibility = ["//visibility:public"],
         include_prefix = "knapsack/ub_surrogate/",

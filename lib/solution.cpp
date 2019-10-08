@@ -253,7 +253,7 @@ void Output::update_ub(Profit ub_new, const std::stringstream& s, Info& info)
     info.output->mutex_sol.unlock();
 }
 
-void Output::algorithm_end(Info& info)
+Output& Output::algorithm_end(Info& info)
 {
     double t = round(info.elapsed_time() * 10000) / 10;
     std::string ub_str = (upper_bound == -1)? "inf": std::to_string(upper_bound);
@@ -276,9 +276,10 @@ void Output::algorithm_end(Info& info)
 
     info.write_ini();
     solution.write_cert(info.output->certfile);
+    return *this;
 }
 
-void knapsack::algorithm_end(Profit upper_bound, Info& info)
+Profit knapsack::algorithm_end(Profit upper_bound, Info& info)
 {
     double t = round(info.elapsed_time() * 10000) / 10;
     PUT(info, "Bound", "Value", upper_bound);
@@ -288,5 +289,6 @@ void knapsack::algorithm_end(Profit upper_bound, Info& info)
             << "Time (ms): " << t << std::endl);
 
     info.write_ini();
+    return upper_bound;
 }
 

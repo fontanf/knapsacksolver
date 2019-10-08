@@ -1,6 +1,7 @@
 #include "knapsack/ub_surrogate/surrogate.hpp"
 
 #include "knapsack/ub_dantzig/dantzig.hpp"
+#include "knapsack/opt_minknap/minknap.hpp"
 
 #include <stdlib.h>
 
@@ -328,5 +329,59 @@ void knapsack::ub_solvesurrelax(SurrelaxData d)
     }
 
     LOG_FOLD_END(d.info, "");
+}
+
+/******************************************************************************/
+
+Output knapsack::ub_surrelax(const Instance& ins, Info info)
+{
+    VER(info, "*** surrelax ***" << std::endl);
+    Output output(ins, info);
+
+    bool end = false;
+
+    std::function<Output (Instance&, Info, bool*)> func
+        = [](Instance& ins, Info info, bool* end)
+        {
+            (void)end;
+            return Output(ins, info);
+        };
+
+    ub_solvesurrelax(SurrelaxData{
+                .ins      = Instance::reset(ins),
+                .output   = output,
+                .func     = func,
+                .end      = &end,
+                .info     = Info(info)});
+
+    return output.algorithm_end(info);
+}
+
+Output knapsack::ub_surrelax_minknap(const Instance& ins, Info info)
+{
+    VER(info, "*** surrelax_minknap ***" << std::endl);
+    Output output(ins, info);
+
+    bool end = false;
+
+    std::function<Output (Instance&, Info, bool*)> func
+        = [](Instance& ins, Info info, bool* end)
+        {
+            MinknapOptionalParameters p;
+            p.info = info;
+            p.end = end;
+            p.stop_if_end = true;
+            p.set_end = false;
+            return sopt_minknap(ins, p);
+        };
+
+    ub_solvesurrelax(SurrelaxData{
+                .ins      = Instance::reset(ins),
+                .output   = output,
+                .func     = func,
+                .end      = &end,
+                .info     = Info(info)});
+
+    return output.algorithm_end(info);
 }
 

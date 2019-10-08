@@ -76,10 +76,10 @@ struct Output
     void update_sol(const Solution& sol, const std::stringstream& s, Info& info);
     void update_ub(Profit ub_new, const std::stringstream& s, Info& info);
 
-    void algorithm_end(Info& info);
+    Output& algorithm_end(Info& info);
 };
 
-void algorithm_end(Profit upper_bound, Info& info);
+Profit algorithm_end(Profit upper_bound, Info& info);
 
 }
 

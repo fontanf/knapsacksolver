@@ -17,5 +17,8 @@ struct SurrelaxData
 
 void ub_solvesurrelax(SurrelaxData d);
 
+Output ub_surrelax(const Instance& ins, Info info = Info());
+Output ub_surrelax_minknap(const Instance& ins, Info info = Info());
+
 }
 

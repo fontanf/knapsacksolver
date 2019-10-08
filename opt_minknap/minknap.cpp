@@ -1,5 +1,6 @@
 #include "knapsack/opt_minknap/minknap.hpp"
 
+#include "knapsack/lib/part_solution_2.hpp"
 #include "knapsack/lb_greedy/greedy.hpp"
 #include "knapsack/lb_greedynlogn/greedynlogn.hpp"
 #include "knapsack/ub_dembo/dembo.hpp"

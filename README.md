@@ -97,7 +97,10 @@ https://github.com/fontanf/gap/blob/master/lb_lagrelax_lbfgs/lagrelax_lbfgs.cpp
 ### Upper bounds
 
 - Dantzig Upper bound `-a dantzig` :heavy_check_mark:
-- Surrogate relaxation Upper bound `-a surrelax` :heavy_check_mark:
+- Surrogate relaxation Upper bound
+  - only solve relaxation: `-a surrelax` :heavy_check_mark:
+  - solve relaxation and surrogate instance with `minknap`: `-a surrelax_minknap` :heavy_check_mark:
+
 
 ### Exact algorithms
 

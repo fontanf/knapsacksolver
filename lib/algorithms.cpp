@@ -147,14 +147,14 @@ func knapsack::get_algorithm(std::string str)
             output.upper_bound = ub_dantzig(ins, info);
             return output;
         };
-    /*
     } else if (algo.name == "surrelax") { // Surrogate relaxation
-        return [](Instance& ins, Solution&, Profit& ub, std::mt19937_64&, Info info) {
-            ins.sort_partially(info);
-            Solution sol = sol_greedy(ins, Info(info, false, "greedy"));
-            ub = ub_solvesurrelax(ins, sol.profit(), info).ub;
+        return [](Instance& ins, std::mt19937_64&, Info info) {
+            return ub_surrelax(ins, info);
         };
-    */
+    } else if (algo.name == "surrelax_minknap") { // Surrogate relaxation
+        return [](Instance& ins, std::mt19937_64&, Info info) {
+            return ub_surrelax_minknap(ins, info);
+        };
 
 
     } else {
