@@ -91,8 +91,11 @@ https://github.com/fontanf/gap/blob/master/lb_lagrelax_lbfgs/lagrelax_lbfgs.cpp
 
 ### Lower bounds
 
-- O(n) Greedy `-a greedy` run Forward and Backward Greedy algorithms and return the best solution :heavy_check_mark:
-- O(n log n) Greedy `-a greedynlogn`  run a Complete Greedy (continue filling the knapsack after the break item) and a Forward and Backward Greedy algorithm similar to the one described in "A fast algorithm for strongly correlated knapsack problems" (Pisinger, 1998), and return the best solution found :heavy_check_mark:
+- O(n) Greedy, run Forward and Backward Greedy algorithms and return the best solution `-a greedy` eavy_check_mark:
+- O(n log n) Greedy algorithms similar to the one described in "A fast algorithm for strongly correlated knapsack problems" (Pisinger, 1998)
+  - Forward O(n log n) Greedy `-a greedynlogn_for`
+  - Backward O(n log n) Greedy `-a greedynlogn_back`
+  - Best between O(n) Greedy and Forward and Backward O(n log n) Greedy algorithms `-a greedynlogn`
 
 ### Upper bounds
 
