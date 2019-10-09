@@ -40,7 +40,7 @@ void bench_literature(
             double t_max = 300;
             double t_total = 0.0;
             double mean = -1;
-            for (d.h=1; d.h<=d.hmax; ++d.h) {
+            for (d.h=1; d.h<=d.hmax && t_total < t_max; ++d.h) {
                 s++;
                 d.s = s;
                 Instance ins = d.generate();
@@ -52,16 +52,19 @@ void bench_literature(
                     f(ins, gen, info);
                     double t = info.elapsed_time();
                     t_total += t;
-                    if (t_total > t_max) {
-                        mean = -1;
-                    }
                 } catch (...) {
+                    t_total = t_max + 1;
                 }
             }
 
-            mean = round(t_total * 100) / 10;
-            std::cout << " mean " << mean << std::endl; // Standard output
-            file << "," << mean << std::flush; // CSV
+            if (t_total <= t_max) {
+                mean = round(t_total * 100) / 10;
+                std::cout << " mean " << mean << std::endl; // Standard output
+                file << "," << mean << std::flush; // CSV
+            } else {
+                std::cout << " x" << std::endl; // Standard output
+                file << ",x" << std::flush; // CSV
+            }
         }
 
         file << std::endl; // CSV
