@@ -150,9 +150,9 @@ ExpknapOutput knapsack::sopt_expknap(Instance& ins, ExpknapOptionalParameters p)
             << " combo_core " << p.combo_core
             << std::endl);
 
-    std::unique_ptr<bool> end_uptr(new bool(false));
+    bool end = false;
     if (p.end == NULL)
-        p.end = end_uptr.get();
+        p.end = &end;
 
     ExpknapOutput output(ins, p.info);
 

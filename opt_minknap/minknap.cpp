@@ -34,9 +34,9 @@ MinknapOutput knapsack::sopt_minknap(Instance& ins, MinknapOptionalParameters p)
             << " combo_core " << p.combo_core
             << std::endl);
 
-    std::unique_ptr<bool> end_uptr(new bool(false));
+    bool end = false;
     if (p.end == NULL)
-        p.end = end_uptr.get();
+        p.end = &end;
 
     MinknapOutput output(ins, p.info);
     sopt_minknap_main(ins, p, output);

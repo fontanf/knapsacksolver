@@ -33,9 +33,9 @@ BalknapOutput knapsack::sopt_balknap(Instance& ins, BalknapOptionalParameters p)
             << " s " << p.surrogate
             << std::endl);
 
-    std::unique_ptr<bool> end_uptr(new bool(false));
+    bool end = false;
     if (p.end == NULL)
-        p.end = end_uptr.get();
+        p.end = &end;
 
     BalknapOutput output(ins, p.info);
     sopt_balknap_main(ins, p, output);

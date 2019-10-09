@@ -46,7 +46,7 @@ Instance::Instance(Weight c, const std::vector<std::pair<Weight, Profit>>& wp):
 
 void Instance::set_optimal_solution(Solution& sol)
 {
-    sol_opt_ = std::unique_ptr<Solution>(new Solution(sol));
+    sol_opt_ = std::make_unique<Solution>(sol);
 }
 
 Instance::Instance(std::string filepath, std::string format)
@@ -109,15 +109,15 @@ Instance::Instance(const Instance& ins)
     sort_type_ = ins.sort_type_;
 
     if (ins.optimal_solution() != NULL) {
-        sol_opt_ = std::unique_ptr<Solution>(new Solution(*this));
+        sol_opt_ = std::make_unique<Solution>(*this);
         *sol_opt_ = *ins.optimal_solution();
     }
     if (ins.break_solution() != NULL) {
-        sol_break_ = std::unique_ptr<Solution>(new Solution(*this));
+        sol_break_ = std::make_unique<Solution>(*this);
         *sol_break_ = *ins.break_solution();
     }
     if (ins.reduced_solution() != NULL) {
-        sol_red_ = std::unique_ptr<Solution>(new Solution(*this));
+        sol_red_ = std::make_unique<Solution>(*this);
         *sol_red_ = *ins.reduced_solution();
     }
 
@@ -299,7 +299,7 @@ void Instance::compute_break_item(Info& info)
     LOG(info, "reduced solution " << reduced_solution()->to_string_items() << std::endl);
 
     if (sol_break_ == NULL) {
-        sol_break_ = std::unique_ptr<Solution>(new Solution(*reduced_solution()));
+        sol_break_ = std::make_unique<Solution>(*reduced_solution());
     } else {
         *sol_break_ = *reduced_solution();
     }
@@ -343,7 +343,7 @@ void Instance::sort(Info& info)
         return;
     }
     if (reduced_solution() == NULL)
-        sol_red_ = std::unique_ptr<Solution>(new Solution(*this));
+        sol_red_ = std::make_unique<Solution>(*this);
     sort_type_ = 2;
     if (item_number() > 1)
         std::sort(items_.begin()+first_item(), items_.begin()+last_item()+1,
@@ -443,7 +443,7 @@ void Instance::sort_partially(Info& info, ItemIdx limit)
     }
 
     if (reduced_solution() == NULL)
-        sol_red_ = std::unique_ptr<Solution>(new Solution(*this));
+        sol_red_ = std::make_unique<Solution>(*this);
 
     srand(0);
     int_right_.clear();
