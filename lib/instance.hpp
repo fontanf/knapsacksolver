@@ -73,7 +73,7 @@ public:
     Instance(const Instance& ins);
     /** Copy assignment operator. */
     Instance& operator=(const Instance& ins);
-    /** Destructor */
+    /** Destructor. */
     ~Instance();
 
     /** Copy constructor without algorithmic informations. */
