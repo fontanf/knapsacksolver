@@ -71,11 +71,13 @@ public:
 
     /** Copy constructor. */
     Instance(const Instance& ins);
+    /** Copy assignment operator. */
+    Instance& operator=(const Instance& ins);
+    /** Destructor */
+    ~Instance();
 
     /** Copy constructor without algorithmic informations. */
     static Instance reset(const Instance& ins);
-
-    ~Instance();
 
     /**
      * Getters

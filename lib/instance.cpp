@@ -102,11 +102,49 @@ void Instance::read_subsetsum_standard(std::ifstream& file)
     }
 }
 
-Instance::Instance(const Instance& ins)
+Instance::Instance(const Instance& ins):
+    items_(ins.items_),
+    c_orig_(ins.c_orig_),
+    b_(ins.b_),
+    f_(ins.f_),
+    l_(ins.l_),
+    s_init_(ins.s_init_),
+    t_init_(ins.t_init_),
+    s_prime_(ins.s_prime_),
+    t_prime_(ins.t_prime_),
+    sort_type_(ins.sort_type_),
+    int_right_(ins.int_right_),
+    int_left_(ins.int_left_)
+{
+    if (ins.optimal_solution() != NULL) {
+        sol_opt_ = std::make_unique<Solution>(*this);
+        *sol_opt_ = *ins.optimal_solution();
+    }
+    if (ins.break_solution() != NULL) {
+        sol_break_ = std::make_unique<Solution>(*this);
+        *sol_break_ = *ins.break_solution();
+    }
+    if (ins.reduced_solution() != NULL) {
+        sol_red_ = std::make_unique<Solution>(*this);
+        *sol_red_ = *ins.reduced_solution();
+    }
+}
+
+Instance& Instance::operator=(const Instance& ins)
 {
     items_ = ins.items_;
     c_orig_ = ins.c_orig_;
+
+    b_ = ins.b_;
+    f_ = ins.f_;
+    l_ = ins.l_;
+    s_init_ = ins.s_init_;
+    t_init_ = ins.t_init_;
+    s_prime_ = ins.s_prime_;
+    t_prime_ = ins.t_prime_;
     sort_type_ = ins.sort_type_;
+    int_right_ = ins.int_right_;
+    int_left_ = ins.int_left_;
 
     if (ins.optimal_solution() != NULL) {
         sol_opt_ = std::make_unique<Solution>(*this);
@@ -120,18 +158,10 @@ Instance::Instance(const Instance& ins)
         sol_red_ = std::make_unique<Solution>(*this);
         *sol_red_ = *ins.reduced_solution();
     }
-
-    b_ = ins.b_;
-    f_ = ins.f_;
-    l_ = ins.l_;
-    s_init_ = ins.s_init_;
-    t_init_ = ins.t_init_;
-    s_prime_ = ins.s_prime_;
-    t_prime_ = ins.t_prime_;
-    sort_type_ = ins.sort_type_;
-    int_right_ = ins.int_right_;
-    int_left_ = ins.int_left_;
+    return *this;
 }
+
+Instance::~Instance() { }
 
 Instance Instance::reset(const Instance& instance)
 {
@@ -150,8 +180,6 @@ bool Instance::check()
             return false;
     return true;
 }
-
-Instance::~Instance() { }
 
 /******************************************************************************/
 
