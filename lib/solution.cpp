@@ -6,12 +6,12 @@ using namespace knapsack;
 
 Solution::Solution(const Instance& ins):
     instance_(ins),
-    x_(ins.total_item_number(), 0)
+    x_(ins.item_number(), 0)
 { }
 
 Solution::Solution(const Instance& ins, std::string filepath):
     instance_(ins),
-    x_(ins.total_item_number(), 0)
+    x_(ins.item_number(), 0)
 {
     if (filepath.empty())
         return;
@@ -22,7 +22,7 @@ Solution::Solution(const Instance& ins, std::string filepath):
     }
 
     int x = 0;
-    for (ItemPos j=0; j<ins.total_item_number(); ++j) {
+    for (ItemPos j=0; j<ins.item_number(); ++j) {
         file >> x;
         set(j, x);
     }
@@ -51,7 +51,7 @@ Solution& Solution::operator=(const Solution& sol)
             x_ = sol.x_;
             p_ = sol.p_;
             w_ = 0;
-            for (ItemPos j=0; j<instance().total_item_number(); ++j)
+            for (ItemPos j=0; j<instance().item_number(); ++j)
                 if (contains(j))
                     w_ += instance().item(j).w;
         }
@@ -61,14 +61,14 @@ Solution& Solution::operator=(const Solution& sol)
 
 int Solution::contains(ItemPos j) const
 {
-    assert(j >= 0 && j < instance().total_item_number());
-    assert(instance().item(j).j >= 0 && instance().item(j).j < instance().total_item_number());
+    assert(j >= 0 && j < instance().item_number());
+    assert(instance().item(j).j >= 0 && instance().item(j).j < instance().item_number());
     return x_[instance().item(j).j];
 }
 
 int Solution::contains_idx(ItemIdx j) const
 {
-    assert(j >= 0 && j < instance().total_item_number());
+    assert(j >= 0 && j < instance().item_number());
     return x_[j];
 }
 
@@ -76,8 +76,8 @@ void Solution::set(ItemPos j, int b)
 {
     assert(b == 0 || b == 1);
     assert(j >= 0);
-    assert(j < instance().total_item_number());
-    assert(instance().item(j).j >= 0 && instance().item(j).j < instance().total_item_number());
+    assert(j < instance().item_number());
+    assert(instance().item(j).j >= 0 && instance().item(j).j < instance().item_number());
     if (contains(j) == b)
         return;
     if (b) {
@@ -117,7 +117,7 @@ void Solution::write_cert(std::string filepath)
 
 std::ostream& knapsack::operator<<(std::ostream& os, const Solution& sol)
 {
-    for (ItemPos j=0; j<sol.instance().total_item_number(); ++j)
+    for (ItemPos j=0; j<sol.instance().item_number(); ++j)
         os << sol.data()[j] << std::endl;
     return os;
 }
@@ -125,7 +125,7 @@ std::ostream& knapsack::operator<<(std::ostream& os, const Solution& sol)
 std::string Solution::to_string_binary() const
 {
     std::string s = "";
-    for (ItemPos j=0; j<instance().total_item_number(); ++j)
+    for (ItemPos j=0; j<instance().item_number(); ++j)
         s += std::to_string(x_[j]);
     return s;
 }
@@ -133,7 +133,7 @@ std::string Solution::to_string_binary() const
 std::string Solution::to_string_binary_ordered() const
 {
     std::string s = "";
-    for (ItemPos j=0; j<instance().total_item_number(); ++j)
+    for (ItemPos j=0; j<instance().item_number(); ++j)
         s += std::to_string(x_[instance().item(j).j]);
     return s;
 }
@@ -141,7 +141,7 @@ std::string Solution::to_string_binary_ordered() const
 std::string Solution::to_string_items() const
 {
     std::string s = "";
-    for (ItemPos j=0; j<instance().total_item_number(); ++j) {
+    for (ItemPos j=0; j<instance().item_number(); ++j) {
         if (x_[j]) {
             if (!s.empty())
                 s += ",";

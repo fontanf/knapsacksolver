@@ -81,9 +81,9 @@ public:
      * Getters
      */
 
-    inline ItemIdx total_item_number() const { return items_.size(); }
-    inline Weight  total_capacity()    const { return c_orig_; }
-    inline const Item& item(ItemIdx j) const { assert(j >= 0 && j < total_item_number()); return items_[j]; }
+    inline ItemIdx item_number() const { return items_.size(); }
+    inline Weight  capacity()    const { return c_orig_; }
+    inline const Item& item(ItemIdx j) const { assert(j >= 0 && j < item_number()); return items_[j]; }
 
     const Solution* optimal_solution() const { return sol_opt_.get(); }
     Profit optimum() const;
@@ -128,7 +128,7 @@ public:
     ItemPos s_prime() const { return s_prime_; }
     ItemPos t_prime() const { return t_prime_; }
     ItemPos s_second() const { return (int_left().empty())? 0: int_left().back().l + 1; }
-    ItemPos t_second() const { return (int_right().empty())? total_item_number() - 1: int_right().back().f - 1; }
+    ItemPos t_second() const { return (int_right().empty())? item_number() - 1: int_right().back().f - 1; }
     ItemPos bound_item_left(ItemPos s, Profit lb, Info& info);
     ItemPos bound_item_right(ItemPos t, Profit lb, Info& info);
     /**
@@ -164,10 +164,10 @@ public:
     void reduce2(Profit lb, Info& info);
     const Solution* reduced_solution() const { return sol_red_.get(); }
 
-    inline ItemIdx item_number() const { return l_-f_+1; }
+    inline ItemIdx reduced_item_number() const { return l_-f_+1; }
     inline ItemPos first_item()  const { return f_; }
     inline ItemPos last_item()   const { return l_; }
-    Weight capacity() const;
+    Weight reduced_capacity() const;
 
     /** Reduce item f..j-1, and add them to the reduced solution */
     void set_first_item(ItemPos k, Info& info);

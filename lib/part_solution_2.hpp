@@ -81,7 +81,7 @@ public:
 
     std::vector<int> vector(PartSol2& s) const
     {
-        std::vector<int> vec(instance_.total_item_number(), 0);
+        std::vector<int> vec(instance_.item_number(), 0);
         for (ItemPos j=0; j<size(); ++j) {
             ItemPos idx = indices()[j];
             if (idx == -1)

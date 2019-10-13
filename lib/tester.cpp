@@ -213,7 +213,7 @@ void test(Instances& inss, std::vector<Output (*)(Instance&)> fs, TestType tt)
             std::cout << "error" << std::endl;
             return;
         }
-        if (ins.item_number() == 0)
+        if (ins.reduced_item_number() == 0)
             break;
     }
 }

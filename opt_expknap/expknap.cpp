@@ -156,7 +156,7 @@ ExpknapOutput knapsack::sopt_expknap(Instance& ins, ExpknapOptionalParameters p)
 
     ExpknapOutput output(ins, p.info);
 
-    if (ins.item_number() == 0) {
+    if (ins.reduced_item_number() == 0) {
         output.update_ub(output.lower_bound, std::stringstream("no item (ub)"), p.info);
         output.algorithm_end(p.info);
         LOG(p.info, "no item" << std::endl);

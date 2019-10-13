@@ -60,7 +60,7 @@ Output knapsack::sopt_bab(Instance& ins, bool sort, Info info)
     VER(info, "*** bab" << ((sort)? " (sort)": "") << " ***" << std::endl);
     Output output(ins, info);
 
-    ItemIdx n = ins.item_number();
+    ItemIdx n = ins.reduced_item_number();
     if (n == 0) {
         output.update_ub(0, std::stringstream("no item"), info);
         output.algorithm_end(info);
@@ -84,12 +84,12 @@ Output knapsack::sopt_bab(Instance& ins, bool sort, Info info)
             output.update_sol(g_output.solution, std::stringstream("greedynlogn"), info);
 
         ins.reduce2(output.lower_bound, info);
-        if (ins.capacity() < 0) {
+        if (ins.reduced_capacity() < 0) {
             output.update_ub(output.lower_bound, std::stringstream("negative capacity after reduction"), info);
             output.algorithm_end(info);
             LOG_FOLD_END(info, "c < 0");
             return output;
-        } else if (n == 0 || ins.capacity() == 0) {
+        } else if (n == 0 || ins.reduced_capacity() == 0) {
             if (output.lower_bound < ins.reduced_solution()->profit())
                 output.update_sol(*ins.reduced_solution(), std::stringstream("no item or null capacity after reduction"), info);
             output.update_ub(output.lower_bound, std::stringstream(""), info);
@@ -108,7 +108,7 @@ Output knapsack::sopt_bab(Instance& ins, bool sort, Info info)
         j_max = ins.max_efficiency_item(info);
     }
 
-    Profit ub = (!sort)? ub_0(ins, 0, 0, ins.total_capacity(), j_max):
+    Profit ub = (!sort)? ub_0(ins, 0, 0, ins.capacity(), j_max):
         std::max(ub_dantzig(ins), output.lower_bound);
     output.update_ub(ub, std::stringstream("initial upper bound"), info);
 

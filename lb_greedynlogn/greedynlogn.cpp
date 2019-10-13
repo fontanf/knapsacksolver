@@ -22,7 +22,7 @@ std::vector<Item> remove_dominated_items(std::vector<Item>& v)
 Output knapsack::sol_forwardgreedynlogn(const Instance& ins, Info info)
 {
     LOG_FOLD_START(info, "forwardgreedynlogn b " << ins.break_item()
-            << " n " << ins.total_item_number() << std::endl;);
+            << " n " << ins.item_number() << std::endl;);
     VER(info, "*** forwardgreedynlogn ***" << std::endl);
     Output output(ins, info);
 
@@ -30,7 +30,7 @@ Output knapsack::sol_forwardgreedynlogn(const Instance& ins, Info info)
 
     // If all items fit in the knapsack or if the break solution doesn't
     // contain any item, return sol.
-    if (ins.break_item() >= ins.total_item_number() - 1
+    if (ins.break_item() >= ins.item_number() - 1
             || ins.break_item() == 0) {
         output.algorithm_end(info);
         LOG_FOLD_END(info, "");
@@ -40,7 +40,7 @@ Output knapsack::sol_forwardgreedynlogn(const Instance& ins, Info info)
     // Sort taken and left items by weight.
     std::vector<Item> taken;
     std::vector<Item> left;
-    for (ItemPos j=0; j<ins.total_item_number(); ++j) {
+    for (ItemPos j=0; j<ins.item_number(); ++j) {
         Item item = ins.item(j);
         item.j = j;
         if (sol.contains(j)) {
@@ -92,7 +92,7 @@ Output knapsack::sol_forwardgreedynlogn(const Instance& ins, Info info)
 Output knapsack::sol_backwardgreedynlogn(const Instance& ins, Info info)
 {
     LOG_FOLD_START(info, "backwardgreedynlogn b " << ins.break_item()
-            << " n " << ins.total_item_number() << std::endl;);
+            << " n " << ins.item_number() << std::endl;);
     VER(info, "*** backwardgreedynlogn ***" << std::endl);
     Output output(ins, info);
 
@@ -100,7 +100,7 @@ Output knapsack::sol_backwardgreedynlogn(const Instance& ins, Info info)
 
     // If all items fit in the knapsack or if the break solution doesn't
     // contain any item, return sol.
-    if (ins.break_item() >= ins.total_item_number() - 1
+    if (ins.break_item() >= ins.item_number() - 1
             || ins.break_item() == 0) {
         LOG_FOLD_END(info, "");
         output.algorithm_end(info);
@@ -113,7 +113,7 @@ Output knapsack::sol_backwardgreedynlogn(const Instance& ins, Info info)
     // Sort taken and left items by weight.
     std::vector<Item> taken;
     std::vector<Item> left;
-    for (ItemPos j=0; j<ins.total_item_number(); ++j) {
+    for (ItemPos j=0; j<ins.item_number(); ++j) {
         Item item = ins.item(j);
         item.j = j;
         if (sol.contains(j)) {

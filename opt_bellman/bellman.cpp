@@ -17,9 +17,9 @@ Output knapsack::opt_bellman_array(const Instance& ins, Info info)
 {
     VER(info, "*** bellman (array) ***" << std::endl);
     Output output(ins, info);
-    Weight c = ins.total_capacity();
+    Weight c = ins.capacity();
     std::vector<Profit> values(c + 1, 0);
-    for (ItemPos j=0; j<ins.total_item_number(); ++j) {
+    for (ItemPos j=0; j<ins.item_number(); ++j) {
         // Check time
         if (!info.check_time()) {
             output.algorithm_end(info);
@@ -58,7 +58,7 @@ void opts_bellmanpar_array(const Instance& ins, ItemPos n1, ItemPos n2,
             return;
         Weight wj = ins.item(j).w;
         Profit pj = ins.item(j).p;
-        for (Weight w=ins.total_capacity(); w>=wj; w--)
+        for (Weight w=ins.capacity(); w>=wj; w--)
             if (*(values + w) < *(values + w - wj) + pj)
                 *(values + w) = *(values + w - wj) + pj;
     }
@@ -68,7 +68,7 @@ Output knapsack::opt_bellmanpar_array(const Instance& ins, Info info)
 {
     VER(info, "*** bellmanpar (array) ***" << std::endl);
     Output output(ins, info);
-    ItemIdx n = ins.total_item_number();
+    ItemIdx n = ins.item_number();
 
     // Trivial cases
     if (n == 0) {
@@ -83,7 +83,7 @@ Output knapsack::opt_bellmanpar_array(const Instance& ins, Info info)
     }
 
     // Partition items and solve both knapsacks
-    Weight c = ins.total_capacity();
+    Weight c = ins.capacity();
     ItemIdx k = (n - 1) / 2 + 1;
     std::vector<Profit> values1(c + 1, 0);
     std::thread thread(opts_bellmanpar_array, std::ref(ins), 0, k, values1.begin(), info);
@@ -117,7 +117,7 @@ Profit sopt_bellmanrec_rec(const Instance& ins,
 {
     if (!info.check_time())
         return -1;
-    Weight c = ins.total_capacity();
+    Weight c = ins.capacity();
     if (values[INDEX(j, w)] == -1) {
         if (j == -1) {
             values[INDEX(j, w)] = 0;
@@ -139,8 +139,8 @@ Output knapsack::sopt_bellmanrec(const Instance& ins, Info info)
     Output output(ins, info);
 
     // Initialize memory table
-    ItemPos n = ins.total_item_number();
-    Weight  c = ins.total_capacity();
+    ItemPos n = ins.item_number();
+    Weight  c = ins.capacity();
     StateIdx values_size = (n + 1) * (c + 1);
     std::vector<Profit> values(values_size, -1);
 
@@ -176,14 +176,14 @@ Output knapsack::sopt_bellman_array_all(const Instance& ins, Info info)
     Output output(ins, info);
 
     // Initialize memory table
-    ItemPos n = ins.total_item_number();
-    Weight  c = ins.total_capacity();
+    ItemPos n = ins.item_number();
+    Weight  c = ins.capacity();
     StateIdx values_size = (n + 1) * (c + 1);
     std::vector<Profit> values(values_size);
 
     // Compute optimal value
     std::fill(values.begin(), values.begin() + c + 1, 0);
-    for (ItemPos j=0; j<ins.total_item_number(); ++j) {
+    for (ItemPos j=0; j<ins.item_number(); ++j) {
         // Check time
         if (!info.check_time()) {
             output.algorithm_end(info);
@@ -234,8 +234,8 @@ Output knapsack::sopt_bellman_array_one(const Instance& ins, Info info)
     VER(info, "*** bellman (array, one) ***" << std::endl);
     Output output(ins, info);
 
-    ItemPos n = ins.total_item_number();
-    Weight  c = ins.total_capacity();
+    ItemPos n = ins.item_number();
+    Weight  c = ins.capacity();
 
     if (n == 0) {
         output.update_ub(0, std::stringstream("no item"), info);
@@ -300,7 +300,7 @@ Output knapsack::sopt_bellman_array_one(const Instance& ins, Info info)
 end:
 
         // If first iteration, memorize optimal value
-        if (n == ins.total_item_number()) {
+        if (n == ins.item_number()) {
             // Update upper bound
             output.update_ub(values[c], std::stringstream("tree search completed"), info);
             opt = values[c];
@@ -332,8 +332,8 @@ Output knapsack::sopt_bellman_array_part(const Instance& ins, ItemPos k, Info in
     Output output(ins, info);
 
     assert(0 <= k && k <= 64);
-    ItemPos n = ins.total_item_number();
-    Weight  c = ins.total_capacity();
+    ItemPos n = ins.item_number();
+    Weight  c = ins.capacity();
     Solution sol(ins);
 
     if (n == 0) {
@@ -389,7 +389,7 @@ Output knapsack::sopt_bellman_array_part(const Instance& ins, ItemPos k, Info in
 end:
 
         // If first iteration, memorize optimal value
-        if (n == ins.total_item_number()) {
+        if (n == ins.item_number()) {
             // Update upper bound
             output.update_ub(values[c], std::stringstream("tree search completed"), info);
             opt = values[w_opt];
@@ -402,7 +402,7 @@ end:
         // Update solution and instance
         psolf.update_solution(bisols[w_opt], sol);
         n -= psolf.size();
-        c = ins.total_capacity() - sol.weight();
+        c = ins.capacity() - sol.weight();
         opt_local = opt - sol.profit();
         LOG(info, " p(S) " << sol.profit() << std::endl);
     }
@@ -498,11 +498,11 @@ Output knapsack::sopt_bellman_array_rec(const Instance& ins, Info info)
     VER(info, "*** bellman (array, rec) ***" << std::endl);
     Output output(ins, info);
 
-    if (ins.total_item_number() == 0) {
+    if (ins.item_number() == 0) {
         output.update_ub(0, std::stringstream("no item"), info);
         output.algorithm_end(info);
         return output;
-    } else if (ins.total_item_number() == 1) {
+    } else if (ins.item_number() == 1) {
         Solution sol(ins);
         sol.set(0, true);
         output.update_sol(sol, std::stringstream("one item (lb)"), info);
@@ -511,13 +511,13 @@ Output knapsack::sopt_bellman_array_rec(const Instance& ins, Info info)
         return output;
     }
 
-    std::vector<Profit> values(2 * ins.total_capacity() + ins.total_item_number());
+    std::vector<Profit> values(2 * ins.capacity() + ins.item_number());
     Solution sol(ins);
     sopt_bellman_array_rec_rec({
         .ins = ins,
         .n1 = 0,
-        .n2 = ins.total_item_number(),
-        .c = ins.total_capacity(),
+        .n2 = ins.item_number(),
+        .c = ins.capacity(),
         .sol = sol,
         .values = values.begin(),
         .info = info
@@ -558,8 +558,8 @@ Output knapsack::opt_bellman_list(Instance& ins, bool sort, Info info)
     LOG_FOLD_START(info, "bellman sort " << sort << std::endl);
     Output output(ins, info);
 
-    Weight  c = ins.total_capacity();
-    ItemPos n = ins.total_item_number();
+    Weight  c = ins.capacity();
+    ItemPos n = ins.item_number();
     ItemPos j_max = ins.max_efficiency_item(info);
 
     if (n == 0 || c == 0) {
@@ -569,7 +569,7 @@ Output knapsack::opt_bellman_list(Instance& ins, bool sort, Info info)
         return output;
     }
 
-    if (!sort && INT_FAST64_MAX / ins.item(j_max).p < ins.total_capacity()) {
+    if (!sort && INT_FAST64_MAX / ins.item(j_max).p < ins.capacity()) {
         output.algorithm_end(info);
         LOG_FOLD_END(info, "");
         return output;
@@ -588,12 +588,12 @@ Output knapsack::opt_bellman_list(Instance& ins, bool sort, Info info)
         output.update_sol(g_output.solution, std::stringstream("greedynlogn"), info);
 
         ins.reduce2(output.lower_bound, info);
-        if (ins.capacity() < 0) {
+        if (ins.reduced_capacity() < 0) {
             output.update_ub(output.lower_bound, std::stringstream("negative capacity after reduction"), info);
             output.algorithm_end(info);
             LOG_FOLD_END(info, "c < 0");
             return output;
-        } else if (n == 0 || ins.capacity() == 0) {
+        } else if (n == 0 || ins.reduced_capacity() == 0) {
             output.update_sol(*ins.reduced_solution(), std::stringstream("no item or null capacity after reduction (lb)"), info);
             output.update_ub(output.lower_bound, std::stringstream("no item or null capacity after reduction (ub)"), info);
             output.algorithm_end(info);
@@ -608,7 +608,7 @@ Output knapsack::opt_bellman_list(Instance& ins, bool sort, Info info)
         }
     }
 
-    Profit ub = (!sort)? ub_0(ins, 0, 0, ins.total_capacity(), j_max):
+    Profit ub = (!sort)? ub_0(ins, 0, 0, ins.capacity(), j_max):
         std::max(ub_dantzig(ins), output.lower_bound);
     output.update_ub(ub, std::stringstream("initial upper bound"), info);
     std::vector<BellmanState> l0{{
@@ -850,7 +850,7 @@ Output knapsack::sopt_bellman_list_rec(const Instance& ins, Info info)
     LOG_FOLD_START(info, "*** bellman (list, rec) ***" << std::endl);
     VER(info, "*** bellman (list, rec) ***" << std::endl);
     Output output(ins, info);
-    ItemPos n = ins.total_item_number();
+    ItemPos n = ins.item_number();
 
     if (n == 0) {
         output.update_ub(0, std::stringstream("no item (ub)"), info);
@@ -867,7 +867,7 @@ Output knapsack::sopt_bellman_list_rec(const Instance& ins, Info info)
     }
 
     ItemPos j_max = ins.max_efficiency_item(info);
-    if (INT_FAST64_MAX / ins.item(j_max).p < ins.total_capacity()) {
+    if (INT_FAST64_MAX / ins.item(j_max).p < ins.capacity()) {
         output.algorithm_end(info);
         LOG_FOLD_END(info, "");
         return output;
@@ -877,8 +877,8 @@ Output knapsack::sopt_bellman_list_rec(const Instance& ins, Info info)
     sopt_bellman_list_rec_rec({
         .ins = ins,
         .n1 = 0,
-        .n2 = ins.total_item_number(),
-        .c = ins.total_capacity(),
+        .n2 = ins.item_number(),
+        .c = ins.capacity(),
         .sol = sol,
         .j_max = j_max,
         .info = info});

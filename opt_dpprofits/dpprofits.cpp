@@ -13,7 +13,7 @@ Output knapsack::opt_dpprofits_array(const Instance& ins, Info info)
     VER(info, "*** dpprofits (array) ***" << std::endl);
     Output output(ins, info);
 
-    ItemIdx n = ins.item_number();
+    ItemIdx n = ins.reduced_item_number();
     if (n == 0) {
         output.update_ub(0, std::stringstream("no item"), info);
         output.algorithm_end(info);
@@ -21,9 +21,9 @@ Output knapsack::opt_dpprofits_array(const Instance& ins, Info info)
     }
 
     // Initialize memory table
-    Weight c = ins.total_capacity();
+    Weight c = ins.capacity();
     ItemPos j_max = ins.max_efficiency_item(info);
-    Profit ub = ub_0(ins, 0, 0, ins.total_capacity(), j_max);
+    Profit ub = ub_0(ins, 0, 0, ins.capacity(), j_max);
     output.update_ub(ub, std::stringstream("initial upper bound"), info);
     std::vector<Weight> values(ub + 1, c + 1);
 
@@ -67,7 +67,7 @@ Output knapsack::sopt_dpprofits_array_all(const Instance& ins, Info info)
     VER(info, "*** dpprofits (array, all) ***" << std::endl);
     Output output(ins, info);
 
-    ItemIdx n = ins.item_number();
+    ItemIdx n = ins.reduced_item_number();
     if (n == 0) {
         output.update_ub(0, std::stringstream("no item"), info);
         output.algorithm_end(info);
@@ -75,9 +75,9 @@ Output knapsack::sopt_dpprofits_array_all(const Instance& ins, Info info)
     }
 
     // Initialize memory table
-    Weight c = ins.total_capacity();
+    Weight c = ins.capacity();
     ItemPos j_max = ins.max_efficiency_item(info);
-    Profit ub = ub_0(ins, 0, 0, ins.total_capacity(), j_max);
+    Profit ub = ub_0(ins, 0, 0, ins.capacity(), j_max);
     output.update_ub(ub, std::stringstream("initial upper bound"), info);
     StateIdx values_size = (n + 1) * (ub + 1);
     std::vector<Weight> values(values_size);

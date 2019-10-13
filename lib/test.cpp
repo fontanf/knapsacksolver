@@ -83,12 +83,12 @@ TEST(Instance, SortPartially3)
             }
             ins.set_capacity(std::max(wmax, (h * wsum) / 100));
 
-            std::cout << "n " << ins.total_item_number()
-                << " c " << ins.total_capacity() << std::endl;
+            std::cout << "n " << ins.item_number()
+                << " c " << ins.capacity() << std::endl;
             std::cout << "{";
-            for (ItemIdx j=0; j<ins.total_item_number(); ++j) {
+            for (ItemIdx j=0; j<ins.item_number(); ++j) {
                 std::cout << "{" << ins.item(j).w << "," << ins.item(j).p << "}";
-                if (j != ins.total_item_number() - 1)
+                if (j != ins.item_number() - 1)
                     std::cout << ", ";
             }
             std::cout << "}" << std::endl;
@@ -99,7 +99,7 @@ TEST(Instance, SortPartially3)
             Solution sol(ins);
             ItemPos b = ins.break_item();
 
-            if (b == ins.total_item_number()) {
+            if (b == ins.item_number()) {
                 continue;
             }
 
@@ -118,7 +118,7 @@ TEST(Instance, SortPartially3)
                     return;
                 }
             }
-            for (ItemPos j=ins.break_item(); j<ins.total_item_number(); ++j) {
+            for (ItemPos j=ins.break_item(); j<ins.item_number(); ++j) {
                 EXPECT_LE(ins.item(j).p*wb, ins.item(j).w*pb);
                 if (ins.item(j).p*wb > ins.item(j).w*pb) {
                     std::cout << ins << std::endl;
@@ -126,16 +126,16 @@ TEST(Instance, SortPartially3)
                 }
             }
 
-            EXPECT_LE(ins.break_solution()->weight(), ins.total_capacity());
-            if (ins.break_solution()->weight() > ins.total_capacity()){
+            EXPECT_LE(ins.break_solution()->weight(), ins.capacity());
+            if (ins.break_solution()->weight() > ins.capacity()){
                 std::cout << ins << std::endl;
                 return;
             }
 
             EXPECT_GT(ins.break_solution()->weight() + ins.item(b).w,
-                    ins.total_capacity());
+                    ins.capacity());
             if (ins.break_solution()->weight() + ins.item(b).w
-                    <= ins.total_capacity()) {
+                    <= ins.capacity()) {
                 std::cout << "w_bar " << ins.break_solution()->weight() << std::endl;
                 std::cout << "w_b   " << ins.item(b).w << std::endl;
                 std::cout << ins << std::endl;

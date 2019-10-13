@@ -102,13 +102,13 @@ void sopt_balknap_main(Instance& ins, BalknapOptionalParameters& p, BalknapOutpu
             << std::endl);
 
     // Trivial cases
-    if (ins.item_number() == 0 || ins.capacity() == 0) {
+    if (ins.reduced_item_number() == 0 || ins.reduced_capacity() == 0) {
         Solution sol_tmp = (ins.reduced_solution() == NULL)? Solution(ins): *ins.reduced_solution();
         output.update_sol(sol_tmp, std::stringstream("no item of null capacity (lb)"), p.info);
         output.update_ub(output.lower_bound, std::stringstream("no item of null capacity (ub)"), p.info);
         LOG_FOLD_END(info, "no item or null capacity");
         return;
-    } else if (ins.item_number() == 1) {
+    } else if (ins.reduced_item_number() == 1) {
         Solution sol_tmp = (ins.reduced_solution() == NULL)? Solution(ins): *ins.reduced_solution();
         sol_tmp.set(ins.first_item(), true);
         output.update_sol(sol_tmp, std::stringstream("one item (lb)"), p.info);
@@ -152,7 +152,7 @@ void sopt_balknap_main(Instance& ins, BalknapOptionalParameters& p, BalknapOutpu
     } else if (p.ub == 't') {
         ins.reduce2(lb_red, info);
     }
-    if (ins.capacity() < 0) {
+    if (ins.reduced_capacity() < 0) {
         output.update_ub(output.lower_bound, std::stringstream("negative capacity after reduction"), info);
         LOG_FOLD_END(info, "c < 0");
         return;
@@ -161,13 +161,13 @@ void sopt_balknap_main(Instance& ins, BalknapOptionalParameters& p, BalknapOutpu
     if (output.solution.profit() < ins.break_solution()->profit())
         output.update_sol(*ins.break_solution(), std::stringstream("break solution after reduction"), p.info);
 
-    Weight  c = ins.total_capacity();
+    Weight  c = ins.capacity();
     ItemPos f = ins.first_item();
     ItemPos l = ins.last_item();
-    ItemPos n = ins.item_number();
+    ItemPos n = ins.reduced_item_number();
 
     // Trivial cases
-    if (n == 0 || ins.capacity() == 0) {
+    if (n == 0 || ins.reduced_capacity() == 0) {
         Solution sol_tmp = (ins.reduced_solution() == NULL)? Solution(ins): *ins.reduced_solution();
         output.update_sol(sol_tmp, std::stringstream("no item or null capacity after reduction (lb)"), p.info);
         output.update_ub(output.lower_bound, std::stringstream("no item of null capacity after reduction (ub)"), p.info);

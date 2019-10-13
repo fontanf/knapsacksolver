@@ -91,8 +91,8 @@ void sopt_minknap_main(Instance& ins, MinknapOptionalParameters& p, MinknapOutpu
     LOG_FOLD(p.info, ins);
 
     MinknapInternalData d(ins, p, output);
-    Weight  c = ins.capacity();
-    ItemPos n = ins.item_number();
+    Weight  c = ins.reduced_capacity();
+    ItemPos n = ins.reduced_item_number();
 
     // Trivial cases
     if (n == 0 || c == 0) {
@@ -244,7 +244,7 @@ void sopt_minknap_main(Instance& ins, MinknapOptionalParameters& p, MinknapOutpu
     LOG(p.info, "best_state " << d.best_state << std::endl);
     LOG(p.info, d.psolf.print(d.best_state.sol) << std::endl);
     ins.fix(p.info, d.psolf.vector(d.best_state.sol));
-    assert(ins.capacity() >= 0);
+    assert(ins.reduced_capacity() >= 0);
 
     LOG_FOLD_END(p.info, "minknap_main");
     sopt_minknap_main(ins, p, output);
@@ -268,13 +268,13 @@ void add_item(MinknapInternalData& d)
     d.psolf.add_item(d.t - 1);
     LOG(info, "psolf " << d.psolf.print() << std::endl);
     d.best_state.sol = d.psolf.remove(d.best_state.sol);
-    Weight c = ins.total_capacity();
+    Weight c = ins.capacity();
     Weight wt = ins.item(d.t - 1).w;
     Profit pt = ins.item(d.t - 1).p;
     ItemPos sx = ins.bound_item_left(d.s, lb, info);
     ItemPos tx = ins.bound_item_right(d.t, lb, info);
     Profit ub_max = -1;
-    Weight w_max = ins.total_capacity() + d.w_max - ins.reduced_solution()->weight();
+    Weight w_max = ins.capacity() + d.w_max - ins.reduced_solution()->weight();
 
     d.l.clear();
     std::vector<MinknapState>::iterator it = d.l0.begin();
@@ -373,14 +373,14 @@ void remove_item(MinknapInternalData& d)
     d.psolf.add_item(d.s + 1);
     LOG(info, "psolf " << d.psolf.print() << std::endl);
     d.best_state.sol = d.psolf.add(d.best_state.sol);
-    Weight c = ins.total_capacity();
+    Weight c = ins.capacity();
     Weight ws = ins.item(d.s + 1).w;
     Profit ps = ins.item(d.s + 1).p;
     d.w_max -= ws;
     ItemPos sx = ins.bound_item_left(d.s, lb, info);
     ItemPos tx = ins.bound_item_right(d.t, lb, info);
     Profit ub_max = -1;
-    Weight w_max = ins.total_capacity() + d.w_max - ins.reduced_solution()->weight();
+    Weight w_max = ins.capacity() + d.w_max - ins.reduced_solution()->weight();
 
     d.l.clear();
     std::vector<MinknapState>::iterator it = d.l0.begin();
@@ -481,8 +481,8 @@ ItemPos sopt_minknap_find_state(MinknapInternalData& d, bool right)
             continue;
         LOG(d.p.info, "t " << t << std::endl);
         Weight w = (right)?
-            ins.total_capacity() - ins.item(t).w:
-            ins.total_capacity() + ins.item(t).w;
+            ins.capacity() - ins.item(t).w:
+            ins.capacity() + ins.item(t).w;
         if (d.l0.front().w > w)
             continue;
         ItemPos f = 0;
