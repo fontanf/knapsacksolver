@@ -50,14 +50,15 @@ struct MinknapOptionalParameters
         return *this;
     }
 
-    MinknapOptionalParameters& set_params(const std::map<std::string, std::string>& args)
+    MinknapOptionalParameters& set_params(const std::vector<std::string>& argv)
     {
-        auto it = args.end();
-        if ((it = args.find("k"))  != args.end()) partial_solution_size = std::stol(it->second);
-        if ((it = args.find("g"))  != args.end()) greedy                = (it->second == "true");
-        if ((it = args.find("p"))  != args.end()) pairing               = std::stol(it->second);
-        if ((it = args.find("s"))  != args.end()) surrogate             = std::stol(it->second);
-        if ((it = args.find("c"))  != args.end()) combo_core            = (it->second == "true");
+        for (auto it = argv.begin() + 1; it != argv.end(); ++it) {
+            if        (*it == "g") { greedy                 = (*(++it) == "true");
+            } else if (*it == "p") { pairing                = std::stol(*(++it));
+            } else if (*it == "s") { surrogate              = std::stol(*(++it));
+            } else if (*it == "c") { combo_core             = (*(++it) == "true");
+            } else if (*it == "k") { partial_solution_size  = std::stol(*(++it)); }
+        }
         return *this;
     }
 

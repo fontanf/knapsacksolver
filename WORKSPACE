@@ -1,4 +1,6 @@
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository", "new_git_repository")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
 new_git_repository(
     name = "googletest",
     build_file_content = """
@@ -20,22 +22,11 @@ cc_library(
 )
 """,
     remote = "https://github.com/google/googletest",
-    tag = "release-1.8.0",
+    commit = "ec44c6c1675c25b9827aacd08c02433cccde7780",
+    shallow_since = "1468516538 -0400",
 )
 
-load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
-git_repository(
-    name = "benchtools",
-    remote = "https://github.com/fontanf/benchtools.git",
-    commit = "f7a92b00c89d2bca213d0a0f8303e78c2bf228ea",
-)
-
-local_repository(
-    name = "benchtools_",
-    path = "/home/florian/Dev/benchtools/",
-)
-
-new_git_repository(
+http_archive(
     name = "json",
     build_file_content = """
 cc_library(
@@ -45,7 +36,14 @@ cc_library(
         strip_include_prefix = "single_include/"
 )
 """,
-    remote = "https://github.com/nlohmann/json",
-    tag = "v3.7.0",
+    urls = ["https://github.com/nlohmann/json/releases/download/v3.7.3/include.zip"],
+    sha256 = "87b5884741427220d3a33df1363ae0e8b898099fbc59f1c451113f6732891014",
+)
+
+git_repository(
+    name = "benchtools",
+    remote = "https://github.com/fontanf/benchtools.git",
+    commit = "fe56ed683d32f70cd248d77cd4107e57eee05758",
+    shallow_since = "1576623294 +0100",
 )
 

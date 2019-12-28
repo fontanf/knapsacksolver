@@ -40,13 +40,14 @@ struct ExpknapOptionalParameters
         return *this;
     }
 
-    ExpknapOptionalParameters& set_params(const std::map<std::string, std::string>& args)
+    ExpknapOptionalParameters& set_params(const std::vector<std::string>& argv)
     {
-        auto it = args.end();
-        if ((it = args.find("g"))  != args.end()) greedy      = (it->second == "true");
-        if ((it = args.find("gn")) != args.end()) greedynlogn = std::stol(it->second);
-        if ((it = args.find("s"))  != args.end()) surrogate   = std::stol(it->second);
-        if ((it = args.find("c"))  != args.end()) combo_core  = (it->second == "true");
+        for (auto it = argv.begin() + 1; it != argv.end(); ++it) {
+            if        (*it == "g")  { greedy      = (*(++it) == "true");
+            } else if (*it == "gs") { greedynlogn = std::stol(*(++it));
+            } else if (*it == "s")  { surrogate   = std::stol(*(++it));
+            } else if (*it == "c")  { combo_core  = (*(++it) == "true"); }
+        }
         return *this;
     }
 
