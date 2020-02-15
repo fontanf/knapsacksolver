@@ -1,0 +1,53 @@
+#pragma once
+
+#include "knapsacksolver/instance.hpp"
+#include "knapsacksolver/solution.hpp"
+
+#include <thread>
+
+namespace knapsacksolver
+{
+
+struct ExpknapOptionalParameters
+{
+    Info info = Info();
+
+    bool greedy = true;
+    StateIdx greedynlogn = -1;
+    StateIdx surrelax = -1;
+    bool combo_core = false;
+
+    bool* end = NULL;
+    bool stop_if_end = false;
+    bool set_end = true;
+
+    ExpknapOptionalParameters& set_pure()
+    {
+        greedy = false;
+        greedynlogn = -1;
+        surrelax = -1;
+        combo_core = false;
+        return *this;
+    }
+
+    ExpknapOptionalParameters& set_combo()
+    {
+        greedy = true;
+        greedynlogn = 50000;
+        surrelax = 20000;
+        combo_core = true;
+        return *this;
+    }
+
+};
+
+struct ExpknapOutput: Output
+{
+    ExpknapOutput(const Instance& ins, Info& info): Output(ins, info) { }
+    Counter node_number = 0;
+};
+
+ExpknapOutput expknap(Instance& ins, ExpknapOptionalParameters p = {});
+
+}
+

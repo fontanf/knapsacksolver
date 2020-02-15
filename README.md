@@ -1,8 +1,8 @@
-# Knapsack
+# KnapsackSolver
 
-Classical and state of the art algorithm implementations for the Knapsack Problem. Most algorithms are detailed in the "Knapsack Problem" book (Kellerer et al., 2004).
+A solver for the 0-1 Knapsack Problem.
 
-Note: the code of `minknap` with all its optimizations is rather complex. I tried to test it to the best of my ability, however, some bugs might remain. If you wish to use it, do not hesitate to compare the returned values with a simpler algorithm like `opt_bellman_array` during development phase. If you find an instance (preferably a small one) for which two exact algorithms do not return the same value, please open an issue or contact me.
+All classical and state-of-the-art algorithms are implemented. Most of them are described in the "Knapsack Problem" book (Kellerer et al., 2004).
 
 ![knapsack](knapsack.png?raw=true "knapsack")
 
@@ -40,7 +40,7 @@ bazel build -- //...
 Generate an instance:
 ```
 bazel build -- //lib:generator_main
-./bazel-bin/lib/generator_main -n 1000 -t sc -r 1000 -o ./ins.txt
+./bazel-bin/knapsacksolver/generator_main -n 1000 -t sc -r 1000 -o ./ins.txt
 ```
 
 Examples:
@@ -52,12 +52,12 @@ Examples:
 
 Solve:
 ```
-./bazel-bin/lib/main -a bellman_array_part -i ins.txt -o out.ini -c sol.txt -v
+./bazel-bin/knapsacksolver/main -a bellman_array_part -i ins.txt -o out.ini -c sol.txt -v
 ```
 
 Instances can be visualized with gnuplot:
 ```
-./bazel-bin/lib/generator_main -n 1000 -t sw -r 1000 -o ./ins.txt -p ./ins.plot
+./bazel-bin/knapsacksolver/generator_main -n 1000 -t sw -r 1000 -o ./ins.txt -p ./ins.plot
 gnuplot
 gnuplot> set yrange[0:]; set xrange[0:]; plot 'ins.plot' u 1:2
 ```
@@ -74,14 +74,14 @@ If you use Bazel, just add the following lines to the `WORKSPACE` file:
 ```
 git_repository(
     name = "knapsack",
-    remote = "https://github.com/fontanf/knapsack.git",
+    remote = "https://github.com/fontanf/knapsacksolver.git",
     commit = "c45720bd8f220d44863d0c8a6a4cc8aa6d5841c8",
 )
 ```
 And then in the `BUILD` file, add the dependency to the concerned rule:
 ```
         deps = [
-                "@knapsack//opt_minknap:minknap",
+                "@knapsacksolver//knapsacksolver/algorithms:minknap",
         ],
 ```
 * Then an example of how to create an instance and solve it can be found here:
@@ -125,21 +125,22 @@ Algorithms:
   - Bottom-up (iterative), lists: `-a bellman_list` :heavy_check_mark: `-a bellman_list_sort` :heavy_check_mark: `-a bellman_list_rec` :heavy_check_mark:
   - Bottom-up (iterative), array, parallel: `-a bellmanpar_array` :heavy_check_mark:
 - Dynamic programming by Profits `-a dpprofits_array` :heavy_check_mark: `-a dpprofits_array_all` :heavy_check_mark:
-- Primal Branch-and-bound `-a bab` :heavy_check_mark: `-a bab_sort` :heavy_check_mark:
+- Primal Branch-and-bound `-a branchandbound` :heavy_check_mark: `-a branchandbound_sort` :heavy_check_mark:
 
 #### State of the art algorithms
 
 Options
-- `c 1`: use `combo` core
-- `g X`: `greedy` will be executed at Xth node / if state number goes over X
-- `gn X`: `greedynlogn` will be executed at Xth node / if state number goes over X
-- `p X`: state pairing with items outside the core will be executed if state number goes over X
-- `s X`: surrogate relaxation and instance will be solved at Xth node / if state number goes over X
+- `-c`: use `combo` core
+- `-g`: `greedy` will be executed at the beginning of the algorithm
+- `-n X`: `greedynlogn` will be executed at Xth node / if state number goes over X
+- `-p X`: state pairing with items outside the core will be executed if state number goes over X
+- `-s X`: surrogate relaxation and instance will be solved at Xth node / if state number goes over X
+- `-k X`: partial solution size (1 <= X <= 64)
 
 Algorithms:
-- Primal-dual Branch-and-bound `-a "expknap g 0 gn -1 s -1 c false"`, `-a expknap_combo` :heavy_check_mark:
-- Balanced Dynamic programming. The list implementation requires a map. Therefore, its asymptotical complexity is slightly greater than the one with an array. However, the possiblity of combining the dynamic programming with bouding makes it more performant. Still, two versions are implemented. Options `u` can be set to `b` (partial sorting, Dembo Upper bound with break item) or `t` (complete sorting, better Upper Bound) `-a "balknap u t k 64 g 0 gn -1 s -1"` :heavy_check_mark:
-- Primal-dual Dynamic programming (only with list) `-a "minknap k 64 g 0 p -1 s -1 c false"`, `-a combo` :heavy_check_mark:
+- Primal-dual Branch-and-bound `-a "expknap -c -g -n -1 -s -1"`, `-a expknap_combo` :heavy_check_mark:
+- Balanced Dynamic programming. The list implementation requires a map. Therefore, its asymptotical complexity is slightly greater than the one with an array. However, the possiblity of combining the dynamic programming with bouding makes it more performant. Still, two versions are implemented. Options `-u` can be set to `b` (partial sorting, Dembo Upper bound with break item) or `t` (complete sorting, better Upper Bound) `-a "balknap -g -u t -n -1 -s -1 -k 64"` :heavy_check_mark:
+- Primal-dual Dynamic programming (only with list) `-a "minknap -c -g -p -1 -s -1 -k 64"`, `-a combo` :heavy_check_mark:
 
 ## Results
 
@@ -151,7 +152,7 @@ Algorithms:
 
 Bench:
 ```
-bazel run //lib:bench -- -a minknap balknap -d normal easy difficultsmall difficultlarge
+bazel run //knapsacksolver:bench -- -a minknap balknap -d normal easy difficultsmall difficultlarge
 ```
 
 ### Dynamic Programming: recursive vs iterative implementation

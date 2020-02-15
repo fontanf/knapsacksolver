@@ -1,29 +1,28 @@
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository", "new_git_repository")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
-new_git_repository(
+http_archive(
     name = "googletest",
     build_file_content = """
 cc_library(
         name = "gtest",
-        srcs = ["googletest/src/gtest-all.cc", "googlemock/src/gmock-all.cc",],
-        hdrs = glob(["**/*.h", "googletest/src/*.cc", "googlemock/src/*.cc",]),
-        includes = ["googlemock", "googletest", "googletest/include", "googlemock/include",],
+        srcs = ["googletest-release-1.8.0/googletest/src/gtest-all.cc", "googletest-release-1.8.0/googlemock/src/gmock-all.cc",],
+        hdrs = glob(["**/*.h", "googletest-release-1.8.0/googletest/src/*.cc", "googletest-release-1.8.0/googlemock/src/*.cc",]),
+        includes = ["googletest-release-1.8.0/googlemock", "googletest-release-1.8.0/googletest", "googletest-release-1.8.0/googletest/include", "googletest-release-1.8.0/googlemock/include",],
         linkopts = ["-pthread"],
         visibility = ["//visibility:public"],
 )
 
 cc_library(
         name = "gtest_main",
-        srcs = ["googlemock/src/gmock_main.cc"],
+        srcs = ["googletest-release-1.8.0/googlemock/src/gmock_main.cc"],
         linkopts = ["-pthread"],
         visibility = ["//visibility:public"],
         deps = [":gtest"],
 )
 """,
-    remote = "https://github.com/google/googletest",
-    commit = "ec44c6c1675c25b9827aacd08c02433cccde7780",
-    shallow_since = "1468516538 -0400",
+    url = "https://github.com/google/googletest/archive/release-1.8.0.zip",
+    sha256 = "f3ed3b58511efd272eb074a3a6d6fb79d7c2e6a0e374323d1e6bcbcc1ef141bf",
 )
 
 http_archive(
