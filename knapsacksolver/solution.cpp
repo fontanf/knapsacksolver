@@ -4,14 +4,14 @@
 
 using namespace knapsacksolver;
 
-Solution::Solution(const Instance& ins):
-    instance_(ins),
-    x_(ins.item_number(), 0)
+Solution::Solution(const Instance& instance):
+    instance_(instance),
+    x_(instance.item_number(), 0)
 { }
 
-Solution::Solution(const Instance& ins, std::string filepath):
-    instance_(ins),
-    x_(ins.item_number(), 0)
+Solution::Solution(const Instance& instance, std::string filepath):
+    instance_(instance),
+    x_(instance.item_number(), 0)
 {
     if (filepath.empty())
         return;
@@ -22,38 +22,38 @@ Solution::Solution(const Instance& ins, std::string filepath):
     }
 
     int x = 0;
-    for (ItemPos j=0; j<ins.item_number(); ++j) {
+    for (ItemPos j = 0; j < instance.item_number(); ++j) {
         file >> x;
         set(j, x);
     }
 }
 
-Solution::Solution(const Solution& sol):
-    instance_(sol.instance_),
-    k_(sol.k_),
-    p_(sol.p_),
-    w_(sol.w_),
-    x_(sol.x_)
+Solution::Solution(const Solution& solution):
+    instance_(solution.instance_),
+    item_number_(solution.item_number_),
+    profit_(solution.profit_),
+    weight_(solution.weight_),
+    x_(solution.x_)
 { }
 
-Solution& Solution::operator=(const Solution& sol)
+Solution& Solution::operator=(const Solution& solution)
 {
-    if (this != &sol) {
-        if (&this->instance() == &sol.instance()) {
-            k_ = sol.k_;
-            p_ = sol.p_;
-            w_ = sol.w_;
-            x_ = sol.x_;
+    if (this != &solution) {
+        if (&this->instance() == &solution.instance()) {
+            item_number_ = solution.item_number_;
+            profit_ = solution.profit_;
+            weight_ = solution.weight_;
+            x_ = solution.x_;
         } else {
             // Used to convert a solution of a surrogate instance to a
             // solution of its original instance.
-            k_ = sol.k_;
-            x_ = sol.x_;
-            p_ = sol.p_;
-            w_ = 0;
-            for (ItemPos j=0; j<instance().item_number(); ++j)
+            item_number_ = solution.item_number_;
+            x_ = solution.x_;
+            profit_ = solution.profit_;
+            weight_ = 0;
+            for (ItemPos j = 0; j < instance().item_number(); ++j)
                 if (contains(j))
-                    w_ += instance().item(j).w;
+                    weight_ += instance().item(j).w;
         }
     }
     return *this;
@@ -81,22 +81,22 @@ void Solution::set(ItemPos j, int b)
     if (contains(j) == b)
         return;
     if (b) {
-        p_ += instance().item(j).p;
-        w_ += instance().item(j).w;
-        k_++;
+        profit_ += instance().item(j).p;
+        weight_ += instance().item(j).w;
+        item_number_++;
     } else {
-        p_ -= instance().item(j).p;
-        w_ -= instance().item(j).w;
-        k_--;
+        profit_ -= instance().item(j).p;
+        weight_ -= instance().item(j).w;
+        item_number_--;
     }
     x_[instance().item(j).j] = b;
 }
 
 void Solution::clear()
 {
-    k_ = 0;
-    p_ = 0;
-    w_ = 0;
+    item_number_ = 0;
+    profit_ = 0;
+    weight_ = 0;
     std::fill(x_.begin(), x_.end(), 0);
 }
 
@@ -115,17 +115,17 @@ void Solution::write_cert(std::string filepath)
     cert.close();
 }
 
-std::ostream& knapsacksolver::operator<<(std::ostream& os, const Solution& sol)
+std::ostream& knapsacksolver::operator<<(std::ostream& os, const Solution& solution)
 {
-    for (ItemPos j=0; j<sol.instance().item_number(); ++j)
-        os << sol.data()[j] << std::endl;
+    for (ItemPos j = 0; j < solution.instance().item_number(); ++j)
+        os << solution.data()[j] << std::endl;
     return os;
 }
 
 std::string Solution::to_string_binary() const
 {
     std::string s = "";
-    for (ItemPos j=0; j<instance().item_number(); ++j)
+    for (ItemPos j = 0; j < instance().item_number(); ++j)
         s += std::to_string(x_[j]);
     return s;
 }
@@ -133,7 +133,7 @@ std::string Solution::to_string_binary() const
 std::string Solution::to_string_binary_ordered() const
 {
     std::string s = "";
-    for (ItemPos j=0; j<instance().item_number(); ++j)
+    for (ItemPos j = 0; j < instance().item_number(); ++j)
         s += std::to_string(x_[instance().item(j).j]);
     return s;
 }
@@ -141,7 +141,7 @@ std::string Solution::to_string_binary_ordered() const
 std::string Solution::to_string_items() const
 {
     std::string s = "";
-    for (ItemPos j=0; j<instance().item_number(); ++j) {
+    for (ItemPos j = 0; j < instance().item_number(); ++j) {
         if (x_[j]) {
             if (!s.empty())
                 s += ",";
@@ -153,7 +153,7 @@ std::string Solution::to_string_items() const
 
 /*********************************** Output ***********************************/
 
-Output::Output(const Instance& ins, Info& info): solution(ins)
+Output::Output(const Instance& instance, Info& info): solution(instance)
 {
     VER(info, std::left << std::setw(10) << "T (ms)");
     VER(info, std::left << std::setw(15) << "LB");

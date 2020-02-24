@@ -55,8 +55,8 @@ struct MinknapOutput: Output
     Counter recursive_call_number = 0;
     void algorithm_end(Info& info)
     {
-        Output::algorithm_end(info);
         PUT(info, "Algorithm", "RecursiveCallNumber", recursive_call_number);
+        Output::algorithm_end(info);
         VER(info, "Recursive call number: " << recursive_call_number << std::endl);
     }
 };

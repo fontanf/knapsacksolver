@@ -540,7 +540,7 @@ void minknap_update_bounds(MinknapInternalData& d)
                 return minknap(ins, p);
             };
         d.threads.push_back(std::thread(solvesurrelax, SurrelaxData{
-                    .ins      = Instance::reset(ins),
+                    .instance = Instance::reset(ins),
                     .output   = d.output,
                     .func     = func,
                     .end      = d.p.end,

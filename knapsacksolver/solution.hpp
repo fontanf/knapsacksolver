@@ -17,12 +17,12 @@ public:
     ~Solution() { }
 
     inline const Instance& instance()  const { return instance_; }
-    inline Weight weight()             const { return w_; }
+    inline Weight weight()             const { return weight_; }
     inline Weight remaining_capacity() const { return instance_.capacity() - weight(); }
-    inline Profit profit()             const { return p_; }
-    inline ItemIdx item_number()       const { return k_; }
+    inline Profit profit()             const { return profit_; }
+    inline ItemIdx item_number()       const { return item_number_; }
     const std::vector<int>& data()     const { return x_; }
-    inline bool feasible()             const { return w_ <= instance_.capacity(); }
+    inline bool feasible()             const { return weight_ <= instance_.capacity(); }
 
     /**
      * Add/remove an item to/from the solution.
@@ -53,10 +53,11 @@ public:
 private:
 
     const Instance& instance_;
-    ItemIdx k_ = 0;
-    Profit  p_ = 0;
-    Weight  w_ = 0;
+    ItemIdx item_number_ = 0;
+    Profit profit_ = 0;
+    Weight weight_ = 0;
     std::vector<int> x_;
+
 };
 
 std::ostream& operator<<(std::ostream &os, const Solution& solution);
@@ -65,7 +66,7 @@ std::ostream& operator<<(std::ostream &os, const Solution& solution);
 
 struct Output
 {
-    Output(const Instance& ins, Info& info);
+    Output(const Instance& instance, Info& info);
     Solution solution;
     Profit lower_bound = 0;
     Profit upper_bound = -1;

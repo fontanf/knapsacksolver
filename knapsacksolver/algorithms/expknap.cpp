@@ -10,9 +10,9 @@ using namespace knapsacksolver;
 
 struct ExpknapInternalData
 {
-    ExpknapInternalData(Instance& ins, ExpknapOptionalParameters& p, ExpknapOutput& output):
-        ins(ins), p(p), output(output), sol_curr(*ins.break_solution()) { }
-    Instance& ins;
+    ExpknapInternalData(Instance& instance, ExpknapOptionalParameters& p, ExpknapOutput& output):
+        instance(instance), p(p), output(output), sol_curr(*instance.break_solution()) { }
+    Instance& instance;
     ExpknapOptionalParameters& p;
     ExpknapOutput& output;
     Solution sol_curr;
@@ -38,7 +38,7 @@ void expknap_update_bounds(ExpknapInternalData& d)
                 return expknap(ins, p);
             };
         d.threads.push_back(std::thread(solvesurrelax, SurrelaxData{
-                    .ins      = Instance::reset(d.ins),
+                    .instance = Instance::reset(d.instance),
                     .output   = d.output,
                     .func     = func,
                     .end      = d.p.end,
@@ -46,7 +46,7 @@ void expknap_update_bounds(ExpknapInternalData& d)
     }
     if (d.p.greedynlogn >= 0 && d.p.greedynlogn <= d.output.node_number) {
         d.p.greedynlogn = -1;
-        auto gn_output = greedynlogn(d.ins);
+        auto gn_output = greedynlogn(d.instance);
         d.output.update_sol(gn_output.solution, std::stringstream("greedynlogn"), d.p.info);
     }
 }
@@ -96,7 +96,7 @@ void expknap_rec(ExpknapInternalData& d, ItemPos s, ItemPos t)
 
         for (;;t++) {
             // Bounding test
-            Profit ub = ub_dembo(d.ins, d.ins.bound_item_right(t, d.output.solution.profit(), info), d.sol_curr);
+            Profit ub = ub_dembo(d.instance, d.instance.bound_item_right(t, d.output.solution.profit(), info), d.sol_curr);
             LOG(info, "t " << t << " ub " << ub << " lb " << d.output.solution.profit());
             if (ub <= d.output.solution.profit()) {
                 LOG_FOLD_END(info, " bound");
@@ -104,8 +104,8 @@ void expknap_rec(ExpknapInternalData& d, ItemPos s, ItemPos t)
             }
 
             // Recursive call
-            assert(t <= d.ins.last_item());
-            LOG(info, " add (" << d.ins.item(t) << ")" << std::endl);
+            assert(t <= d.instance.last_item());
+            LOG(info, " add (" << d.instance.item(t) << ")" << std::endl);
             d.sol_curr.set(t, true); // Add item t
             expknap_rec(d, s, t + 1);
             d.sol_curr.set(t, false); // Remove item t
@@ -113,7 +113,7 @@ void expknap_rec(ExpknapInternalData& d, ItemPos s, ItemPos t)
     } else {
         for (;;s--) {
             // Bounding test
-            Profit ub = ub_dembo_rev(d.ins, d.ins.bound_item_left(s, d.output.solution.profit(), info), d.sol_curr);
+            Profit ub = ub_dembo_rev(d.instance, d.instance.bound_item_left(s, d.output.solution.profit(), info), d.sol_curr);
             LOG(info, "s " << s << " ub " << ub << " lb " << d.output.solution.profit());
             if (ub <= d.output.solution.profit()) {
                 LOG_FOLD_END(info, " bound");
@@ -121,8 +121,8 @@ void expknap_rec(ExpknapInternalData& d, ItemPos s, ItemPos t)
             }
 
             // Recursive call
-            assert(s >= d.ins.first_item());
-            LOG(info, " remove (" << d.ins.item(s) << ")" << std::endl);
+            assert(s >= d.instance.first_item());
+            LOG(info, " remove (" << d.instance.item(s) << ")" << std::endl);
             d.sol_curr.set(s, false); // Remove item s
             expknap_rec(d, s - 1, t);
             d.sol_curr.set(s, true); // Add item s
@@ -131,7 +131,7 @@ void expknap_rec(ExpknapInternalData& d, ItemPos s, ItemPos t)
     assert(false);
 }
 
-ExpknapOutput knapsacksolver::expknap(Instance& ins, ExpknapOptionalParameters p)
+ExpknapOutput knapsacksolver::expknap(Instance& instance, ExpknapOptionalParameters p)
 {
     VER(p.info, "*** expknap" << std::endl);
     if (!p.greedy)
@@ -155,40 +155,40 @@ ExpknapOutput knapsacksolver::expknap(Instance& ins, ExpknapOptionalParameters p
     if (p.end == NULL)
         p.end = &end;
 
-    ExpknapOutput output(ins, p.info);
+    ExpknapOutput output(instance, p.info);
 
-    if (ins.reduced_item_number() == 0) {
+    if (instance.reduced_item_number() == 0) {
         output.update_ub(output.lower_bound, std::stringstream("no item (ub)"), p.info);
         output.algorithm_end(p.info);
         LOG(p.info, "no item" << std::endl);
         return output;
     }
 
-    ins.sort_partially(p.info);
-    if (ins.break_item() == ins.last_item() + 1) {
-        if (output.lower_bound < ins.break_solution()->profit())
-            output.update_sol(*ins.break_solution(), std::stringstream("all items fit (lb)"), p.info);
-        output.update_ub(ins.break_solution()->profit(), std::stringstream("all items fit (ub)"), p.info);
+    instance.sort_partially(p.info);
+    if (instance.break_item() == instance.last_item() + 1) {
+        if (output.lower_bound < instance.break_solution()->profit())
+            output.update_sol(*instance.break_solution(), std::stringstream("all items fit (lb)"), p.info);
+        output.update_ub(instance.break_solution()->profit(), std::stringstream("all items fit (ub)"), p.info);
         output.algorithm_end(p.info);
         LOG_FOLD_END(p.info, "all items fit in the knapsack");
         return output;
     }
     if (p.combo_core)
-        ins.init_combo_core(p.info);
+        instance.init_combo_core(p.info);
 
     // Compute initial lower bound
-    Solution sol_tmp(ins);
+    Solution sol_tmp(instance);
     if (p.greedy) {
-        auto g_output = greedy(ins);
+        auto g_output = greedy(instance);
         sol_tmp = g_output.solution;
     } else {
-        sol_tmp = *ins.break_solution();
+        sol_tmp = *instance.break_solution();
     }
     if (output.lower_bound < sol_tmp.profit())
         output.update_sol(sol_tmp, std::stringstream("initial solution"), p.info);
 
     // Compute initial upper bound
-    Profit ub_tmp = ub_dantzig(ins);
+    Profit ub_tmp = ub_dantzig(instance);
     output.update_ub(ub_tmp, std::stringstream("dantzig upper bound"), p.info);
 
     if (output.solution.profit() == output.upper_bound) {
@@ -196,8 +196,8 @@ ExpknapOutput knapsacksolver::expknap(Instance& ins, ExpknapOptionalParameters p
         return output;
     }
 
-    ExpknapInternalData d(ins, p, output);
-    ItemPos b = ins.break_item();
+    ExpknapInternalData d(instance, p, output);
+    ItemPos b = instance.break_item();
     expknap_rec(d, b - 1, b);
     if (p.info.check_time())
         output.update_ub(output.lower_bound, std::stringstream("tree search completed (ub)"), p.info);
@@ -208,8 +208,8 @@ ExpknapOutput knapsacksolver::expknap(Instance& ins, ExpknapOptionalParameters p
         thread.join();
     d.threads.clear();
 
-    output.algorithm_end(p.info);
     PUT(p.info, "Algorithm", "NodeNumber", output.node_number);
+    output.algorithm_end(p.info);
     VER(p.info, "Node number: " << output.node_number << std::endl);
     return output;
 }
