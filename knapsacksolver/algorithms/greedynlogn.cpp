@@ -188,8 +188,8 @@ Output knapsacksolver::greedynlogn(const Instance& ins, Info info)
         best = "backward";
     }
 
-    PUT(info, "Algorithm", "Best", best);
     LOG_FOLD_END(info, "");
+    PUT(info, "Algorithm", "Best", best);
     output.algorithm_end(info);
     return output;
 }

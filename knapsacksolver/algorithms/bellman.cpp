@@ -318,8 +318,8 @@ end:
     }
     output.update_sol(sol, std::stringstream(), info);
 
-    output.algorithm_end(info);
     PUT(info, "Algorithm", "Iterations", it);
+    output.algorithm_end(info);
     VER(info, "Iterations: " << it << std::endl);
     return output;
 }
@@ -408,8 +408,8 @@ end:
     }
     output.update_sol(sol, std::stringstream(), info);
 
-    output.algorithm_end(info);
     PUT(info, "Algorithm", "Iterations", it);
+    output.algorithm_end(info);
     VER(info, "Iterations: " << it << std::endl);
     return output;
 }

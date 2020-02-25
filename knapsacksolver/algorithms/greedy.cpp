@@ -52,8 +52,8 @@ Output knapsacksolver::greedy(const Instance& ins, Info info)
         }
     }
 
-    PUT(info, "Algorithm", "Best", best_algo);
     LOG_FOLD_END(info, "greedy " << output.solution.profit());
+    PUT(info, "Algorithm", "Best", best_algo);
     output.algorithm_end(info);
     return output;
 }
