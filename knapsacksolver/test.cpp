@@ -1,4 +1,3 @@
-#include "knapsacksolver/instance.hpp"
 #include "knapsacksolver/solution.hpp"
 
 #include "knapsacksolver/algorithms/greedy.hpp"

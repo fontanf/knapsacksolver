@@ -11,9 +11,9 @@
 
 using namespace knapsacksolver;
 
-void balknap_main(Instance& ins, BalknapOptionalParameters& p, BalknapOutput& output);
+void balknap_main(Instance& instance, BalknapOptionalParameters& p, BalknapOutput& output);
 
-BalknapOutput knapsacksolver::balknap(Instance& ins, BalknapOptionalParameters p)
+BalknapOutput knapsacksolver::balknap(Instance& instance, BalknapOptionalParameters p)
 {
     VER(p.info, "*** balknap");
     if (p.partial_solution_size != 64)
@@ -37,8 +37,8 @@ BalknapOutput knapsacksolver::balknap(Instance& ins, BalknapOptionalParameters p
     if (p.end == NULL)
         p.end = &end;
 
-    BalknapOutput output(ins, p.info);
-    balknap_main(ins, p, output);
+    BalknapOutput output(instance, p.info);
+    balknap_main(instance, p, output);
 
     output.algorithm_end(p.info);
     LOG_FOLD_END(p.info, "balknap");
@@ -82,9 +82,9 @@ std::ostream& operator<<(std::ostream& os, const std::pair<BalknapState, Balknap
 
 struct BalknapInternalData
 {
-    BalknapInternalData(Instance& ins, BalknapOptionalParameters& p, BalknapOutput& output):
-        ins(ins), p(p), output(output) { }
-    Instance& ins;
+    BalknapInternalData(Instance& instance, BalknapOptionalParameters& p, BalknapOutput& output):
+        instance(instance), p(p), output(output) { }
+    Instance& instance;
     BalknapOptionalParameters& p;
     BalknapOutput& output;
     std::map<BalknapState, BalknapValue, BalknapState> map;
@@ -93,7 +93,7 @@ struct BalknapInternalData
 
 void balknap_update_bounds(BalknapInternalData& d);
 
-void balknap_main(Instance& ins, BalknapOptionalParameters& p, BalknapOutput& output)
+void balknap_main(Instance& instance, BalknapOptionalParameters& p, BalknapOutput& output)
 {
     Info& info = p.info;
     output.recursive_call_number++;
@@ -102,15 +102,15 @@ void balknap_main(Instance& ins, BalknapOptionalParameters& p, BalknapOutput& ou
             << std::endl);
 
     // Trivial cases
-    if (ins.reduced_item_number() == 0 || ins.reduced_capacity() == 0) {
-        Solution sol_tmp = (ins.reduced_solution() == NULL)? Solution(ins): *ins.reduced_solution();
+    if (instance.reduced_item_number() == 0 || instance.reduced_capacity() == 0) {
+        Solution sol_tmp = (instance.reduced_solution() == NULL)? Solution(instance): *instance.reduced_solution();
         output.update_sol(sol_tmp, std::stringstream("no item of null capacity (lb)"), p.info);
         output.update_ub(output.lower_bound, std::stringstream("no item of null capacity (ub)"), p.info);
         LOG_FOLD_END(info, "no item or null capacity");
         return;
-    } else if (ins.reduced_item_number() == 1) {
-        Solution sol_tmp = (ins.reduced_solution() == NULL)? Solution(ins): *ins.reduced_solution();
-        sol_tmp.set(ins.first_item(), true);
+    } else if (instance.reduced_item_number() == 1) {
+        Solution sol_tmp = (instance.reduced_solution() == NULL)? Solution(instance): *instance.reduced_solution();
+        sol_tmp.set(instance.first_item(), true);
         output.update_sol(sol_tmp, std::stringstream("one item (lb)"), p.info);
         output.update_ub(output.lower_bound, std::stringstream("one item (ub)"), p.info);
         LOG_FOLD_END(p.info, "one item");
@@ -119,24 +119,24 @@ void balknap_main(Instance& ins, BalknapOptionalParameters& p, BalknapOutput& ou
 
     // Sorting
     if (p.ub == 'b') {
-        ins.sort_partially(info);
+        instance.sort_partially(info);
     } else if (p.ub == 't') {
-        ins.sort(info);
+        instance.sort(info);
     }
-    if (ins.break_item() == ins.last_item() + 1) {
-        output.update_sol(*ins.break_solution(), std::stringstream("all items fit in the knapsack (lb)"), p.info);
+    if (instance.break_item() == instance.last_item() + 1) {
+        output.update_sol(*instance.break_solution(), std::stringstream("all items fit in the knapsack (lb)"), p.info);
         output.update_ub(output.lower_bound, std::stringstream("all items fit in the knapsack (ub)"), p.info);
         LOG_FOLD_END(p.info, "all items fit in the knapsack");
         return;
     }
 
     // Compute initial lower bound
-    Solution sol_tmp(ins);
+    Solution sol_tmp(instance);
     if (p.greedy) {
-        auto g_output = greedy(ins);
+        auto g_output = greedy(instance);
         sol_tmp = g_output.solution;
     } else {
-        sol_tmp = *ins.break_solution();
+        sol_tmp = *instance.break_solution();
     }
     if (output.lower_bound < sol_tmp.profit())
         output.update_sol(sol_tmp, std::stringstream("initial solution"), p.info);
@@ -148,51 +148,51 @@ void balknap_main(Instance& ins, BalknapOptionalParameters& p, BalknapOutput& ou
         output.lower_bound:
         output.lower_bound - 1;
     if (p.ub == 'b') {
-        ins.reduce1(lb_red, info);
+        instance.reduce1(lb_red, info);
     } else if (p.ub == 't') {
-        ins.reduce2(lb_red, info);
+        instance.reduce2(lb_red, info);
     }
-    if (ins.reduced_capacity() < 0) {
+    if (instance.reduced_capacity() < 0) {
         output.update_ub(output.lower_bound, std::stringstream("negative capacity after reduction"), info);
         LOG_FOLD_END(info, "c < 0");
         return;
     }
 
-    if (output.solution.profit() < ins.break_solution()->profit())
-        output.update_sol(*ins.break_solution(), std::stringstream("break solution after reduction"), p.info);
+    if (output.solution.profit() < instance.break_solution()->profit())
+        output.update_sol(*instance.break_solution(), std::stringstream("break solution after reduction"), p.info);
 
-    Weight  c = ins.capacity();
-    ItemPos f = ins.first_item();
-    ItemPos l = ins.last_item();
-    ItemPos n = ins.reduced_item_number();
+    Weight  c = instance.capacity();
+    ItemPos f = instance.first_item();
+    ItemPos l = instance.last_item();
+    ItemPos n = instance.reduced_item_number();
 
     // Trivial cases
-    if (n == 0 || ins.reduced_capacity() == 0) {
-        Solution sol_tmp = (ins.reduced_solution() == NULL)? Solution(ins): *ins.reduced_solution();
+    if (n == 0 || instance.reduced_capacity() == 0) {
+        Solution sol_tmp = (instance.reduced_solution() == NULL)? Solution(instance): *instance.reduced_solution();
         output.update_sol(sol_tmp, std::stringstream("no item or null capacity after reduction (lb)"), p.info);
         output.update_ub(output.lower_bound, std::stringstream("no item of null capacity after reduction (ub)"), p.info);
         LOG_FOLD_END(p.info, "no item or null capacity after reduction");
         return;
     } else if (n == 1) {
-        Solution sol_tmp = (ins.reduced_solution() == NULL)? Solution(ins): *ins.reduced_solution();
-        sol_tmp.set(ins.first_item(), true);
+        Solution sol_tmp = (instance.reduced_solution() == NULL)? Solution(instance): *instance.reduced_solution();
+        sol_tmp.set(instance.first_item(), true);
         output.update_sol(sol_tmp, std::stringstream("one item after reduction (lb)"), p.info);
         output.update_ub(output.lower_bound, std::stringstream("one item after reduction (ub)"), p.info);
         LOG_FOLD_END(p.info, "one item after reduction");
         return;
-    } else if (ins.break_item() == ins.last_item()+1) {
-        output.update_sol(*ins.break_solution(), std::stringstream("all items fit in the knapsack after reduction (lb)"), p.info);
+    } else if (instance.break_item() == instance.last_item()+1) {
+        output.update_sol(*instance.break_solution(), std::stringstream("all items fit in the knapsack after reduction (lb)"), p.info);
         output.update_ub(output.lower_bound, std::stringstream("all items fit in the knapsack after reduction (ub)"), p.info);
         LOG_FOLD_END(p.info, "all items fit in the knapsack after reduction");
         return;
     }
 
-    ItemPos b    = ins.break_item();
-    Weight w_bar = ins.break_solution()->weight();
-    Profit p_bar = ins.break_solution()->profit();
+    ItemPos b    = instance.break_item();
+    Weight w_bar = instance.break_solution()->weight();
+    Profit p_bar = instance.break_solution()->profit();
 
     // Compute initial upper bound
-    Profit ub_tmp = std::max(ub_dantzig(ins), output.lower_bound);
+    Profit ub_tmp = std::max(ub_dantzig(instance), output.lower_bound);
     output.update_ub(ub_tmp, std::stringstream("dantzig upper bound"), p.info);
 
     if (output.solution.profit() == output.upper_bound) {
@@ -202,8 +202,8 @@ void balknap_main(Instance& ins, BalknapOptionalParameters& p, BalknapOutput& ou
 
     // Initialization
     // Create first partial solution centered on the break item.
-    BalknapInternalData d(ins, p, output);
-    PartSolFactory1 psolf(ins, p.partial_solution_size, b, f, l);
+    BalknapInternalData d(instance, p, output);
+    PartSolFactory1 psolf(instance, p.partial_solution_size, b, f, l);
     PartSol1 psol_init = 0;
     for (ItemPos j=f; j<b; ++j)
         psol_init = psolf.add(psol_init, j);
@@ -238,9 +238,9 @@ void balknap_main(Instance& ins, BalknapOptionalParameters& p, BalknapOutput& ou
                 || best_state.first.pi == output.upper_bound)
             break;
 
-        LOG(info, "t " << t << " (" << ins.item(t) << ")" << std::endl);
-        Weight wt = ins.item(t).w;
-        Profit pt = ins.item(t).p;
+        LOG(info, "t " << t << " (" << instance.item(t) << ")" << std::endl);
+        Weight wt = instance.item(t).w;
+        Profit pt = instance.item(t).p;
 
         // Bounding
         LOG(info, "bound" << std::endl);
@@ -251,12 +251,12 @@ void balknap_main(Instance& ins, BalknapOptionalParameters& p, BalknapOutput& ou
             Profit ub_local = 0;
             if (d.p.ub == 'b') {
                 ub_local = (mu <= c)?
-                    ub_dembo(ins, b, pi, c-mu):
-                    ub_dembo_rev(ins, b, pi, c-mu);
+                    ub_dembo(instance, b, pi, c-mu):
+                    ub_dembo_rev(instance, b, pi, c-mu);
             } else if (d.p.ub == 't') {
                 ub_local = (mu <= c)?
-                    ub_dembo(ins, t, pi, c-mu):
-                    ub_dembo_rev(ins, s->second.a, pi, c-mu);
+                    ub_dembo(instance, t, pi, c-mu):
+                    ub_dembo_rev(instance, s->second.a, pi, c-mu);
             }
             if (ub_local < lb) {
                 LOG(info, "remove " << *s << std::endl);
@@ -317,12 +317,12 @@ void balknap_main(Instance& ins, BalknapOptionalParameters& p, BalknapOutput& ou
             Profit ub_local = 0;
             if (d.p.ub == 'b') {
                 ub_local = (mu_ <= c)?
-                    ub_dembo(ins, b, pi_, c-mu_):
-                    ub_dembo_rev(ins, b, pi_, c-mu_);
+                    ub_dembo(instance, b, pi_, c-mu_):
+                    ub_dembo_rev(instance, b, pi_, c-mu_);
             } else if (d.p.ub == 't') {
                 ub_local = (mu_ <= c)?
-                    ub_dembo(ins, t + 1, pi_, c-mu_):
-                    ub_dembo_rev(ins, s->second.a - 1, pi_, c-mu_);
+                    ub_dembo(instance, t + 1, pi_, c-mu_):
+                    ub_dembo_rev(instance, s->second.a - 1, pi_, c-mu_);
             }
             if (ub_local <= lb) {
                 LOG(info, " ×" << std::endl);
@@ -364,8 +364,8 @@ void balknap_main(Instance& ins, BalknapOptionalParameters& p, BalknapOutput& ou
 
             for (ItemPos j = s->second.a_prec; j < s->second.a; ++j) {
                 LOG(info, "j " << j);
-                Weight mu_ = s->first.mu - ins.item(j).w;
-                Profit pi_ = s->first.pi - ins.item(j).p;
+                Weight mu_ = s->first.mu - instance.item(j).w;
+                Profit pi_ = s->first.pi - instance.item(j).p;
                 std::pair<BalknapState, BalknapValue> s1 = {
                     {mu_, pi_},
                     {j, f, psolf.remove(s->second.sol, j)}};
@@ -388,12 +388,12 @@ void balknap_main(Instance& ins, BalknapOptionalParameters& p, BalknapOutput& ou
                 Profit ub_local = 0;
                 if (d.p.ub == 'b') {
                     ub_local = (mu_ <= c)?
-                        ub_dembo(ins, b, pi_, c-mu_):
-                        ub_dembo_rev(ins, b, pi_, c-mu_);
+                        ub_dembo(instance, b, pi_, c-mu_):
+                        ub_dembo_rev(instance, b, pi_, c-mu_);
                 } else if (d.p.ub == 't') {
                     ub_local = (mu_ <= c)?
-                        ub_dembo(ins, t + 1, pi_, c-mu_):
-                        ub_dembo_rev(ins, j - 1, pi_, c-mu_);
+                        ub_dembo(instance, t + 1, pi_, c-mu_):
+                        ub_dembo_rev(instance, j - 1, pi_, c-mu_);
                 }
                 if (ub_local <= lb) {
                     LOG(info, " ×" << std::endl);
@@ -433,25 +433,25 @@ end:
     // Reduce instance to items from best_state.second.a to last_item and remove
     // the items from the partial solution from the instance.
     // Then run the algorithm again.
-    ins.set_first_item(best_state.second.a, info);
-    ins.set_last_item(last_item);
-    ins.fix(info, psolf.vector(best_state.second.sol));
+    instance.set_first_item(best_state.second.a, info);
+    instance.set_last_item(last_item);
+    instance.fix(info, psolf.vector(best_state.second.sol));
 
     LOG_FOLD_END(info, "balknap_main");
-    balknap_main(ins, p, output);
+    balknap_main(instance, p, output);
 }
 
 /******************************************************************************/
 
 void balknap_update_bounds(BalknapInternalData& d)
 {
-    Instance& ins = d.ins;
+    Instance& instance = d.instance;
     Info& info = d.p.info;
 
     if (d.p.surrelax >= 0 && d.p.surrelax <= (StateIdx)d.map.size()) {
         d.p.surrelax = -1;
         std::function<Output (Instance&, Info, bool*)> func
-            = [&d](Instance& ins, Info info, bool* end)
+            = [&d](Instance& instance, Info info, bool* end)
             {
                 BalknapOptionalParameters p;
                 p.info = info;
@@ -462,10 +462,10 @@ void balknap_update_bounds(BalknapInternalData& d)
                 p.end = end;
                 p.stop_if_end = true;
                 p.set_end = false;
-                return balknap(ins, p);
+                return balknap(instance, p);
             };
         d.threads.push_back(std::thread(solvesurrelax, SurrelaxData{
-                    .instance = Instance::reset(ins),
+                    .instance = Instance::reset(instance),
                     .output   = d.output,
                     .func     = func,
                     .end      = d.p.end,
@@ -473,7 +473,7 @@ void balknap_update_bounds(BalknapInternalData& d)
     }
     if (d.p.greedynlogn >= 0 && d.p.greedynlogn <= (StateIdx)d.map.size()) {
         d.p.greedynlogn = -1;
-        auto gn_output = greedynlogn(d.ins);
+        auto gn_output = greedynlogn(d.instance);
         d.output.update_sol(gn_output.solution, std::stringstream("greedynlogn"), d.p.info);
     }
 }

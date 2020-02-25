@@ -1,6 +1,5 @@
 #pragma once
 
-#include "knapsacksolver/instance.hpp"
 #include "knapsacksolver/solution.hpp"
 #include "knapsacksolver/part_solution_1.hpp"
 
@@ -48,11 +47,11 @@ struct BalknapOptionalParameters
 
 struct BalknapOutput: Output
 {
-    BalknapOutput(const Instance& ins, Info& info): Output(ins, info) { }
+    BalknapOutput(const Instance& instance, Info& info): Output(instance, info) { }
     Counter recursive_call_number = 0;
 };
 
-BalknapOutput balknap(Instance& ins, BalknapOptionalParameters p = {});
+BalknapOutput balknap(Instance& instance, BalknapOptionalParameters p = {});
 
 }
 

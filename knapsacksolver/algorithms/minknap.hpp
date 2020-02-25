@@ -51,8 +51,10 @@ struct MinknapOptionalParameters
 
 struct MinknapOutput: Output
 {
-    MinknapOutput(const Instance& ins, Info& info): Output(ins, info) { }
+    MinknapOutput(const Instance& instance, Info& info): Output(instance, info) { }
+
     Counter recursive_call_number = 0;
+
     void algorithm_end(Info& info)
     {
         PUT(info, "Algorithm", "RecursiveCallNumber", recursive_call_number);
@@ -61,7 +63,7 @@ struct MinknapOutput: Output
     }
 };
 
-MinknapOutput minknap(Instance& ins, MinknapOptionalParameters p = {});
+MinknapOutput minknap(Instance& instance, MinknapOptionalParameters p = {});
 
 }
 

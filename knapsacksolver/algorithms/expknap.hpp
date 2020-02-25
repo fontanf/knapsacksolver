@@ -1,6 +1,5 @@
 #pragma once
 
-#include "knapsacksolver/instance.hpp"
 #include "knapsacksolver/solution.hpp"
 
 #include <thread>
