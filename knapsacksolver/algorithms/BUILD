@@ -264,6 +264,7 @@ cc_library(
         hdrs = ["algorithms.hpp"],
         srcs = ["algorithms.cpp"],
         deps = [
+                "@boost//:program_options",
                 ":greedy",
                 ":greedynlogn",
                 ":dembo",

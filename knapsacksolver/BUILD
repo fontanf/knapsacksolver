@@ -42,8 +42,10 @@ cc_library(
 cc_binary(
         name = "generator_main",
         srcs = ["generator_main.cpp"],
-        deps = [":generator"],
-        linkopts = ["-lboost_program_options"],
+        deps = [
+                "@boost//:program_options",
+                ":generator",
+        ],
 )
 
 cc_library(
@@ -78,18 +80,20 @@ cc_binary(
 cc_binary(
         name = "main",
         srcs = ["main.cpp"],
-        deps = ["//knapsacksolver/algorithms:algorithms"],
-        linkopts = ["-lboost_program_options"],
+        deps = [
+                "@boost//:program_options",
+                "//knapsacksolver/algorithms:algorithms",
+        ],
 )
 
 cc_binary(
         name = "bench",
         srcs = ["bench.cpp"],
         deps = [
+                "@boost//:program_options",
                 "//knapsacksolver/algorithms:algorithms",
                 ":generator",
         ],
-        linkopts = ["-lboost_program_options"],
 )
 
 cc_binary(
