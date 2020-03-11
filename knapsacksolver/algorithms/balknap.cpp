@@ -51,7 +51,7 @@ struct BalknapState
 {
     Weight mu;
     Profit pi;
-    bool operator()(const BalknapState& s1, const BalknapState& s2)
+    bool operator()(const BalknapState& s1, const BalknapState& s2) const
     {
         if (s1.mu != s2.mu)
             return s1.mu < s2.mu;

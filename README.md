@@ -85,7 +85,7 @@ And then in the `BUILD` file, add the dependency to the concerned rule:
         ],
 ```
 * Then an example of how to create an instance and solve it can be found here:
-https://github.com/fontanf/gap/blob/master/lb_lagrelax_lbfgs/lagrelax_lbfgs.cpp
+https://github.com/fontanf/generalizedassignmentsolver/blob/master/generalizedassignmentsolver/algorithms/lagrelax_lbfgs.cpp
 
 ## Implemented algorithms
 
@@ -103,7 +103,6 @@ https://github.com/fontanf/gap/blob/master/lb_lagrelax_lbfgs/lagrelax_lbfgs.cpp
 - Surrogate relaxation Upper bound
   - only solve relaxation: `-a surrelax` :heavy_check_mark:
   - solve relaxation and surrogate instance with `minknap`: `-a surrelax_minknap` :heavy_check_mark:
-
 
 ### Exact algorithms
 

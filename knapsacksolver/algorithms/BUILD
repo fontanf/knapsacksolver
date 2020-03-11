@@ -126,11 +126,7 @@ cc_library(
                 ":dantzig",
                 ":greedynlogn",
         ],
-        copts = ["-fopenmp"],
-        linkopts = [
-                "-fopenmp",
-                "-lpthread",
-        ],
+        linkopts = ["-lpthread"],
         visibility = ["//visibility:public"],
 )
 

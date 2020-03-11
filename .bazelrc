@@ -1,1 +1,8 @@
-build --cxxopt='-std=c++14' --compilation_mode=opt
+build --compilation_mode=opt
+
+# Unix
+build --cxxopt='-std=c++14'
+
+# Windows
+#build --cxxopt='/std:c++latest'
+
