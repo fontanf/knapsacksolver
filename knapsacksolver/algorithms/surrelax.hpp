@@ -7,7 +7,6 @@ namespace knapsacksolver
 
 struct SurrelaxData
 {
-    SurrelaxData(Output& output): output(output) { }
     Instance instance;
     Output& output;
     std::function<Output (Instance&, Info, bool*)> func;

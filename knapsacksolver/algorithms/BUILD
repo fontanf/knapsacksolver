@@ -73,6 +73,10 @@ cc_library(
                 ":dantzig",
                 ":minknap_hpp",
         ],
+        copts = select({
+                "@bazel_tools//src/conditions:windows": ['/std:c++latest'],
+                "//conditions:default":                 ["-std=c++14"],
+        }),
         visibility = ["//visibility:public"],
 )
 
@@ -84,6 +88,10 @@ cc_test(
                 ":surrelax",
                 ":minknap",
         ],
+        copts = select({
+                "@bazel_tools//src/conditions:windows": ['/std:c++latest'],
+                "//conditions:default":                 ["-std=c++14"],
+        }),
         timeout = "moderate",
 )
 
@@ -100,6 +108,10 @@ cc_library(
                 ":dantzig",
                 ":greedynlogn",
         ],
+        copts = select({
+                "@bazel_tools//src/conditions:windows": ['/std:c++latest'],
+                "//conditions:default":                 ["-std=c++14"],
+        }),
         visibility = ["//visibility:public"],
 )
 
@@ -126,6 +138,10 @@ cc_library(
                 ":dantzig",
                 ":greedynlogn",
         ],
+        copts = select({
+                "@bazel_tools//src/conditions:windows": ['/std:c++latest'],
+                "//conditions:default":                 ["-std=c++14"],
+        }),
         linkopts = select({
                 "@bazel_tools//src/conditions:windows": [],
                 "//conditions:default":                 ["-lpthread"],
@@ -180,6 +196,10 @@ cc_library(
                 ":dembo",
                 ":surrelax",
         ],
+        copts = select({
+                "@bazel_tools//src/conditions:windows": ['/std:c++latest'],
+                "//conditions:default":                 ["-std=c++14"],
+        }),
         visibility = ["//visibility:public"],
 )
 
@@ -207,6 +227,10 @@ cc_library(
                 ":dembo",
                 ":surrelax",
         ],
+        copts = select({
+                "@bazel_tools//src/conditions:windows": ['/std:c++latest'],
+                "//conditions:default":                 ["-std=c++14"],
+        }),
         visibility = ["//visibility:public"],
 )
 
@@ -234,6 +258,10 @@ cc_library(
                 ":dembo",
                 ":surrelax",
         ],
+        copts = select({
+                "@bazel_tools//src/conditions:windows": ['/std:c++latest'],
+                "//conditions:default":                 ["-std=c++14"],
+        }),
         visibility = ["//visibility:public"],
 )
 
@@ -275,6 +303,10 @@ cc_library(
                 ":balknap",
                 ":minknap",
         ],
+        copts = select({
+                "@bazel_tools//src/conditions:windows": ['/std:c++latest'],
+                "//conditions:default":                 ["-std=c++14"],
+        }),
         visibility = ["//visibility:public"],
 )
 

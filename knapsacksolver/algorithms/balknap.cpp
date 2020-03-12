@@ -464,12 +464,12 @@ void balknap_update_bounds(BalknapInternalData& d)
                 p.set_end = false;
                 return balknap(instance, p);
             };
-        SurrelaxData surrelax_data(d.output);
-        surrelax_data.instance = Instance::reset(instance);
-        surrelax_data.func     = func;
-        surrelax_data.end      = d.p.end;
-        surrelax_data.info     = Info(info, true, "surrelax");
-        d.threads.push_back(std::thread(solvesurrelax, surrelax_data));
+        d.threads.push_back(std::thread(solvesurrelax, SurrelaxData{
+                    .instance = Instance::reset(instance),
+                    .output   = d.output,
+                    .func     = func,
+                    .end      = d.p.end,
+                    .info     = Info(info, true, "surrelax")}));
     }
     if (d.p.greedynlogn >= 0 && d.p.greedynlogn <= (StateIdx)d.map.size()) {
         d.p.greedynlogn = -1;

@@ -19,7 +19,7 @@ cc_library(
                 "//conditions:default":                 ["-lpthread"],
         }),
         copts = select({
-                "@bazel_tools//src/conditions:windows": ['/std:c++14'],
+                "@bazel_tools//src/conditions:windows": ['/std:c++latest'],
                 "//conditions:default":                 ["-std=c++14"],
         }),
         visibility = ["//visibility:public"],
@@ -91,6 +91,10 @@ cc_binary(
                 "@boost//:program_options",
                 "//knapsacksolver/algorithms:algorithms",
         ],
+        copts = select({
+                "@bazel_tools//src/conditions:windows": ['/std:c++latest'],
+                "//conditions:default":                 ["-std=c++14"],
+        }),
 )
 
 cc_binary(
@@ -101,6 +105,10 @@ cc_binary(
                 "//knapsacksolver/algorithms:algorithms",
                 ":generator",
         ],
+        copts = select({
+                "@bazel_tools//src/conditions:windows": ['/std:c++latest'],
+                "//conditions:default":                 ["-std=c++14"],
+        }),
 )
 
 cc_binary(
@@ -111,5 +119,9 @@ cc_binary(
                 ":generator",
                 ":tester",
         ],
+        copts = select({
+                "@bazel_tools//src/conditions:windows": ['/std:c++latest'],
+                "//conditions:default":                 ["-std=c++14"],
+        }),
 )
 
