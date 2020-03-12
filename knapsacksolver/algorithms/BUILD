@@ -126,7 +126,10 @@ cc_library(
                 ":dantzig",
                 ":greedynlogn",
         ],
-        linkopts = ["-lpthread"],
+        linkopts = select({
+                "@bazel_tools//src/conditions:windows": [],
+                "//conditions:default":                 ["-lpthread"],
+        }),
         visibility = ["//visibility:public"],
 )
 

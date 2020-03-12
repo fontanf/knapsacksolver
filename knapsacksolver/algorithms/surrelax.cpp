@@ -347,12 +347,12 @@ Output knapsacksolver::surrelax(const Instance& instance, Info info)
             return Output(instance, info);
         };
 
-    solvesurrelax(SurrelaxData{
-                .instance = Instance::reset(instance),
-                .output   = output,
-                .func     = func,
-                .end      = &end,
-                .info     = Info(info)});
+    SurrelaxData surrelax_data(output);
+    surrelax_data.instance = Instance::reset(instance);
+    surrelax_data.func     = func;
+    surrelax_data.end      = &end;
+    surrelax_data.info     = Info(info, true, "surrelax");
+    solvesurrelax(surrelax_data);
 
     return output.algorithm_end(info);
 }
@@ -375,12 +375,12 @@ Output knapsacksolver::surrelax_minknap(const Instance& instance, Info info)
             return minknap(instance, p);
         };
 
-    solvesurrelax(SurrelaxData{
-                .instance = Instance::reset(instance),
-                .output   = output,
-                .func     = func,
-                .end      = &end,
-                .info     = Info(info)});
+    SurrelaxData surrelax_data(output);
+    surrelax_data.instance = Instance::reset(instance);
+    surrelax_data.func     = func;
+    surrelax_data.end      = &end;
+    surrelax_data.info     = Info(info, true, "surrelax");
+    solvesurrelax(surrelax_data);
 
     return output.algorithm_end(info);
 }

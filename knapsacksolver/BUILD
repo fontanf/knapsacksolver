@@ -14,7 +14,14 @@ cc_library(
                 "//knapsacksolver/algorithms:dembo",
                 "@benchtools//:info",
         ],
-        linkopts = ["-lpthread"],
+        linkopts = select({
+                "@bazel_tools//src/conditions:windows": [],
+                "//conditions:default":                 ["-lpthread"],
+        }),
+        copts = select({
+                "@bazel_tools//src/conditions:windows": ['/std:c++14'],
+                "//conditions:default":                 ["-std=c++14"],
+        }),
         visibility = ["//visibility:public"],
 )
 
