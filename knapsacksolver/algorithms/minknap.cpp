@@ -147,7 +147,7 @@ void minknap_main(Instance& instance, MinknapOptionalParameters& p, MinknapOutpu
     d.w_max = w_bar;
     d.best_state = d.l0.front();
     LOG_FOLD(p.info, instance);
-    while (!d.l0.empty()) {
+    while (!d.l0.empty() && (d.t <= instance.last_item() || d.s >= instance.first_item())) {
         minknap_update_bounds(d); // Update bounds
         if (!p.info.check_time()) {
             if (p.set_end)
@@ -268,7 +268,6 @@ void add_item(MinknapInternalData& d)
     Profit pt = instance.item(d.t - 1).p;
     ItemPos sx = instance.bound_item_left(d.s, lb, info);
     ItemPos tx = instance.bound_item_right(d.t, lb, info);
-    Profit ub_max = -1;
     Weight w_max = instance.capacity() + d.w_max - instance.reduced_solution()->weight();
 
     d.l.clear();
@@ -276,78 +275,87 @@ void add_item(MinknapInternalData& d)
     std::vector<MinknapState>::iterator it1 = d.l0.begin();
     while (it != d.l0.end() || it1 != d.l0.end()) {
         if (it == d.l0.end() || it->w > it1->w + wt) {
-            MinknapState s1{it1->w + wt, it1->p + pt, d.psolf.add(it1->sol)};
+            Weight w = it1->w + wt;
+            if (w > w_max) {
+                LOG(info, " ×" << std::endl);
+                it1++;
+                continue;
+            }
+
+            Profit p = it1->p + pt;
+            if (!d.l.empty() && p <= d.l.back().p) {
+                LOG(info, " ×" << std::endl);
+                it1++;
+                continue;
+            }
+
+            Profit ub = (w <= c)?
+                ub_dembo(instance, tx, p, c - w):
+                ub_dembo_rev(instance, sx, p, c - w);
+            LOG(info, " ub " << ub << " lb " << lb);
+            if (ub <= lb) {
+                LOG(info, " ×" << std::endl);
+                it1++;
+                continue;
+            }
+
+            MinknapState s1{w, p, d.psolf.add(it1->sol)};
             LOG(info, "state " << *it1 << " => " << s1);
 
-            Profit ub = (s1.w <= c)?
-                ub_dembo(instance, tx, s1.p, c - s1.w):
-                ub_dembo_rev(instance, sx, s1.p, c - s1.w);
-            LOG(info, " ub " << ub << " lb " << lb);
-
-            if (s1.w <= w_max
-                    && ub > lb
-                    && (d.l.empty() || s1.p > d.l.back().p)) {
-                // Update lower bound
-                if (s1.w <= c && s1.p > lb) {
-                    if (d.output.recursive_call_number == 1) {
-                        std::stringstream ss;
-                        ss << "it " << d.t - d.s << " (lb)";
-                        d.output.update_lb(s1.p, ss, info);
-                        lb = s1.p;
-                    }
-                    d.best_state = s1;
-                    assert(d.output.lower_bound <= d.output.upper_bound);
-                    if (d.best_state.p == d.output.upper_bound) {
-                        LOG_FOLD_END(info, " lb == ub");
-                        return;
-                    }
+            // Update lower bound
+            if (s1.w <= c && s1.p > lb) {
+                if (d.output.recursive_call_number == 1) {
+                    std::stringstream ss;
+                    ss << "it " << d.t - d.s << " (lb)";
+                    d.output.update_lb(s1.p, ss, info);
+                    lb = s1.p;
                 }
-
-                if (ub_max < ub)
-                    ub_max = ub;
-                if (!d.l.empty() && s1.w == d.l.back().w) {
-                    d.l.back() = s1;
-                    LOG(info, " ok" << std::endl);
-                } else {
-                    d.l.push_back(s1);
-                    LOG(info, " ok" << std::endl);
-                }
-            } else {
-                LOG(info, " ×" << std::endl);
+                d.best_state = s1;
+                assert(d.output.lower_bound <= d.output.upper_bound);
             }
+
+            if (!d.l.empty() && s1.w == d.l.back().w) {
+                d.l.back() = s1;
+            } else {
+                d.l.push_back(s1);
+            }
+            LOG(info, " ok" << std::endl);
             it1++;
         } else {
             assert(it != d.l0.end());
             LOG(info, "state " << *it);
 
+            if (it->w > w_max) {
+                LOG(info, " ×" << std::endl);
+                it++;
+                continue;
+            }
+
+            if (!d.l.empty() && it->p <= d.l.back().p) {
+                LOG(info, " ×" << std::endl);
+                it++;
+                continue;
+            }
+
             Profit ub = (it->w <= c)?
                 ub_dembo(instance, tx, it->p, c - it->w):
                 ub_dembo_rev(instance, sx, it->p, c - it->w);
             LOG(info, " ub " << ub << " lb " << lb);
-
-            if (it->w <= w_max
-                    && ub > lb
-                    && (d.l.empty() || it->p > d.l.back().p)) {
-                if (ub_max < ub)
-                    ub_max = ub;
-                it->sol = d.psolf.remove(it->sol);
-                if (!d.l.empty() && it->w == d.l.back().w) {
-                    d.l.back() = *it;
-                    LOG(info, " ok" << std::endl);
-                } else {
-                    d.l.push_back(*it);
-                    LOG(info, " ok" << std::endl);
-                }
-            } else {
+            if (ub <= lb) {
                 LOG(info, " ×" << std::endl);
+                it++;
+                continue;
             }
+
+            it->sol = d.psolf.remove(it->sol);
+            if (!d.l.empty() && it->w == d.l.back().w) {
+                d.l.back() = *it;
+            } else {
+                d.l.push_back(*it);
+            }
+            LOG(info, " ok" << std::endl);
             ++it;
         }
-    }
-    if (d.output.recursive_call_number == 1 && ub_max != -1 && d.output.upper_bound > ub_max) {
-        std::stringstream ss;
-        ss << "it " << d.t - d.s << " (ub)";
-        d.output.update_ub(ub_max, ss, info);
     }
     d.l0.swap(d.l);
     LOG_FOLD_END(info, "add_item");
@@ -374,7 +382,6 @@ void remove_item(MinknapInternalData& d)
     d.w_max -= ws;
     ItemPos sx = instance.bound_item_left(d.s, lb, info);
     ItemPos tx = instance.bound_item_right(d.t, lb, info);
-    Profit ub_max = -1;
     Weight w_max = instance.capacity() + d.w_max - instance.reduced_solution()->weight();
 
     d.l.clear();
@@ -384,75 +391,84 @@ void remove_item(MinknapInternalData& d)
         if (it1 == d.l0.end() || it->w <= it1->w - ws) {
             LOG(info, "state " << *it);
 
+            if (it->w > w_max) {
+                LOG(info, " ×" << std::endl);
+                it++;
+                continue;
+            }
+
+            if (!d.l.empty() && it->p <= d.l.back().p) {
+                LOG(info, " ×" << std::endl);
+                it++;
+                continue;
+            }
+
             Profit ub = (it->w <= c)?
                 ub_dembo(instance, tx, it->p, c - it->w):
                 ub_dembo_rev(instance, sx, it->p, c - it->w);
             LOG(info, " ub " << ub << " lb " << lb);
-
-            if (it->w <= w_max
-                    && ub > lb
-                    && (d.l.empty() || it->p > d.l.back().p)) {
-                if (ub_max < ub)
-                    ub_max = ub;
-                it->sol = d.psolf.add(it->sol);
-                if (!d.l.empty() && it->w == d.l.back().w) {
-                    d.l.back() = *it;
-                    LOG(info, " ok" << std::endl);
-                } else {
-                    d.l.push_back(*it);
-                    LOG(info, " ok" << std::endl);
-                }
-            } else {
+            if (ub <= lb) {
                 LOG(info, " ×" << std::endl);
+                it++;
+                continue;
             }
+
+            it->sol = d.psolf.add(it->sol);
+            if (!d.l.empty() && it->w == d.l.back().w) {
+                d.l.back() = *it;
+            } else {
+                d.l.push_back(*it);
+            }
+            LOG(info, " ok" << std::endl);
             ++it;
         } else {
+            Weight w = it1->w - ws;
+            if (w > w_max) {
+                LOG(info, " ×" << std::endl);
+                it1++;
+                continue;
+            }
+
+            Profit p = it1->p - ps;
+            if (!d.l.empty() && p <= d.l.back().p) {
+                LOG(info, " ×" << std::endl);
+                it1++;
+                continue;
+            }
+
+            Profit ub = (w <= c)?
+                ub_dembo(instance, tx, p, c - w):
+                ub_dembo_rev(instance, sx, p, c - w);
+            LOG(info, " ub " << ub << " lb " << lb);
+            if (ub <= lb) {
+                LOG(info, " ×" << std::endl);
+                it1++;
+                continue;
+            }
+
             MinknapState s1{it1->w - ws, it1->p - ps, d.psolf.remove(it1->sol)};
             LOG(info, "state " << *it1 << " => " << s1);
 
-            Profit ub = (s1.w <= c)?
-                ub_dembo(instance, tx, s1.p, c - s1.w):
-                ub_dembo_rev(instance, sx, s1.p, c - s1.w);
-            LOG(info, " ub " << ub << " lb " << lb);
-
-            if (s1.w <= w_max
-                    && ub > lb
-                    && (d.l.empty() || s1.p > d.l.back().p)) {
-                // Update lower bound
-                if (s1.w <= c && s1.p > lb) {
-                    if (d.output.recursive_call_number == 1) {
-                        std::stringstream ss;
-                        ss << "it " << d.t - d.s << " (lb)";
-                        d.output.update_lb(s1.p, ss, info);
-                        lb = s1.p;
-                    }
-                    d.best_state = s1;
-                    assert(d.output.lower_bound <= d.output.upper_bound);
-                    if (d.best_state.p == d.output.upper_bound) {
-                        LOG_FOLD_END(info, " lb == ub");
-                        return;
-                    }
+            // Update lower bound
+            if (s1.w <= c && s1.p > lb) {
+                if (d.output.recursive_call_number == 1) {
+                    std::stringstream ss;
+                    ss << "it " << d.t - d.s << " (lb)";
+                    d.output.update_lb(s1.p, ss, info);
+                    lb = s1.p;
                 }
-
-                if (ub_max < ub)
-                    ub_max = ub;
-                if (!d.l.empty() && s1.w == d.l.back().w) {
-                    d.l.back() = s1;
-                    LOG(info, " ok" << std::endl);
-                } else {
-                    d.l.push_back(s1);
-                    LOG(info, " ok" << std::endl);
-                }
-            } else {
-                LOG(info, " ×" << std::endl);
+                d.best_state = s1;
+                assert(d.output.lower_bound <= d.output.upper_bound);
             }
+
+            if (!d.l.empty() && s1.w == d.l.back().w) {
+                d.l.back() = s1;
+            } else {
+                d.l.push_back(s1);
+            }
+            LOG(info, " ok" << std::endl);
             it1++;
         }
-    }
-    if (d.output.recursive_call_number == 1 && ub_max != -1 && d.output.upper_bound > ub_max) {
-        std::stringstream ss;
-        ss << "it " << d.t - d.s << " (ub)";
-        d.output.update_ub(ub_max, ss, info);
     }
     d.l0.swap(d.l);
     LOG_FOLD_END(info, "remove_item");

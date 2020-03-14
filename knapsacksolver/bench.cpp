@@ -108,7 +108,7 @@ std::string path(std::string d, ItemPos n)
                              + "knapPI_6_" + std::to_string(n) + "_10000000_";
 
     } else if (d == "sw5") {
-        return "data/largecoeff/knapPI_9_" + std::to_string(n) + "_1000/"
+        return "data/smallcoeff/knapPI_9_" + std::to_string(n) + "_1000/"
                              + "knapPI_9_" + std::to_string(n) + "_1000_";
     } else if (d == "sw7") {
         return "data/largecoeff/knapPI_9_" + std::to_string(n) + "_1000000/"
@@ -118,22 +118,22 @@ std::string path(std::string d, ItemPos n)
                              + "knapPI_9_" + std::to_string(n) + "_1000000_";
 
     } else if (d == "sp/u3") {
-        return "data/hardinstancetances/knapPI_11_" + std::to_string(n) + "_1000/"
+        return "data/hardinstances/knapPI_11_" + std::to_string(n) + "_1000/"
                                 + "knapPI_11_" + std::to_string(n) + "_1000_";
     } else if (d == "sp/wc3") {
-        return "data/hardinstancetances/knapPI_12_" + std::to_string(n) + "_1000/"
+        return "data/hardinstances/knapPI_12_" + std::to_string(n) + "_1000/"
                                 + "knapPI_12_" + std::to_string(n) + "_1000_";
     } else if (d == "sp/sc3") {
-        return "data/hardinstancetances/knapPI_13_" + std::to_string(n) + "_1000/"
+        return "data/hardinstances/knapPI_13_" + std::to_string(n) + "_1000/"
                                 + "knapPI_13_" + std::to_string(n) + "_1000_";
     } else if (d == "mstr3") {
-        return "data/hardinstancetances/knapPI_14_" + std::to_string(n) + "_1000/"
+        return "data/hardinstances/knapPI_14_" + std::to_string(n) + "_1000/"
                                 + "knapPI_14_" + std::to_string(n) + "_1000_";
     } else if (d == "pceil3") {
-        return "data/hardinstancetances/knapPI_15_" + std::to_string(n) + "_1000/"
+        return "data/hardinstances/knapPI_15_" + std::to_string(n) + "_1000/"
                                 + "knapPI_15_" + std::to_string(n) + "_1000_";
     } else if (d == "circle3") {
-        return "data/hardinstancetances/knapPI_16_" + std::to_string(n) + "_1000/"
+        return "data/hardinstances/knapPI_16_" + std::to_string(n) + "_1000/"
                                 + "knapPI_16_" + std::to_string(n) + "_1000_";
     }
     return "";
@@ -167,6 +167,7 @@ void bench_literature(
             double mean = -1;
             for (Counter h = 1; h <= 100 && t_total < t_max; ++h) {
                 Instance instance(path(dataset[k], n) + std::to_string(h) + ".csv", "pisinger");
+                //std::cout << path(dataset[k], n) + std::to_string(h) + ".csv" << std::endl;
                 try {
                     Info info = Info()
                         .set_timelimit(t_max - t_total)
