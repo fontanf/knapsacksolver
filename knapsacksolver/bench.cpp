@@ -9,10 +9,140 @@
 
 using namespace knapsacksolver;
 
+std::string path(std::string d, ItemPos n)
+{
+    if (d == "u3") {
+        return "data/smallcoeff/knapPI_1_" + std::to_string(n) + "_1000/"
+                             + "knapPI_1_" + std::to_string(n) + "_1000_";
+    } else if (d == "u4") {
+        return "data/smallcoeff/knapPI_1_" + std::to_string(n) + "_10000/"
+                             + "knapPI_1_" + std::to_string(n) + "_10000_";
+    } else if (d == "u5") {
+        return "data/largecoeff/knapPI_1_" + std::to_string(n) + "_100000/"
+                             + "knapPI_1_" + std::to_string(n) + "_100000_";
+    } else if (d == "u6") {
+        return "data/largecoeff/knapPI_1_" + std::to_string(n) + "_1000000/"
+                             + "knapPI_1_" + std::to_string(n) + "_1000000_";
+    } else if (d == "u7") {
+        return "data/largecoeff/knapPI_1_" + std::to_string(n) + "_10000000/"
+                             + "knapPI_1_" + std::to_string(n) + "_10000000_";
+
+    } else if (d == "wc3") {
+        return "data/smallcoeff/knapPI_2_" + std::to_string(n) + "_1000/"
+                             + "knapPI_2_" + std::to_string(n) + "_1000_";
+    } else if (d == "wc4") {
+        return "data/smallcoeff/knapPI_2_" + std::to_string(n) + "_10000/"
+                             + "knapPI_2_" + std::to_string(n) + "_10000_";
+    } else if (d == "wc5") {
+        return "data/largecoeff/knapPI_2_" + std::to_string(n) + "_100000/"
+                             + "knapPI_2_" + std::to_string(n) + "_100000_";
+    } else if (d == "wc6") {
+        return "data/largecoeff/knapPI_2_" + std::to_string(n) + "_1000000/"
+                             + "knapPI_2_" + std::to_string(n) + "_1000000_";
+    } else if (d == "wc7") {
+        return "data/largecoeff/knapPI_2_" + std::to_string(n) + "_10000000/"
+                             + "knapPI_2_" + std::to_string(n) + "_10000000_";
+
+    } else if (d == "sc3") {
+        return "data/smallcoeff/knapPI_3_" + std::to_string(n) + "_1000/"
+                             + "knapPI_3_" + std::to_string(n) + "_1000_";
+    } else if (d == "sc4") {
+        return "data/smallcoeff/knapPI_3_" + std::to_string(n) + "_10000/"
+                             + "knapPI_3_" + std::to_string(n) + "_10000_";
+    } else if (d == "sc5") {
+        return "data/largecoeff/knapPI_3_" + std::to_string(n) + "_100000/"
+                             + "knapPI_3_" + std::to_string(n) + "_100000_";
+    } else if (d == "sc6") {
+        return "data/largecoeff/knapPI_3_" + std::to_string(n) + "_1000000/"
+                             + "knapPI_3_" + std::to_string(n) + "_1000000_";
+    } else if (d == "sc7") {
+        return "data/largecoeff/knapPI_3_" + std::to_string(n) + "_10000000/"
+                             + "knapPI_3_" + std::to_string(n) + "_10000000_";
+
+    } else if (d == "isc3") {
+        return "data/smallcoeff/knapPI_4_" + std::to_string(n) + "_1000/"
+                             + "knapPI_4_" + std::to_string(n) + "_1000_";
+    } else if (d == "isc4") {
+        return "data/smallcoeff/knapPI_4_" + std::to_string(n) + "_10000/"
+                             + "knapPI_4_" + std::to_string(n) + "_10000_";
+    } else if (d == "isc5") {
+        return "data/largecoeff/knapPI_4_" + std::to_string(n) + "_100000/"
+                             + "knapPI_4_" + std::to_string(n) + "_100000_";
+    } else if (d == "isc6") {
+        return "data/largecoeff/knapPI_4_" + std::to_string(n) + "_1000000/"
+                             + "knapPI_4_" + std::to_string(n) + "_1000000_";
+    } else if (d == "isc7") {
+        return "data/largecoeff/knapPI_4_" + std::to_string(n) + "_10000000/"
+                             + "knapPI_4_" + std::to_string(n) + "_10000000_";
+
+    } else if (d == "asc3") {
+        return "data/smallcoeff/knapPI_5_" + std::to_string(n) + "_1000/"
+                             + "knapPI_5_" + std::to_string(n) + "_1000_";
+    } else if (d == "asc4") {
+        return "data/smallcoeff/knapPI_5_" + std::to_string(n) + "_10000/"
+                             + "knapPI_5_" + std::to_string(n) + "_10000_";
+    } else if (d == "asc5") {
+        return "data/largecoeff/knapPI_5_" + std::to_string(n) + "_100000/"
+                             + "knapPI_5_" + std::to_string(n) + "_100000_";
+    } else if (d == "asc6") {
+        return "data/largecoeff/knapPI_5_" + std::to_string(n) + "_1000000/"
+                             + "knapPI_5_" + std::to_string(n) + "_1000000_";
+    } else if (d == "asc7") {
+        return "data/largecoeff/knapPI_5_" + std::to_string(n) + "_10000000/"
+                             + "knapPI_5_" + std::to_string(n) + "_10000000_";
+
+    } else if (d == "ss3") {
+        return "data/smallcoeff/knapPI_6_" + std::to_string(n) + "_1000/"
+                             + "knapPI_6_" + std::to_string(n) + "_1000_";
+    } else if (d == "ss4") {
+        return "data/smallcoeff/knapPI_6_" + std::to_string(n) + "_10000/"
+                             + "knapPI_6_" + std::to_string(n) + "_10000_";
+    } else if (d == "ss5") {
+        return "data/largecoeff/knapPI_6_" + std::to_string(n) + "_100000/"
+                             + "knapPI_6_" + std::to_string(n) + "_100000_";
+    } else if (d == "ss6") {
+        return "data/largecoeff/knapPI_6_" + std::to_string(n) + "_1000000/"
+                             + "knapPI_6_" + std::to_string(n) + "_1000000_";
+    } else if (d == "ss7") {
+        return "data/largecoeff/knapPI_6_" + std::to_string(n) + "_10000000/"
+                             + "knapPI_6_" + std::to_string(n) + "_10000000_";
+
+    } else if (d == "sw5") {
+        return "data/largecoeff/knapPI_9_" + std::to_string(n) + "_1000/"
+                             + "knapPI_9_" + std::to_string(n) + "_1000_";
+    } else if (d == "sw7") {
+        return "data/largecoeff/knapPI_9_" + std::to_string(n) + "_1000000/"
+                             + "knapPI_9_" + std::to_string(n) + "_1000000_";
+    } else if (d == "sw8") {
+        return "data/largecoeff/knapPI_9_" + std::to_string(n) + "_1000000/"
+                             + "knapPI_9_" + std::to_string(n) + "_1000000_";
+
+    } else if (d == "sp/u3") {
+        return "data/hardinstancetances/knapPI_11_" + std::to_string(n) + "_1000/"
+                                + "knapPI_11_" + std::to_string(n) + "_1000_";
+    } else if (d == "sp/wc3") {
+        return "data/hardinstancetances/knapPI_12_" + std::to_string(n) + "_1000/"
+                                + "knapPI_12_" + std::to_string(n) + "_1000_";
+    } else if (d == "sp/sc3") {
+        return "data/hardinstancetances/knapPI_13_" + std::to_string(n) + "_1000/"
+                                + "knapPI_13_" + std::to_string(n) + "_1000_";
+    } else if (d == "mstr3") {
+        return "data/hardinstancetances/knapPI_14_" + std::to_string(n) + "_1000/"
+                                + "knapPI_14_" + std::to_string(n) + "_1000_";
+    } else if (d == "pceil3") {
+        return "data/hardinstancetances/knapPI_15_" + std::to_string(n) + "_1000/"
+                                + "knapPI_15_" + std::to_string(n) + "_1000_";
+    } else if (d == "circle3") {
+        return "data/hardinstancetances/knapPI_16_" + std::to_string(n) + "_1000/"
+                                + "knapPI_16_" + std::to_string(n) + "_1000_";
+    }
+    return "";
+}
+
 void bench_literature(
         std::string algorithm,
         std::string dataset_name,
-        std::vector<std::pair<std::string, Generator>>& dataset,
+        std::vector<std::string>& dataset,
         std::mt19937_64& gen)
 {
     std::ofstream file(algorithm + "_" + dataset_name + ".csv");
@@ -20,36 +150,29 @@ void bench_literature(
 
     // CSV
     file << "n \\ ds";
-    for (auto& p: dataset)
-        file << "," << p.first;
+    for (auto& d: dataset)
+        file << "," << d;
     file << std::endl;
 
-    Seed s = 0;
     for (ItemIdx n: {50, 100, 200, 500, 1000, 2000, 5000, 10000}) {
 
         file << n << std::flush; // CSV
 
         for (Counter k = 0; k < (Counter)dataset.size(); ++k) {
-            Generator& d = dataset[k].second;
-            d.n = n;
-            d.s = -1;
-            d.h = -1;
 
-            std::cout << d << "..." << std::flush; // Standard output
+            std::cout << "n " << n << ", " << dataset[k] << "..." << std::flush; // Standard output
 
             double t_max = 300;
             double t_total = 0.0;
             double mean = -1;
-            for (d.h=1; d.h<=d.hmax && t_total < t_max; ++d.h) {
-                s++;
-                d.s = s;
-                Instance ins = d.generate();
+            for (Counter h = 1; h <= 100 && t_total < t_max; ++h) {
+                Instance instance(path(dataset[k], n) + std::to_string(h) + ".csv", "pisinger");
                 try {
                     Info info = Info()
                         .set_timelimit(t_max - t_total)
                         //.set_verbose(true)
                         ;
-                    f(ins, gen, info);
+                    f(instance, gen, info);
                     double t = info.elapsed_time();
                     t_total += t;
                 } catch (...) {
@@ -78,7 +201,7 @@ void bench_normal(std::string algorithm, double time_limit, std::mt19937_64& gen
 {
     func f = get_algorithm(algorithm);
 
-    std::vector<ItemIdx> ns {100, 1000, 10000, 100000, 1000000};
+    std::vector<ItemIdx> ns {100, 1000, 10000, 100000};
     std::vector<Weight> rs {1000, 10000, 100000, 1000000, 10000000, 100000000};
     std::vector<double> xs {0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9};
 
@@ -94,48 +217,38 @@ void bench_normal(std::string algorithm, double time_limit, std::mt19937_64& gen
     int col_g = 0;
     int col_b = 0;
 
-    Generator d;
-    d.normal = true;
-    d.t = "normal";
-    d.dw = 10;
-    d.d = 10;
-    d.s = 0;
-
     for (Counter in = 0; in < (Counter)ns.size(); ++in) {
         ItemIdx n = ns[in];
-        d.n = n;
         for (Counter ir = 0; ir < (Counter)rs.size(); ++ir) {
             Weight r = rs[ir];
-            d.r = r;
 
             // Standard output
             std::string s = "--- n " + std::to_string(n) + " r " + std::to_string(r) + " --- ";
             int pos = (int)((80 - s.length())/2);
-            for(int i=0; i<pos; i++)
+            for(int i = 0; i < pos; i++)
                 std::cout << " ";
             std::cout << s << std::endl;
 
             for (Counter ix = 0; ix < (Counter)xs.size(); ++ix) {
                 double x = xs[ix];
-                d.x = x;
-                d.s++;
 
                 // Standard output
                 std::cout
                     << "x " << std::right << std::setw(5) << x
-                    << " s " << std::right << std::setw(5) << d.s
                     << std::flush;
 
-                Instance ins = d.generate();
+                Instance instance("data/normal/knap_n" + std::to_string(n)
+                        + "_r" + std::to_string(r)
+                        + "_x0." + std::to_string((int)(10 * x)), "standard");
                 double t = time_limit + 1;
                 Info info = Info()
                     .set_timelimit(time_limit)
                     //.set_verbose(true)
                     ;
-                Output output(ins, info);
+                Output output(instance, info);
                 try {
                     info.reset_time();
-                    output = f(ins, gen, info);
+                    output = f(instance, gen, info);
                     t = info.elapsed_time();
                 } catch (...) {
                 }
@@ -212,59 +325,34 @@ int main(int argc, char *argv[])
             std::cout << "*** " << algorithm << " / " << dataset << " ***" << std::endl;
 
             if (dataset == "easy" || dataset == "literature") {
-                std::vector<std::pair<std::string, Generator>> dataset_easy {
-                        {"u3", Generator::classical_generator("u", 1000)},
-                        {"u4", Generator::classical_generator("u", 10000)},
-                        {"wc3", Generator::classical_generator("wc", 1000)},
-                        {"wc4", Generator::classical_generator("wc", 10000)},
-                        {"sc3", Generator::classical_generator("sc", 1000)},
-                        {"sc4", Generator::classical_generator("sc", 10000)},
-                        {"isc3", Generator::classical_generator("isc", 1000)},
-                        {"isc4", Generator::classical_generator("isc", 10000)},
-                        {"asc3", Generator::classical_generator("asc", 1000)},
-                        {"asc4", Generator::classical_generator("asc", 10000)},
-                        {"ss3", Generator::classical_generator("ss", 1000)},
-                        {"ss4", Generator::classical_generator("ss", 10000)},
-                        {"sw5", Generator::classical_generator("sw", 100000)},
+                std::vector<std::string> dataset_easy {
+                        "u3", "u4",
+                        "wc3", "wc4",
+                        "sc3", "sc4",
+                        "isc3", "isc4",
+                        "asc3", "asc4",
+                        "ss3", "ss4",
+                        "sw5",
                 };
                 bench_literature(algorithm, "easy", dataset_easy, gen);
             }
 
             if (dataset == "difficultsmall" || dataset == "literature") {
-                std::vector<std::pair<std::string, Generator>> dataset_difficultsmall {
-                        {"sp/u3", Generator::spanner_generator("u", 1000, 2, 10)},
-                        {"sp/wc3", Generator::spanner_generator("wc", 1000, 2, 10)},
-                        {"sp/sc3", Generator::spanner_generator("sc", 1000, 2, 10)},
-                        {"mstr3", Generator::mstr_generator(1000, 300, 200, 6)},
-                        {"pceil3", Generator::pceil_generator(1000, 3)},
-                        {"circle3", Generator::circle_generator(1000, 2.0/3)},
+                std::vector<std::string> dataset_difficultsmall {
+                        "sp/u3", "sp/wc3", "sp/sc3", "mstr3", "pceil3", "circle3",
                 };
                 bench_literature(algorithm, "difficultsmall", dataset_difficultsmall, gen);
             }
 
             if (dataset == "difficultlarge" || dataset == "literature") {
-                std::vector<std::pair<std::string, Generator>> dataset_difficultlarge {
-                        {"u5", Generator::classical_generator("u", 100000)},
-                        {"u6", Generator::classical_generator("u", 1000000)},
-                        {"u7", Generator::classical_generator("u", 10000000)},
-                        {"wc5", Generator::classical_generator("wc", 100000)},
-                        {"wc6", Generator::classical_generator("wc", 1000000)},
-                        {"wc7", Generator::classical_generator("wc", 10000000)},
-                        {"sc5", Generator::classical_generator("sc", 100000)},
-                        {"sc6", Generator::classical_generator("sc", 1000000)},
-                        {"sc7", Generator::classical_generator("sc", 10000000)},
-                        {"isc5", Generator::classical_generator("isc", 100000)},
-                        {"isc6", Generator::classical_generator("isc", 1000000)},
-                        {"isc7", Generator::classical_generator("isc", 10000000)},
-                        {"asc5", Generator::classical_generator("asc", 100000)},
-                        {"asc6", Generator::classical_generator("asc", 1000000)},
-                        {"asc7", Generator::classical_generator("asc", 10000000)},
-                        {"ss5", Generator::classical_generator("ss", 100000)},
-                        {"ss6", Generator::classical_generator("ss", 1000000)},
-                        {"ss7", Generator::classical_generator("ss", 10000000)},
-                        {"sw6", Generator::classical_generator("sw", 1000000)},
-                        {"sw7", Generator::classical_generator("sw", 10000000)},
-                        {"sw8", Generator::classical_generator("sw", 100000000)},
+                std::vector<std::string> dataset_difficultlarge {
+                        "u5", "u6", "u7",
+                        "wc5", "wc6", "wc7",
+                        "sc5", "sc6", "sc7",
+                        "isc5", "isc6", "isc7",
+                        "asc5", "asc6", "asc7",
+                        "ss5", "ss6", "ss7",
+                        "sw7", "sw8",
                 };
                 bench_literature(algorithm, "difficultlarge", dataset_difficultlarge, gen);
             }

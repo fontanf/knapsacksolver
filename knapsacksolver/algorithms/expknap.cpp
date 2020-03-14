@@ -133,23 +133,19 @@ void expknap_rec(ExpknapInternalData& d, ItemPos s, ItemPos t)
 
 ExpknapOutput knapsacksolver::expknap(Instance& instance, ExpknapOptionalParameters p)
 {
-    VER(p.info, "*** expknap" << std::endl);
-    if (!p.greedy)
-        VER(p.info, " g false");
-    if (p.surrelax != -1)
-        VER(p.info, " s " << p.surrelax);
-    if (p.greedynlogn != -1)
-        VER(p.info, " gn " << p.greedynlogn);
-    if (p.combo_core)
-        VER(p.info, " cc " << p.combo_core);
-    VER(p.info, " ***" << std::endl);
+    VER(p.info, "*** expknap"
+            << ((p.greedy)? " -g": "")
+            << " -s " << p.surrelax
+            << " -n " << p.greedynlogn
+            << ((p.combo_core)? " -c": "")
+            << " ***" << std::endl);
 
-    LOG_FOLD_START(p.info, "expknap"
-            << " g " << p.greedy
-            << " gn " << p.greedynlogn
-            << " s " << p.surrelax
-            << " combo_core " << p.combo_core
-            << std::endl);
+    LOG_FOLD_START(p.info, "*** expknap"
+            << ((p.greedy)? " -g": "")
+            << " -s " << p.surrelax
+            << " -n " << p.greedynlogn
+            << ((p.combo_core)? " -c": "")
+            << " ***" << std::endl);
 
     bool end = false;
     if (p.end == NULL)

@@ -13,26 +13,21 @@ void minknap_main(Instance& instance, MinknapOptionalParameters& p, MinknapOutpu
 
 MinknapOutput knapsacksolver::minknap(Instance& instance, MinknapOptionalParameters p)
 {
-    VER(p.info, "*** minknap");
-    if (p.partial_solution_size != 64)
-        VER(p.info, " k " << p.partial_solution_size);
-    if (!p.greedy)
-        VER(p.info, " g false");
-    if (p.pairing != -1)
-        VER(p.info, " p " << p.pairing);
-    if (p.surrelax != -1)
-        VER(p.info, " s " << p.surrelax);
-    if (p.combo_core)
-        VER(p.info, " cc true");
-    VER(p.info, " ***" << std::endl);
+    VER(p.info, "*** minknap"
+            << " -k " << p.partial_solution_size
+            << ((p.greedy)? " -g": "")
+            << " -p " << p.pairing
+            << " -s " << p.surrelax
+            << ((p.combo_core)? " -c": "")
+            << " ***" << std::endl);
 
-    LOG_FOLD_START(p.info, "minknap"
-            << " k " << p.partial_solution_size
-            << " g " << p.greedy
-            << " p " << p.pairing
-            << " s " << p.surrelax
-            << " combo_core " << p.combo_core
-            << std::endl);
+    LOG_FOLD_START(p.info, "*** minknap"
+            << " -k " << p.partial_solution_size
+            << ((p.greedy)? " -g": "")
+            << " -p " << p.pairing
+            << " -s " << p.surrelax
+            << ((p.combo_core)? " -c": "")
+            << " ***" << std::endl);
 
     bool end = false;
     if (p.end == NULL)

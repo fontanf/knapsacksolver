@@ -75,6 +75,10 @@ cc_test(
                 "//knapsacksolver/algorithms:greedy",
                 "@googletest//:gtest_main",
         ],
+        copts = select({
+                "@bazel_tools//src/conditions:windows": ['/std:c++latest'],
+                "//conditions:default":                 ["-std=c++14"],
+        }),
         timeout = "long",
 )
 
@@ -109,6 +113,7 @@ cc_binary(
                 "@bazel_tools//src/conditions:windows": ['/std:c++latest'],
                 "//conditions:default":                 ["-std=c++14"],
         }),
+        data = ["//data:data"],
 )
 
 cc_binary(

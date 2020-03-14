@@ -59,14 +59,19 @@ Instance::Instance(std::string filepath, std::string format)
         return;
     }
 
-    if (format == "knapsack_standard") {
+    if (format == "standard") {
         read_standard(file);
+    } else if (format == "pisinger") {
+        read_pisinger(file);
     } else if (format == "subsetsum_standard") {
         read_subsetsum_standard(file);
     } else {
         std::cerr << "\033[31m" << "ERROR, unknown instance format: \"" << format << "\"" << "\033[0m" << std::endl;
         assert(false);
     }
+
+    f_ = 0;
+    l_ = item_number() - 1;
 }
 
 void Instance::read_standard(std::ifstream& file)
@@ -74,16 +79,54 @@ void Instance::read_standard(std::ifstream& file)
     ItemIdx n;
     file >> n >> c_orig_;
 
-    f_ = 0;
-    l_ = n - 1;
-
     items_.reserve(n);
     Weight w;
     Profit p;
-    for (ItemPos j=0; j<n; ++j) {
+    for (ItemPos j = 0; j < n; ++j) {
         file >> w >> p;
         add_item(w, p);
     }
+}
+
+static inline void rtrim(std::string &s) {
+    s.erase(std::find_if(s.rbegin(), s.rend(), [](int ch) {
+        return !std::isspace(ch);
+    }).base(), s.end());
+}
+
+std::vector<std::string> split(std::string line)
+{
+    std::vector<std::string> v;
+    std::stringstream ss(line);
+    std::string tmp;
+    while (getline(ss, tmp, ',')) {
+        rtrim(tmp);
+        v.push_back(tmp);
+    }
+    return v;
+}
+
+void Instance::read_pisinger(std::ifstream& file)
+{
+    ItemIdx n;
+    std::string tmp;
+    Profit opt;
+    file >> tmp >> tmp >> n >> tmp >> c_orig_ >> tmp >> opt >> tmp >> tmp;
+
+    items_.reserve(n);
+    std::vector<int> x(n);
+    getline(file, tmp);
+    for (ItemPos j = 0; j < n; ++j) {
+        getline(file, tmp);
+        std::vector<std::string> line = split(tmp);
+        add_item(std::stol(line[2]), std::stol(line[1]));
+        x[j] = std::stol(line[3]);
+    }
+
+    sol_opt_ = std::make_unique<Solution>(*this);
+    for (ItemPos j = 0; j < n; ++j)
+        sol_opt_->set(j, x[j]);
+    assert(sol_opt_->profit() == opt);
 }
 
 void Instance::read_subsetsum_standard(std::ifstream& file)
@@ -91,12 +134,9 @@ void Instance::read_subsetsum_standard(std::ifstream& file)
     ItemIdx n;
     file >> n >> c_orig_;
 
-    f_ = 0;
-    l_ = n - 1;
-
     items_.reserve(n);
     Weight w;
-    for (ItemPos j=0; j<n; ++j) {
+    for (ItemPos j = 0; j < n; ++j) {
         file >> w;
         add_item(w,w);
     }

@@ -15,23 +15,19 @@ void balknap_main(Instance& instance, BalknapOptionalParameters& p, BalknapOutpu
 
 BalknapOutput knapsacksolver::balknap(Instance& instance, BalknapOptionalParameters p)
 {
-    VER(p.info, "*** balknap");
-    if (p.partial_solution_size != 64)
-        VER(p.info, " k " << p.partial_solution_size);
-    if (!p.greedy)
-        VER(p.info, " g false");
-    if (p.greedynlogn != -1)
-        VER(p.info, " gn " << p.greedynlogn);
-    if (p.surrelax != -1)
-        VER(p.info, " s " << p.surrelax);
-    VER(p.info, " ***" << std::endl);
+    VER(p.info, "*** balknap"
+            << " -k " << p.partial_solution_size
+            << ((p.greedy)? " -g": "")
+            << " -n " << p.greedynlogn
+            << " -s " << p.surrelax
+            << " ***" << std::endl);
 
-    LOG_FOLD_START(p.info, "balknap"
-            << " k " << p.partial_solution_size
-            << " g " << p.greedy
-            << " gn " << p.greedynlogn
-            << " s " << p.surrelax
-            << std::endl);
+    LOG_FOLD_START(p.info, "*** balknap"
+            << " -k " << p.partial_solution_size
+            << ((p.greedy)? " -g": "")
+            << " -n " << p.greedynlogn
+            << " -s " << p.surrelax
+            << " ***" << std::endl);
 
     bool end = false;
     if (p.end == NULL)

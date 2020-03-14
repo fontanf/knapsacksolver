@@ -33,36 +33,26 @@ All classical and state-of-the-art algorithms are implemented. Most of them are 
 This project uses Bazel https://bazel.build/
 
 Compile:
-```
+```shell
 bazel build -- //...
 ```
 
-Generate an instance:
-```
-bazel build -- //lib:generator_main
-./bazel-bin/knapsacksolver/generator_main -n 1000 -t sc -r 1000 -o ./ins.txt
-```
-
-Examples:
-- `-n 100 -t u/wc/sc/isc/asc/ss/sw -r 1000`
-- `-n 100 --spanner -t u/wc/sc/isc/asc/ss/sw -r 1000 -v 2 -m 10`
-- `-n 100 -t mstr -r 1000 -ka 300 -kb 200 -d 6`
-- `-n 100 -t pceil -r 1000 -d 3`
-- `-n 100 -t circle -r 1000 -d 0.66`
+Download and uncompress the instances in the `data/` folder:
+https://drive.google.com/file/d/1k2Mp3Z5sb5tVJO8I5-WiAglqawk-l1k3/view?usp=sharing
 
 Solve:
-```
-./bazel-bin/knapsacksolver/main -a bellman_array_part -i ins.txt -o out.ini -c sol.txt -v
-```
-
-Instances can be visualized with gnuplot:
-```
-./bazel-bin/knapsacksolver/generator_main -n 1000 -t sw -r 1000 -o ./ins.txt -p ./ins.plot
-gnuplot
-gnuplot> set yrange[0:]; set xrange[0:]; plot 'ins.plot' u 1:2
+```shell
+./bazel-bin/knapsacksolver/main -v --algorithm combo --input data/largecoeff/knapPI_3_10000_10000000/knapPI_3_10000_10000000_50.csv --format pisinger
+./bazel-bin/knapsacksolver/main -v --algorithm combo --input data/largecoeff/knapPI_5_10000_10000000/knapPI_5_10000_10000000_60.csv --format pisinger
+./bazel-bin/knapsacksolver/main -v --algorithm combo --input data/normal/knap_n100000_r100000000_x0.5 --format standard
 ```
 
-Unit tests:
+For more options, see:
+```
+./bazel-bin/knapsacksolver/main --help
+```
+
+Run tests:
 ```
 bazel test -- //...
 ```
