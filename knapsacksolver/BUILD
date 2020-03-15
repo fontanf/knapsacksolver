@@ -1,3 +1,5 @@
+load("//knapsacksolver:variables.bzl", "STDCPP")
+
 cc_library(
         name = "knapsacksolver",
         hdrs = [
@@ -18,10 +20,7 @@ cc_library(
                 "@bazel_tools//src/conditions:windows": [],
                 "//conditions:default":                 ["-lpthread"],
         }),
-        copts = select({
-                "@bazel_tools//src/conditions:windows": ['/std:c++latest'],
-                "//conditions:default":                 ["-std=c++14"],
-        }),
+        copts = STDCPP,
         visibility = ["//visibility:public"],
 )
 
@@ -75,10 +74,7 @@ cc_test(
                 "//knapsacksolver/algorithms:greedy",
                 "@googletest//:gtest_main",
         ],
-        copts = select({
-                "@bazel_tools//src/conditions:windows": ['/std:c++latest'],
-                "//conditions:default":                 ["-std=c++14"],
-        }),
+        copts = STDCPP,
         timeout = "long",
 )
 
@@ -95,10 +91,7 @@ cc_binary(
                 "@boost//:program_options",
                 "//knapsacksolver/algorithms:algorithms",
         ],
-        copts = select({
-                "@bazel_tools//src/conditions:windows": ['/std:c++latest'],
-                "//conditions:default":                 ["-std=c++14"],
-        }),
+        copts = STDCPP,
 )
 
 cc_binary(
@@ -109,10 +102,7 @@ cc_binary(
                 "//knapsacksolver/algorithms:algorithms",
                 ":generator",
         ],
-        copts = select({
-                "@bazel_tools//src/conditions:windows": ['/std:c++latest'],
-                "//conditions:default":                 ["-std=c++14"],
-        }),
+        copts = STDCPP,
         data = ["//data:data"],
 )
 
@@ -124,9 +114,6 @@ cc_binary(
                 ":generator",
                 ":tester",
         ],
-        copts = select({
-                "@bazel_tools//src/conditions:windows": ['/std:c++latest'],
-                "//conditions:default":                 ["-std=c++14"],
-        }),
+        copts = STDCPP,
 )
 

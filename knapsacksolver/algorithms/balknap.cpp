@@ -201,7 +201,7 @@ void balknap_main(Instance& instance, BalknapOptionalParameters& p, BalknapOutpu
     BalknapInternalData d(instance, p, output);
     PartSolFactory1 psolf(instance, p.partial_solution_size, b, f, l);
     PartSol1 psol_init = 0;
-    for (ItemPos j=f; j<b; ++j)
+    for (ItemPos j = f; j < b; ++j)
         psol_init = psolf.add(psol_init, j);
     // s(w_bar,p_bar) = b
     d.map.insert({{w_bar, p_bar},{b, f, psol_init}});
@@ -216,7 +216,7 @@ void balknap_main(Instance& instance, BalknapOptionalParameters& p, BalknapOutpu
         d.output.lower_bound - 1;
 
     // Recursion
-    for (ItemPos t=b; t<=l; ++t) {
+    for (ItemPos t = b; t <= l; ++t) {
         balknap_update_bounds(d);
         if (!p.info.check_time()) {
             if (p.set_end)

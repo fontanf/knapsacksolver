@@ -109,7 +109,7 @@ https://github.com/fontanf/generalizedassignmentsolver/blob/master/generalizedas
 
 Algorithms:
 - Dynamic programming with Bellman recursion
-  - Top-down (recursive): `-a bellmanrec_array` :heavy_check_mark:
+  - Top-down (recursive): `-a bellman_rec` :heavy_check_mark:
   - Bottom-up (iterative), array: `-a bellman_array` :heavy_check_mark: `-a bellman_array_all` :heavy_check_mark: `-a bellman_array_one` :heavy_check_mark: `-a bellman_array_part` :heavy_check_mark: `-a bellman_array_rec` :heavy_check_mark:
   - Bottom-up (iterative), lists: `-a bellman_list` :heavy_check_mark: `-a bellman_list_sort` :heavy_check_mark: `-a bellman_list_rec` :heavy_check_mark:
   - Bottom-up (iterative), array, parallel: `-a bellmanpar_array` :heavy_check_mark:
@@ -140,14 +140,17 @@ Algorithms:
 - Given a number of items, a range, and a distribution for the weights and profits, a cell contains the mean time (in ms) to solve 100 instances with these parameters and a capacity from 1% to 100% of the sum of all weights of the instance.
 
 Bench:
-```
-bazel run //knapsacksolver:bench -- -a minknap balknap -d normal easy difficultsmall difficultlarge
+```shell
+bazel run //knapsacksolver:bench -- -a bellman_rec bellman_array bellman_array_all bellman_array_part bellman_array_rec bellmanpar_array -d easy
+bazel run //knapsacksolver:bench -- -a expknap expknap_combo balknap balknap_combo minknap combo -d normal
+bazel run //knapsacksolver:bench -- -a expknap expknap_combo balknap minknap combo -d easy difficultlarge difficultsmall
+bazel run //knapsacksolver:bench -- -a bellman_list_sort -d difficultsmall
 ```
 
 ### Dynamic Programming: recursive vs iterative implementation
 
 Except for very sparse instances (like SW), the iterative implementation is about 10 times faster.
-- ![Recursive implementation](bench/bellmanrec_easy.csv)
+- ![Recursive implementation](bench/bellman_rec_easy.csv)
 - ![Iterative implementation](bench/bellman_array_all_easy.csv)
 
 ### Dynamic Programming: cost of retrieving an optimal solution
