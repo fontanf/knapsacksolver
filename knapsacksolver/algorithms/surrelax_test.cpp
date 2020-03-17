@@ -7,12 +7,12 @@
 using namespace knapsacksolver;
 
 /*
-Profit surrogate_test(Instance& ins)
+Profit surrogate_test(Instance& instance)
 {
     Info info;
-    ins.sort_partially(info);
-    Profit lb = greedy(ins).profit();
-    return surrogate(ins, lb, info).ub;
+    instance.sort_partially(info);
+    Profit lb = greedy(instance).profit();
+    return surrogate(instance, lb, info).ub;
 }
 
 std::vector<Profit (*)(Instance&)> f = {

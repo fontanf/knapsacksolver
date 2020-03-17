@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
     // Parse program options
 
     std::string algorithm = "bellman_array";
-    std::string instancefile = "";
+    std::string instancetancefile = "";
     std::string outputfile = "";
     std::string format = "standard";
     std::string certfile = "";
@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
     desc.add_options()
         ("help,h", "produce help message")
         ("algorithm,a", po::value<std::string>(&algorithm), "set algorithm")
-        ("input,i", po::value<std::string>(&instancefile)->required(), "set input file (required)")
+        ("input,i", po::value<std::string>(&instancetancefile)->required(), "set input file (required)")
         ("format,f", po::value<std::string>(&format), "set input file format (default: standard)")
         ("output,o", po::value<std::string>(&outputfile), "set JSON output file")
         ("cert,c", po::value<std::string>(&certfile), "set certificate file")
@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
 
     std::mt19937_64 gen(seed);
     auto func = get_algorithm(algorithm);
-    Instance ins(instancefile, format);
+    Instance instance(instancetancefile, format);
 
     Info info = Info()
         .set_verbose(vm.count("verbose"))
@@ -65,14 +65,14 @@ int main(int argc, char *argv[])
         .set_loglevelmax(loglevelmax)
         ;
 
-    auto output = func(ins, gen, info);
+    auto output = func(instance, gen, info);
 
-    if (ins.optimal_solution() != NULL) {
-        if (output.solution.feasible() && output.solution.profit() > ins.optimum()) {
+    if (instance.optimal_solution() != NULL) {
+        if (output.solution.feasible() && output.solution.profit() > instance.optimum()) {
             std::cerr << "\033[31m" << "ERROR, computed solution strictly better than provided optimum." << "\033[0m" << std::endl;
             return 1;
         }
-        if (output.upper_bound != -1 && output.upper_bound < ins.optimum()) {
+        if (output.upper_bound != -1 && output.upper_bound < instance.optimum()) {
             std::cerr << "\033[31m" << "ERROR, computed upper bound strictly lower than provided optimum." << "\033[0m" << std::endl;
             return 1;
         }

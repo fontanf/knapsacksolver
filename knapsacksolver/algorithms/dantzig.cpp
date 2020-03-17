@@ -2,18 +2,17 @@
 
 using namespace knapsacksolver;
 
-Profit knapsacksolver::ub_dantzig(const Instance& ins, Info info)
+Profit knapsacksolver::ub_dantzig(const Instance& instance, Info info)
 {
     VER(info, "*** dantzig ***" << std::endl);
-    assert(ins.sort_type() >= 1);
+    assert(instance.sort_type() >= 1);
 
-    ItemPos b = ins.break_item();
-    Weight  r = ins.break_capacity();
-    Profit  p = ins.break_solution()->profit();
-    if (b <= ins.last_item() && r > 0)
-        p += (ins.item(b).p * r) / ins.item(b).w;
+    ItemPos b = instance.break_item();
+    Weight  r = instance.break_capacity();
+    Profit  p = instance.break_solution()->profit();
+    if (b <= instance.last_item() && r > 0)
+        p += (instance.item(b).p * r) / instance.item(b).w;
 
-    algorithm_end(p, info);
-    return p;
+    return algorithm_end(p, info);
 }
 

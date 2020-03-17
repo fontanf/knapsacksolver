@@ -4,16 +4,16 @@
 
 using namespace knapsacksolver;
 
-Output minknap_test(Instance& ins)
+Output minknap_test(Instance& instance)
 {
-    return minknap(ins);
+    return minknap(instance);
 }
 
-Output greedy_test(Instance& ins)
+Output greedy_test(Instance& instance)
 {
     Info info;
-    ins.sort_partially(info);
-    return greedy(ins, info);
+    instance.sort_partially(info);
+    return greedy(instance, info);
 }
 
 std::vector<Output (*)(Instance&)> f = {

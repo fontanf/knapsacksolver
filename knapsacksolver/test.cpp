@@ -8,31 +8,31 @@ using namespace knapsacksolver;
 
 TEST(Instance, Sort)
 {
-    Instance instance(100, {
+    Instance instancetance(100, {
             {10, 10},
             {10, 15},
             {10, 5},
             {10, 12},
             {10, 20}});
     Info info;
-    instance.sort(info);
+    instancetance.sort(info);
 
-    EXPECT_EQ(instance.item(4).p, 5);
-    EXPECT_EQ(instance.item(3).p, 10);
-    EXPECT_EQ(instance.item(2).p, 12);
-    EXPECT_EQ(instance.item(1).p, 15);
-    EXPECT_EQ(instance.item(0).p, 20);
+    EXPECT_EQ(instancetance.item(4).p, 5);
+    EXPECT_EQ(instancetance.item(3).p, 10);
+    EXPECT_EQ(instancetance.item(2).p, 12);
+    EXPECT_EQ(instancetance.item(1).p, 15);
+    EXPECT_EQ(instancetance.item(0).p, 20);
 
-    EXPECT_EQ(instance.item(4).j, 2);
-    EXPECT_EQ(instance.item(3).j, 0);
-    EXPECT_EQ(instance.item(2).j, 3);
-    EXPECT_EQ(instance.item(1).j, 1);
-    EXPECT_EQ(instance.item(0).j, 4);
+    EXPECT_EQ(instancetance.item(4).j, 2);
+    EXPECT_EQ(instancetance.item(3).j, 0);
+    EXPECT_EQ(instancetance.item(2).j, 3);
+    EXPECT_EQ(instancetance.item(1).j, 1);
+    EXPECT_EQ(instancetance.item(0).j, 4);
 }
 
 TEST(Instance, SortPartially)
 {
-    Instance instance(4, {
+    Instance instancetance(4, {
             {1, 1},
             {2, 1},
             {3, 1},
@@ -43,13 +43,13 @@ TEST(Instance, SortPartially)
             {8, 1},
             {9, 1}});
     Info info;
-    instance.sort_partially(info);
-    EXPECT_EQ(instance.item(instance.break_item()).j, 2);
+    instancetance.sort_partially(info);
+    EXPECT_EQ(instancetance.item(instancetance.break_item()).j, 2);
 }
 
 TEST(Instance, SortPartially2)
 {
-    Instance instance(5, { // break item b = 3 (1, 3)
+    Instance instancetance(5, { // break item b = 3 (1, 3)
             {1, 1},
             {9, 1},
             {2, 1},
@@ -60,8 +60,8 @@ TEST(Instance, SortPartially2)
             {5, 1},
             {6, 1}});
     Info info;
-    instance.sort_partially(info);
-    EXPECT_EQ(instance.item(instance.break_item()).j, 4);
+    instancetance.sort_partially(info);
+    EXPECT_EQ(instancetance.item(instancetance.break_item()).j, 4);
 }
 
 TEST(Instance, SortPartially3)
@@ -72,72 +72,72 @@ TEST(Instance, SortPartially3)
         for (Counter h = 1; h < 100; ++h) {
             Weight wmax = d1(g);
             std::uniform_int_distribution<int> d2(1, wmax);
-            Instance ins;
+            Instance instance;
             Weight wsum = 0;
             for (ItemIdx j = 0; j < n; ++j) {
                 Weight w = d2(g);
                 Profit p = d2(g);
-                ins.add_item(w, p);
+                instance.add_item(w, p);
                 wsum += w;
             }
-            ins.set_capacity(std::max(wmax, (h * wsum) / 100));
+            instance.set_capacity(std::max(wmax, (h * wsum) / 100));
 
-            std::cout << "n " << ins.item_number()
-                << " c " << ins.capacity() << std::endl;
+            std::cout << "n " << instance.item_number()
+                << " c " << instance.capacity() << std::endl;
             std::cout << "{";
-            for (ItemIdx j = 0; j < ins.item_number(); ++j) {
-                std::cout << "{" << ins.item(j).w << "," << ins.item(j).p << "}";
-                if (j != ins.item_number() - 1)
+            for (ItemIdx j = 0; j < instance.item_number(); ++j) {
+                std::cout << "{" << instance.item(j).w << "," << instance.item(j).p << "}";
+                if (j != instance.item_number() - 1)
                     std::cout << ", ";
             }
             std::cout << "}" << std::endl;
 
             Info info_tmp;
-            ins.sort_partially(info_tmp, 2);
+            instance.sort_partially(info_tmp, 2);
 
-            Solution sol(ins);
-            ItemPos b = ins.break_item();
+            Solution sol(instance);
+            ItemPos b = instance.break_item();
 
-            if (b == ins.item_number()) {
+            if (b == instance.item_number()) {
                 continue;
             }
 
-            if (ins.break_solution()->remaining_capacity() == 0) {
+            if (instance.break_solution()->remaining_capacity() == 0) {
                 continue;
             }
 
-            Weight wb = ins.item(b).w;
-            Profit pb = ins.item(b).p;
+            Weight wb = instance.item(b).w;
+            Profit pb = instance.item(b).p;
 
             std::cout << "b " << b << " wb " << wb << " pb " << pb << std::endl;
-            for (ItemPos j=0; j<ins.break_item(); ++j) {
-                EXPECT_GE(ins.item(j).p*wb, ins.item(j).w*pb);
-                if (ins.item(j).p*wb < ins.item(j).w*pb) {
-                    std::cout << ins << std::endl;
+            for (ItemPos j=0; j<instance.break_item(); ++j) {
+                EXPECT_GE(instance.item(j).p*wb, instance.item(j).w*pb);
+                if (instance.item(j).p*wb < instance.item(j).w*pb) {
+                    std::cout << instance << std::endl;
                     return;
                 }
             }
-            for (ItemPos j=ins.break_item(); j<ins.item_number(); ++j) {
-                EXPECT_LE(ins.item(j).p*wb, ins.item(j).w*pb);
-                if (ins.item(j).p*wb > ins.item(j).w*pb) {
-                    std::cout << ins << std::endl;
+            for (ItemPos j=instance.break_item(); j<instance.item_number(); ++j) {
+                EXPECT_LE(instance.item(j).p*wb, instance.item(j).w*pb);
+                if (instance.item(j).p*wb > instance.item(j).w*pb) {
+                    std::cout << instance << std::endl;
                     return;
                 }
             }
 
-            EXPECT_LE(ins.break_solution()->weight(), ins.capacity());
-            if (ins.break_solution()->weight() > ins.capacity()){
-                std::cout << ins << std::endl;
+            EXPECT_LE(instance.break_solution()->weight(), instance.capacity());
+            if (instance.break_solution()->weight() > instance.capacity()){
+                std::cout << instance << std::endl;
                 return;
             }
 
-            EXPECT_GT(ins.break_solution()->weight() + ins.item(b).w,
-                    ins.capacity());
-            if (ins.break_solution()->weight() + ins.item(b).w
-                    <= ins.capacity()) {
-                std::cout << "w_bar " << ins.break_solution()->weight() << std::endl;
-                std::cout << "w_b   " << ins.item(b).w << std::endl;
-                std::cout << ins << std::endl;
+            EXPECT_GT(instance.break_solution()->weight() + instance.item(b).w,
+                    instance.capacity());
+            if (instance.break_solution()->weight() + instance.item(b).w
+                    <= instance.capacity()) {
+                std::cout << "w_bar " << instance.break_solution()->weight() << std::endl;
+                std::cout << "w_b   " << instance.item(b).w << std::endl;
+                std::cout << instance << std::endl;
                 return ;
             }
 

@@ -15,12 +15,12 @@ int main(int argc, char *argv[])
     po::options_description desc("Allowed options");
     desc.add_options()
         ("help,h", "produce help message")
-        (",t", po::value<std::string>(&data.t)->required(), "set instance type (u, wc, sc, isc, asc, ss, sw, mstr, pceil, circle)")
+        (",t", po::value<std::string>(&data.t)->required(), "set instancetance type (u, wc, sc, isc, asc, ss, sw, mstr, pceil, circle)")
         (",n", po::value<ItemIdx>(&data.n)->required(), "set item number")
         (",r", po::value<Profit>(&data.r), "set R")
-        ("ka", po::value<Profit>(&data.k1), "set k1 (for mstr instances)")
-        ("kb", po::value<Profit>(&data.k2), "set k2 (for mstr instances)")
-        (",d", po::value<double>(&data.d), "set d (for mstr (6), pceil (3) and circle (3/2) instances)")
+        ("ka", po::value<Profit>(&data.k1), "set k1 (for mstr instancetances)")
+        ("kb", po::value<Profit>(&data.k2), "set k2 (for mstr instancetances)")
+        (",d", po::value<double>(&data.d), "set d (for mstr (6), pceil (3) and circle (3/2) instancetances)")
         (",H", po::value<int>(&data.h), "set h")
         ("hmax", po::value<int>(&data.hmax), "set hmax")
         (",x", po::value<double>(&data.x), "set x")
@@ -28,8 +28,8 @@ int main(int argc, char *argv[])
         ("spanner", "set spanner")
         ("normal", "set normal")
         ("dw", po::value<double>(&data.dw), "set dw")
-        (",m", po::value<Profit>(&data.m), "set m (for spanner instances)")
-        (",v", po::value<Profit>(&data.v), "set v (for spanner instances)")
+        (",m", po::value<Profit>(&data.m), "set m (for spanner instancetances)")
+        (",v", po::value<Profit>(&data.v), "set v (for spanner instancetances)")
         (",o", po::value<std::string>(&output_file), "set output file")
         (",p", po::value<std::string>(&plot_file), "set plot file")
         ;
@@ -49,12 +49,12 @@ int main(int argc, char *argv[])
     data.normal = vm.count("normal");
 
     std::cout << data << std::endl;
-    Instance ins = data.generate();
+    Instance instance = data.generate();
 
     if (plot_file != "")
-        ins.plot(plot_file);
+        instance.plot(plot_file);
     if (output_file != "")
-        ins.write(output_file);
+        instance.write(output_file);
 
     return 0;
 }

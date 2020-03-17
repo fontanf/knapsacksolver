@@ -19,19 +19,19 @@ std::vector<Item> remove_dominated_items(std::vector<Item>& v)
 
 /***************************** forwardgreedynlogn *****************************/
 
-Output knapsacksolver::forwardgreedynlogn(const Instance& ins, Info info)
+Output knapsacksolver::forwardgreedynlogn(const Instance& instance, Info info)
 {
-    LOG_FOLD_START(info, "forwardgreedynlogn b " << ins.break_item()
-            << " n " << ins.item_number() << std::endl;);
+    LOG_FOLD_START(info, "forwardgreedynlogn b " << instance.break_item()
+            << " n " << instance.item_number() << std::endl;);
     VER(info, "*** forwardgreedynlogn ***" << std::endl);
-    Output output(ins, info);
+    Output output(instance, info);
 
-    Solution sol = *ins.break_solution();
+    Solution sol = *instance.break_solution();
 
     // If all items fit in the knapsack or if the break solution doesn't
     // contain any item, return sol.
-    if (ins.break_item() >= ins.item_number() - 1
-            || ins.break_item() == 0) {
+    if (instance.break_item() >= instance.item_number() - 1
+            || instance.break_item() == 0) {
         output.algorithm_end(info);
         LOG_FOLD_END(info, "");
         return output;
@@ -40,8 +40,8 @@ Output knapsacksolver::forwardgreedynlogn(const Instance& ins, Info info)
     // Sort taken and left items by weight.
     std::vector<Item> taken;
     std::vector<Item> left;
-    for (ItemPos j=0; j<ins.item_number(); ++j) {
-        Item item = ins.item(j);
+    for (ItemPos j = 0; j < instance.item_number(); ++j) {
+        Item item = instance.item(j);
         item.j = j;
         if (sol.contains(j)) {
             taken.push_back(item);
@@ -89,32 +89,32 @@ Output knapsacksolver::forwardgreedynlogn(const Instance& ins, Info info)
 
 /**************************** backwardgreedynlogn *****************************/
 
-Output knapsacksolver::backwardgreedynlogn(const Instance& ins, Info info)
+Output knapsacksolver::backwardgreedynlogn(const Instance& instance, Info info)
 {
-    LOG_FOLD_START(info, "backwardgreedynlogn b " << ins.break_item()
-            << " n " << ins.item_number() << std::endl;);
+    LOG_FOLD_START(info, "backwardgreedynlogn b " << instance.break_item()
+            << " n " << instance.item_number() << std::endl;);
     VER(info, "*** backwardgreedynlogn ***" << std::endl);
-    Output output(ins, info);
+    Output output(instance, info);
 
-    output.update_sol(*ins.break_solution(), std::stringstream("break"), info);
+    output.update_sol(*instance.break_solution(), std::stringstream("break"), info);
 
     // If all items fit in the knapsack or if the break solution doesn't
     // contain any item, return sol.
-    if (ins.break_item() >= ins.item_number() - 1
-            || ins.break_item() == 0) {
+    if (instance.break_item() >= instance.item_number() - 1
+            || instance.break_item() == 0) {
         LOG_FOLD_END(info, "");
         output.algorithm_end(info);
         return output;
     }
 
     Solution sol = output.solution;
-    sol.set(ins.break_item(), true);
+    sol.set(instance.break_item(), true);
 
     // Sort taken and left items by weight.
     std::vector<Item> taken;
     std::vector<Item> left;
-    for (ItemPos j=0; j<ins.item_number(); ++j) {
-        Item item = ins.item(j);
+    for (ItemPos j = 0; j < instance.item_number(); ++j) {
+        Item item = instance.item(j);
         item.j = j;
         if (sol.contains(j)) {
             taken.push_back(item);
@@ -133,7 +133,7 @@ Output knapsacksolver::backwardgreedynlogn(const Instance& ins, Info info)
 
     // Find best exchange.
     Weight r = sol.remaining_capacity();
-    Profit pmax = -ins.item(0).p;
+    Profit pmax = -instance.item(0).p;
     auto it_max = t.end();
     auto il_max = l.end();
     auto il = l.begin();
@@ -166,23 +166,23 @@ Output knapsacksolver::backwardgreedynlogn(const Instance& ins, Info info)
 
 /******************************** greedynlogn *********************************/
 
-Output knapsacksolver::greedynlogn(const Instance& ins, Info info)
+Output knapsacksolver::greedynlogn(const Instance& instance, Info info)
 {
     VER(info, "*** greedynlogn ***" << std::endl);
     LOG_FOLD_START(info, "greedynlogn" << std::endl;);
-    Output output(ins, info);
+    Output output(instance, info);
 
-    auto g_output = greedy(ins);
+    auto g_output = greedy(instance);
     output.update_sol(g_output.solution, std::stringstream("greedy"), info);
     std::string best = "greedy";
 
-    auto f_output = forwardgreedynlogn(ins);
+    auto f_output = forwardgreedynlogn(instance);
     if (output.lower_bound < f_output.lower_bound) {
         output.update_sol(f_output.solution, std::stringstream("forward"), info);
         best = "forward";
     }
 
-    auto b_output = backwardgreedynlogn(ins);
+    auto b_output = backwardgreedynlogn(instance);
     if (output.lower_bound < b_output.lower_bound) {
         output.update_sol(b_output.solution, std::stringstream("backward"), info);
         best = "backward";

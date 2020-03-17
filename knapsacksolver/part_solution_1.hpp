@@ -35,7 +35,7 @@ public:
     PartSol1 bsol_break() const
     {
         PartSol1 bsolbreak = 0UL;
-        for (ItemPos j=x1_; j<b_; ++j)
+        for (ItemPos j = x1_; j < b_; ++j)
             add(bsolbreak, j);
         return bsolbreak;
     }
@@ -72,7 +72,7 @@ public:
     std::string print(PartSol1& s) const
     {
         std::string str = "";
-        for (ItemPos j=x1_; j<=x2_; ++j)
+        for (ItemPos j = x1_; j <= x2_; ++j)
             str += std::to_string(contains(s,j));
         return str;
     }
@@ -82,14 +82,14 @@ public:
         ItemPos f = std::max(instance_.first_item(), x1());
         ItemPos l = std::min(instance_.last_item(), x2());
         std::vector<int> vec(instance_.item_number(), 0);
-        for (ItemPos j=f; j<=l; ++j)
+        for (ItemPos j = f; j <= l; ++j)
             vec[j] = (contains(s, j))? 1: -1;
         return vec;
     }
 
     void update_solution(PartSol1 psol, Solution& sol)
     {
-        for (ItemPos j=x1(); j<=x2(); ++j)
+        for (ItemPos j = x1(); j <= x2(); ++j)
             sol.set(j, contains(psol, j));
     }
 

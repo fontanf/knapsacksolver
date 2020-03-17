@@ -50,7 +50,7 @@ public:
     std::string print(PartSol2& s) const
     {
         std::string str = "";
-        for (ItemPos j=0; j<size_; ++j) {
+        for (ItemPos j = 0; j < size_; ++j) {
             if (str != "")
                 str += " ";
             if (idx_[j] != -1)
@@ -62,7 +62,7 @@ public:
     std::string print() const
     {
         std::string str = "";
-        for (ItemPos j=0; j<size_; ++j) {
+        for (ItemPos j = 0; j < size_; ++j) {
             if (str != "")
                 str += " ";
             str += std::to_string(idx_[j]);
@@ -81,7 +81,7 @@ public:
     std::vector<int> vector(PartSol2& s) const
     {
         std::vector<int> vec(instance_.item_number(), 0);
-        for (ItemPos j=0; j<size(); ++j) {
+        for (ItemPos j = 0; j < size(); ++j) {
             ItemPos idx = indices()[j];
             if (idx == -1)
                 continue;
@@ -92,7 +92,7 @@ public:
 
     void update_solution(PartSol2 psol, Solution& sol)
     {
-        for (ItemPos j=0; j<size(); ++j)
+        for (ItemPos j = 0; j < size(); ++j)
             sol.set(indices()[j], contains(psol, j));
     }
 

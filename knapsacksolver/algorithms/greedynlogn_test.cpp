@@ -4,29 +4,29 @@
 
 using namespace knapsacksolver;
 
-Output minknap_test(Instance& ins)
+Output minknap_test(Instance& instance)
 {
-    return minknap(ins);
+    return minknap(instance);
 }
 
-Output forwardgreedynlogn_test(Instance& ins)
+Output forwardgreedynlogn_test(Instance& instance)
 {
     Info info;
-    ins.sort_partially(info);
-    return forwardgreedynlogn(ins, info);
+    instance.sort_partially(info);
+    return forwardgreedynlogn(instance, info);
 }
 
-Output backwardgreedynlogn_test(Instance& ins)
+Output backwardgreedynlogn_test(Instance& instance)
 {
     Info info;
-    ins.sort_partially(info);
-    return backwardgreedynlogn(ins, info);
+    instance.sort_partially(info);
+    return backwardgreedynlogn(instance, info);
 }
 
-Output greedynlogn_test(Instance& ins)
+Output greedynlogn_test(Instance& instance)
 {
-    Info info; ins.sort_partially(info);
-    return greedynlogn(ins, info);
+    Info info; instance.sort_partially(info);
+    return greedynlogn(instance, info);
 }
 
 std::vector<Output (*)(Instance&)> f = {

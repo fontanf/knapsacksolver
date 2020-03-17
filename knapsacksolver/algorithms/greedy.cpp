@@ -2,37 +2,37 @@
 
 using namespace knapsacksolver;
 
-Output knapsacksolver::greedy(const Instance& ins, Info info)
+Output knapsacksolver::greedy(const Instance& instance, Info info)
 {
     LOG_FOLD_START(info, "greedy" << std::endl);
     VER(info, "*** greedy ***" << std::endl);
-    Output output(ins, info);
+    Output output(instance, info);
 
-    assert(ins.break_item() != -1);
+    assert(instance.break_item() != -1);
 
-    output.update_sol(*ins.break_solution(), std::stringstream("break"), info);
+    output.update_sol(*instance.break_solution(), std::stringstream("break"), info);
     std::string best_algo = "break";
     LOG(info, "break " << output.solution.profit() << std::endl);
-    ItemPos b = ins.break_item();
+    ItemPos b = instance.break_item();
 
-    if (b < ins.last_item()) {
+    if (b < instance.last_item()) {
         Profit  p = 0;
         ItemPos j = -1;
 
         // Backward greedy
-        Weight rb = output.solution.remaining_capacity() - ins.item(b).w;
-        for (ItemPos k=ins.first_item(); k<=b; ++k) {
-            if (rb + ins.item(k).w >= 0 && ins.item(b).p - ins.item(k).p > p) {
-                p = ins.item(b).p - ins.item(k).p;
+        Weight rb = output.solution.remaining_capacity() - instance.item(b).w;
+        for (ItemPos k=instance.first_item(); k<=b; ++k) {
+            if (rb + instance.item(k).w >= 0 && instance.item(b).p - instance.item(k).p > p) {
+                p = instance.item(b).p - instance.item(k).p;
                 j = k;
             }
         }
 
         // Forward greedy
         Weight rf = output.solution.remaining_capacity();
-        for (ItemPos k=b+1; k<=ins.last_item(); ++k) {
-            if (ins.item(k).w <= rf && ins.item(k).p > p) {
-                p = ins.item(k).p;
+        for (ItemPos k=b+1; k<=instance.last_item(); ++k) {
+            if (instance.item(k).w <= rf && instance.item(k).p > p) {
+                p = instance.item(k).p;
                 j = k;
             }
         }

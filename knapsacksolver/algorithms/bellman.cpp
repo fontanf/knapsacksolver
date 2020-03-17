@@ -19,17 +19,15 @@ Output knapsacksolver::bellman_array(const Instance& instance, Info info)
     Output output(instance, info);
     Weight c = instance.capacity();
     std::vector<Profit> values(c + 1, 0);
-    for (ItemPos j=0; j<instance.item_number(); ++j) {
+    for (ItemPos j = 0; j < instance.item_number(); ++j) {
         // Check time
-        if (!info.check_time()) {
-            output.algorithm_end(info);
-            return output;
-        }
+        if (!info.check_time())
+            return output.algorithm_end(info);
 
         // Update DP table
         Weight wj = instance.item(j).w;
         Profit pj = instance.item(j).p;
-        for (Weight w=c; w>=wj; w--)
+        for (Weight w = c; w >= wj; w--)
             if (values[w] < values[w - wj] + pj)
                 values[w] = values[w - wj] + pj;
 
@@ -53,12 +51,12 @@ Output knapsacksolver::bellman_array(const Instance& instance, Info info)
 void bellmanpar_array_worker(const Instance& instance, ItemPos n1, ItemPos n2,
         std::vector<Profit>::iterator values, Info info)
 {
-    for (ItemPos j=n1; j<n2; ++j) {
+    for (ItemPos j = n1; j < n2; ++j) {
         if (!info.check_time())
             return;
         Weight wj = instance.item(j).w;
         Profit pj = instance.item(j).p;
-        for (Weight w=instance.capacity(); w>=wj; w--)
+        for (Weight w = instance.capacity(); w >= wj; w--)
             if (*(values + w) < *(values + w - wj) + pj)
                 *(values + w) = *(values + w - wj) + pj;
     }
@@ -90,14 +88,12 @@ Output knapsacksolver::bellmanpar_array(const Instance& instance, Info info)
     std::vector<Profit> values2(c + 1, 0);
     bellmanpar_array_worker(std::ref(instance), k, n, values2.begin(), info);
     thread.join();
-    if (!info.check_time()) {
-        output.algorithm_end(info);
-        return output;
-    }
+    if (!info.check_time())
+        return output.algorithm_end(info);
 
     // Compute optimum
     Profit opt = -1;
-    for (Weight c1=0; c1<=c; ++c1) {
+    for (Weight c1 = 0; c1 <= c; ++c1) {
         Profit z = values1[c1] + values2[c - c1];
         if (opt < z)
             opt = z;
@@ -146,17 +142,15 @@ Output knapsacksolver::bellmanrec(const Instance& instance, Info info)
 
     // Compute recursively
     Profit opt = bellmanrec_rec(instance, values, n - 1, c, info);
-    if (!info.check_time()) {
-        output.algorithm_end(info);
-        return output;
-    }
+    if (!info.check_time())
+        return output.algorithm_end(info);
     output.update_lb(opt, std::stringstream("tree search completed (lb)"), info);
     output.update_ub(opt, std::stringstream("tree search completed (ub)"), info);
 
     // Retrieve optimal solution
     Weight w = c;
     Solution sol(instance);
-    for (ItemPos j=n-1; j>=0; --j) {
+    for (ItemPos j = n - 1; j >= 0; --j) {
         if (values[INDEX(j, w)] != values[INDEX(j - 1, w)]) {
             w -= instance.item(j).w;
             sol.set(j, true);
@@ -183,19 +177,17 @@ Output knapsacksolver::bellman_array_all(const Instance& instance, Info info)
 
     // Compute optimal value
     std::fill(values.begin(), values.begin() + c + 1, 0);
-    for (ItemPos j=0; j<instance.item_number(); ++j) {
+    for (ItemPos j = 0; j < instance.item_number(); ++j) {
         // Check time
-        if (!info.check_time()) {
-            output.algorithm_end(info);
-            return output;
-        }
+        if (!info.check_time())
+            return output.algorithm_end(info);
 
         // Fill DP table
         Weight wj = instance.item(j).w;
-        for (Weight w=0; w<wj; ++w)
+        for (Weight w = 0; w < wj; ++w)
             values[INDEX(j, w)] = values[INDEX(j-1, w)];
         Profit pj = instance.item(j).p;
-        for (Weight w=wj; w<=c; ++w) {
+        for (Weight w = wj; w <= c; ++w) {
             Profit v0 = values[INDEX(j - 1 ,w)];
             Profit v1 = values[INDEX(j - 1, w - wj)] + pj;
             values[INDEX(j, w)] = std::max(v1, v0);
@@ -215,7 +207,7 @@ Output knapsacksolver::bellman_array_all(const Instance& instance, Info info)
     // Retrieve optimal solution
     Weight w = c;
     Solution sol(instance);
-    for (ItemPos j=n-1; j>=0; --j) {
+    for (ItemPos j = n - 1; j >= 0; --j) {
         if (values[INDEX(j, w)] != values[INDEX(j - 1, w)]) {
             w -= instance.item(j).w;
             sol.set(j, true);
@@ -258,12 +250,10 @@ Output knapsacksolver::bellman_array_one(const Instance& instance, Info info)
         std::fill(values.begin(), values.end(), 0);
 
         // Recursion
-        for (ItemPos j=0; j<n; ++j) {
+        for (ItemPos j = 0; j < n; ++j) {
             // Check time
-            if (!info.check_time()) {
-                output.algorithm_end(info);
-                return output;
-            }
+            if (!info.check_time())
+                return output.algorithm_end(info);
 
             Weight wj = instance.item(j).w;
             Profit pj = instance.item(j).p;
@@ -279,7 +269,7 @@ Output knapsacksolver::bellman_array_one(const Instance& instance, Info info)
             }
 
             // For other values of w
-            for (Weight w=c-1; w>=wj; w--) {
+            for (Weight w = c - 1; w >= wj; w--) {
                 if (values[w - wj] + pj > values[w]) {
                     values[w] = values[w - wj] + pj;
                     if (values[w] == opt_local) {
@@ -359,15 +349,15 @@ Output knapsacksolver::bellman_array_part(const Instance& instance, ItemPos k, I
         std::fill(bisols.begin(), bisols.end(), 0);
 
         // Recursion
-        for (ItemPos j=0; j<n; ++j) {
+        for (ItemPos j = 0; j < n; ++j) {
             if (!info.check_time())
-                goto end;
+                return output.algorithm_end(info);
 
             Weight wj = instance.item(j).w;
             Profit pj = instance.item(j).p;
 
             // For other values of w
-            for (Weight w=c; w>=wj; w--) {
+            for (Weight w = c; w >= wj; w--) {
                 if (values[w - wj] + pj > values[w]) {
                     values[w] = values[w - wj] + pj;
                     bisols[w] = psolf.add(bisols[w - wj], j);
@@ -431,12 +421,12 @@ void opts_bellman_array(const Instance& instance, ItemPos n1, ItemPos n2, Weight
         std::vector<Profit>::iterator values, Info& info)
 {
     std::fill(values, values + c + 1, 0);
-    for (ItemPos j=n1; j<n2; ++j) {
+    for (ItemPos j = n1; j < n2; ++j) {
         if (!info.check_time())
             break;
         Weight wj = instance.item(j).w;
         Profit pj = instance.item(j).p;
-        for (Weight w=c; w>=wj; w--)
+        for (Weight w = c; w >= wj; w--)
             if (*(values + w) < *(values + w - wj) + pj)
                 *(values + w) = *(values + w - wj) + pj;
     }
@@ -454,7 +444,7 @@ void bellman_array_rec_rec(RecData d)
     Profit z_max  = -1;
     Weight c1_opt = 0;
     Weight c2_opt = 0;
-    for (Weight c1=0; c1<=d.c; ++c1) {
+    for (Weight c1 = 0; c1 <= d.c; ++c1) {
         Weight c2 = d.c - c1;
         Profit z = *(d.values + c1) + *(values_2 + c2);
         if (z > z_max) {
@@ -522,10 +512,9 @@ Output knapsacksolver::bellman_array_rec(const Instance& instance, Info info)
         .values = values.begin(),
         .info = info
     });
-    if (!info.check_time()) {
-        output.algorithm_end(info);
-        return output;
-    }
+    if (!info.check_time())
+        return output.algorithm_end(info);
+
     output.update_sol(sol, std::stringstream("tree search completed (lb)"), info);
     output.update_ub(sol.profit(), std::stringstream("tree search completed (ub)"), info);
     output.algorithm_end(info);
@@ -614,12 +603,11 @@ Output knapsacksolver::bellman_list(Instance& instance, bool sort, Info info)
     std::vector<BellmanState> l0{{
         .w = (instance.reduced_solution() == NULL)? 0: instance.reduced_solution()->weight(),
         .p = (instance.reduced_solution() == NULL)? 0: instance.reduced_solution()->profit()}};
-    for (ItemPos j=instance.first_item(); j<=instance.last_item() && !l0.empty(); ++j) {
+    for (ItemPos j = instance.first_item(); j <= instance.last_item() && !l0.empty(); ++j) {
         // Check time
         if (!info.check_time()) {
-            output.algorithm_end(info);
             LOG_FOLD_END(info, "no time left");
-            return output;
+            return output.algorithm_end(info);
         }
 
         Profit ub_max = -1;
@@ -714,7 +702,7 @@ std::vector<BellmanState> opts_bellman_list(const Instance& instance,
 
     Profit lb = 0;
     std::vector<BellmanState> l0{{0, 0}};
-    for (ItemPos j=n1; j<n2; ++j) {
+    for (ItemPos j = n1; j < n2; ++j) {
         if (!info.check_time())
             break;
         Weight wj = instance.item(j).w;
@@ -791,7 +779,7 @@ void bellman_list_rec_rec(BellmanListRecData d)
     Weight i1_opt = 0;
     Weight i2_opt = 0;
     StateIdx i2 = l2.size() - 1;
-    for (StateIdx i1=0; i1<(StateIdx)l1.size(); ++i1) {
+    for (StateIdx i1 = 0; i1 < (StateIdx)l1.size(); ++i1) {
         while (l1[i1].w + l2[i2].w > d.c)
             i2--;
         LOG(d.info, "i1 " << i1 << " l1[i1].w " << l1[i1].w << " i2 " << i2 << " l2[i2].w " << l2[i2].w << std::endl);
@@ -804,7 +792,7 @@ void bellman_list_rec_rec(BellmanListRecData d)
         }
     }
     StateIdx i1 = l1.size() - 1;
-    for (StateIdx i2=0; i2<(StateIdx)l2.size(); ++i2) {
+    for (StateIdx i2 = 0; i2 < (StateIdx)l2.size(); ++i2) {
         while (l2[i2].w + l1[i1].w > d.c)
             i1--;
         Profit z = l1[i1].p + l2[i2].p;
@@ -883,9 +871,8 @@ Output knapsacksolver::bellman_list_rec(const Instance& instance, Info info)
         .j_max = j_max,
         .info = info});
     if (!info.check_time()) {
-        output.algorithm_end(info);
         LOG_FOLD_END(info, "");
-        return output;
+        return output.algorithm_end(info);
     }
 
     output.update_sol(sol, std::stringstream("tree search completed (lb)"), info);

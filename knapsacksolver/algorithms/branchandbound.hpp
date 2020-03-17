@@ -5,7 +5,7 @@
 namespace knapsacksolver
 {
 
-Output branchandbound(Instance& ins, bool sort = false, Info info = Info());
+Output branchandbound(Instance& instance, bool sort = false, Info info = Info());
 
 }
 

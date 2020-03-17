@@ -103,54 +103,54 @@ std::pair<Weight, Profit> Generator::item()
 
 Instance Generator::generate_standard()
 {
-    Instance ins;
+    Instance instance;
     Weight wsum = 0;
     Weight wmax = 0;
-    for (ItemIdx j=0; j<n; ++j) {
+    for (ItemIdx j = 0; j < n; ++j) {
         auto wp = item();
-        ins.add_item(wp.first, wp.second);
+        instance.add_item(wp.first, wp.second);
         wsum += wp.first;
         wmax = std::max(wmax, wp.first);
     }
     if (h != -1) {
-        ins.set_capacity(std::max(wmax, (h * wsum) / (hmax + 1)));
+        instance.set_capacity(std::max(wmax, (h * wsum) / (hmax + 1)));
     } else {
-        ins.set_capacity(r * (1 - x) + wsum * x);
+        instance.set_capacity(r * (1 - x) + wsum * x);
     }
-    return ins;
+    return instance;
 }
 
 Instance Generator::generate_spanner()
 {
     std::vector<std::pair<Weight, Profit>> vec;
-    for (ItemIdx j=0; j<v; ++j) {
+    for (ItemIdx j = 0; j < v; ++j) {
         auto wp = item();
         Weight w = (2 * wp.first  - 1 + m) / m;
         Weight p = (2 * wp.second - 1 + m) / m;
         vec.push_back({w, p});
     }
 
-    Instance ins;
+    Instance instance;
     ItemIdx i = 0;
     std::uniform_int_distribution<Counter> dist(1, m);
     Weight wsum = 0;
     Weight wmax = 0;
-    while (ins.reduced_item_number() < n) {
+    while (instance.reduced_item_number() < n) {
         auto wp = vec[i];
         i = (i + 1) % v;
         ItemIdx a = dist(g);
         Weight w = a * wp.first;
         Profit p = a * wp.second;
-        ins.add_item(w, p);
+        instance.add_item(w, p);
         wsum += wp.first;
         wmax = std::max(wmax, w);
     }
     if (h != -1) {
-        ins.set_capacity(std::max(wmax, (h * wsum) / (hmax + 1)));
+        instance.set_capacity(std::max(wmax, (h * wsum) / (hmax + 1)));
     } else {
-        ins.set_capacity(r * (1 - x) + wsum * x);
+        instance.set_capacity(r * (1 - x) + wsum * x);
     }
-    return ins;
+    return instance;
 }
 
 Instance Generator::generate()

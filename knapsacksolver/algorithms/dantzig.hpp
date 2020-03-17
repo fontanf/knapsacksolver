@@ -5,7 +5,7 @@
 namespace knapsacksolver
 {
 
-Profit ub_dantzig(const Instance& ins, Info info = Info());
+Profit ub_dantzig(const Instance& instance, Info info = Info());
 
 }
 
