@@ -139,13 +139,15 @@ Algorithms:
 - Column correspond to distribution for the weights and profits (n, u, wc...) and their range (3 means 1000, 4 means 10000...).
 - Given a number of items, a range, and a distribution for the weights and profits, a cell contains the mean time (in ms) to solve 100 instances with these parameters and a capacity from 1% to 100% of the sum of all weights of the instance.
 
-Bench:
+Run benchmarks:
 ```shell
-bazel run //knapsacksolver:bench -- -a bellman_rec bellman_array bellman_array_all bellman_array_part bellman_array_rec bellmanpar_array -d easy
+bazel run //knapsacksolver:bench -- -a bellman_array bellman_array_part bellman_array_rec bellmanpar_array bellman_array_all bellman_rec -d easy
 bazel run //knapsacksolver:bench -- -a expknap expknap_combo balknap balknap_combo minknap combo -d normal
 bazel run //knapsacksolver:bench -- -a expknap expknap_combo balknap minknap combo -d easy difficultlarge difficultsmall
 bazel run //knapsacksolver:bench -- -a bellman_list_sort -d difficultsmall
 ```
+
+Output files are created in `bazel-out/k8-opt/bin/knapsacksolver/bench.runfiles/__main__/`.
 
 ### Dynamic Programming: recursive vs iterative implementation
 
@@ -174,12 +176,11 @@ The parallel algorithm is implemented as follows: items are divided in two sets 
 n ∈ {100, 1000, 10000, 100000, 1000000}
 r ∈ {1000, 10000, 100000, 1000000, 10000000, 100000000}
 x ∈ {0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9}
-wj ~ N(r / 2, r / 10)
-pj ~ N(wj, wj / 10), 1 <= pj <= r
+wj ~ N(r / 2, r  / 10), 1 <= wj <= r
+pj ~ N(wj,    wj / 10), 1 <= pj <= r
 c = r * (1 - x) + ∑wj * x;
 ```
 
-Each instance (except one) of the normal dataset happens to be solved exactly by `minknap` in less than a second:
 * [bellman_list_rec](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/knapsack/master/bench/bellman_list_rec.json)
 * [expknap](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/knapsack/master/bench/expknap.json)
 * [expknap_combo](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/knapsack/master/bench/expknap_combo.json)
@@ -188,15 +189,19 @@ Each instance (except one) of the normal dataset happens to be solved exactly by
 * [minknap](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/knapsack/master/bench/minknap.json)
 * [combo](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/knapsack/master/bench/combo.json)
 
+Remarks:
+- The superiority of `minknap` is clear
+- `combo` optimizations do not help:
+
 ### Literature dataset
 
-| Algorithm                               | Instances                                                                                                                                                        |
-| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `expknap`                               | ![easy](bench/expknap_easy.csv),        ![difficult large](bench/expknap_difficultlarge.csv),        ![difficult small](bench/expknap_difficultsmall.csv)        |
-| `expknap_combo`                         | ![easy](bench/expknap_combo_easy.csv),  ![difficult large](bench/expknap_combo_difficultlarge.csv),  ![difficult small](bench/expknap_combo_difficultsmall.csv)  |
-| `balknap`                               | ![easy](bench/balknap_t_easy.csv),      ![difficult large](bench/balknap_t_difficultlarge.csv),      ![difficult small](bench/balknap_t_difficultsmall.csv)      |
-| `minknap`                               | ![easy](bench/minknap_easy.csv),        ![difficult large](bench/minknap_difficultlarge.csv),        ![difficult small](bench/minknap_difficultsmall.csv)        |
-| `combo`                                 | ![easy](bench/combo_easy.csv),          ![difficult large](bench/combo_difficultlarge.csv),          ![difficult small](bench/combo_difficultsmall.csv)          |
+| Algorithm       | Instances                                                                                                                                                        |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `expknap`       | ![easy](bench/expknap_easy.csv),        ![difficult large](bench/expknap_difficultlarge.csv),        ![difficult small](bench/expknap_difficultsmall.csv)        |
+| `expknap_combo` | ![easy](bench/expknap_combo_easy.csv),  ![difficult large](bench/expknap_combo_difficultlarge.csv),  ![difficult small](bench/expknap_combo_difficultsmall.csv)  |
+| `balknap`       | ![easy](bench/balknap_easy.csv),        ![difficult large](bench/balknap_difficultlarge.csv),        ![difficult small](bench/balknap_difficultsmall.csv)        |
+| `minknap`       | ![easy](bench/minknap_easy.csv),        ![difficult large](bench/minknap_difficultlarge.csv),        ![difficult small](bench/minknap_difficultsmall.csv)        |
+| `combo`         | ![easy](bench/combo_easy.csv),          ![difficult large](bench/combo_difficultlarge.csv),          ![difficult small](bench/combo_difficultsmall.csv)          |
 
 Remarks:
 - Spanner instances are among the worst cases of the `minknap` recursion, since many items of the break solution won't be in an optimal solution. It is interesting to note that the `bellman` recursion performs better ![on those instances](bench/bellman_list_sort_difficultsmall.csv). However, the worst case of the `bellman` recursion is worse than the worst case of the `minknap` recursion.
