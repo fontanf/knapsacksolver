@@ -16,8 +16,7 @@ Output knapsacksolver::dpprofits_array(const Instance& instance, Info info)
     ItemIdx n = instance.reduced_item_number();
     if (n == 0) {
         output.update_ub(0, std::stringstream("no item"), info);
-        output.algorithm_end(info);
-        return output;
+        return output.algorithm_end(info);
     }
 
     // Initialize memory table
@@ -31,10 +30,8 @@ Output knapsacksolver::dpprofits_array(const Instance& instance, Info info)
     values[0] = 0;
     for (ItemPos j = 0; j < n; ++j) {
         // Check time
-        if (!info.check_time()) {
-            output.algorithm_end(info);
-            return output;
-        }
+        if (!info.check_time())
+            return output.algorithm_end(info);
 
         // Update DP table
         Profit pj = instance.item(j).p;
@@ -69,8 +66,7 @@ Output knapsacksolver::dpprofits_array_all(const Instance& instance, Info info)
     ItemIdx n = instance.reduced_item_number();
     if (n == 0) {
         output.update_ub(0, std::stringstream("no item"), info);
-        output.algorithm_end(info);
-        return output;
+        return output.algorithm_end(info);
     }
 
     // Initialize memory table

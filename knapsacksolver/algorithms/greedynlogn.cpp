@@ -32,9 +32,8 @@ Output knapsacksolver::forwardgreedynlogn(const Instance& instance, Info info)
     // contain any item, return sol.
     if (instance.break_item() >= instance.item_number() - 1
             || instance.break_item() == 0) {
-        output.algorithm_end(info);
         LOG_FOLD_END(info, "");
-        return output;
+        return output.algorithm_end(info);
     }
 
     // Sort taken and left items by weight.
@@ -82,9 +81,8 @@ Output knapsacksolver::forwardgreedynlogn(const Instance& instance, Info info)
     }
 
     output.update_sol(sol, std::stringstream(), info);
-    output.algorithm_end(info);
     LOG_FOLD_END(info, "");
-    return output;
+    return output.algorithm_end(info);
 }
 
 /**************************** backwardgreedynlogn *****************************/
@@ -103,8 +101,7 @@ Output knapsacksolver::backwardgreedynlogn(const Instance& instance, Info info)
     if (instance.break_item() >= instance.item_number() - 1
             || instance.break_item() == 0) {
         LOG_FOLD_END(info, "");
-        output.algorithm_end(info);
-        return output;
+        return output.algorithm_end(info);
     }
 
     Solution sol = output.solution;
@@ -158,10 +155,8 @@ Output knapsacksolver::backwardgreedynlogn(const Instance& instance, Info info)
         output.update_sol(sol, std::stringstream(), info);
     }
 
-    output.algorithm_end(info);
     LOG_FOLD_END(info, "");
-    return output;
-
+    return output.algorithm_end(info);
 }
 
 /******************************** greedynlogn *********************************/
@@ -190,7 +185,6 @@ Output knapsacksolver::greedynlogn(const Instance& instance, Info info)
 
     LOG_FOLD_END(info, "");
     PUT(info, "Algorithm", "Best", best);
-    output.algorithm_end(info);
-    return output;
+    return output.algorithm_end(info);
 }
 

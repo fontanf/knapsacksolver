@@ -155,9 +155,8 @@ ExpknapOutput knapsacksolver::expknap(Instance& instance, ExpknapOptionalParamet
 
     if (instance.reduced_item_number() == 0) {
         output.update_ub(output.lower_bound, std::stringstream("no item (ub)"), p.info);
-        output.algorithm_end(p.info);
         LOG(p.info, "no item" << std::endl);
-        return output;
+        return output.algorithm_end(p.info);
     }
 
     instance.sort_partially(p.info);
@@ -165,9 +164,8 @@ ExpknapOutput knapsacksolver::expknap(Instance& instance, ExpknapOptionalParamet
         if (output.lower_bound < instance.break_solution()->profit())
             output.update_sol(*instance.break_solution(), std::stringstream("all items fit (lb)"), p.info);
         output.update_ub(instance.break_solution()->profit(), std::stringstream("all items fit (ub)"), p.info);
-        output.algorithm_end(p.info);
         LOG_FOLD_END(p.info, "all items fit in the knapsack");
-        return output;
+        return output.algorithm_end(p.info);
     }
     if (p.combo_core)
         instance.init_combo_core(p.info);
@@ -187,10 +185,8 @@ ExpknapOutput knapsacksolver::expknap(Instance& instance, ExpknapOptionalParamet
     Profit ub_tmp = ub_dantzig(instance);
     output.update_ub(ub_tmp, std::stringstream("dantzig upper bound"), p.info);
 
-    if (output.solution.profit() == output.upper_bound) {
-        output.algorithm_end(p.info);
-        return output;
-    }
+    if (output.solution.profit() == output.upper_bound)
+        return output.algorithm_end(p.info);
 
     ExpknapInternalData d(instance, p, output);
     ItemPos b = instance.break_item();
@@ -204,9 +200,6 @@ ExpknapOutput knapsacksolver::expknap(Instance& instance, ExpknapOptionalParamet
         thread.join();
     d.threads.clear();
 
-    PUT(p.info, "Algorithm", "NodeNumber", output.node_number);
-    output.algorithm_end(p.info);
-    VER(p.info, "Node number: " << output.node_number << std::endl);
-    return output;
+    return output.algorithm_end(p.info);
 }
 

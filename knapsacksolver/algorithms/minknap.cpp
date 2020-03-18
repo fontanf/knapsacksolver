@@ -36,9 +36,8 @@ MinknapOutput knapsacksolver::minknap(Instance& instance, MinknapOptionalParamet
     MinknapOutput output(instance, p.info);
     minknap_main(instance, p, output);
 
-    output.algorithm_end(p.info);
     LOG_FOLD_END(p.info, "minknap");
-    return output;
+    return output.algorithm_end(p.info);
 }
 
 /******************************************************************************/

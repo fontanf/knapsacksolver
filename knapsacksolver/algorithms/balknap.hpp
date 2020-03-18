@@ -49,6 +49,14 @@ struct BalknapOutput: Output
 {
     BalknapOutput(const Instance& instance, Info& info): Output(instance, info) { }
     Counter recursive_call_number = 0;
+
+    BalknapOutput& algorithm_end(Info& info)
+    {
+        PUT(info, "Algorithm", "RecursiveCallNumber", recursive_call_number);
+        Output::algorithm_end(info);
+        VER(info, "Recursive call number: " << recursive_call_number << std::endl);
+        return *this;
+    }
 };
 
 BalknapOutput balknap(Instance& instance, BalknapOptionalParameters p = {});

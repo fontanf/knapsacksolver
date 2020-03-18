@@ -36,9 +36,8 @@ BalknapOutput knapsacksolver::balknap(Instance& instance, BalknapOptionalParamet
     BalknapOutput output(instance, p.info);
     balknap_main(instance, p, output);
 
-    output.algorithm_end(p.info);
     LOG_FOLD_END(p.info, "balknap");
-    return output;
+    return output.algorithm_end(p.info);
 }
 
 /******************************************************************************/

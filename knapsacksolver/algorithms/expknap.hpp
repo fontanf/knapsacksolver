@@ -44,6 +44,14 @@ struct ExpknapOutput: Output
 {
     ExpknapOutput(const Instance& instance, Info& info): Output(instance, info) { }
     Counter node_number = 0;
+
+    ExpknapOutput& algorithm_end(Info& info)
+    {
+        PUT(info, "Algorithm", "NodeNumber", node_number);
+        Output::algorithm_end(info);
+        VER(info, "Node number: " << node_number << std::endl);
+        return *this;
+    }
 };
 
 ExpknapOutput expknap(Instance& instance, ExpknapOptionalParameters p = {});
