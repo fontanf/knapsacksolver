@@ -22,7 +22,7 @@ All classical and state-of-the-art algorithms are implemented. Most of them are 
  * [Results](#results)
    * [Dynamic Programming: recursive vs iterative implementation](#dynamic-programming-recursive-vs-iterative-implementation)
    * [Dynamic Programming: cost of retrieving an optimal solution](#dynamic-programming-cost-of-retrieving-an-optimal-solution)
-   * [When cache makes parallel algorithms slower](#when-cache-makes-parallel-algorithms-slower)
+   * [Dynamic Programming: sequencial vs parallel implementation](#dynamic-programming-sequencial-vs-parallel-implementation)
    * [Normal dataset](#normal-dataset)
    * [Literature dataset](#literature-dataset)
 
@@ -164,7 +164,7 @@ It still requires 2 times more time than the implementation returning only the o
 - ![Storing partial solutions in states](bench/bellman_array_part_easy.csv)
 - ![Recursive scheme](bench/bellman_array_rec_easy.csv)
 
-### When cache makes parallel algorithms slower
+### Dynamic Programming: sequencial vs parallel implementation
 
 The parallel algorithm is implemented as follows: items are divided in two sets of same size. The all-capacities version of the knapsack problem is solved for both sets with the classical `bellman` recursion. Then, the optimal value is computed by merging the information from both arrays.
 - ![Sequencial](bench/bellman_array_easy.csv)
@@ -181,7 +181,6 @@ pj ~ N(wj,    wj / 10), 1 <= pj <= r
 c = r * (1 - x) + ∑wj * x;
 ```
 
-* [bellman_list_rec](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/knapsack/master/bench/bellman_list_rec.json)
 * [expknap](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/knapsack/master/bench/expknap.json)
 * [expknap_combo](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/knapsack/master/bench/expknap_combo.json)
 * [balknap](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/knapsack/master/bench/balknap.json)
@@ -204,7 +203,6 @@ Remarks:
 | `combo`         | ![easy](bench/combo_easy.csv),          ![difficult large](bench/combo_difficultlarge.csv),          ![difficult small](bench/combo_difficultsmall.csv)          |
 
 Remarks:
-- Spanner instances are among the worst cases of the `minknap` recursion, since many items of the break solution won't be in an optimal solution. It is interesting to note that the `bellman` recursion performs better ![on those instances](bench/bellman_list_sort_difficultsmall.csv). However, the worst case of the `bellman` recursion is worse than the worst case of the `minknap` recursion.
 - These subset sum, strongly correlated and inverse strongly correlated instances are easy to solve since the upper bound happens to always be optimal.
 - With `combo` optimizations, `expknap` is able to solve strongly correlated and inverse strongly correlated instances. It also solves more almost strongly correlated instances.
 - Performances of `minknap` and `combo` seems to match the results from the literature. Furthermore, taking advantage of parallelization, this implementation of `combo` is able to solve all instances of the `difficultlarge` dataset.
