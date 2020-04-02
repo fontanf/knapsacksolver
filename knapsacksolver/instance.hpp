@@ -1,6 +1,6 @@
 #pragma once
 
-#include "benchtools/info.hpp"
+#include "optimizationtools/info.hpp"
 
 #include <cstdint>
 #include <random>
@@ -12,7 +12,7 @@
 namespace knapsacksolver
 {
 
-using benchtools::Info;
+using optimizationtools::Info;
 
 typedef int64_t Profit;
 typedef int64_t Weight;
