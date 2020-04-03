@@ -11,11 +11,11 @@ int main(int argc, char *argv[])
     // Parse program options
 
     std::string algorithm = "bellman_array";
-    std::string instancetancefile = "";
-    std::string outputfile = "";
+    std::string    instance_path = "";
+    std::string      output_path = "";
+    std::string certificate_path = "";
+    std::string         log_path = "";
     std::string format = "standard";
-    std::string certfile = "";
-    std::string logfile = "";
     int loglevelmax = 999;
     int seed = 0;
     double time_limit = std::numeric_limits<double>::infinity();
@@ -24,14 +24,14 @@ int main(int argc, char *argv[])
     desc.add_options()
         ("help,h", "produce help message")
         ("algorithm,a", po::value<std::string>(&algorithm), "set algorithm")
-        ("input,i", po::value<std::string>(&instancetancefile)->required(), "set input file (required)")
+        ("input,i", po::value<std::string>(&instance_path)->required(), "set input path (required)")
         ("format,f", po::value<std::string>(&format), "set input file format (default: standard)")
-        ("output,o", po::value<std::string>(&outputfile), "set JSON output file")
-        ("cert,c", po::value<std::string>(&certfile), "set certificate file")
-        ("time-limit,t", po::value<double>(&time_limit), "Time limit in seconds")
+        ("output,o", po::value<std::string>(&output_path), "set JSON output path")
+        ("certificate,c", po::value<std::string>(&certificate_path), "set certificate path")
+        ("time-limit,t", po::value<double>(&time_limit), "set time limit (in s)")
         ("seed,s", po::value<int>(&seed), "set seed")
-        ("verbose,v", "set verbosity")
-        ("log,l", po::value<std::string>(&logfile), "set log file")
+        ("verbose,v", "enable verbosity")
+        ("log,l", po::value<std::string>(&log_path), "set log path")
         ("loglevelmax", po::value<int>(&loglevelmax), "set log max level")
         ("log2stderr", "write log to stderr")
         ;
@@ -52,15 +52,15 @@ int main(int argc, char *argv[])
 
     std::mt19937_64 gen(seed);
     auto func = get_algorithm(algorithm);
-    Instance instance(instancetancefile, format);
+    Instance instance(instance_path, format);
 
     Info info = Info()
         .set_verbose(vm.count("verbose"))
         .set_timelimit(time_limit)
-        .set_certfile(certfile)
-        .set_outputfile(outputfile)
+        .set_certfile(certificate_path)
+        .set_outputfile(output_path)
         .set_onlywriteattheend(true)
-        .set_logfile(logfile)
+        .set_logfile(log_path)
         .set_log2stderr(vm.count("log2stderr"))
         .set_loglevelmax(loglevelmax)
         ;
