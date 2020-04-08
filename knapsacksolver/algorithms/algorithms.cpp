@@ -75,7 +75,8 @@ MinknapOptionalParameters read_minknap_args(std::vector<char*> argv)
     return p;
 }
 
-func knapsacksolver::get_algorithm(std::string algorithm)
+Output knapsacksolver::run(
+        std::string algorithm, Instance& instance, std::mt19937_64&, Info info)
 {
     std::vector<std::string> algorithm_args = po::split_unix(algorithm);
     std::vector<char*> algorithm_argv;
@@ -84,153 +85,98 @@ func knapsacksolver::get_algorithm(std::string algorithm)
 
     if (algorithm_args[0] == "") {
         std::cerr << "\033[32m" << "ERROR, missing argsrithm." << "\033[0m" << std::endl;
-        return [](Instance& instance, std::mt19937_64&, Info info) { return Output(instance, info); };
+        return Output(instance, info);
 
-    /*
-     * Lower bounds
-     */
+        /*
+         * Lower bounds
+         */
     } else if (algorithm_args[0] == "greedy") {
-        return [](Instance& instance, std::mt19937_64&, Info info) {
-            instance.sort_partially(info);
-            return greedy(instance, info);
-        };
+        instance.sort_partially(info);
+        return greedy(instance, info);
     } else if (algorithm_args[0] == "greedynlogn") {
-        return [](Instance& instance, std::mt19937_64&, Info info) {
-            instance.sort_partially(info);
-            return greedynlogn(instance, info);
-        };
+        instance.sort_partially(info);
+        return greedynlogn(instance, info);
     } else if (algorithm_args[0] == "greedynlogn_for") {
-        return [](Instance& instance, std::mt19937_64&, Info info) {
-            instance.sort_partially(info);
-            return forwardgreedynlogn(instance, info);
-        };
+        instance.sort_partially(info);
+        return forwardgreedynlogn(instance, info);
     } else if (algorithm_args[0] == "greedynlogn_back") {
-        return [](Instance& instance, std::mt19937_64&, Info info) {
-            instance.sort_partially(info);
-            return backwardgreedynlogn(instance, info);
-        };
+        instance.sort_partially(info);
+        return backwardgreedynlogn(instance, info);
 
-    /*
-     * Exact argsrithms
-     */
+        /*
+         * Exact argsrithms
+         */
     } else if (algorithm_args[0] == "bellman_array") { // Bellman
-        return [](Instance& instance, std::mt19937_64&, Info info) {
-            return bellman_array(instance, info);
-        };
+        return bellman_array(instance, info);
     } else if (algorithm_args[0] == "bellmanpar_array") {
-        return [](Instance& instance, std::mt19937_64&, Info info) {
-            return bellmanpar_array(instance, info);
-        };
+        return bellmanpar_array(instance, info);
     } else if (algorithm_args[0] == "bellman_rec") {
-        return [](Instance& instance, std::mt19937_64&, Info info) {
-            return bellmanrec(instance, info);
-        };
+        return bellmanrec(instance, info);
     } else if (algorithm_args[0] == "bellman_array_all") {
-        return [](Instance& instance, std::mt19937_64&, Info info) {
-            return bellman_array_all(instance, info);
-        };
+        return bellman_array_all(instance, info);
     } else if (algorithm_args[0] == "bellman_array_one") {
-        return [](Instance& instance, std::mt19937_64&, Info info) {
-            return bellman_array_one(instance, info);
-        };
+        return bellman_array_one(instance, info);
     } else if (algorithm_args[0] == "bellman_array_part") {
-        return [](Instance& instance, std::mt19937_64&, Info info) {
-            return bellman_array_part(instance, 64, info);
-        };
+        return bellman_array_part(instance, 64, info);
     } else if (algorithm_args[0] == "bellman_array_rec") {
-        return [](Instance& instance, std::mt19937_64&, Info info) {
-            return bellman_array_rec(instance, info);
-        };
+        return bellman_array_rec(instance, info);
     } else if (algorithm_args[0] == "bellman_list") {
-        return [](Instance& instance, std::mt19937_64&, Info info) {
-            return bellman_list(instance, false, info);
-        };
+        return bellman_list(instance, false, info);
     } else if (algorithm_args[0] == "bellman_list_sort") {
-        return [](Instance& instance, std::mt19937_64&, Info info) {
-            return bellman_list(instance, true, info);
-        };
+        return bellman_list(instance, true, info);
     } else if (algorithm_args[0] == "bellman_list_rec") {
-        return [](Instance& instance, std::mt19937_64&, Info info) {
-            return bellman_list_rec(instance, info);
-        };
+        return bellman_list_rec(instance, info);
     } else if (algorithm_args[0] == "dpprofits_array") { // DPProfits
-        return [](Instance& instance, std::mt19937_64&, Info info) {
-            return dpprofits_array(instance, info);
-        };
+        return dpprofits_array(instance, info);
     } else if (algorithm_args[0] == "dpprofits_array_all") {
-        return [](Instance& instance, std::mt19937_64&, Info info) {
-            return dpprofits_array_all(instance, info);
-        };
+        return dpprofits_array_all(instance, info);
     } else if (algorithm_args[0] == "branchandbound") { // Branch-and-bound
-        return [](Instance& instance, std::mt19937_64&, Info info) {
-            return branchandbound(instance, false, info);
-        };
+        return branchandbound(instance, false, info);
     } else if (algorithm_args[0] == "branchandbound_sort") {
-        return [](Instance& instance, std::mt19937_64&, Info info) {
-            return branchandbound(instance, true, info);
-        };
+        return branchandbound(instance, true, info);
     } else if (algorithm_args[0] == "expknap") { // Expknap
-        return [algorithm_argv](Instance& instance, std::mt19937_64&, Info info) {
-            ExpknapOptionalParameters p = read_expknap_args(algorithm_argv);
-            p.info = info;
-            return expknap(instance, p);
-        };
+        ExpknapOptionalParameters p = read_expknap_args(algorithm_argv);
+        p.info = info;
+        return expknap(instance, p);
     } else if (algorithm_args[0] == "expknap_combo") {
-        return [](Instance& instance, std::mt19937_64&, Info info) {
-            auto p = ExpknapOptionalParameters().set_combo();
-            p.info = info;
-            return expknap(instance, p);
-        };
+        auto p = ExpknapOptionalParameters().set_combo();
+        p.info = info;
+        return expknap(instance, p);
     } else if (algorithm_args[0] == "balknap") { // Balknap
-        return [algorithm_argv](Instance& instance, std::mt19937_64&, Info info) {
-            BalknapOptionalParameters p = read_balknap_args(algorithm_argv);
-            p.info = info;
-            return balknap(instance, p);
-        };
+        BalknapOptionalParameters p = read_balknap_args(algorithm_argv);
+        p.info = info;
+        return balknap(instance, p);
     } else if (algorithm_args[0] == "balknap_combo") {
-        return [](Instance& instance, std::mt19937_64&, Info info) {
-            auto p = BalknapOptionalParameters().set_combo();
-            p.info = info;
-            return balknap(instance, p);
-        };
+        auto p = BalknapOptionalParameters().set_combo();
+        p.info = info;
+        return balknap(instance, p);
     } else if (algorithm_args[0] == "minknap") { // Minknap
-        return [algorithm_argv](Instance& instance, std::mt19937_64&, Info info) {
-            MinknapOptionalParameters p = read_minknap_args(algorithm_argv);
-            p.info = info;
-            return minknap(instance, p);
-        };
+        MinknapOptionalParameters p = read_minknap_args(algorithm_argv);
+        p.info = info;
+        return minknap(instance, p);
     } else if (algorithm_args[0] == "minknap_combo" || algorithm_args[0] == "combo") {
-        return [](Instance& instance, std::mt19937_64&, Info info) {
-            auto p = MinknapOptionalParameters().set_combo();
-            p.info = info;
-            return minknap(instance, p);
-        };
+        auto p = MinknapOptionalParameters().set_combo();
+        p.info = info;
+        return minknap(instance, p);
 
-    /*
-     * Upper bounds
-     */
+        /*
+         * Upper bounds
+         */
     } else if (algorithm_args[0] == "dantzig") { // Dantzig
-        return [](Instance& instance, std::mt19937_64&, Info info) {
-            Info info_tmp;
-            Output output(instance, info_tmp);
-            instance.sort_partially(info_tmp);
-            output.upper_bound = ub_dantzig(instance, info);
-            return output;
-        };
+        Info info_tmp;
+        Output output(instance, info_tmp);
+        instance.sort_partially(info_tmp);
+        output.upper_bound = ub_dantzig(instance, info);
+        return output;
     } else if (algorithm_args[0] == "surrelax") { // Surrogate relaxation
-        return [](Instance& instance, std::mt19937_64&, Info info) {
-            return surrelax(instance, info);
-        };
+        return surrelax(instance, info);
     } else if (algorithm_args[0] == "surrelax_minknap") { // Surrogate relaxation
-        return [](Instance& instance, std::mt19937_64&, Info info) {
-            return surrelax_minknap(instance, info);
-        };
+        return surrelax_minknap(instance, info);
 
 
     } else {
         std::cerr << "\033[31m" << "ERROR, unknown algorithm: " << algorithm_args[0] << "\033[0m" << std::endl;
         assert(false);
-        return [](Instance& instance, std::mt19937_64&, Info info) { return Output(instance, info); };
     }
 }
 

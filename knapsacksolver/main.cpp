@@ -51,7 +51,6 @@ int main(int argc, char *argv[])
     // Run algorithm
 
     std::mt19937_64 gen(seed);
-    auto func = get_algorithm(algorithm);
     Instance instance(instance_path, format);
 
     Info info = Info()
@@ -65,7 +64,7 @@ int main(int argc, char *argv[])
         .set_loglevelmax(loglevelmax)
         ;
 
-    auto output = func(instance, gen, info);
+    auto output = run(algorithm, instance, gen, info);
 
     if (instance.optimal_solution() != NULL) {
         if (output.solution.feasible() && output.solution.profit() > instance.optimum()) {

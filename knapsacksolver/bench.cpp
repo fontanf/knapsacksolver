@@ -146,7 +146,6 @@ void bench_literature(
         std::mt19937_64& gen)
 {
     std::ofstream file(algorithm + "_" + dataset_name + ".csv");
-    func f = get_algorithm(algorithm);
 
     // CSV
     file << "n \\ ds";
@@ -173,7 +172,7 @@ void bench_literature(
                         .set_timelimit(t_max - t_total)
                         //.set_verbose(true)
                         ;
-                    f(instance, gen, info);
+                    run(algorithm, instance, gen, info);
                     double t = info.elapsed_time();
                     t_total += t;
                 } catch (...) {
@@ -200,8 +199,6 @@ void bench_literature(
 
 void bench_normal(std::string algorithm, double time_limit, std::mt19937_64& gen)
 {
-    func f = get_algorithm(algorithm);
-
     std::vector<ItemIdx> ns {100, 1000, 10000, 100000};
     std::vector<Weight> rs {1000, 10000, 100000, 1000000, 10000000, 100000000};
     std::vector<double> xs {0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9};
@@ -249,7 +246,7 @@ void bench_normal(std::string algorithm, double time_limit, std::mt19937_64& gen
                 Output output(instance, info);
                 try {
                     info.reset_time();
-                    output = f(instance, gen, info);
+                    output = run(algorithm, instance, gen, info);
                     t = info.elapsed_time();
                 } catch (...) {
                 }

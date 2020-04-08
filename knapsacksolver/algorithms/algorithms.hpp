@@ -16,9 +16,7 @@
 namespace knapsacksolver
 {
 
-typedef std::function<Output (Instance&, std::mt19937_64&, Info)> func;
-
-func get_algorithm(std::string str);
+Output run(std::string algorithm, Instance& instance, std::mt19937_64& generator, Info info);
 
 }
 
