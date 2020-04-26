@@ -13,6 +13,7 @@ All classical and state-of-the-art algorithms are implemented. Most of them are 
  * [Usage](#usage)
    * [Command line](#command-line)
    * [C++ library](#c-library)
+   * [Python interface](#python-interface)
  * [Implemented algorithms](#implemented-algorithms)
    * [Lower bounds](#lower-bounds)
    * [Upper bounds](#upper-bounds)
@@ -86,7 +87,6 @@ bazel build -- //python:knapsacksolver.so
 
 Usage:
 ```python
-from __future__ import print_function
 import random
 import knapsacksolver
 
@@ -103,6 +103,7 @@ instance.set_capacity(c // 2)
 
 # Solve
 solution = knapsacksolver.solve(instance)
+# or solution = knapsacksolver.solve(instance, algorithm = "minknap", verbose = True)
 solution.item_number()
 solution.profit()
 solution.contains(0)
