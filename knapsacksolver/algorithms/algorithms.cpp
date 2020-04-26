@@ -177,6 +177,7 @@ Output knapsacksolver::run(
     } else {
         std::cerr << "\033[31m" << "ERROR, unknown algorithm: " << algorithm_args[0] << "\033[0m" << std::endl;
         assert(false);
+        return Output(instance, info);
     }
 }
 

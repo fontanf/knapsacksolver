@@ -38,3 +38,19 @@ git_repository(
     shallow_since = "1585857862 +0200",
 )
 
+http_archive(
+    name = "pybind11_bazel",
+    strip_prefix = "pybind11_bazel-34206c29f891dbd5f6f5face7b91664c2ff7185c",
+    urls = ["https://github.com/pybind/pybind11_bazel/archive/34206c29f891dbd5f6f5face7b91664c2ff7185c.zip"],
+)
+
+http_archive(
+    name = "pybind11",
+    build_file = "@pybind11_bazel//:pybind11.BUILD",
+    strip_prefix = "pybind11-2.5.0",
+    urls = ["https://github.com/pybind/pybind11/archive/v2.5.0.tar.gz"],
+    sha256 = "97504db65640570f32d3fdf701c25a340c8643037c3b69aec469c10c93dc8504",
+)
+load("@pybind11_bazel//:python_configure.bzl", "python_configure")
+python_configure(name = "local_config_python")
+

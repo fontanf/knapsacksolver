@@ -77,6 +77,37 @@ And then in the `BUILD` file, add the dependency to the concerned rule:
 * Then an example of how to create an instance and solve it can be found here:
 https://github.com/fontanf/generalizedassignmentsolver/blob/master/generalizedassignmentsolver/algorithms/lagrelax_lbfgs.cpp
 
+### Python interface
+
+The Python library is generated at `bazel-bin/python/knapsacksolver.so` by the following command:
+```shell
+bazel build -- //python:knapsacksolver.so
+```
+
+Usage:
+```python
+from __future__ import print_function
+import random
+import knapsacksolver
+
+# Create instance
+instance = knapsacksolver.Instance()
+n = 100
+c = 0
+for i in range(n):
+    w = random.randint(1, 1000000)
+    c += w
+    instance.add_item(w, w + 10)
+
+instance.set_capacity(c // 2)
+
+# Solve
+solution = knapsacksolver.solve(instance)
+solution.item_number()
+solution.profit()
+solution.contains(0)
+```
+
 ## Implemented algorithms
 
 ### Lower bounds
