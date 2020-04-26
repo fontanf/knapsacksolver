@@ -1,27 +1,5 @@
 #include "knapsacksolver/algorithms/algorithms.hpp"
 
-/*
-#include <boost/python.hpp>
-
-using namespace boost::python;
-using namespace knapsacksolver;
-
-char const* greet()
-{
-   return "Hello, world!";
-}
-
-BOOST_PYTHON_MODULE(knapsacksolver)
-{
-    def("greet", greet);
-    class_<Instance>("Instance")
-        //.def("add_item",     &Instance::add_item)
-        //.def("set_capacity", &Instance::set_capacity)
-        ;
-}
-
-*/
-
 #include <pybind11/pybind11.h>
 
 namespace py = pybind11;
@@ -38,7 +16,8 @@ knapsacksolver::Solution solve(
     return run(algorithm, instance, gen, info).solution;
 }
 
-PYBIND11_MODULE(knapsacksolver, m) {
+PYBIND11_MODULE(knapsacksolver, m)
+{
     py::class_<knapsacksolver::Instance>(m, "Instance")
         .def(py::init<>())
         .def(py::init<std::string, std::string>(),
@@ -47,7 +26,6 @@ PYBIND11_MODULE(knapsacksolver, m) {
         .def("set_capacity", &knapsacksolver::Instance::set_capacity)
         .def("add_item", &knapsacksolver::Instance::add_item);
     py::class_<knapsacksolver::Solution>(m, "Solution")
-        //.def(py::init<>())
         .def("contains", &knapsacksolver::Solution::contains_idx)
         .def("item_number", &knapsacksolver::Solution::item_number)
         .def("profit", &knapsacksolver::Solution::profit)
