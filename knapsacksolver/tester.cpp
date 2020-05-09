@@ -5,27 +5,27 @@
 
 using namespace knapsacksolver;
 
-bool test(const Instance& ins, std::vector<Output (*)(Instance&)> fs, TestType tt)
+bool test(const Instance& instance, std::vector<Output (*)(Instance&)> algorithms, TestType test_type)
 {
     Profit opt = -1;
-    for (auto f: fs) {
-        Instance ins_tmp = ins;
-        Output output = f(ins_tmp);
+    for (auto f: algorithms) {
+        Instance instance_tmp = instance;
+        Output output = f(instance_tmp);
         if (opt == -1) {
             opt = output.lower_bound;
             continue;
         }
-        if (tt == SOPT) {
+        if (test_type == SOPT) {
             EXPECT_EQ(output.lower_bound, opt);
             EXPECT_EQ(output.lower_bound, output.upper_bound);
             EXPECT_TRUE(output.solution.feasible());
             EXPECT_EQ(output.solution.profit(), output.lower_bound);
-        } else if (tt == OPT) {
+        } else if (test_type == OPT) {
             EXPECT_EQ(output.lower_bound, opt);
             EXPECT_EQ(output.lower_bound, output.upper_bound);
-        } else if (tt == UB) {
+        } else if (test_type == UB) {
             EXPECT_GE(output.upper_bound, opt);
-        } else if (tt == LB) {
+        } else if (test_type == LB) {
             EXPECT_LE(output.lower_bound, opt);
             EXPECT_TRUE(output.solution.feasible());
             EXPECT_EQ(output.solution.profit(), output.lower_bound);
@@ -38,9 +38,9 @@ class Instances
 {
 public:
     virtual Instance next() = 0;
+    bool end = false;
 };
 
-typedef std::vector<std::pair<Weight, Profit>> v;
 class TestInstances: public Instances
 {
 
@@ -49,6 +49,8 @@ public:
     Instance next()
     {
         i++;
+        if (i == 15)
+            end = true;
         return test_instance(i);
     }
 
@@ -115,11 +117,12 @@ public:
                 if (r > r_max) {
                     r = 2;
                     n += 1;
-                    if (n > n_max)
-                        return Instance(0, {});
                 }
             }
         }
+
+        if (s == s_max && h == h_max && r == r_max && n == n_max)
+            end = true;
 
         Generator data;
         data.n = n;
@@ -137,7 +140,7 @@ private:
     ItemIdx n_max = 10;
     Weight r_max = 10;
     Counter h_max = 100;
-    Seed s_max = 20;
+    Seed s_max = 7;
     ItemIdx n = 1;
     Weight r = 2;
     Counter h = 1;
@@ -150,9 +153,9 @@ class PisingerInstances: public Instances
 public:
 
     PisingerInstances(
-            std::vector<ItemIdx> ns,
-            std::vector<Weight> rs,
-            std::vector<std::string> ts,
+            const std::vector<ItemIdx>& ns,
+            const std::vector<Weight>& rs,
+            const std::vector<std::string>& ts,
             Seed s_max):
         ns(ns), rs(rs), ts(ts), s_max(s_max) {  }
 
@@ -171,12 +174,17 @@ public:
                     if (ti >= (Counter)ts.size()) {
                         ti = 0;
                         ni += 1;
-                        if (ni >= (Counter)ns.size())
-                            return Instance(0, {});
                     }
                 }
             }
         }
+
+        if (s == s_max
+                && h == 100
+                && ri == (Counter)rs.size() - 1
+                && ti == (Counter)ts.size() - 1
+                && ni == (Counter)ns.size() - 1)
+            end = true;
 
         Generator data;
         data.n = ns[ni];
@@ -203,35 +211,43 @@ private:
 
 };
 
-void test(Instances& inss, std::vector<Output (*)(Instance&)> fs, TestType tt)
+void test(Instances& instances, std::vector<Output (*)(Instance&)> fs, TestType test_type)
 {
-    for (;;) {
-        Instance ins(inss.next());
-        std::cout << ins << std::endl;
-        bool b = test(ins, fs, tt);
+    while (!instances.end) {
+        Instance instance(instances.next());
+        //std::cout << instance << std::endl;
+        bool b = test(instance, fs, test_type);
         if (!b) {
             std::cout << "error" << std::endl;
             return;
         }
-        if (ins.reduced_item_number() == 0)
-            break;
     }
 }
 
-void knapsacksolver::test(InstacesType it, std::vector<Output (*)(Instance&)> fs, TestType tt)
+void knapsacksolver::test(
+        InstacesType instances_type,
+        std::vector<Output (*)(Instance&)> algorithms,
+        TestType test_type)
 {
-    if (it == TEST) {
-        TestInstances ti;
-        test(ti, fs, tt);
-    } else if (it == SMALL) {
-        SmallInstances si;
-        test(si, fs, tt);
-    } else if (it == MEDIUM) {
-        PisingerInstances pi({50}, {100}, {"u", "wc", "sc", "isc", "asc", "ss"}, 5);
-        test(pi, fs, tt);
-    } else if (it == SC) {
-        PisingerInstances pi({2, 5, 10, 20, 50, 100, 200, 500, 1000}, {10, 100, 1000}, {"sc"}, 5);
-        test(pi, fs, tt);
+    switch (instances_type) {
+    case TEST: {
+        TestInstances instances;
+        test(instances, algorithms, test_type);
+        break;
+    } case SMALL: {
+        SmallInstances instances;
+        test(instances, algorithms, test_type);
+        break;
+    } case MEDIUM: {
+        PisingerInstances instances({50}, {100}, {"u", "wc", "sc", "isc", "asc", "ss"}, 3);
+        test(instances, algorithms, test_type);
+        break;
+    } case SC: {
+        PisingerInstances instances({2, 5, 10, 20, 50, 100, 200, 500}, {10, 100, 1000}, {"sc"}, 3);
+        test(instances, algorithms, test_type);
+        break;
+    } default: {
+    }
     }
 }
 
