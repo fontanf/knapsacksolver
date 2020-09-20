@@ -100,7 +100,7 @@ void Solution::clear()
     std::fill(x_.begin(), x_.end(), 0);
 }
 
-void Solution::write_cert(std::string filepath)
+void Solution::write(std::string filepath)
 {
     if (filepath.empty())
         return;
@@ -198,7 +198,7 @@ void Output::update_lb(Profit lb_new, const std::stringstream& s, Info& info)
         PUT(info, sol_str, "Cost", lower_bound);
         PUT(info, sol_str, "Time", t);
         if (!info.output->onlywriteattheend)
-            solution.write_cert(info.output->certfile);
+            solution.write(info.output->certfile);
     }
 
     info.output->mutex_sol.unlock();
@@ -225,7 +225,7 @@ void Output::update_sol(const Solution& sol, const std::stringstream& s, Info& i
         PUT(info, sol_str, "Cost", lower_bound);
         PUT(info, sol_str, "Time", t);
         if (!info.output->onlywriteattheend)
-            solution.write_cert(info.output->certfile);
+            solution.write(info.output->certfile);
     }
 
     info.output->mutex_sol.unlock();
@@ -248,7 +248,7 @@ void Output::update_ub(Profit ub_new, const std::stringstream& s, Info& info)
         PUT(info, sol_str, "Cost", upper_bound);
         PUT(info, sol_str, "Time", t);
         if (!info.output->onlywriteattheend)
-            solution.write_cert(info.output->certfile);
+            solution.write(info.output->certfile);
     }
 
     info.output->mutex_sol.unlock();
@@ -276,7 +276,7 @@ Output& Output::algorithm_end(Info& info)
             << "Time (ms): " << t << std::endl);
 
     info.write_ini();
-    solution.write_cert(info.output->certfile);
+    solution.write(info.output->certfile);
     return *this;
 }
 

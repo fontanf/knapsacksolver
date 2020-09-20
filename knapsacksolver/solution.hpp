@@ -44,7 +44,7 @@ public:
      * Write the solution in the input file.
      * One item per line. 1 if in, 0 if out.
      */
-    void write_cert(std::string filepath);
+    void write(std::string filepath);
 
     std::string to_string_binary() const;
     std::string to_string_binary_ordered() const;

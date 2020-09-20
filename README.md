@@ -1,4 +1,4 @@
-# KnapsackSolver
+# Knapsack Solver
 
 A solver for the 0-1 Knapsack Problem.
 
