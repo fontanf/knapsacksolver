@@ -272,7 +272,6 @@ cc_library(
         hdrs = ["algorithms.hpp"],
         srcs = ["algorithms.cpp"],
         deps = [
-                "@boost//:program_options",
                 ":greedy",
                 ":greedynlogn",
                 ":dembo",
@@ -283,6 +282,7 @@ cc_library(
                 ":dpprofits",
                 ":balknap",
                 ":minknap",
+                "@boost//:program_options",
         ],
         copts = STDCPP,
         visibility = ["//visibility:public"],

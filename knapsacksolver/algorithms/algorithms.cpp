@@ -19,7 +19,7 @@ ExpknapOptionalParameters read_expknap_args(std::vector<char*> argv)
     po::store(po::parse_command_line((Counter)argv.size(), argv.data(), desc), vm);
     try {
         po::notify(vm);
-    } catch (po::required_option e) {
+    } catch (const po::required_option& e) {
         std::cout << desc << std::endl;;
         throw "";
     }
@@ -43,7 +43,7 @@ BalknapOptionalParameters read_balknap_args(std::vector<char*> argv)
     po::store(po::parse_command_line((Counter)argv.size(), argv.data(), desc), vm);
     try {
         po::notify(vm);
-    } catch (po::required_option e) {
+    } catch (const po::required_option& e) {
         std::cout << desc << std::endl;;
         throw "";
     }
@@ -66,7 +66,7 @@ MinknapOptionalParameters read_minknap_args(std::vector<char*> argv)
     po::store(po::parse_command_line((Counter)argv.size(), argv.data(), desc), vm);
     try {
         po::notify(vm);
-    } catch (po::required_option e) {
+    } catch (const po::required_option& e) {
         std::cout << desc << std::endl;;
         throw "";
     }
