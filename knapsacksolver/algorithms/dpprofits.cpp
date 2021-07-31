@@ -13,7 +13,7 @@ Output knapsacksolver::dpprofits_array(const Instance& instance, Info info)
     VER(info, "*** dpprofits (array) ***" << std::endl);
     Output output(instance, info);
 
-    ItemIdx n = instance.reduced_item_number();
+    ItemIdx n = instance.reduced_number_of_items();
     if (n == 0) {
         output.update_ub(0, std::stringstream("no item"), info);
         return output.algorithm_end(info);
@@ -63,7 +63,7 @@ Output knapsacksolver::dpprofits_array_all(const Instance& instance, Info info)
     VER(info, "*** dpprofits (array, all) ***" << std::endl);
     Output output(instance, info);
 
-    ItemIdx n = instance.reduced_item_number();
+    ItemIdx n = instance.reduced_number_of_items();
     if (n == 0) {
         output.update_ub(0, std::stringstream("no item"), info);
         return output.algorithm_end(info);

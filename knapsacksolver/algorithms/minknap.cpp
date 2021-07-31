@@ -78,15 +78,15 @@ void minknap_update_bounds(MinknapInternalData& d);
 
 void minknap_main(Instance& instance, MinknapOptionalParameters& p, MinknapOutput& output)
 {
-    output.recursive_call_number++;
+    output.number_of_recursive_calls++;
     LOG_FOLD_START(p.info, "minknap_main"
-            << " recursive_call_number " << output.recursive_call_number
+            << " number_of_recursive_calls " << output.number_of_recursive_calls
             << std::endl);
     LOG_FOLD(p.info, instance);
 
     MinknapInternalData d(instance, p, output);
     Weight  c = instance.reduced_capacity();
-    ItemPos n = instance.reduced_item_number();
+    ItemPos n = instance.reduced_number_of_items();
 
     // Trivial cases
     if (n == 0 || c == 0) {
@@ -112,7 +112,7 @@ void minknap_main(Instance& instance, MinknapOptionalParameters& p, MinknapOutpu
         LOG_FOLD_END(p.info, "all items fit in the knapsack");
         return;
     }
-    if (output.recursive_call_number == 1 && p.combo_core) {
+    if (output.number_of_recursive_calls == 1 && p.combo_core) {
         instance.init_combo_core(p.info);
         LOG_FOLD(p.info, instance);
     }
@@ -250,7 +250,7 @@ void add_item(MinknapInternalData& d)
 {
     Instance& instance = d.instance;
     Info& info = d.p.info;
-    Profit lb = (d.output.recursive_call_number == 1)?
+    Profit lb = (d.output.number_of_recursive_calls == 1)?
         d.output.lower_bound:
         d.output.lower_bound - 1;
     LOG_FOLD_START(info, "add_item"
@@ -303,7 +303,7 @@ void add_item(MinknapInternalData& d)
 
             // Update lower bound
             if (s1.w <= c && s1.p > lb) {
-                if (d.output.recursive_call_number == 1) {
+                if (d.output.number_of_recursive_calls == 1) {
                     std::stringstream ss;
                     ss << "it " << d.t - d.s << " (lb)";
                     d.output.update_lb(s1.p, ss, info);
@@ -364,7 +364,7 @@ void remove_item(MinknapInternalData& d)
 {
     Instance& instance = d.instance;
     Info& info = d.p.info;
-    Profit lb = (d.output.recursive_call_number == 1)?
+    Profit lb = (d.output.number_of_recursive_calls == 1)?
         d.output.lower_bound:
         d.output.lower_bound - 1;
     LOG_FOLD_START(info, "remove_item"
@@ -450,7 +450,7 @@ void remove_item(MinknapInternalData& d)
 
             // Update lower bound
             if (s1.w <= c && s1.p > lb) {
-                if (d.output.recursive_call_number == 1) {
+                if (d.output.number_of_recursive_calls == 1) {
                     std::stringstream ss;
                     ss << "it " << d.t - d.s << " (lb)";
                     d.output.update_lb(s1.p, ss, info);

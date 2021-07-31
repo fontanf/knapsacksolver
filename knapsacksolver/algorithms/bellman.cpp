@@ -19,7 +19,7 @@ Output knapsacksolver::bellman_array(const Instance& instance, Info info)
     Output output(instance, info);
     Weight c = instance.capacity();
     std::vector<Profit> values(c + 1, 0);
-    for (ItemPos j = 0; j < instance.item_number(); ++j) {
+    for (ItemPos j = 0; j < instance.number_of_items(); ++j) {
         // Check time
         if (!info.check_time())
             return output.algorithm_end(info);
@@ -65,7 +65,7 @@ Output knapsacksolver::bellmanpar_array(const Instance& instance, Info info)
 {
     VER(info, "*** bellmanpar (array) ***" << std::endl);
     Output output(instance, info);
-    ItemIdx n = instance.item_number();
+    ItemIdx n = instance.number_of_items();
 
     // Trivial cases
     if (n == 0) {
@@ -131,7 +131,7 @@ Output knapsacksolver::bellmanrec(const Instance& instance, Info info)
     Output output(instance, info);
 
     // Initialize memory table
-    ItemPos n = instance.item_number();
+    ItemPos n = instance.number_of_items();
     Weight  c = instance.capacity();
     StateIdx values_size = (n + 1) * (c + 1);
     std::vector<Profit> values(values_size, -1);
@@ -165,14 +165,14 @@ Output knapsacksolver::bellman_array_all(const Instance& instance, Info info)
     Output output(instance, info);
 
     // Initialize memory table
-    ItemPos n = instance.item_number();
+    ItemPos n = instance.number_of_items();
     Weight  c = instance.capacity();
     StateIdx values_size = (n + 1) * (c + 1);
     std::vector<Profit> values(values_size);
 
     // Compute optimal value
     std::fill(values.begin(), values.begin() + c + 1, 0);
-    for (ItemPos j = 0; j < instance.item_number(); ++j) {
+    for (ItemPos j = 0; j < instance.number_of_items(); ++j) {
         // Check time
         if (!info.check_time())
             return output.algorithm_end(info);
@@ -220,7 +220,7 @@ Output knapsacksolver::bellman_array_one(const Instance& instance, Info info)
     VER(info, "*** bellman (array, one) ***" << std::endl);
     Output output(instance, info);
 
-    ItemPos n = instance.item_number();
+    ItemPos n = instance.number_of_items();
     Weight  c = instance.capacity();
 
     if (n == 0) {
@@ -283,7 +283,7 @@ Output knapsacksolver::bellman_array_one(const Instance& instance, Info info)
 end:
 
         // If first iteration, memorize optimal value
-        if (n == instance.item_number()) {
+        if (n == instance.number_of_items()) {
             // Update upper bound
             output.update_ub(values[c], std::stringstream("tree search completed"), info);
             opt = values[c];
@@ -315,7 +315,7 @@ Output knapsacksolver::bellman_array_part(const Instance& instance, ItemPos k, I
     Output output(instance, info);
 
     assert(0 <= k && k <= 64);
-    ItemPos n = instance.item_number();
+    ItemPos n = instance.number_of_items();
     Weight  c = instance.capacity();
     Solution sol(instance);
 
@@ -371,7 +371,7 @@ Output knapsacksolver::bellman_array_part(const Instance& instance, ItemPos k, I
 end:
 
         // If first iteration, memorize optimal value
-        if (n == instance.item_number()) {
+        if (n == instance.number_of_items()) {
             // Update upper bound
             output.update_ub(values[c], std::stringstream("tree search completed"), info);
             opt = values[w_opt];
@@ -480,10 +480,10 @@ Output knapsacksolver::bellman_array_rec(const Instance& instance, Info info)
     VER(info, "*** bellman (array, rec) ***" << std::endl);
     Output output(instance, info);
 
-    if (instance.item_number() == 0) {
+    if (instance.number_of_items() == 0) {
         output.update_ub(0, std::stringstream("no item"), info);
         return output.algorithm_end(info);
-    } else if (instance.item_number() == 1) {
+    } else if (instance.number_of_items() == 1) {
         Solution sol(instance);
         sol.set(0, true);
         output.update_sol(sol, std::stringstream("one item (lb)"), info);
@@ -491,12 +491,12 @@ Output knapsacksolver::bellman_array_rec(const Instance& instance, Info info)
         return output.algorithm_end(info);
     }
 
-    std::vector<Profit> values(2 * instance.capacity() + instance.item_number());
+    std::vector<Profit> values(2 * instance.capacity() + instance.number_of_items());
     Solution sol(instance);
     bellman_array_rec_rec({
         .instance = instance,
         .n1 = 0,
-        .n2 = instance.item_number(),
+        .n2 = instance.number_of_items(),
         .c = instance.capacity(),
         .sol = sol,
         .values = values.begin(),
@@ -537,7 +537,7 @@ Output knapsacksolver::bellman_list(Instance& instance, bool sort, Info info)
     Output output(instance, info);
 
     Weight  c = instance.capacity();
-    ItemPos n = instance.item_number();
+    ItemPos n = instance.number_of_items();
     ItemPos j_max = instance.max_efficiency_item(info);
 
     if (n == 0 || c == 0) {
@@ -820,7 +820,7 @@ Output knapsacksolver::bellman_list_rec(const Instance& instance, Info info)
     LOG_FOLD_START(info, "*** bellman (list, rec) ***" << std::endl);
     VER(info, "*** bellman (list, rec) ***" << std::endl);
     Output output(instance, info);
-    ItemPos n = instance.item_number();
+    ItemPos n = instance.number_of_items();
 
     if (n == 0) {
         output.update_ub(0, std::stringstream("no item (ub)"), info);
@@ -844,7 +844,7 @@ Output knapsacksolver::bellman_list_rec(const Instance& instance, Info info)
     bellman_list_rec_rec({
         .instance = instance,
         .n1 = 0,
-        .n2 = instance.item_number(),
+        .n2 = instance.number_of_items(),
         .c = instance.capacity(),
         .sol = sol,
         .j_max = j_max,

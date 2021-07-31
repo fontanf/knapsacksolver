@@ -91,19 +91,19 @@ void balknap_update_bounds(BalknapInternalData& d);
 void balknap_main(Instance& instance, BalknapOptionalParameters& p, BalknapOutput& output)
 {
     Info& info = p.info;
-    output.recursive_call_number++;
+    output.number_of_recursive_calls++;
     LOG_FOLD_START(info, "balknap_main"
-            << " recursive_call_number " << output.recursive_call_number
+            << " number_of_recursive_calls " << output.number_of_recursive_calls
             << std::endl);
 
     // Trivial cases
-    if (instance.reduced_item_number() == 0 || instance.reduced_capacity() == 0) {
+    if (instance.reduced_number_of_items() == 0 || instance.reduced_capacity() == 0) {
         Solution sol_tmp = (instance.reduced_solution() == NULL)? Solution(instance): *instance.reduced_solution();
         output.update_sol(sol_tmp, std::stringstream("no item of null capacity (lb)"), p.info);
         output.update_ub(output.lower_bound, std::stringstream("no item of null capacity (ub)"), p.info);
         LOG_FOLD_END(info, "no item or null capacity");
         return;
-    } else if (instance.reduced_item_number() == 1) {
+    } else if (instance.reduced_number_of_items() == 1) {
         Solution sol_tmp = (instance.reduced_solution() == NULL)? Solution(instance): *instance.reduced_solution();
         sol_tmp.set(instance.first_item(), true);
         output.update_sol(sol_tmp, std::stringstream("one item (lb)"), p.info);
@@ -139,7 +139,7 @@ void balknap_main(Instance& instance, BalknapOptionalParameters& p, BalknapOutpu
     // Variable reduction
     // If we already know the optimal value, we can use opt-1 as lower bound
     // for the reduction.
-    Profit lb_red = (output.recursive_call_number == 1)?
+    Profit lb_red = (output.number_of_recursive_calls == 1)?
         output.lower_bound:
         output.lower_bound - 1;
     if (p.ub == 'b') {
@@ -159,7 +159,7 @@ void balknap_main(Instance& instance, BalknapOptionalParameters& p, BalknapOutpu
     Weight  c = instance.capacity();
     ItemPos f = instance.first_item();
     ItemPos l = instance.last_item();
-    ItemPos n = instance.reduced_item_number();
+    ItemPos n = instance.reduced_number_of_items();
 
     // Trivial cases
     if (n == 0 || instance.reduced_capacity() == 0) {
@@ -210,7 +210,7 @@ void balknap_main(Instance& instance, BalknapOptionalParameters& p, BalknapOutpu
     // Also keep last added item to improve the variable reduction at the end.
     ItemPos last_item = b-1;
 
-    Profit lb = (d.output.recursive_call_number == 1)?
+    Profit lb = (d.output.number_of_recursive_calls == 1)?
         d.output.lower_bound:
         d.output.lower_bound - 1;
 
@@ -296,7 +296,7 @@ void balknap_main(Instance& instance, BalknapOptionalParameters& p, BalknapOutpu
 
             // Update LB
             if (mu_ <= c && pi_ > lb) {
-                if (d.output.recursive_call_number == 1) {
+                if (d.output.number_of_recursive_calls == 1) {
                     std::stringstream ss;
                     ss << "it " << t - b << " (lb)";
                     output.update_lb(pi_, ss, info);
@@ -367,7 +367,7 @@ void balknap_main(Instance& instance, BalknapOptionalParameters& p, BalknapOutpu
 
                 // Update LB
                 if (mu_ <= c && pi_ > lb) {
-                    if (d.output.recursive_call_number == 1) {
+                    if (d.output.number_of_recursive_calls == 1) {
                         std::stringstream ss;
                         ss << "it " << t - b << " (lb)";
                         output.update_lb(pi_, ss, info);

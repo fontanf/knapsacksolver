@@ -21,7 +21,7 @@ struct ExpknapInternalData
 
 void expknap_update_bounds(ExpknapInternalData& d)
 {
-    if (d.p.surrelax >= 0 && d.p.surrelax <= d.output.node_number) {
+    if (d.p.surrelax >= 0 && d.p.surrelax <= d.output.number_of_node) {
         d.p.surrelax = -1;
         std::function<Output (Instance&, Info, bool*)> func
             = [&d](Instance& ins, Info info, bool* end)
@@ -44,7 +44,7 @@ void expknap_update_bounds(ExpknapInternalData& d)
                     .end      = d.p.end,
                     .info     = Info(d.p.info, true, "surrelax")}));
     }
-    if (d.p.greedynlogn >= 0 && d.p.greedynlogn <= d.output.node_number) {
+    if (d.p.greedynlogn >= 0 && d.p.greedynlogn <= d.output.number_of_node) {
         d.p.greedynlogn = -1;
         auto gn_output = greedynlogn(d.instance);
         d.output.update_sol(gn_output.solution, std::stringstream("greedynlogn"), d.p.info);
@@ -54,8 +54,8 @@ void expknap_update_bounds(ExpknapInternalData& d)
 void expknap_rec(ExpknapInternalData& d, ItemPos s, ItemPos t)
 {
     Info& info = d.p.info;
-    d.output.node_number++; // Increment node number
-    LOG_FOLD_START(info, "node number " << d.output.node_number
+    d.output.number_of_node++; // Increment node number
+    LOG_FOLD_START(info, "node number " << d.output.number_of_node
             << " s " << s << " t " << t
             << " w " << d.sol_curr.weight() << " p " << d.sol_curr.profit()
             << std::endl);
@@ -90,7 +90,7 @@ void expknap_rec(ExpknapInternalData& d, ItemPos s, ItemPos t)
         // Update best solution
         if (d.output.solution.profit() < d.sol_curr.profit()) {
             std::stringstream ss;
-            ss << "node " << d.output.node_number;
+            ss << "node " << d.output.number_of_node;
             d.output.update_sol(d.sol_curr, ss, info);
         }
 
@@ -153,7 +153,7 @@ ExpknapOutput knapsacksolver::expknap(Instance& instance, ExpknapOptionalParamet
 
     ExpknapOutput output(instance, p.info);
 
-    if (instance.reduced_item_number() == 0) {
+    if (instance.reduced_number_of_items() == 0) {
         output.update_ub(output.lower_bound, std::stringstream("no item (ub)"), p.info);
         LOG(p.info, "no item" << std::endl);
         return output.algorithm_end(p.info);

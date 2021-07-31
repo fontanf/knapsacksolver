@@ -27,7 +27,7 @@ PYBIND11_MODULE(knapsacksolver, m)
         .def("add_item", &knapsacksolver::Instance::add_item);
     py::class_<knapsacksolver::Solution>(m, "Solution")
         .def("contains", &knapsacksolver::Solution::contains_idx)
-        .def("item_number", &knapsacksolver::Solution::item_number)
+        .def("number_of_items", &knapsacksolver::Solution::number_of_items)
         .def("profit", &knapsacksolver::Solution::profit)
         .def("weight", &knapsacksolver::Solution::weight);
     m.def("solve", &solve,

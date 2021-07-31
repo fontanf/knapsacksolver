@@ -81,7 +81,7 @@ public:
     {
         ItemPos f = std::max(instance_.first_item(), x1());
         ItemPos l = std::min(instance_.last_item(), x2());
-        std::vector<int> vec(instance_.item_number(), 0);
+        std::vector<int> vec(instance_.number_of_items(), 0);
         for (ItemPos j = f; j <= l; ++j)
             vec[j] = (contains(s, j))? 1: -1;
         return vec;

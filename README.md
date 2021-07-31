@@ -104,7 +104,7 @@ instance.set_capacity(c // 2)
 # Solve
 solution = knapsacksolver.solve(instance)
 # or solution = knapsacksolver.solve(instance, algorithm = "minknap", verbose = True)
-solution.item_number()
+solution.number_of_items()
 solution.profit()
 solution.contains(0)
 ```

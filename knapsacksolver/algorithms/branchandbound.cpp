@@ -15,20 +15,20 @@ struct BranchAndBoundData
     bool sort;
     ItemPos j_max;
     std::vector<Weight> min_weight;
-    Counter node_number;
+    Counter number_of_node;
     Info& info;
 };
 
 void branchandbound_rec(BranchAndBoundData& d)
 {
-    d.node_number++; // Increment node number
+    d.number_of_node++; // Increment node number
 
     if (!d.info.check_time()) // Check time
         return;
 
     if (d.output.lower_bound < d.sol_curr.profit()) {
         std::stringstream ss;
-        ss << "node " << d.node_number;
+        ss << "node " << d.number_of_node;
         d.output.update_sol(d.sol_curr, ss, d.info);
     }
 
@@ -60,7 +60,7 @@ Output knapsacksolver::branchandbound(Instance& instance, bool sort, Info info)
     VER(info, "*** branchandbound" << ((sort)? " (sort)": "") << " ***" << std::endl);
     Output output(instance, info);
 
-    ItemIdx n = instance.reduced_item_number();
+    ItemIdx n = instance.reduced_number_of_items();
     if (n == 0) {
         output.update_ub(0, std::stringstream("no item"), info);
         LOG_FOLD_END(info, "no item");
@@ -115,7 +115,7 @@ Output knapsacksolver::branchandbound(Instance& instance, bool sort, Info info)
         .sort = sort,
         .j_max = j_max,
         .min_weight = instance.min_weights(),
-        .node_number = 0,
+        .number_of_node = 0,
         .info = info,
     };
     branchandbound_rec(d);

@@ -82,12 +82,12 @@ TEST(Instance, SortPartially3)
             }
             instance.set_capacity(std::max(wmax, (h * wsum) / 100));
 
-            std::cout << "n " << instance.item_number()
+            std::cout << "n " << instance.number_of_items()
                 << " c " << instance.capacity() << std::endl;
             std::cout << "{";
-            for (ItemIdx j = 0; j < instance.item_number(); ++j) {
+            for (ItemIdx j = 0; j < instance.number_of_items(); ++j) {
                 std::cout << "{" << instance.item(j).w << "," << instance.item(j).p << "}";
-                if (j != instance.item_number() - 1)
+                if (j != instance.number_of_items() - 1)
                     std::cout << ", ";
             }
             std::cout << "}" << std::endl;
@@ -98,7 +98,7 @@ TEST(Instance, SortPartially3)
             Solution sol(instance);
             ItemPos b = instance.break_item();
 
-            if (b == instance.item_number()) {
+            if (b == instance.number_of_items()) {
                 continue;
             }
 
@@ -117,7 +117,7 @@ TEST(Instance, SortPartially3)
                     return;
                 }
             }
-            for (ItemPos j=instance.break_item(); j<instance.item_number(); ++j) {
+            for (ItemPos j=instance.break_item(); j<instance.number_of_items(); ++j) {
                 EXPECT_LE(instance.item(j).p*wb, instance.item(j).w*pb);
                 if (instance.item(j).p*wb > instance.item(j).w*pb) {
                     std::cout << instance << std::endl;

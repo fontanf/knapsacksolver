@@ -53,13 +53,13 @@ struct MinknapOutput: Output
 {
     MinknapOutput(const Instance& instance, Info& info): Output(instance, info) { }
 
-    Counter recursive_call_number = 0;
+    Counter number_of_recursive_calls = 0;
 
     MinknapOutput& algorithm_end(Info& info)
     {
-        PUT(info, "Algorithm", "RecursiveCallNumber", recursive_call_number);
+        PUT(info, "Algorithm", "RecursiveCallNumber", number_of_recursive_calls);
         Output::algorithm_end(info);
-        VER(info, "Recursive call number: " << recursive_call_number << std::endl);
+        VER(info, "Number of recursive calls: " << number_of_recursive_calls << std::endl);
         return *this;
     }
 };

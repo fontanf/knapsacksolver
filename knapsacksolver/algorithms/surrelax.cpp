@@ -10,12 +10,12 @@ using namespace knapsacksolver;
 ItemIdx max_card(const Instance& instance, Info& info)
 {
     LOG_FOLD_START(info, "max_card" << std::endl);
-    if (instance.reduced_item_number() == 1) {
+    if (instance.reduced_number_of_items() == 1) {
         LOG_FOLD_END(info, "1 item");
         return 1;
     }
 
-    std::vector<ItemIdx> index(instance.item_number());
+    std::vector<ItemIdx> index(instance.number_of_items());
     std::iota(index.begin(), index.end(), 0);
     ItemIdx f = instance.first_item();
     ItemIdx l = instance.last_item();
@@ -55,7 +55,7 @@ ItemIdx max_card(const Instance& instance, Info& info)
         }
     }
 
-    ItemPos k = instance.reduced_solution()->item_number();
+    ItemPos k = instance.reduced_solution()->number_of_items();
     Weight r = instance.reduced_capacity();
     for (ItemPos j = instance.first_item(); j <= instance.last_item(); ++j) {
         if (r < instance.item(index[j]).w) {
@@ -74,12 +74,12 @@ ItemIdx min_card(const Instance& instance, Info& info, Profit lb)
     LOG_FOLD_START(info, "min_card" << std::endl);
 
     lb -= instance.reduced_solution()->profit();
-    if (instance.reduced_item_number() <= 1) {
+    if (instance.reduced_number_of_items() <= 1) {
         LOG_FOLD_END(info, "1 item");
         return (instance.item(1).p <= lb)? 1: 0;
     }
 
-    std::vector<ItemIdx> index(instance.item_number());
+    std::vector<ItemIdx> index(instance.number_of_items());
     std::iota(index.begin(), index.end(), 0);
     ItemIdx f = instance.first_item();
     ItemIdx l = instance.last_item();
@@ -173,7 +173,7 @@ UBS surrogate_solve(Instance& instance, Info& info, ItemIdx k,
         if (s_min == 0 && s != 0) {
             if (INT_FAST64_MAX / s < k
                     || instance.capacity() > INT_FAST64_MAX - s * k
-                    || INT_FAST64_MAX / instance.item_number() < wmax+s
+                    || INT_FAST64_MAX / instance.number_of_items() < wmax+s
                     || wmax + s > wlim) {
                 s2 = s - 1;
                 LOG_FOLD_END(info, "");
@@ -185,7 +185,7 @@ UBS surrogate_solve(Instance& instance, Info& info, ItemIdx k,
         if (s_max == 0 && s != 0) {
             wabs = (wmax+s > -wmin+s)? wmax+s: wmin+s;
             if (INT_FAST64_MAX / -s < k
-                    || INT_FAST64_MAX / instance.item_number() < wabs
+                    || INT_FAST64_MAX / instance.number_of_items() < wabs
                     || wabs > wlim) {
                 s1 = s + 1;
                 LOG_FOLD_END(info, "");
@@ -234,7 +234,7 @@ void knapsacksolver::solvesurrelax(SurrelaxData d)
     ItemPos b = d.instance.break_item();
 
     // Trivial cases
-    if (d.instance.reduced_item_number() == 0) {
+    if (d.instance.reduced_number_of_items() == 0) {
         Profit ub = (d.instance.reduced_solution() == NULL)? 0: d.instance.reduced_solution()->profit();
         if (d.output.upper_bound == -1 || d.output.upper_bound > ub)
             d.output.update_ub(ub, std::stringstream("surrogate relaxation"), d.info);

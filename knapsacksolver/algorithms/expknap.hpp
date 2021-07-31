@@ -43,13 +43,13 @@ struct ExpknapOptionalParameters
 struct ExpknapOutput: Output
 {
     ExpknapOutput(const Instance& instance, Info& info): Output(instance, info) { }
-    Counter node_number = 0;
+    Counter number_of_node = 0;
 
     ExpknapOutput& algorithm_end(Info& info)
     {
-        PUT(info, "Algorithm", "NodeNumber", node_number);
+        PUT(info, "Algorithm", "NodeNumber", number_of_node);
         Output::algorithm_end(info);
-        VER(info, "Node number: " << node_number << std::endl);
+        VER(info, "Node number: " << number_of_node << std::endl);
         return *this;
     }
 };

@@ -173,7 +173,6 @@ Output knapsacksolver::run(
     } else if (algorithm_args[0] == "surrelax_minknap") { // Surrogate relaxation
         return surrelax_minknap(instance, info);
 
-
     } else {
         std::cerr << "\033[31m" << "ERROR, unknown algorithm: " << algorithm_args[0] << "\033[0m" << std::endl;
         assert(false);

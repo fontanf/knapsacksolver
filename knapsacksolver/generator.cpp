@@ -135,7 +135,7 @@ Instance Generator::generate_spanner()
     std::uniform_int_distribution<Counter> dist(1, m);
     Weight wsum = 0;
     Weight wmax = 0;
-    while (instance.reduced_item_number() < n) {
+    while (instance.reduced_number_of_items() < n) {
         auto wp = vec[i];
         i = (i + 1) % v;
         ItemIdx a = dist(g);

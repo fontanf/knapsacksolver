@@ -20,7 +20,7 @@ public:
     inline Weight weight()             const { return weight_; }
     inline Weight remaining_capacity() const { return instance_.capacity() - weight(); }
     inline Profit profit()             const { return profit_; }
-    inline ItemIdx item_number()       const { return item_number_; }
+    inline ItemIdx number_of_items()       const { return number_of_items_; }
     const std::vector<int>& data()     const { return x_; }
     inline bool feasible()             const { return weight_ <= instance_.capacity(); }
 
@@ -53,7 +53,7 @@ public:
 private:
 
     const Instance& instance_;
-    ItemIdx item_number_ = 0;
+    ItemIdx number_of_items_ = 0;
     Profit profit_ = 0;
     Weight weight_ = 0;
     std::vector<int> x_;
