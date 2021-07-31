@@ -177,8 +177,8 @@ void Output::print(Info& info, const std::stringstream& s) const
     VER(info, std::left << std::setw(10) << gap_str);
     VER(info, s.str() << std::endl);
 
-    if (!info.output->onlywriteattheend)
-        info.write_ini();
+    if (!info.output->only_write_at_the_end)
+        info.write_json_output();
 }
 
 void Output::update_lb(Profit lb_new, const std::stringstream& s, Info& info)
@@ -186,22 +186,22 @@ void Output::update_lb(Profit lb_new, const std::stringstream& s, Info& info)
     if (lower_bound >= lb_new)
         return;
 
-    info.output->mutex_sol.lock();
+    info.output->mutex_solutions.lock();
 
     if (lower_bound < lb_new) {
         lower_bound = lb_new;
         print(info, s);
 
-        info.output->sol_number++;
+        info.output->number_of_solutions++;
         double t = round(info.elapsed_time() * 10000) / 10;
-        std::string sol_str = "Solution" + std::to_string(info.output->sol_number);
+        std::string sol_str = "Solution" + std::to_string(info.output->number_of_solutions);
         PUT(info, sol_str, "Cost", lower_bound);
         PUT(info, sol_str, "Time", t);
-        if (!info.output->onlywriteattheend)
-            solution.write(info.output->certfile);
+        if (!info.output->only_write_at_the_end)
+            solution.write(info.output->certificate_path);
     }
 
-    info.output->mutex_sol.unlock();
+    info.output->mutex_solutions.unlock();
 }
 
 void Output::update_sol(const Solution& sol, const std::stringstream& s, Info& info)
@@ -209,7 +209,7 @@ void Output::update_sol(const Solution& sol, const std::stringstream& s, Info& i
     if (!sol.feasible() || solution.profit() >= sol.profit())
         return;
 
-    info.output->mutex_sol.lock();
+    info.output->mutex_solutions.lock();
 
     if (solution.profit() < sol.profit()) {
         solution = sol;
@@ -219,16 +219,16 @@ void Output::update_sol(const Solution& sol, const std::stringstream& s, Info& i
         lower_bound = sol.profit();
         print(info, s);
 
-        info.output->sol_number++;
+        info.output->number_of_solutions++;
         double t = round(info.elapsed_time() * 10000) / 10;
-        std::string sol_str = "Solution" + std::to_string(info.output->sol_number);
+        std::string sol_str = "Solution" + std::to_string(info.output->number_of_solutions);
         PUT(info, sol_str, "Cost", lower_bound);
         PUT(info, sol_str, "Time", t);
-        if (!info.output->onlywriteattheend)
-            solution.write(info.output->certfile);
+        if (!info.output->only_write_at_the_end)
+            solution.write(info.output->certificate_path);
     }
 
-    info.output->mutex_sol.unlock();
+    info.output->mutex_solutions.unlock();
 }
 
 void Output::update_ub(Profit ub_new, const std::stringstream& s, Info& info)
@@ -236,22 +236,22 @@ void Output::update_ub(Profit ub_new, const std::stringstream& s, Info& info)
     if (upper_bound != -1 && upper_bound <= ub_new)
         return;
 
-    info.output->mutex_sol.lock();
+    info.output->mutex_solutions.lock();
 
     if (upper_bound == -1 || upper_bound > ub_new) {
         upper_bound = ub_new;
         print(info, s);
 
-        info.output->bnd_number++;
+        info.output->number_of_bounds++;
         double t = round(info.elapsed_time() * 10000) / 10;
-        std::string sol_str = "Bound" + std::to_string(info.output->bnd_number);
+        std::string sol_str = "Bound" + std::to_string(info.output->number_of_bounds);
         PUT(info, sol_str, "Cost", upper_bound);
         PUT(info, sol_str, "Time", t);
-        if (!info.output->onlywriteattheend)
-            solution.write(info.output->certfile);
+        if (!info.output->only_write_at_the_end)
+            solution.write(info.output->certificate_path);
     }
 
-    info.output->mutex_sol.unlock();
+    info.output->mutex_solutions.unlock();
 }
 
 Output& Output::algorithm_end(Info& info)
@@ -275,8 +275,8 @@ Output& Output::algorithm_end(Info& info)
             << "Solution: " << sol_str << std::endl
             << "Time (ms): " << t << std::endl);
 
-    info.write_ini();
-    solution.write(info.output->certfile);
+    info.write_json_output();
+    solution.write(info.output->certificate_path);
     return *this;
 }
 
@@ -289,7 +289,7 @@ Profit knapsacksolver::algorithm_end(Profit upper_bound, Info& info)
             << "Bound: " << upper_bound << std::endl
             << "Time (ms): " << t << std::endl);
 
-    info.write_ini();
+    info.write_json_output();
     return upper_bound;
 }
 

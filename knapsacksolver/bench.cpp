@@ -169,7 +169,7 @@ void bench_literature(
                 //std::cout << path(dataset[k], n) + std::to_string(h) + ".csv" << std::endl;
                 try {
                     Info info = Info()
-                        .set_timelimit(t_max - t_total)
+                        .set_time_limit(t_max - t_total)
                         //.set_verbose(true)
                         ;
                     run(algorithm, instance, gen, info);
@@ -240,7 +240,7 @@ void bench_normal(std::string algorithm, double time_limit, std::mt19937_64& gen
                         + "_x0." + std::to_string((int)(10 * x)), "standard");
                 double t = time_limit + 1;
                 Info info = Info()
-                    .set_timelimit(time_limit)
+                    .set_time_limit(time_limit)
                     //.set_verbose(true)
                     ;
                 Output output(instance, info);
