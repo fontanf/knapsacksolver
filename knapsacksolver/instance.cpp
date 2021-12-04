@@ -22,7 +22,7 @@ void Instance::clear()
 {
     items_.clear();
     c_orig_ = 0;
-    sol_opt_ = NULL;
+    sol_opt_ = nullptr;
     b_ = -1;
     f_ = 0;
     l_ = -1;
@@ -33,8 +33,8 @@ void Instance::clear()
     sort_type_ = 0;
     int_right_.clear();
     int_left_.clear();
-    sol_red_ = NULL;
-    sol_break_ = NULL;
+    sol_red_ = nullptr;
+    sol_break_ = nullptr;
 }
 
 Instance::Instance(Weight c, const std::vector<std::pair<Weight, Profit>>& wp):
@@ -157,15 +157,15 @@ Instance::Instance(const Instance& instance):
     int_right_(instance.int_right_),
     int_left_(instance.int_left_)
 {
-    if (instance.optimal_solution() != NULL) {
+    if (instance.optimal_solution() != nullptr) {
         sol_opt_ = std::make_unique<Solution>(*this);
         *sol_opt_ = *instance.optimal_solution();
     }
-    if (instance.break_solution() != NULL) {
+    if (instance.break_solution() != nullptr) {
         sol_break_ = std::make_unique<Solution>(*this);
         *sol_break_ = *instance.break_solution();
     }
-    if (instance.reduced_solution() != NULL) {
+    if (instance.reduced_solution() != nullptr) {
         sol_red_ = std::make_unique<Solution>(*this);
         *sol_red_ = *instance.reduced_solution();
     }
@@ -188,15 +188,15 @@ Instance& Instance::operator=(const Instance& instance)
         int_right_ = instance.int_right_;
         int_left_ = instance.int_left_;
 
-        if (instance.optimal_solution() != NULL) {
+        if (instance.optimal_solution() != nullptr) {
             sol_opt_ = std::make_unique<Solution>(*this);
             *sol_opt_ = *instance.optimal_solution();
         }
-        if (instance.break_solution() != NULL) {
+        if (instance.break_solution() != nullptr) {
             sol_break_ = std::make_unique<Solution>(*this);
             *sol_break_ = *instance.break_solution();
         }
-        if (instance.reduced_solution() != NULL) {
+        if (instance.reduced_solution() != nullptr) {
             sol_red_ = std::make_unique<Solution>(*this);
             *sol_red_ = *instance.reduced_solution();
         }
@@ -226,7 +226,7 @@ bool Instance::check()
 
 /******************************************************************************/
 
-ItemPos Instance::max_efficiency_item(Info& info) const
+ItemPos Instance::max_efficiency_item(DBG(Info& info)) const
 {
     ItemPos k = -1;
     for (ItemPos j = first_item(); j <= last_item(); ++j)
@@ -236,7 +236,7 @@ ItemPos Instance::max_efficiency_item(Info& info) const
     return k;
 }
 
-ItemPos Instance::before_break_item(Info& info) const
+ItemPos Instance::before_break_item(DBG(Info& info)) const
 {
     ItemPos k = -1;
     for (ItemPos j = first_item(); j < break_item(); ++j)
@@ -246,7 +246,7 @@ ItemPos Instance::before_break_item(Info& info) const
     return k;
 }
 
-ItemPos Instance::max_profit_item(Info& info) const
+ItemPos Instance::max_profit_item(DBG(Info& info)) const
 {
     ItemPos k = -1;
     for (ItemPos j = first_item(); j <= last_item(); ++j)
@@ -256,7 +256,7 @@ ItemPos Instance::max_profit_item(Info& info) const
     return k;
 }
 
-ItemPos Instance::min_profit_item(Info& info) const
+ItemPos Instance::min_profit_item(DBG(Info& info)) const
 {
     ItemPos k = -1;
     for (ItemPos j = first_item(); j <= last_item(); ++j)
@@ -266,7 +266,7 @@ ItemPos Instance::min_profit_item(Info& info) const
     return k;
 }
 
-ItemPos Instance::max_weight_item(Info& info) const
+ItemPos Instance::max_weight_item(DBG(Info& info)) const
 {
     ItemPos k = -1;
     for (ItemPos j = first_item(); j <= last_item(); ++j)
@@ -276,7 +276,7 @@ ItemPos Instance::max_weight_item(Info& info) const
     return k;
 }
 
-ItemPos Instance::min_weight_item(Info& info) const
+ItemPos Instance::min_weight_item(DBG(Info& info)) const
 {
     ItemPos k = -1;
     for (ItemPos j = first_item(); j <= last_item(); ++j)
@@ -302,13 +302,13 @@ std::vector<Item> Instance::get_isum() const
     std::vector<Item> isum;
     isum.reserve(number_of_items()+1);
     isum.clear();
-    isum.push_back({0,0,0});
+    isum.push_back({0, 0, 0});
     for (ItemPos j = 1; j <= number_of_items(); ++j)
         isum.push_back({j, isum[j - 1].w + item(j - 1).w, isum[j - 1].p + item(j - 1).p});
     return isum;
 }
 
-ItemPos Instance::gamma1(Info& info) const
+ItemPos Instance::gamma1(DBG(Info& info)) const
 {
     Weight w = break_weight() - item(break_item() - 1).w;
     ItemPos k = -1;
@@ -320,7 +320,7 @@ ItemPos Instance::gamma1(Info& info) const
 
 }
 
-ItemPos Instance::gamma2(Info& info) const
+ItemPos Instance::gamma2(DBG(Info& info)) const
 {
     Weight w = break_weight() + item(break_item()).w;
     ItemPos k = -1;
@@ -331,7 +331,7 @@ ItemPos Instance::gamma2(Info& info) const
     return k;
 }
 
-ItemPos Instance::beta1(Info& info) const
+ItemPos Instance::beta1(DBG(Info& info)) const
 {
     ItemPos k = -1;
     for (ItemPos j = break_item() + 1; j <= last_item(); ++j)
@@ -342,7 +342,7 @@ ItemPos Instance::beta1(Info& info) const
 
 }
 
-ItemPos Instance::beta2(Info& info) const
+ItemPos Instance::beta2(DBG(Info& info)) const
 {
     ItemPos k = -1;
     if (break_item() + 1 <= last_item()) {
@@ -357,19 +357,19 @@ ItemPos Instance::beta2(Info& info) const
 
 Profit Instance::optimum() const
 {
-    if (optimal_solution() == NULL)
+    if (optimal_solution() == nullptr)
         return -1;
     return optimal_solution()->profit();
 }
 
 /******************************************************************************/
 
-void Instance::compute_break_item(Info& info)
+void Instance::compute_break_item(DBG(Info& info))
 {
     LOG_FOLD_START(info, "compute_break_item f " << first_item() << std::endl);
     LOG(info, "reduced solution " << reduced_solution()->to_string_items() << std::endl);
 
-    if (sol_break_ == NULL) {
+    if (sol_break_ == nullptr) {
         sol_break_ = std::make_unique<Solution>(*reduced_solution());
     } else {
         *sol_break_ = *reduced_solution();
@@ -400,20 +400,20 @@ Weight Instance::break_capacity() const
 
 Weight Instance::reduced_capacity() const
 {
-    return (reduced_solution() == NULL)?
+    return (reduced_solution() == nullptr)?
         capacity(): capacity() - reduced_solution()->weight();
 }
 
 /******************************************************************************/
 
-void Instance::sort(Info& info)
+void Instance::sort(DBG(Info& info))
 {
     LOG_FOLD_START(info, "sort" << std::endl);
     if (sort_type() == 2) {
         LOG_FOLD_END(info, "sort already sorted");
         return;
     }
-    if (reduced_solution() == NULL)
+    if (reduced_solution() == nullptr)
         sol_red_ = std::make_unique<Solution>(*this);
     sort_type_ = 2;
     if (reduced_number_of_items() > 1)
@@ -421,11 +421,11 @@ void Instance::sort(Info& info)
                 [](const Item& i1, const Item& i2) {
                 return i1.p * i2.w > i2.p * i1.w;});
 
-    compute_break_item(info);
+    compute_break_item(DBG(info));
     LOG_FOLD_END(info, "sort");
 }
 
-void Instance::remove_big_items(Info& info)
+void Instance::remove_big_items(DBG(Info& info))
 {
     LOG_FOLD_START(info, "remove_big_items" << std::endl);
     if (b_ != -1 && item(b_).w > reduced_capacity())
@@ -450,7 +450,7 @@ void Instance::remove_big_items(Info& info)
         }
 
         if (b_ == -1)
-            compute_break_item(info);
+            compute_break_item(DBG(info));
     } else {
         for (ItemPos j = first_item(); j <= last_item();) {
             if (item(j).w > reduced_capacity()) {
@@ -462,12 +462,12 @@ void Instance::remove_big_items(Info& info)
         }
 
         sort_type_ = 0;
-        sort_partially(info);
+        sort_partially(DBG(info));
     }
     LOG_FOLD_END(info, "remove_big_items");
 }
 
-std::pair<ItemPos, ItemPos> Instance::partition(ItemPos f, ItemPos l, Info& info)
+std::pair<ItemPos, ItemPos> Instance::partition(ItemPos f, ItemPos l DBG(COMMA Info& info))
 {
     LOG_FOLD_START(info, "partition f " << f << " l " << l << std::endl);
     ItemPos pivot = f + 1 + rand() % (l - f); // Select pivot
@@ -504,7 +504,7 @@ std::pair<ItemPos, ItemPos> Instance::partition(ItemPos f, ItemPos l, Info& info
     return {f,l};
 }
 
-void Instance::sort_partially(Info& info, ItemIdx limit)
+void Instance::sort_partially(DBG(Info& info COMMA) ItemIdx limit)
 {
     LOG_FOLD_START(info, "sort_partially limit " << limit << std::endl);
 
@@ -513,7 +513,7 @@ void Instance::sort_partially(Info& info, ItemIdx limit)
         return;
     }
 
-    if (reduced_solution() == NULL)
+    if (reduced_solution() == nullptr)
         sol_red_ = std::make_unique<Solution>(*this);
 
     srand(0);
@@ -533,7 +533,7 @@ void Instance::sort_partially(Info& info, ItemIdx limit)
             break;
         }
 
-        std::pair<ItemPos, ItemPos> fl = partition(f, l, info);
+        std::pair<ItemPos, ItemPos> fl = partition(f, l DBG(COMMA info));
         ItemPos w = 0;
         for (ItemPos k = f; k < fl.first; ++k)
             w += item(k).w;
@@ -561,7 +561,7 @@ void Instance::sort_partially(Info& info, ItemIdx limit)
 
     sort_type_ = 1;
 
-    compute_break_item(info);
+    compute_break_item(DBG(info));
 
     if (f < b_)
         int_left_.push_back({f, b_ - 1});
@@ -572,12 +572,12 @@ void Instance::sort_partially(Info& info, ItemIdx limit)
     s_init_ = b_;
     t_init_ = b_;
 
-    assert(check_partialsort(info));
+    DBG(assert(check_partialsort(info)));
     LOG_FOLD(info, *this);
     LOG_FOLD_END(info, "sort_partially");
 }
 
-void Instance::sort_right(Info& info, Profit lb)
+void Instance::sort_right(Profit lb DBG(COMMA Info& info))
 {
     LOG_FOLD_START(info, "sort_right lb " << lb << std::endl);
     Interval in = int_right_.back();
@@ -617,7 +617,7 @@ void Instance::sort_right(Info& info, Profit lb)
     LOG_FOLD_END(info, "sort_right");
 }
 
-void Instance::sort_left(Info& info, Profit lb)
+void Instance::sort_left(Profit lb DBG(COMMA Info& info))
 {
     LOG_FOLD_START(info, "sort_left lb " << lb << std::endl);
     LOG(info, "s_prime " << s_prime() << std::endl);
@@ -660,11 +660,11 @@ void Instance::sort_left(Info& info, Profit lb)
     LOG_FOLD_END(info, "sort_left");
 }
 
-ItemPos Instance::bound_item_left(ItemPos s, Profit lb, Info& info)
+ItemPos Instance::bound_item_left(ItemPos s, Profit lb DBG(COMMA Info& info))
 {
     LOG_FOLD_START(info, "bound_item_left s " << s << std::endl);
     while (s < s_prime() && int_left().size() > 0)
-        sort_left(info, lb);
+        sort_left(lb DBG(COMMA info));
     if (s < first_item()) {
         LOG_FOLD_END(info, "bound_item_left " << first_item() + 1);
         return first_item() - 1;
@@ -677,11 +677,11 @@ ItemPos Instance::bound_item_left(ItemPos s, Profit lb, Info& info)
     }
 }
 
-ItemPos Instance::bound_item_right(ItemPos t, Profit lb, Info& info)
+ItemPos Instance::bound_item_right(ItemPos t, Profit lb DBG(COMMA Info& info))
 {
     LOG_FOLD_START(info, "bound_item_right t " << t << std::endl);
     while (t > t_prime() && int_right().size() > 0)
-        sort_right(info, lb);
+        sort_right(lb DBG(COMMA info));
     if (t >= last_item() + 1) {
         LOG_FOLD_END(info, "bound_item_right " << last_item() + 1);
         return last_item() + 1;
@@ -694,7 +694,7 @@ ItemPos Instance::bound_item_right(ItemPos t, Profit lb, Info& info)
     }
 }
 
-void Instance::add_item_to_core(ItemPos s, ItemPos t, ItemPos j, Info& info)
+void Instance::add_item_to_core(ItemPos s, ItemPos t, ItemPos j DBG(COMMA Info& info))
 {
     LOG_FOLD_START(info, "add_item_to_initial_core j " << j << std::endl);
     if (j == -1) {
@@ -796,7 +796,7 @@ void Instance::add_item_to_core(ItemPos s, ItemPos t, ItemPos j, Info& info)
     LOG_FOLD_END(info, "add_item_to_initial_core");
 }
 
-bool Instance::check_partialsort(Info& info) const
+bool Instance::check_partialsort(DBG(Info& info)) const
 {
     LOG_FOLD(info, *this);
 
@@ -867,14 +867,14 @@ bool Instance::check_partialsort(Info& info) const
                 std::cout << 8 << std::endl;
                 return false;
             }
-        Effciency emin_prev = INT_FAST64_MAX;
+        Effciency emin_prev = std::numeric_limits<Effciency>::infinity();
         for (auto i: int_left_) {
             if (i.f > i.l) {
                 std::cout << 9 << std::endl;
                 return false;
             }
             Effciency emax = 0;
-            Effciency emin = INT_FAST64_MAX;
+            Effciency emin = std::numeric_limits<Effciency>::infinity();
             for (ItemPos j = i.f; j <= i.l; ++j) {
                 if (emax < item(j).efficiency())
                     emax = item(j).efficiency();
@@ -905,7 +905,7 @@ bool Instance::check_partialsort(Info& info) const
                 return false;
             }
             Effciency emax = 0;
-            Effciency emin = INT_FAST64_MAX;
+            Effciency emin = std::numeric_limits<Effciency>::infinity();
             for (ItemPos j = i.f; j <= i.l; ++j) {
                 if (emax < item(j).efficiency())
                     emax = item(j).efficiency();
@@ -922,18 +922,18 @@ bool Instance::check_partialsort(Info& info) const
     return true;
 }
 
-void Instance::init_combo_core(Info& info)
+void Instance::init_combo_core(DBG(Info& info))
 {
     LOG_FOLD_START(info, "init_combo_core" << std::endl);
     assert(sort_type_ >= 1);
-    add_item_to_core(s_init_ - 1, t_init_ + 1, before_break_item(info), info);
-    add_item_to_core(s_init_ - 1, t_init_ + 1, gamma1(info), info);
-    add_item_to_core(s_init_ - 1, t_init_ + 1, gamma2(info), info);
-    add_item_to_core(s_init_ - 1, t_init_ + 1, beta1(info), info);
-    add_item_to_core(s_init_ - 1, t_init_ + 1, beta2(info), info);
-    add_item_to_core(s_init_ - 1, t_init_ + 1, max_weight_item(info), info);
-    add_item_to_core(s_init_ - 1, t_init_ + 1, min_weight_item(info), info);
-    assert(check_partialsort(info));
+    add_item_to_core(s_init_ - 1, t_init_ + 1, before_break_item(DBG(info)) DBG(COMMA info));
+    add_item_to_core(s_init_ - 1, t_init_ + 1, gamma1(DBG(info)) DBG(COMMA info));
+    add_item_to_core(s_init_ - 1, t_init_ + 1, gamma2(DBG(info)) DBG(COMMA info));
+    add_item_to_core(s_init_ - 1, t_init_ + 1, beta1(DBG(info)) DBG(COMMA info));
+    add_item_to_core(s_init_ - 1, t_init_ + 1, beta2(DBG(info)) DBG(COMMA info));
+    add_item_to_core(s_init_ - 1, t_init_ + 1, max_weight_item(DBG(info)) DBG(COMMA info));
+    add_item_to_core(s_init_ - 1, t_init_ + 1, min_weight_item(DBG(info)) DBG(COMMA info));
+    DBG(assert(check_partialsort(info)));
     LOG_FOLD_END(info, "init_combo_core");
 }
 
@@ -981,7 +981,7 @@ void Instance::reduce1(Profit lb, Info& info)
         j--;
     }
 
-    remove_big_items(info);
+    remove_big_items(DBG(info));
 
     VER(info, "Reduction: " << lb << " - "
             << "n " << reduced_number_of_items() << "/" << number_of_items()
@@ -1093,8 +1093,8 @@ void Instance::reduce2(Profit lb, Info& info)
     f_ += j1;
     l_ -= j0;
 
-    remove_big_items(info);
-    compute_break_item(info);
+    remove_big_items(DBG(info));
+    compute_break_item(DBG(info));
 
     VER(info, "Reduction: " << lb << " - "
             << "n " << reduced_number_of_items() << "/" << number_of_items()
@@ -1106,7 +1106,7 @@ void Instance::reduce2(Profit lb, Info& info)
     LOG_FOLD_END(info, "reduce2");
 }
 
-void Instance::set_first_item(ItemPos k, Info& info)
+void Instance::set_first_item(ItemPos k DBG(COMMA Info& info))
 {
     LOG_FOLD_START(info, "set_first_item k " << k << std::endl);
     assert(k >= f_);
@@ -1124,7 +1124,7 @@ void Instance::set_last_item(ItemPos k)
     l_ = k;
 }
 
-void Instance::fix(Info& info, const std::vector<int> vec)
+void Instance::fix(const std::vector<int> vec DBG(COMMA Info& info))
 {
     LOG_FOLD_START(info, "fix");
     DBG(
@@ -1162,13 +1162,13 @@ void Instance::fix(Info& info, const std::vector<int> vec)
     l_ -= j0;
     LOG(info, "reduced solution " << reduced_solution()->to_string_items() << std::endl);
 
-    remove_big_items(info);
+    remove_big_items(DBG(info));
 
     if (sort_type() == 1) {
         sort_type_ = 0;
-        sort_partially(info);
+        sort_partially(DBG(info));
     } else {
-        compute_break_item(info);
+        compute_break_item(DBG(info));
     }
 
     LOG(info, "reduced solution " << reduced_solution()->to_string_items() << std::endl);
@@ -1177,16 +1177,16 @@ void Instance::fix(Info& info, const std::vector<int> vec)
 
 /******************************************************************************/
 
-void Instance::surrogate(Info& info, Weight multiplier, ItemIdx bound)
+void Instance::surrogate(Weight multiplier, ItemIdx bound DBG(COMMA Info& info))
 {
-    surrogate(info, multiplier, bound, first_item());
+    surrogate(multiplier, bound, first_item() DBG(COMMA info));
 }
 
-void Instance::surrogate(Info& info, Weight multiplier, ItemIdx bound, ItemPos first)
+void Instance::surrogate(Weight multiplier, ItemIdx bound, ItemPos first DBG(COMMA Info& info))
 {
     sol_break_->clear();
-    if (sol_opt_ != NULL)
-        sol_opt_ = NULL;
+    if (sol_opt_ != nullptr)
+        sol_opt_ = nullptr;
     f_ = first;
     l_ = last_item();
     for (ItemIdx j = f_; j <= l_; ++j)
@@ -1205,7 +1205,7 @@ void Instance::surrogate(Info& info, Weight multiplier, ItemIdx bound, ItemPos f
         c_orig_ =  reduced_solution()->weight();
 
     sort_type_ = 0;
-    sort_partially(info);
+    sort_partially(DBG(info));
 }
 
 /******************************************************************************/
@@ -1229,13 +1229,13 @@ std::ostream& knapsacksolver::operator<<(std::ostream& os, const Instance& insta
         << " c_total "   << instance.capacity()
         << " opt " << instance.optimum()
         << std::endl;
-    if (instance.reduced_solution() != NULL)
+    if (instance.reduced_solution() != nullptr)
         os
             <<  "n " << instance.reduced_number_of_items() << " c " << instance.reduced_capacity()
             << " f " << instance.first_item() << " l " << instance.last_item()
             << " p_red " << instance.reduced_solution()->profit()
             << std::endl;
-    if (instance.break_solution() != NULL)
+    if (instance.break_solution() != nullptr)
         os << "b " << instance.break_item()
             << " wsum " << instance.break_weight()
             << " psum " << instance.break_profit()
@@ -1272,18 +1272,18 @@ std::ostream& knapsacksolver::operator<<(std::ostream& os, const Instance& insta
         os << std::left << std::setw(12) << it.efficiency();
 
         os << std::left << std::setw(4);
-        if (instance.break_solution() != NULL)
+        if (instance.break_solution() != nullptr)
              os << instance.break_solution()->contains(j);
 
         os << std::left << std::setw(4);
-        if (instance.optimal_solution() != NULL) {
+        if (instance.optimal_solution() != nullptr) {
             os << instance.optimal_solution()->contains(j);
         } else {
             os << ".";
         }
 
         os << std::left << std::setw(4);
-        if (instance.reduced_solution() != NULL) {
+        if (instance.reduced_solution() != nullptr) {
             os << instance.reduced_solution()->contains(j);
         } else {
             os << ".";

@@ -96,7 +96,7 @@ void expknap_rec(ExpknapInternalData& d, ItemPos s, ItemPos t)
 
         for (;;t++) {
             // Bounding test
-            Profit ub = ub_dembo(d.instance, d.instance.bound_item_right(t, d.output.solution.profit(), info), d.sol_curr);
+            Profit ub = ub_dembo(d.instance, d.instance.bound_item_right(t, d.output.solution.profit() DBG(COMMA info)), d.sol_curr);
             LOG(info, "t " << t << " ub " << ub << " lb " << d.output.solution.profit());
             if (ub <= d.output.solution.profit()) {
                 LOG_FOLD_END(info, " bound");
@@ -113,7 +113,7 @@ void expknap_rec(ExpknapInternalData& d, ItemPos s, ItemPos t)
     } else {
         for (;;s--) {
             // Bounding test
-            Profit ub = ub_dembo_rev(d.instance, d.instance.bound_item_left(s, d.output.solution.profit(), info), d.sol_curr);
+            Profit ub = ub_dembo_rev(d.instance, d.instance.bound_item_left(s, d.output.solution.profit() DBG(COMMA info)), d.sol_curr);
             LOG(info, "s " << s << " ub " << ub << " lb " << d.output.solution.profit());
             if (ub <= d.output.solution.profit()) {
                 LOG_FOLD_END(info, " bound");
@@ -159,7 +159,7 @@ ExpknapOutput knapsacksolver::expknap(Instance& instance, ExpknapOptionalParamet
         return output.algorithm_end(p.info);
     }
 
-    instance.sort_partially(p.info);
+    instance.sort_partially(DBG(p.info));
     if (instance.break_item() == instance.last_item() + 1) {
         if (output.lower_bound < instance.break_solution()->profit())
             output.update_sol(*instance.break_solution(), std::stringstream("all items fit (lb)"), p.info);
@@ -168,7 +168,7 @@ ExpknapOutput knapsacksolver::expknap(Instance& instance, ExpknapOptionalParamet
         return output.algorithm_end(p.info);
     }
     if (p.combo_core)
-        instance.init_combo_core(p.info);
+        instance.init_combo_core(DBG(p.info));
 
     // Compute initial lower bound
     Solution sol_tmp(instance);

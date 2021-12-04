@@ -38,10 +38,16 @@ git_repository(
     shallow_since = "1627731577 +0200",
 )
 
+local_repository(
+    name = "optimizationtools_",
+    path = "../optimizationtools/",
+)
+
 http_archive(
     name = "pybind11_bazel",
     strip_prefix = "pybind11_bazel-34206c29f891dbd5f6f5face7b91664c2ff7185c",
     urls = ["https://github.com/pybind/pybind11_bazel/archive/34206c29f891dbd5f6f5face7b91664c2ff7185c.zip"],
+    sha256 = "8d0b776ea5b67891f8585989d54aa34869fc12f14bf33f1dc7459458dd222e95",
 )
 
 http_archive(

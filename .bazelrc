@@ -1,2 +1,3 @@
 build --compilation_mode=opt
+build --cxxopt=-Wall --cxxopt=-Wextra
 

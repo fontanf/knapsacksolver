@@ -538,7 +538,7 @@ Output knapsacksolver::bellman_list(Instance& instance, bool sort, Info info)
 
     Weight  c = instance.capacity();
     ItemPos n = instance.number_of_items();
-    ItemPos j_max = instance.max_efficiency_item(info);
+    ItemPos j_max = instance.max_efficiency_item(DBG(info));
 
     if (n == 0 || c == 0) {
         output.update_ub(0, std::stringstream("no item or null capacity"), info);
@@ -552,7 +552,7 @@ Output knapsacksolver::bellman_list(Instance& instance, bool sort, Info info)
     }
 
     if (sort) {
-        instance.sort(info);
+        instance.sort(DBG(info));
         if (instance.break_item() == instance.last_item() + 1) {
             output.update_lb(instance.break_solution()->profit(), std::stringstream("all items fit in the knapsack (lb)"), info);
             output.update_ub(output.lower_bound, std::stringstream("all item fit in the knapsack (ub)"), info);
@@ -834,7 +834,7 @@ Output knapsacksolver::bellman_list_rec(const Instance& instance, Info info)
         return output.algorithm_end(info);
     }
 
-    ItemPos j_max = instance.max_efficiency_item(info);
+    ItemPos j_max = instance.max_efficiency_item(DBG(info));
     if (INT_FAST64_MAX / instance.item(j_max).p < instance.capacity()) {
         LOG_FOLD_END(info, "");
         return output.algorithm_end(info);

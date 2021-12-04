@@ -21,7 +21,7 @@ Output knapsacksolver::dpprofits_array(const Instance& instance, Info info)
 
     // Initialize memory table
     Weight c = instance.capacity();
-    ItemPos j_max = instance.max_efficiency_item(info);
+    ItemPos j_max = instance.max_efficiency_item(DBG(info));
     Profit ub = ub_0(instance, 0, 0, instance.capacity(), j_max);
     output.update_ub(ub, std::stringstream("initial upper bound"), info);
     std::vector<Weight> values(ub + 1, c + 1);
@@ -71,7 +71,7 @@ Output knapsacksolver::dpprofits_array_all(const Instance& instance, Info info)
 
     // Initialize memory table
     Weight c = instance.capacity();
-    ItemPos j_max = instance.max_efficiency_item(info);
+    ItemPos j_max = instance.max_efficiency_item(DBG(info));
     Profit ub = ub_0(instance, 0, 0, instance.capacity(), j_max);
     output.update_ub(ub, std::stringstream("initial upper bound"), info);
     StateIdx values_size = (n + 1) * (ub + 1);

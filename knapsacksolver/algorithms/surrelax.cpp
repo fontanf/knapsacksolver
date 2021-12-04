@@ -7,7 +7,7 @@
 
 using namespace knapsacksolver;
 
-ItemIdx max_card(const Instance& instance, Info& info)
+ItemIdx max_card(const Instance& instance DBG(COMMA Info& info))
 {
     LOG_FOLD_START(info, "max_card" << std::endl);
     if (instance.reduced_number_of_items() == 1) {
@@ -69,7 +69,7 @@ ItemIdx max_card(const Instance& instance, Info& info)
     return k;
 }
 
-ItemIdx min_card(const Instance& instance, Info& info, Profit lb)
+ItemIdx min_card(const Instance& instance, Profit lb DBG(COMMA Info& info))
 {
     LOG_FOLD_START(info, "min_card" << std::endl);
 
@@ -138,8 +138,13 @@ struct UBS
     Weight s;
 };
 
-UBS surrogate_solve(Instance& instance, Info& info, ItemIdx k,
-        Weight s_min, Weight s_max, bool* end)
+UBS surrogate_solve(
+        Instance& instance,
+        ItemIdx k,
+        Weight s_min,
+        Weight s_max,
+        bool* end
+        DBG(COMMA Info& info))
 {
     LOG_FOLD_START(info, "surrogate_solve k " << k << " s_min " << s_min << " s_max " << s_max << std::endl);
     ItemPos first = instance.first_item();
@@ -196,7 +201,7 @@ UBS surrogate_solve(Instance& instance, Info& info, ItemIdx k,
             }
         }
 
-        instance.surrogate(info, s-s_prec, k, first);
+        instance.surrogate(s - s_prec, k, first DBG(COMMA info));
         LOG_FOLD(info, instance);
         Profit p = ub_dantzig(instance);
         ItemPos b = instance.break_item();
@@ -221,7 +226,7 @@ UBS surrogate_solve(Instance& instance, Info& info, ItemIdx k,
         s_prec = s;
         LOG_FOLD_END(info, "");
     }
-    instance.surrogate(info, -s, k);
+    instance.surrogate(-s, k DBG(COMMA info));
     LOG_FOLD_END(info, "ub " << ub << " s " << s_best);
     return {ub, s_best};
 }
@@ -230,7 +235,7 @@ void knapsacksolver::solvesurrelax(SurrelaxData d)
 {
     LOG_FOLD_START(d.info, "surrogate relaxation lb " << d.output.lower_bound << std::endl);
 
-    d.instance.sort_partially(d.info);
+    d.instance.sort_partially(DBG(d.info));
     ItemPos b = d.instance.break_item();
 
     // Trivial cases
@@ -252,13 +257,13 @@ void knapsacksolver::solvesurrelax(SurrelaxData d)
     // Compte s_min and s_max
     // s_min and s_max should ideally be (-)pmax*wmax, but this may cause
     // overflow
-    Weight wmax = d.instance.item(d.instance.max_weight_item(d.info)).w;
-    Profit pmax = d.instance.item(d.instance.max_profit_item(d.info)).p;
+    Weight wmax = d.instance.item(d.instance.max_weight_item(DBG(d.info))).w;
+    Profit pmax = d.instance.item(d.instance.max_profit_item(DBG(d.info))).p;
     Weight s_max = (INT_FAST64_MAX / pmax > wmax)?  pmax*wmax:  INT_FAST64_MAX;
     Weight s_min = (INT_FAST64_MAX / pmax > wmax)? -pmax*wmax: -INT_FAST64_MAX;
 
-    if (max_card(d.instance, d.info) == b) {
-        UBS o = surrogate_solve(d.instance, d.info, b, 0, s_max, d.end);
+    if (max_card(d.instance DBG(COMMA d.info)) == b) {
+        UBS o = surrogate_solve(d.instance, b, 0, s_max, d.end DBG(COMMA d.info));
         if (*d.end)
             return;
         Profit ub = std::max(o.ub, d.output.lower_bound);
@@ -267,7 +272,7 @@ void knapsacksolver::solvesurrelax(SurrelaxData d)
             return;
 
         Solution sol_sur(d.output.solution.instance());
-        d.instance.surrogate(d.info, o.s, b);
+        d.instance.surrogate(o.s, b DBG(COMMA d.info));
         Output output = d.func(d.instance, Info(d.info, false, ""), d.end);
         if (output.solution.profit() != output.upper_bound)
             return;
@@ -275,8 +280,8 @@ void knapsacksolver::solvesurrelax(SurrelaxData d)
         d.output.update_sol(sol_sur, std::stringstream("surrogate instance resolution (lb)"), d.info);
         ub = std::max(sol_sur.profit(), d.output.lower_bound);
         d.output.update_ub(ub, std::stringstream("surrogate instance resolution (ub)"), d.info);
-    } else if (min_card(d.instance, d.info, d.output.lower_bound) == b + 1) {
-        UBS o = surrogate_solve(d.instance, d.info, b + 1, s_min, 0, d.end);
+    } else if (min_card(d.instance, d.output.lower_bound) == b + 1 DBG(COMMA d.info)) {
+        UBS o = surrogate_solve(d.instance, b + 1, s_min, 0, d.end DBG(COMMA d.info));
         if (*d.end)
             return;
         Profit ub = std::max(o.ub, d.output.lower_bound);
@@ -285,7 +290,7 @@ void knapsacksolver::solvesurrelax(SurrelaxData d)
             return;
 
         Solution sol_sur(d.output.solution.instance());
-        d.instance.surrogate(d.info, o.s, b + 1);
+        d.instance.surrogate(o.s, b + 1 DBG(COMMA d.info));
         Output output = d.func(d.instance, Info(d.info, false, ""), d.end);
         if (output.solution.profit() != output.upper_bound)
             return;
@@ -295,10 +300,10 @@ void knapsacksolver::solvesurrelax(SurrelaxData d)
         d.output.update_ub(ub, std::stringstream("surrogate instance resolution (ub)"), d.info);
     } else {
         Instance instance_2(d.instance);
-        UBS o1 = surrogate_solve(d.instance, d.info, b,     0,     s_max, d.end);
+        UBS o1 = surrogate_solve(d.instance, b,     0,     s_max, d.end DBG(COMMA d.info));
         if (*d.end)
             return;
-        UBS o2 = surrogate_solve(instance_2, d.info, b + 1, s_min, 0,     d.end);
+        UBS o2 = surrogate_solve(instance_2, b + 1, s_min, 0,     d.end DBG(COMMA d.info));
         if (*d.end)
             return;
         Profit ub = std::max(std::max(o1.ub, o2.ub), d.output.lower_bound);
@@ -307,7 +312,7 @@ void knapsacksolver::solvesurrelax(SurrelaxData d)
             return;
 
         Solution sol_sur1(d.output.solution.instance());
-        d.instance.surrogate(d.info, o1.s, b);
+        d.instance.surrogate(o1.s, b DBG(COMMA d.info));
         Output output1 = d.func(d.instance, Info(d.info, false, ""), d.end);
         if (output1.solution.profit() != output1.upper_bound)
             return;
@@ -317,7 +322,7 @@ void knapsacksolver::solvesurrelax(SurrelaxData d)
             return;
 
         Solution sol_sur2(d.output.solution.instance());
-        instance_2.surrogate(d.info, o2.s, b + 1);
+        instance_2.surrogate(o2.s, b + 1 DBG(COMMA d.info));
         Output output2 = d.func(instance_2, Info(d.info, false, ""), d.end);
         if (output2.solution.profit() != output2.upper_bound)
             return;

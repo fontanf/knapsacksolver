@@ -105,7 +105,7 @@ void minknap_main(Instance& instance, MinknapOptionalParameters& p, MinknapOutpu
     }
 
     // Sort partially
-    instance.sort_partially(p.info);
+    instance.sort_partially(DBG(p.info));
     if (instance.break_item() == instance.last_item() + 1) {
         output.update_sol(*instance.break_solution(), std::stringstream("all items fit in the knapsack (lb)"), p.info);
         output.update_ub(output.lower_bound, std::stringstream("all items fit in the knapsack (ub)"), p.info);
@@ -113,7 +113,7 @@ void minknap_main(Instance& instance, MinknapOptionalParameters& p, MinknapOutpu
         return;
     }
     if (output.number_of_recursive_calls == 1 && p.combo_core) {
-        instance.init_combo_core(p.info);
+        instance.init_combo_core(DBG(p.info));
         LOG_FOLD(p.info, instance);
     }
 
@@ -233,11 +233,11 @@ void minknap_main(Instance& instance, MinknapOptionalParameters& p, MinknapOutpu
 
     //assert(best_state_.p >= lb_);
     LOG_FOLD(p.info, instance);
-    instance.set_first_item(d.s + 1, p.info);
+    instance.set_first_item(d.s + 1 DBG(COMMA p.info));
     instance.set_last_item(d.t - 1);
     LOG(p.info, "best_state " << d.best_state << std::endl);
     LOG(p.info, d.psolf.print(d.best_state.sol) << std::endl);
-    instance.fix(p.info, d.psolf.vector(d.best_state.sol));
+    instance.fix(d.psolf.vector(d.best_state.sol) DBG(COMMA p.info));
     assert(instance.reduced_capacity() >= 0);
 
     LOG_FOLD_END(p.info, "minknap_main");
@@ -265,8 +265,8 @@ void add_item(MinknapInternalData& d)
     Weight c = instance.capacity();
     Weight wt = instance.item(d.t - 1).w;
     Profit pt = instance.item(d.t - 1).p;
-    ItemPos sx = instance.bound_item_left(d.s, lb, info);
-    ItemPos tx = instance.bound_item_right(d.t, lb, info);
+    ItemPos sx = instance.bound_item_left(d.s, lb DBG(COMMA info));
+    ItemPos tx = instance.bound_item_right(d.t, lb DBG(COMMA info));
     Weight w_max = instance.capacity() + d.w_max - instance.reduced_solution()->weight();
 
     d.l.clear();
@@ -379,8 +379,8 @@ void remove_item(MinknapInternalData& d)
     Weight ws = instance.item(d.s + 1).w;
     Profit ps = instance.item(d.s + 1).p;
     d.w_max -= ws;
-    ItemPos sx = instance.bound_item_left(d.s, lb, info);
-    ItemPos tx = instance.bound_item_right(d.t, lb, info);
+    ItemPos sx = instance.bound_item_left(d.s, lb DBG(COMMA info));
+    ItemPos tx = instance.bound_item_right(d.t, lb DBG(COMMA info));
     Weight w_max = instance.capacity() + d.w_max - instance.reduced_solution()->weight();
 
     d.l.clear();
@@ -563,7 +563,7 @@ void minknap_update_bounds(MinknapInternalData& d)
         if (d.t <= instance.last_item()) {
             ItemPos j = minknap_find_state(d, true);
             if (j != -1) {
-                instance.add_item_to_core(d.s, d.t, j, info);
+                instance.add_item_to_core(d.s, d.t, j DBG(COMMA info));
                 ++d.t;
                 add_item(d);
                 if (d.output.solution.profit() == d.output.upper_bound
@@ -576,7 +576,7 @@ void minknap_update_bounds(MinknapInternalData& d)
         if (d.s >= instance.first_item()) {
             ItemPos j = minknap_find_state(d, false);
             if (j != -1) {
-                instance.add_item_to_core(d.s, d.t, j, info);
+                instance.add_item_to_core(d.s, d.t, j DBG(COMMA info));
                 --d.s;
                 remove_item(d);
             }

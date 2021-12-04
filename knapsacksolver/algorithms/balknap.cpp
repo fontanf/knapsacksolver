@@ -114,9 +114,9 @@ void balknap_main(Instance& instance, BalknapOptionalParameters& p, BalknapOutpu
 
     // Sorting
     if (p.ub == 'b') {
-        instance.sort_partially(info);
+        instance.sort_partially(DBG(info));
     } else if (p.ub == 't') {
-        instance.sort(info);
+        instance.sort(DBG(info));
     }
     if (instance.break_item() == instance.last_item() + 1) {
         output.update_sol(*instance.break_solution(), std::stringstream("all items fit in the knapsack (lb)"), p.info);
@@ -428,9 +428,9 @@ end:
     // Reduce instance to items from best_state.second.a to last_item and remove
     // the items from the partial solution from the instance.
     // Then run the algorithm again.
-    instance.set_first_item(best_state.second.a, info);
+    instance.set_first_item(best_state.second.a DBG(COMMA info));
     instance.set_last_item(last_item);
-    instance.fix(info, psolf.vector(best_state.second.sol));
+    instance.fix(psolf.vector(best_state.second.sol) DBG(COMMA info));
 
     LOG_FOLD_END(info, "balknap_main");
     balknap_main(instance, p, output);

@@ -69,7 +69,7 @@ Output knapsacksolver::branchandbound(Instance& instance, bool sort, Info info)
 
     ItemPos j_max = -1;
     if (sort) {
-        instance.sort(info);
+        instance.sort(DBG(info));
         if (instance.break_item() == instance.last_item() + 1) {
             if (output.lower_bound < instance.break_solution()->profit())
                 output.update_sol(*instance.break_solution(), std::stringstream("all items fit"), info);
@@ -100,7 +100,7 @@ Output knapsacksolver::branchandbound(Instance& instance, bool sort, Info info)
             return output.algorithm_end(info);
         }
     } else {
-        j_max = instance.max_efficiency_item(info);
+        j_max = instance.max_efficiency_item(DBG(info));
     }
 
     Profit ub = (!sort)? ub_0(instance, 0, 0, instance.capacity(), j_max):

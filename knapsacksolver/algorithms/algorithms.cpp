@@ -91,16 +91,16 @@ Output knapsacksolver::run(
          * Lower bounds
          */
     } else if (algorithm_args[0] == "greedy") {
-        instance.sort_partially(info);
+        instance.sort_partially(DBG(info));
         return greedy(instance, info);
     } else if (algorithm_args[0] == "greedynlogn") {
-        instance.sort_partially(info);
+        instance.sort_partially(DBG(info));
         return greedynlogn(instance, info);
     } else if (algorithm_args[0] == "greedynlogn_for") {
-        instance.sort_partially(info);
+        instance.sort_partially(DBG(info));
         return forwardgreedynlogn(instance, info);
     } else if (algorithm_args[0] == "greedynlogn_back") {
-        instance.sort_partially(info);
+        instance.sort_partially(DBG(info));
         return backwardgreedynlogn(instance, info);
 
         /*
@@ -165,7 +165,7 @@ Output knapsacksolver::run(
     } else if (algorithm_args[0] == "dantzig") { // Dantzig
         Info info_tmp;
         Output output(instance, info_tmp);
-        instance.sort_partially(info_tmp);
+        instance.sort_partially(DBG(info_tmp));
         output.upper_bound = ub_dantzig(instance, info);
         return output;
     } else if (algorithm_args[0] == "surrelax") { // Surrogate relaxation

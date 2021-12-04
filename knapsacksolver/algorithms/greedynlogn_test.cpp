@@ -12,20 +12,20 @@ Output minknap_test(Instance& instance)
 Output forwardgreedynlogn_test(Instance& instance)
 {
     Info info;
-    instance.sort_partially(info);
+    instance.sort_partially(DBG(info));
     return forwardgreedynlogn(instance, info);
 }
 
 Output backwardgreedynlogn_test(Instance& instance)
 {
     Info info;
-    instance.sort_partially(info);
+    instance.sort_partially(DBG(info));
     return backwardgreedynlogn(instance, info);
 }
 
 Output greedynlogn_test(Instance& instance)
 {
-    Info info; instance.sort_partially(info);
+    Info info; instance.sort_partially(DBG(info));
     return greedynlogn(instance, info);
 }
 
