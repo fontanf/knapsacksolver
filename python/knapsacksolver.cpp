@@ -21,7 +21,7 @@ PYBIND11_MODULE(knapsacksolver, m)
     py::class_<knapsacksolver::Instance>(m, "Instance")
         .def(py::init<>())
         .def(py::init<std::string, std::string>(),
-            py::arg("filepath"),
+            py::arg("instance_path"),
             py::arg("format") = "standard")
         .def("set_capacity", &knapsacksolver::Instance::set_capacity)
         .def("add_item", &knapsacksolver::Instance::add_item);

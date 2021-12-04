@@ -58,16 +58,20 @@ public:
      */
 
     /** Create instance from file. */
-    Instance(std::string filepath, std::string format);
+    Instance(std::string instance_path, std::string format);
 
     /** Manual constructor. */
     Instance();
+    /** Add an item to the knapsack. */
     void add_item(Weight w, Profit p);
-    void set_capacity(Weight c) { c_orig_ = c; }
+    /** Set the capacity of the knapsack. */
+    void set_capacity(Weight c) { capacity_ = c; }
+    /** Clear the instance. */
     void clear();
 
     /** Constructor for test instances. */
     Instance(Weight c, const std::vector<std::pair<Weight, Profit>>& wp);
+    /** Set the optimal solution of the instance. */
     void set_optimal_solution(Solution& sol);
 
     /** Copy constructor. */
@@ -85,11 +89,11 @@ public:
      */
 
     inline ItemIdx number_of_items() const { return items_.size(); }
-    inline Weight  capacity()    const { return c_orig_; }
+    inline Weight  capacity()    const { return capacity_; }
     inline const Item& item(ItemIdx j) const { assert(j >= 0 && j < number_of_items()); return items_[j]; }
     inline std::string path() const { return path_; }
 
-    const Solution* optimal_solution() const { return sol_opt_.get(); }
+    const Solution* optimal_solution() const { return optimal_solution_.get(); }
     Profit optimum() const;
 
     ItemPos max_efficiency_item(DBG(Info& info)) const;
@@ -113,8 +117,8 @@ public:
 
     /** Sort items according to non-increasing profit-to-weight ratio.  */
     void sort(DBG(Info& info));
-    int sort_type() const { return sort_type_; }
-    void set_sort_type(int type) { sort_type_ = type; }
+    int sort_status() const { return sort_status_; }
+    void set_sort_status(int type) { sort_status_ = type; }
 
     /**
      * Sort items partially according to non-increasing profit-to-weight
@@ -166,7 +170,7 @@ public:
      */
     void reduce1(Profit lb, Info& info);
     void reduce2(Profit lb, Info& info);
-    const Solution* reduced_solution() const { return sol_red_.get(); }
+    const Solution* reduced_solution() const { return reduced_solution_.get(); }
 
     inline ItemIdx reduced_number_of_items() const { return l_-f_+1; }
     inline ItemPos first_item()  const { return f_; }
@@ -192,7 +196,7 @@ public:
     void surrogate(Weight multiplier, ItemIdx bound, ItemPos first DBG(COMMA Info& info));
     void surrogate(Weight multiplier, ItemIdx bound DBG(COMMA Info& info));
 
-    const Solution* break_solution() const { return sol_break_.get(); }
+    const Solution* break_solution() const { return break_solution_.get(); }
     ItemPos break_item()     const { return b_; }
     Profit  break_profit()   const;
     Weight  break_weight()   const;
@@ -200,10 +204,10 @@ public:
 
     ItemPos ub_item(Item item) const;
 
-    void plot(std::string filepath);
-    void write(std::string filepath);
-    void plot_reduced(std::string filepath);
-    void write_reduced(std::string filepath);
+    void plot(std::string output_path);
+    void write(std::string instance_path);
+    void plot_reduced(std::string output_path);
+    void write_reduced(std::string instance_path);
 
 private:
 
@@ -235,18 +239,32 @@ private:
      * Attributes
      */
 
+    /** Path of the instance. */
     std::string path_ = "";
 
+    /** Items. */
     std::vector<Item> items_;
-    Weight c_orig_;
-    std::unique_ptr<Solution> sol_opt_;
+    /** Capacity of the knapsack. */
+    Weight capacity_;
+    /** Optimal solution. */
+    std::unique_ptr<Solution> optimal_solution_;
 
     /** Break item. */
     ItemPos b_ = -1;
 
-    /** First and last items. Items moved before f_ or after l_ have their
-     * value fixed in the reduced solution. */
+    /**
+     * Position of the first item.
+     *
+     * Items moved before this position have their value fixed in the reduced
+     * solution.
+     */
     ItemPos f_ = -1;
+    /**
+     * Position of the last item.
+     *
+     * Items moved after this position have their value fixed in the reduced
+     * solution.
+     */
     ItemPos l_ = -1;
 
     /** Initial core. */
@@ -257,19 +275,20 @@ private:
     ItemIdx t_prime_ = -1;
 
     /**
-     * 0: not sorted
-     * 1: partially sorted
-     * 2: fully sorted
+     * Sort status of the instance:
+     * - 0: not sorted
+     * - 1: partially sorted
+     * - 2: fully sorted
      */
-    int sort_type_ = 0;
+    int sort_status_ = 0;
 
     std::vector<Interval> int_right_;
     std::vector<Interval> int_left_;
 
     /** Reduced solution. */
-    std::unique_ptr<Solution> sol_red_;
+    std::unique_ptr<Solution> reduced_solution_;
     /** Break solution. */
-    std::unique_ptr<Solution> sol_break_;
+    std::unique_ptr<Solution> break_solution_;
 
 };
 

@@ -11,7 +11,7 @@ class Solution
 public:
 
     Solution(const Instance& instance);
-    Solution(const Instance& instance, std::string filepath);
+    Solution(const Instance& instance, std::string certificate_path);
     Solution(const Solution& solution);
     Solution& operator=(const Solution& solution);
     ~Solution() { }
@@ -44,7 +44,7 @@ public:
      * Write the solution in the input file.
      * One item per line. 1 if in, 0 if out.
      */
-    void write(std::string filepath);
+    void write(std::string certificate_path);
 
     std::string to_string_binary() const;
     std::string to_string_binary_ordered() const;

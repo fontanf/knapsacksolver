@@ -9,15 +9,15 @@ Solution::Solution(const Instance& instance):
     x_(instance.number_of_items(), 0)
 { }
 
-Solution::Solution(const Instance& instance, std::string filepath):
+Solution::Solution(const Instance& instance, std::string certificate_path):
     instance_(instance),
     x_(instance.number_of_items(), 0)
 {
-    if (filepath.empty())
+    if (certificate_path.empty())
         return;
-    std::ifstream file(filepath);
+    std::ifstream file(certificate_path);
     if (!file.good()) {
-        std::cerr << "\033[31m" << "ERROR, unable to open file \"" << filepath << "\"" << "\033[0m" << std::endl;
+        std::cerr << "\033[31m" << "ERROR, unable to open file \"" << certificate_path << "\"" << "\033[0m" << std::endl;
         return;
     }
 
@@ -100,13 +100,13 @@ void Solution::clear()
     std::fill(x_.begin(), x_.end(), 0);
 }
 
-void Solution::write(std::string filepath)
+void Solution::write(std::string certificate_path)
 {
-    if (filepath.empty())
+    if (certificate_path.empty())
         return;
-    std::ofstream cert(filepath);
+    std::ofstream cert(certificate_path);
     if (!cert.good()) {
-        std::cerr << "\033[31m" << "ERROR, unable to open file \"" << filepath << "\"" << "\033[0m" << std::endl;
+        std::cerr << "\033[31m" << "ERROR, unable to open file \"" << certificate_path << "\"" << "\033[0m" << std::endl;
         assert(false);
         return;
     }

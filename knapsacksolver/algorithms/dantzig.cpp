@@ -5,7 +5,7 @@ using namespace knapsacksolver;
 Profit knapsacksolver::ub_dantzig(const Instance& instance, Info info)
 {
     VER(info, "*** dantzig ***" << std::endl);
-    assert(instance.sort_type() >= 1);
+    assert(instance.sort_status() >= 1);
 
     ItemPos b = instance.break_item();
     Weight  r = instance.break_capacity();

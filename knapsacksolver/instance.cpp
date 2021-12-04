@@ -21,8 +21,8 @@ void Instance::add_item(Weight w, Profit p)
 void Instance::clear()
 {
     items_.clear();
-    c_orig_ = 0;
-    sol_opt_ = nullptr;
+    capacity_ = 0;
+    optimal_solution_ = nullptr;
     b_ = -1;
     f_ = 0;
     l_ = -1;
@@ -30,15 +30,15 @@ void Instance::clear()
     t_init_ = -1;
     s_prime_ = -1;
     t_prime_ = -1;
-    sort_type_ = 0;
+    sort_status_ = 0;
     int_right_.clear();
     int_left_.clear();
-    sol_red_ = nullptr;
-    sol_break_ = nullptr;
+    reduced_solution_ = nullptr;
+    break_solution_ = nullptr;
 }
 
 Instance::Instance(Weight c, const std::vector<std::pair<Weight, Profit>>& wp):
-    c_orig_(c), f_(0), l_(-1)
+    capacity_(c), f_(0), l_(-1)
 {
     for (const auto& p: wp)
         add_item(p.first, p.second);
@@ -46,16 +46,16 @@ Instance::Instance(Weight c, const std::vector<std::pair<Weight, Profit>>& wp):
 
 void Instance::set_optimal_solution(Solution& sol)
 {
-    sol_opt_ = std::make_unique<Solution>(sol);
+    optimal_solution_ = std::make_unique<Solution>(sol);
 }
 
-Instance::Instance(std::string filepath, std::string format):
-    path_(filepath)
+Instance::Instance(std::string instance_path, std::string format):
+    path_(instance_path)
 {
-    std::ifstream file(filepath);
-    std::ifstream file_sol(filepath + ".sol");
+    std::ifstream file(instance_path);
+    std::ifstream file_sol(instance_path + ".sol");
     if (!file.good()) {
-        std::cerr << "\033[31m" << "ERROR, unable to open file \"" << filepath << "\"" << "\033[0m" << std::endl;
+        std::cerr << "\033[31m" << "ERROR, unable to open file \"" << instance_path << "\"" << "\033[0m" << std::endl;
         assert(false);
         return;
     }
@@ -78,7 +78,7 @@ Instance::Instance(std::string filepath, std::string format):
 void Instance::read_standard(std::ifstream& file)
 {
     ItemIdx n;
-    file >> n >> c_orig_;
+    file >> n >> capacity_;
 
     items_.reserve(n);
     Weight w;
@@ -112,7 +112,7 @@ void Instance::read_pisinger(std::ifstream& file)
     ItemIdx n;
     std::string tmp;
     Profit opt;
-    file >> tmp >> tmp >> n >> tmp >> c_orig_ >> tmp >> opt >> tmp >> tmp;
+    file >> tmp >> tmp >> n >> tmp >> capacity_ >> tmp >> opt >> tmp >> tmp;
 
     items_.reserve(n);
     std::vector<int> x(n);
@@ -124,16 +124,16 @@ void Instance::read_pisinger(std::ifstream& file)
         x[j] = std::stol(line[3]);
     }
 
-    sol_opt_ = std::make_unique<Solution>(*this);
+    optimal_solution_ = std::make_unique<Solution>(*this);
     for (ItemPos j = 0; j < n; ++j)
-        sol_opt_->set(j, x[j]);
-    assert(sol_opt_->profit() == opt);
+        optimal_solution_->set(j, x[j]);
+    assert(optimal_solution_->profit() == opt);
 }
 
 void Instance::read_subsetsum_standard(std::ifstream& file)
 {
     ItemIdx n;
-    file >> n >> c_orig_;
+    file >> n >> capacity_;
 
     items_.reserve(n);
     Weight w;
@@ -145,7 +145,7 @@ void Instance::read_subsetsum_standard(std::ifstream& file)
 
 Instance::Instance(const Instance& instance):
     items_(instance.items_),
-    c_orig_(instance.c_orig_),
+    capacity_(instance.capacity_),
     b_(instance.b_),
     f_(instance.f_),
     l_(instance.l_),
@@ -153,21 +153,21 @@ Instance::Instance(const Instance& instance):
     t_init_(instance.t_init_),
     s_prime_(instance.s_prime_),
     t_prime_(instance.t_prime_),
-    sort_type_(instance.sort_type_),
+    sort_status_(instance.sort_status_),
     int_right_(instance.int_right_),
     int_left_(instance.int_left_)
 {
     if (instance.optimal_solution() != nullptr) {
-        sol_opt_ = std::make_unique<Solution>(*this);
-        *sol_opt_ = *instance.optimal_solution();
+        optimal_solution_ = std::make_unique<Solution>(*this);
+        *optimal_solution_ = *instance.optimal_solution();
     }
     if (instance.break_solution() != nullptr) {
-        sol_break_ = std::make_unique<Solution>(*this);
-        *sol_break_ = *instance.break_solution();
+        break_solution_ = std::make_unique<Solution>(*this);
+        *break_solution_ = *instance.break_solution();
     }
     if (instance.reduced_solution() != nullptr) {
-        sol_red_ = std::make_unique<Solution>(*this);
-        *sol_red_ = *instance.reduced_solution();
+        reduced_solution_ = std::make_unique<Solution>(*this);
+        *reduced_solution_ = *instance.reduced_solution();
     }
 }
 
@@ -175,7 +175,7 @@ Instance& Instance::operator=(const Instance& instance)
 {
     if (this != &instance) {
         items_ = instance.items_;
-        c_orig_ = instance.c_orig_;
+        capacity_ = instance.capacity_;
 
         b_ = instance.b_;
         f_ = instance.f_;
@@ -184,21 +184,21 @@ Instance& Instance::operator=(const Instance& instance)
         t_init_ = instance.t_init_;
         s_prime_ = instance.s_prime_;
         t_prime_ = instance.t_prime_;
-        sort_type_ = instance.sort_type_;
+        sort_status_ = instance.sort_status_;
         int_right_ = instance.int_right_;
         int_left_ = instance.int_left_;
 
         if (instance.optimal_solution() != nullptr) {
-            sol_opt_ = std::make_unique<Solution>(*this);
-            *sol_opt_ = *instance.optimal_solution();
+            optimal_solution_ = std::make_unique<Solution>(*this);
+            *optimal_solution_ = *instance.optimal_solution();
         }
         if (instance.break_solution() != nullptr) {
-            sol_break_ = std::make_unique<Solution>(*this);
-            *sol_break_ = *instance.break_solution();
+            break_solution_ = std::make_unique<Solution>(*this);
+            *break_solution_ = *instance.break_solution();
         }
         if (instance.reduced_solution() != nullptr) {
-            sol_red_ = std::make_unique<Solution>(*this);
-            *sol_red_ = *instance.reduced_solution();
+            reduced_solution_ = std::make_unique<Solution>(*this);
+            *reduced_solution_ = *instance.reduced_solution();
         }
     }
     return *this;
@@ -210,7 +210,7 @@ Instance Instance::reset(const Instance& instance)
 {
     Instance instance_new;
     instance_new.items_  = instance.items_;
-    instance_new.c_orig_ = instance.c_orig_;
+    instance_new.capacity_ = instance.capacity_;
     instance_new.f_ = 0;
     instance_new.l_ = instance.items_.size() - 1;
     return instance;
@@ -298,7 +298,7 @@ std::vector<Weight> Instance::min_weights() const
 
 std::vector<Item> Instance::get_isum() const
 {
-    assert(sort_type() == 2);
+    assert(sort_status() == 2);
     std::vector<Item> isum;
     isum.reserve(number_of_items()+1);
     isum.clear();
@@ -369,17 +369,17 @@ void Instance::compute_break_item(DBG(Info& info))
     LOG_FOLD_START(info, "compute_break_item f " << first_item() << std::endl);
     LOG(info, "reduced solution " << reduced_solution()->to_string_items() << std::endl);
 
-    if (sol_break_ == nullptr) {
-        sol_break_ = std::make_unique<Solution>(*reduced_solution());
+    if (break_solution_ == nullptr) {
+        break_solution_ = std::make_unique<Solution>(*reduced_solution());
     } else {
-        *sol_break_ = *reduced_solution();
+        *break_solution_ = *reduced_solution();
     }
     for (b_ = first_item(); b_ <= last_item(); ++b_) {
-        if (item(b_).w > sol_break_->remaining_capacity())
+        if (item(b_).w > break_solution_->remaining_capacity())
             break;
-        sol_break_->set(b_, true);
+        break_solution_->set(b_, true);
     }
-    LOG(info, "break solution " << sol_break_->to_string_items() << std::endl);
+    LOG(info, "break solution " << break_solution_->to_string_items() << std::endl);
     LOG_FOLD_END(info, "compute_break_item b " << b_);
 }
 
@@ -409,13 +409,13 @@ Weight Instance::reduced_capacity() const
 void Instance::sort(DBG(Info& info))
 {
     LOG_FOLD_START(info, "sort" << std::endl);
-    if (sort_type() == 2) {
+    if (sort_status() == 2) {
         LOG_FOLD_END(info, "sort already sorted");
         return;
     }
     if (reduced_solution() == nullptr)
-        sol_red_ = std::make_unique<Solution>(*this);
-    sort_type_ = 2;
+        reduced_solution_ = std::make_unique<Solution>(*this);
+    sort_status_ = 2;
     if (reduced_number_of_items() > 1)
         std::sort(items_.begin()+first_item(), items_.begin()+last_item()+1,
                 [](const Item& i1, const Item& i2) {
@@ -431,7 +431,7 @@ void Instance::remove_big_items(DBG(Info& info))
     if (b_ != -1 && item(b_).w > reduced_capacity())
         b_ = -1;
 
-    if (sort_type() == 2) {
+    if (sort_status() == 2) {
         std::vector<Item> not_fixed;
         std::vector<Item> fixed_0;
         for (ItemPos j = first_item(); j <= last_item(); ++j) {
@@ -461,7 +461,7 @@ void Instance::remove_big_items(DBG(Info& info))
             }
         }
 
-        sort_type_ = 0;
+        sort_status_ = 0;
         sort_partially(DBG(info));
     }
     LOG_FOLD_END(info, "remove_big_items");
@@ -508,13 +508,13 @@ void Instance::sort_partially(DBG(Info& info COMMA) ItemIdx limit)
 {
     LOG_FOLD_START(info, "sort_partially limit " << limit << std::endl);
 
-    if (sort_type_ >= 1) {
+    if (sort_status_ >= 1) {
         LOG_FOLD_END(info, "sort_partially already sorted");
         return;
     }
 
     if (reduced_solution() == nullptr)
-        sol_red_ = std::make_unique<Solution>(*this);
+        reduced_solution_ = std::make_unique<Solution>(*this);
 
     srand(0);
     int_right_.clear();
@@ -559,7 +559,7 @@ void Instance::sort_partially(DBG(Info& info COMMA) ItemIdx limit)
         }
     }
 
-    sort_type_ = 1;
+    sort_status_ = 1;
 
     compute_break_item(DBG(info));
 
@@ -609,9 +609,9 @@ void Instance::sort_right(Profit lb DBG(COMMA Info& info))
     }
     if (first_item() >= s_prime() && last_item() <= t_prime()) {
         if (s_init_ == t_init_) {
-            sort_type_ = 2;
+            sort_status_ = 2;
         } else {
-            sort_type_ = 0;
+            sort_status_ = 0;
         }
     }
     LOG_FOLD_END(info, "sort_right");
@@ -638,7 +638,7 @@ void Instance::sort_left(Profit lb DBG(COMMA Info& info))
             LOG(info, " swap j " << j << " k " << k << std::endl);
         } else {
             LOG(info, " set 1" << std::endl);
-            sol_red_->set(j, true);
+            reduced_solution_->set(j, true);
         }
     }
     std::sort(items_.begin() + k, items_.begin() + s_prime(),
@@ -652,9 +652,9 @@ void Instance::sort_left(Profit lb DBG(COMMA Info& info))
     }
     if (first_item() >= s_prime() && last_item() <= t_prime()) {
         if (s_init_ == t_init_) {
-            sort_type_ = 2;
+            sort_status_ = 2;
         } else {
-            sort_type_ = 0;
+            sort_status_ = 0;
         }
     }
     LOG_FOLD_END(info, "sort_left");
@@ -790,7 +790,7 @@ void Instance::add_item_to_core(ItemPos s, ItemPos t, ItemPos j DBG(COMMA Info& 
 
         t_init_++;
     }
-    sort_type_ = 1;
+    sort_status_ = 1;
 
     LOG_FOLD(info, *this);
     LOG_FOLD_END(info, "add_item_to_initial_core");
@@ -925,7 +925,7 @@ bool Instance::check_partialsort(DBG(Info& info)) const
 void Instance::init_combo_core(DBG(Info& info))
 {
     LOG_FOLD_START(info, "init_combo_core" << std::endl);
-    assert(sort_type_ >= 1);
+    assert(sort_status_ >= 1);
     add_item_to_core(s_init_ - 1, t_init_ + 1, before_break_item(DBG(info)) DBG(COMMA info));
     add_item_to_core(s_init_ - 1, t_init_ + 1, gamma1(DBG(info)) DBG(COMMA info));
     add_item_to_core(s_init_ - 1, t_init_ + 1, gamma2(DBG(info)) DBG(COMMA info));
@@ -952,7 +952,7 @@ void Instance::reduce1(Profit lb, Info& info)
 
         if (ub <= lb) {
             LOG(info, " 1" << std::endl);
-            sol_red_->set(j, true);
+            reduced_solution_->set(j, true);
             if (j != f_)
                 swap(j, f_);
             f_++;
@@ -994,7 +994,7 @@ void Instance::reduce1(Profit lb, Info& info)
 
 ItemPos Instance::ub_item(const std::vector<Item>& isum, Item item) const
 {
-    assert(sort_type() == 2);
+    assert(sort_status() == 2);
     auto s = std::upper_bound(isum.begin() + f_, isum.begin() + l_ + 1, item,
             [](const Item& i1, const Item& i2) { return i1.w < i2.w;});
     if (s == isum.begin() + l_ + 1)
@@ -1005,7 +1005,7 @@ ItemPos Instance::ub_item(const std::vector<Item>& isum, Item item) const
 void Instance::reduce2(Profit lb, Info& info)
 {
     LOG_FOLD_START(info, "Reduce 2: lb " << lb << " b_ " << b_ << std::endl);
-    assert(sort_type() == 2);
+    assert(sort_status() == 2);
 
     std::vector<Item> isum = get_isum();
 
@@ -1035,7 +1035,7 @@ void Instance::reduce2(Profit lb, Info& info)
         }
         if (ub <= lb) {
             LOG(info, " 1" << std::endl);
-            sol_red_->set(j, true);
+            reduced_solution_->set(j, true);
             fixed_1.push_back(item(j));
             if (reduced_capacity() < 0)
                 return;
@@ -1112,7 +1112,7 @@ void Instance::set_first_item(ItemPos k DBG(COMMA Info& info))
     assert(k >= f_);
     for (ItemPos j = f_; j < k; ++j) {
         LOG(info, "set " << j << " (" << item(j) << ")" << std::endl);
-        sol_red_->set(j, true);
+        reduced_solution_->set(j, true);
     }
     f_ = k;
     LOG_FOLD_END(info, "set_first_item");
@@ -1143,7 +1143,7 @@ void Instance::fix(const std::vector<int> vec DBG(COMMA Info& info))
         } else if (vec[j] == 1) {
             LOG(info, "fix " << j << " (" << item(j) << ") 1" << std::endl);
             fixed_1.push_back(item(j));
-            sol_red_->set(j, true);
+            reduced_solution_->set(j, true);
         } else {
             assert(vec[j] == -1);
             LOG(info, "fix " << j << " (" << item(j) << ") 0" << std::endl);
@@ -1164,8 +1164,8 @@ void Instance::fix(const std::vector<int> vec DBG(COMMA Info& info))
 
     remove_big_items(DBG(info));
 
-    if (sort_type() == 1) {
-        sort_type_ = 0;
+    if (sort_status() == 1) {
+        sort_status_ = 0;
         sort_partially(DBG(info));
     } else {
         compute_break_item(DBG(info));
@@ -1184,27 +1184,27 @@ void Instance::surrogate(Weight multiplier, ItemIdx bound DBG(COMMA Info& info))
 
 void Instance::surrogate(Weight multiplier, ItemIdx bound, ItemPos first DBG(COMMA Info& info))
 {
-    sol_break_->clear();
-    if (sol_opt_ != nullptr)
-        sol_opt_ = nullptr;
+    break_solution_->clear();
+    if (optimal_solution_ != nullptr)
+        optimal_solution_ = nullptr;
     f_ = first;
     l_ = last_item();
     for (ItemIdx j = f_; j <= l_; ++j)
-        sol_red_->set(j, false);
-    bound -= sol_red_->number_of_items();
+        reduced_solution_->set(j, false);
+    bound -= reduced_solution_->number_of_items();
     for (ItemIdx j = f_; j <= l_; ++j) {
         items_[j].w += multiplier;
         if (items_[j].w <= 0) {
-            sol_red_->set(j, true);
+            reduced_solution_->set(j, true);
             swap(j, f_);
             f_++;
         }
     }
-    c_orig_ += multiplier * bound;
-    if (c_orig_ <= reduced_solution()->weight())
-        c_orig_ =  reduced_solution()->weight();
+    capacity_ += multiplier * bound;
+    if (capacity_ <= reduced_solution()->weight())
+        capacity_ =  reduced_solution()->weight();
 
-    sort_type_ = 0;
+    sort_status_ = 0;
     sort_partially(DBG(info));
 }
 
@@ -1241,7 +1241,7 @@ std::ostream& knapsacksolver::operator<<(std::ostream& os, const Instance& insta
             << " psum " << instance.break_profit()
             << " p_break " << instance.break_solution()->profit()
             << std::endl;
-    os << "sort_type " << instance.sort_type() << std::endl;
+    os << "sort_status " << instance.sort_status() << std::endl;
 
     os << "left";
     for (Interval in: instance.int_left())
@@ -1309,11 +1309,11 @@ std::ostream& knapsacksolver::operator<<(std::ostream& os, const Instance& insta
     return os;
 }
 
-void Instance::plot(std::string filepath)
+void Instance::plot(std::string output_path)
 {
-    std::ofstream file(filepath);
+    std::ofstream file(output_path);
     if (!file.good()) {
-        std::cerr << "\033[31m" << "ERROR, unable to open file \"" << filepath << "\"" << "\033[0m" << std::endl;
+        std::cerr << "\033[31m" << "ERROR, unable to open file \"" << output_path << "\"" << "\033[0m" << std::endl;
         assert(false);
         return;
     }
@@ -1324,11 +1324,11 @@ void Instance::plot(std::string filepath)
     file.close();
 }
 
-void Instance::write(std::string filepath)
+void Instance::write(std::string certificate_path)
 {
-    std::ofstream file(filepath);
+    std::ofstream file(certificate_path);
     if (!file.good()) {
-        std::cerr << "\033[31m" << "ERROR, unable to open file \"" << filepath << "\"" << "\033[0m" << std::endl;
+        std::cerr << "\033[31m" << "ERROR, unable to open file \"" << certificate_path << "\"" << "\033[0m" << std::endl;
         assert(false);
         return;
     }
@@ -1339,11 +1339,11 @@ void Instance::write(std::string filepath)
     file.close();
 }
 
-void Instance::plot_reduced(std::string filepath)
+void Instance::plot_reduced(std::string output_path)
 {
-    std::ofstream file(filepath);
+    std::ofstream file(output_path);
     if (!file.good()) {
-        std::cerr << "\033[31m" << "ERROR, unable to open file \"" << filepath << "\"" << "\033[0m" << std::endl;
+        std::cerr << "\033[31m" << "ERROR, unable to open file \"" << output_path << "\"" << "\033[0m" << std::endl;
         assert(false);
         return;
     }
@@ -1354,11 +1354,11 @@ void Instance::plot_reduced(std::string filepath)
     file.close();
 }
 
-void Instance::write_reduced(std::string filepath)
+void Instance::write_reduced(std::string instance_path)
 {
-    std::ofstream file(filepath);
+    std::ofstream file(instance_path);
     if (!file.good()) {
-        std::cerr << "\033[31m" << "ERROR, unable to open file \"" << filepath << "\"" << "\033[0m" << std::endl;
+        std::cerr << "\033[31m" << "ERROR, unable to open file \"" << instance_path << "\"" << "\033[0m" << std::endl;
         assert(false);
         return;
     }
