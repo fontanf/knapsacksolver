@@ -37,12 +37,13 @@ void expknap_update_bounds(ExpknapInternalData& d)
                 p.set_end = false;
                 return expknap(ins, p);
             };
-        d.threads.push_back(std::thread(solvesurrelax, SurrelaxData{
-                    .instance = Instance::reset(d.instance),
-                    .output   = d.output,
-                    .func     = func,
-                    .end      = d.p.end,
-                    .info     = Info(d.p.info, true, "surrelax")}));
+        d.threads.push_back(std::thread(
+                    solvesurrelax,
+                    Instance::reset(d.instance),
+                    std::ref(d.output),
+                    func,
+                    d.p.end,
+                    Info(d.p.info, true, "surrelax")));
     }
     if (d.p.greedynlogn >= 0 && d.p.greedynlogn <= d.output.number_of_node) {
         d.p.greedynlogn = -1;

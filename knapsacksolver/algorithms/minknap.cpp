@@ -549,12 +549,13 @@ void minknap_update_bounds(MinknapInternalData& d)
                 p.set_end = false;
                 return minknap(instance, p);
             };
-        d.threads.push_back(std::thread(solvesurrelax, SurrelaxData{
-                    .instance = Instance::reset(instance),
-                    .output   = d.output,
-                    .func     = func,
-                    .end      = d.p.end,
-                    .info     = Info(info, true, "surrelax")}));
+        d.threads.push_back(std::thread(
+                    solvesurrelax,
+                    Instance::reset(instance),
+                    std::ref(d.output),
+                    func,
+                    d.p.end,
+                    Info(info, true, "surrelax")));
     }
     if (d.p.pairing >= 0 && d.p.pairing <= (StateIdx)d.l0.size()) {
         LOG_FOLD_START(info, "pairing" << std::endl);

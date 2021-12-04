@@ -44,9 +44,9 @@ Instance::Instance(Weight c, const std::vector<std::pair<Weight, Profit>>& wp):
         add_item(p.first, p.second);
 }
 
-void Instance::set_optimal_solution(Solution& sol)
+void Instance::set_optimal_solution(Solution& solution)
 {
-    optimal_solution_ = std::make_unique<Solution>(sol);
+    optimal_solution_ = std::unique_ptr<Solution>(new Solution(solution));
 }
 
 Instance::Instance(std::string instance_path, std::string format):
@@ -124,7 +124,7 @@ void Instance::read_pisinger(std::ifstream& file)
         x[j] = std::stol(line[3]);
     }
 
-    optimal_solution_ = std::make_unique<Solution>(*this);
+    optimal_solution_ = std::unique_ptr<Solution>(new Solution(*this));
     for (ItemPos j = 0; j < n; ++j)
         optimal_solution_->set(j, x[j]);
     assert(optimal_solution_->profit() == opt);
@@ -158,15 +158,15 @@ Instance::Instance(const Instance& instance):
     int_left_(instance.int_left_)
 {
     if (instance.optimal_solution() != nullptr) {
-        optimal_solution_ = std::make_unique<Solution>(*this);
+        optimal_solution_ = std::unique_ptr<Solution>(new Solution(*this));
         *optimal_solution_ = *instance.optimal_solution();
     }
     if (instance.break_solution() != nullptr) {
-        break_solution_ = std::make_unique<Solution>(*this);
+        break_solution_ = std::unique_ptr<Solution>(new Solution(*this));
         *break_solution_ = *instance.break_solution();
     }
     if (instance.reduced_solution() != nullptr) {
-        reduced_solution_ = std::make_unique<Solution>(*this);
+        reduced_solution_ = std::unique_ptr<Solution>(new Solution(*this));
         *reduced_solution_ = *instance.reduced_solution();
     }
 }
@@ -189,15 +189,15 @@ Instance& Instance::operator=(const Instance& instance)
         int_left_ = instance.int_left_;
 
         if (instance.optimal_solution() != nullptr) {
-            optimal_solution_ = std::make_unique<Solution>(*this);
+            optimal_solution_ = std::unique_ptr<Solution>(new Solution(*this));
             *optimal_solution_ = *instance.optimal_solution();
         }
         if (instance.break_solution() != nullptr) {
-            break_solution_ = std::make_unique<Solution>(*this);
+            break_solution_ = std::unique_ptr<Solution>(new Solution(*this));
             *break_solution_ = *instance.break_solution();
         }
         if (instance.reduced_solution() != nullptr) {
-            reduced_solution_ = std::make_unique<Solution>(*this);
+            reduced_solution_ = std::unique_ptr<Solution>(new Solution(*this));
             *reduced_solution_ = *instance.reduced_solution();
         }
     }
@@ -370,7 +370,7 @@ void Instance::compute_break_item(DBG(Info& info))
     LOG(info, "reduced solution " << reduced_solution()->to_string_items() << std::endl);
 
     if (break_solution_ == nullptr) {
-        break_solution_ = std::make_unique<Solution>(*reduced_solution());
+        break_solution_ = std::unique_ptr<Solution>(new Solution(*reduced_solution()));
     } else {
         *break_solution_ = *reduced_solution();
     }
@@ -414,7 +414,7 @@ void Instance::sort(DBG(Info& info))
         return;
     }
     if (reduced_solution() == nullptr)
-        reduced_solution_ = std::make_unique<Solution>(*this);
+        reduced_solution_ = std::unique_ptr<Solution>(new Solution(*this));
     sort_status_ = 2;
     if (reduced_number_of_items() > 1)
         std::sort(items_.begin()+first_item(), items_.begin()+last_item()+1,
@@ -514,7 +514,7 @@ void Instance::sort_partially(DBG(Info& info COMMA) ItemIdx limit)
     }
 
     if (reduced_solution() == nullptr)
-        reduced_solution_ = std::make_unique<Solution>(*this);
+        reduced_solution_ = std::unique_ptr<Solution>(new Solution(*this));
 
     srand(0);
     int_right_.clear();

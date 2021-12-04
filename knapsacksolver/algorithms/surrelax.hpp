@@ -5,16 +5,12 @@
 namespace knapsacksolver
 {
 
-struct SurrelaxData
-{
-    Instance instance;
-    Output& output;
-    std::function<Output (Instance&, Info, bool*)> func;
-    bool* end;
-    Info info = Info();
-};
-
-void solvesurrelax(SurrelaxData d);
+void solvesurrelax(
+        Instance instance,
+        Output& output,
+        std::function<Output (Instance&, Info, bool*)> func,
+        bool* end,
+        Info info = Info());
 
 Output surrelax(const Instance& instance, Info info = Info());
 Output surrelax_minknap(const Instance& instance, Info info = Info());
