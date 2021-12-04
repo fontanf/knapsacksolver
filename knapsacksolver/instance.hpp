@@ -53,7 +53,7 @@ class Instance
 
 public:
 
-    /**
+    /*
      * Constructors and destructor
      */
 
@@ -84,7 +84,7 @@ public:
     /** Copy constructor without algorithmic informations. */
     static Instance reset(const Instance& ins);
 
-    /**
+    /*
      * Getters
      */
 
@@ -102,22 +102,30 @@ public:
     ItemPos min_weight_item(DBG(Info& info)) const;
     ItemPos max_profit_item(DBG(Info& info)) const;
     ItemPos min_profit_item(DBG(Info& info)) const;
-    /** Item of highest profit that can be added to the break solution once
-     * item b - 1 has been removed.  */
+    /**
+     * Item of highest profit that can be added to the break solution once item
+     * b - 1 has been removed.
+     */
     ItemPos gamma1(DBG(Info& info)) const;
-    /** Item of lowest profit which has to be removed from the break solution
-     * so that item b can be added.  */
+    /**
+     * Item of lowest profit which has to be removed from the break solution so
+     * that item b can be added.
+     */
     ItemPos gamma2(DBG(Info& info)) const;
     /** Item of highest profit that can be added to the break solution.  */
     ItemPos beta1(DBG(Info& info)) const;
-    /** Item of lowest profit which has to be removed from the break solution
-     * so that item b and b + 1 can be added.  */
+    /**
+     * Item of lowest profit which has to be removed from the break solution so
+     * that item b and b + 1 can be added.
+     */
     ItemPos beta2(DBG(Info& info)) const;
     std::vector<Weight> min_weights() const;
 
     /** Sort items according to non-increasing profit-to-weight ratio.  */
     void sort(DBG(Info& info));
+    /** Get the sort status of the instance. */
     int sort_status() const { return sort_status_; }
+    /** Set the sort status of the instance. */
     void set_sort_status(int type) { sort_status_ = type; }
 
     /**
@@ -184,23 +192,19 @@ public:
 
     void fix(const std::vector<int> vec DBG(COMMA Info& info));
 
-    /**
-     * Create an instance with capacitiy and weights divided, keeping the
-     * floor (resp. the ceiling).
-     */
-    void divide_weights_floor(Weight divisor);
-    void divide_weights_ceil(Weight divisor);
-    void divide_profits_floor(Profit divisor);
-    void divide_profits_ceil(Profit divisor);
-
     void surrogate(Weight multiplier, ItemIdx bound, ItemPos first DBG(COMMA Info& info));
     void surrogate(Weight multiplier, ItemIdx bound DBG(COMMA Info& info));
 
+    /** Get the break solution of the instance. */
     const Solution* break_solution() const { return break_solution_.get(); }
+    /** Get the position of the break item of the instance. */
     ItemPos break_item()     const { return b_; }
-    Profit  break_profit()   const;
-    Weight  break_weight()   const;
-    Weight  break_capacity() const;
+    /** Get the break profit of the instance. */
+    Profit break_profit()   const;
+    /** Get the break weight of the instance. */
+    Weight break_weight()   const;
+    /** Get the break capacity of the instance. */
+    Weight break_capacity() const;
 
     ItemPos ub_item(Item item) const;
 
@@ -212,7 +216,7 @@ public:
 private:
 
     /*
-     * Methods
+     * Private methods.
      */
 
     void read_standard(std::ifstream& file);
@@ -236,7 +240,7 @@ private:
 
 
     /*
-     * Attributes
+     * Private attributes
      */
 
     /** Path of the instance. */
