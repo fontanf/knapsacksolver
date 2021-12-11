@@ -221,6 +221,7 @@ private:
 
     void read_standard(std::ifstream& file);
     void read_pisinger(std::ifstream& file);
+    void read_jooken(std::ifstream& file);
     void read_subsetsum_standard(std::ifstream& file);
 
     std::pair<ItemPos, ItemPos> partition(ItemPos f, ItemPos l DBG(COMMA Info& info));

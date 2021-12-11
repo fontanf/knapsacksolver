@@ -64,6 +64,8 @@ Instance::Instance(std::string instance_path, std::string format):
         read_standard(file);
     } else if (format == "pisinger") {
         read_pisinger(file);
+    } else if (format == "jooken") {
+        read_jooken(file);
     } else if (format == "subsetsum_standard") {
         read_subsetsum_standard(file);
     } else {
@@ -78,7 +80,9 @@ Instance::Instance(std::string instance_path, std::string format):
 void Instance::read_standard(std::ifstream& file)
 {
     ItemIdx n;
-    file >> n >> capacity_;
+    Weight c;
+    file >> n >> c;
+    set_capacity(c);
 
     items_.reserve(n);
     Weight w;
@@ -87,6 +91,25 @@ void Instance::read_standard(std::ifstream& file)
         file >> w >> p;
         add_item(w, p);
     }
+}
+
+void Instance::read_jooken(std::ifstream& file)
+{
+    ItemIdx n;
+    file >> n;
+
+    items_.reserve(n);
+    ItemIdx tmp;
+    Weight w;
+    Profit p;
+    for (ItemPos j = 0; j < n; ++j) {
+        file >> tmp >> p >> w;
+        add_item(w, p);
+    }
+
+    Weight c;
+    file >> c;
+    set_capacity(c);
 }
 
 static inline void rtrim(std::string &s) {
@@ -110,9 +133,11 @@ std::vector<std::string> split(std::string line)
 void Instance::read_pisinger(std::ifstream& file)
 {
     ItemIdx n;
+    Weight c;
     std::string tmp;
     Profit opt;
-    file >> tmp >> tmp >> n >> tmp >> capacity_ >> tmp >> opt >> tmp >> tmp;
+    file >> tmp >> tmp >> n >> tmp >> c >> tmp >> opt >> tmp >> tmp;
+    set_capacity(c);
 
     items_.reserve(n);
     std::vector<int> x(n);
