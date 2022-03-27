@@ -42,7 +42,11 @@ struct ExpknapOptionalParameters
 
 struct ExpknapOutput: Output
 {
-    ExpknapOutput(const Instance& instance, Info& info): Output(instance, info) { }
+    ExpknapOutput(
+            const Instance& instance,
+            Info& info):
+        Output(instance, info) { }
+
     Counter number_of_node = 0;
 
     ExpknapOutput& algorithm_end(Info& info)
@@ -54,7 +58,9 @@ struct ExpknapOutput: Output
     }
 };
 
-ExpknapOutput expknap(Instance& instance, ExpknapOptionalParameters p = {});
+ExpknapOutput expknap(
+        Instance& instance,
+        ExpknapOptionalParameters parameters = {});
 
 }
 

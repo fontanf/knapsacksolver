@@ -9,7 +9,9 @@ Solution::Solution(const Instance& instance):
     x_(instance.number_of_items(), 0)
 { }
 
-Solution::Solution(const Instance& instance, std::string certificate_path):
+Solution::Solution(
+        const Instance& instance,
+        std::string certificate_path):
     instance_(instance),
     x_(instance.number_of_items(), 0)
 {
@@ -17,8 +19,8 @@ Solution::Solution(const Instance& instance, std::string certificate_path):
         return;
     std::ifstream file(certificate_path);
     if (!file.good()) {
-        std::cerr << "\033[31m" << "ERROR, unable to open file \"" << certificate_path << "\"" << "\033[0m" << std::endl;
-        return;
+        throw std::runtime_error(
+                "Unable to open file \"" + certificate_path + "\".");
     }
 
     int x = 0;
@@ -106,9 +108,8 @@ void Solution::write(std::string certificate_path)
         return;
     std::ofstream cert(certificate_path);
     if (!cert.good()) {
-        std::cerr << "\033[31m" << "ERROR, unable to open file \"" << certificate_path << "\"" << "\033[0m" << std::endl;
-        assert(false);
-        return;
+        throw std::runtime_error(
+                "Unable to open file \"" + certificate_path + "\".");
     }
 
     cert << *this;
@@ -151,18 +152,27 @@ std::string Solution::to_string_items() const
     return s;
 }
 
-/*********************************** Output ***********************************/
+////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////// Output ////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 Output::Output(const Instance& instance, Info& info): solution(instance)
 {
-    VER(info, std::left << std::setw(10) << "T (ms)");
-    VER(info, std::left << std::setw(15) << "LB");
-    VER(info, std::left << std::setw(15) << "UB");
-    VER(info, std::left << std::setw(10) << "GAP");
-    VER(info, "");
-    VER(info, std::endl);
-    print(info, std::stringstream(""));
     info.reset_time();
+    VER(info,
+               std::setw(10) << "T (ms)"
+            << std::setw(15) << "LB"
+            << std::setw(15) << "UB"
+            << std::setw(10) << "GAP"
+            << std::setw(24) << "Comment"
+            << std::endl
+            << std::setw(10) << "------"
+            << std::setw(15) << "--"
+            << std::setw(15) << "--"
+            << std::setw(10) << "---"
+            << std::setw(24) << "-------"
+            << std::endl);
+    print(info, std::stringstream(""));
 }
 
 void Output::print(Info& info, const std::stringstream& s) const
@@ -171,25 +181,29 @@ void Output::print(Info& info, const std::stringstream& s) const
     std::string gap_str = (upper_bound == -1)? "inf": std::to_string(upper_bound - lower_bound);
     double t = round(info.elapsed_time() * 10000) / 10;
 
-    VER(info, std::left << std::setw(10) << t);
-    VER(info, std::left << std::setw(15) << lower_bound);
-    VER(info, std::left << std::setw(15) << ub_str);
-    VER(info, std::left << std::setw(10) << gap_str);
-    VER(info, s.str() << std::endl);
+    VER(info,
+               std::setw(10) << t
+            << std::setw(15) << lower_bound
+            << std::setw(15) << ub_str
+            << std::setw(10) << gap_str
+            << std::setw(24) << s.str() << std::endl);
 
     if (!info.output->only_write_at_the_end)
         info.write_json_output();
 }
 
-void Output::update_lb(Profit lb_new, const std::stringstream& s, Info& info)
+void Output::update_lower_bound(
+        Profit lower_bound_new,
+        const std::stringstream& s,
+        Info& info)
 {
-    if (lower_bound >= lb_new)
+    if (lower_bound >= lower_bound_new)
         return;
 
     info.output->mutex_solutions.lock();
 
-    if (lower_bound < lb_new) {
-        lower_bound = lb_new;
+    if (lower_bound < lower_bound_new) {
+        lower_bound = lower_bound_new;
         print(info, s);
 
         info.output->number_of_solutions++;
@@ -204,19 +218,23 @@ void Output::update_lb(Profit lb_new, const std::stringstream& s, Info& info)
     info.output->mutex_solutions.unlock();
 }
 
-void Output::update_sol(const Solution& sol, const std::stringstream& s, Info& info)
+void Output::update_solution(
+        const Solution& solution_new,
+        const std::stringstream& s,
+        Info& info)
 {
-    if (!sol.feasible() || solution.profit() >= sol.profit())
+    if (!solution_new.feasible()
+            || solution.profit() >= solution_new.profit())
         return;
 
     info.output->mutex_solutions.lock();
 
-    if (solution.profit() < sol.profit()) {
-        solution = sol;
+    if (solution.profit() < solution_new.profit()) {
+        solution = solution_new;
     }
 
-    if (lower_bound < sol.profit()) {
-        lower_bound = sol.profit();
+    if (lower_bound < solution_new.profit()) {
+        lower_bound = solution_new.profit();
         print(info, s);
 
         info.output->number_of_solutions++;
@@ -231,15 +249,18 @@ void Output::update_sol(const Solution& sol, const std::stringstream& s, Info& i
     info.output->mutex_solutions.unlock();
 }
 
-void Output::update_ub(Profit ub_new, const std::stringstream& s, Info& info)
+void Output::update_upper_bound(
+        Profit upper_bound_new,
+        const std::stringstream& s,
+        Info& info)
 {
-    if (upper_bound != -1 && upper_bound <= ub_new)
+    if (upper_bound != -1 && upper_bound <= upper_bound_new)
         return;
 
     info.output->mutex_solutions.lock();
 
-    if (upper_bound == -1 || upper_bound > ub_new) {
-        upper_bound = ub_new;
+    if (upper_bound == -1 || upper_bound > upper_bound_new) {
+        upper_bound = upper_bound_new;
         print(info, s);
 
         info.output->number_of_bounds++;
@@ -267,13 +288,16 @@ Output& Output::algorithm_end(Info& info)
     PUT(info, "Bound", "Value", upper_bound);
     PUT(info, "Solution", "Time", t);
     PUT(info, "Bound", "Time", t);
-    VER(info, "---" << std::endl
-            << "Value: " << lower_bound << std::endl
-            << "Bound: " << ub_str << std::endl
-            << "Gap: " << gap_str << std::endl
-            << "Gap (%): " << gap << std::endl
-            << "Solution: " << sol_str << std::endl
-            << "Time (ms): " << t << std::endl);
+    VER(info,
+            std::endl
+            << "Final statistics" << std::endl
+            << "----------------" << std::endl
+            << "Value:                      " << lower_bound << std::endl
+            << "Bound:                      " << ub_str << std::endl
+            << "Gap:                        " << gap_str << std::endl
+            << "Gap (%):                    " << gap << std::endl
+            << "Solution:                   " << sol_str << std::endl
+            << "Time (ms):                  " << t << std::endl);
 
     info.write_json_output();
     solution.write(info.output->certificate_path);
@@ -285,9 +309,12 @@ Profit knapsacksolver::algorithm_end(Profit upper_bound, Info& info)
     double t = round(info.elapsed_time() * 10000) / 10;
     PUT(info, "Bound", "Value", upper_bound);
     PUT(info, "Bound", "Time", t);
-    VER(info, "---" << std::endl
-            << "Bound: " << upper_bound << std::endl
-            << "Time (ms): " << t << std::endl);
+    VER(info,
+            std::endl
+            << "Final statistics" << std::endl
+            << "----------------" << std::endl
+            << "Bound:                      " << upper_bound << std::endl
+            << "Time (ms):                  " << t << std::endl);
 
     info.write_json_output();
     return upper_bound;

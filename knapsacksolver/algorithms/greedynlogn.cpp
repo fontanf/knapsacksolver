@@ -17,7 +17,9 @@ std::vector<Item> remove_dominated_items(std::vector<Item>& v)
     return t;
 }
 
-/***************************** forwardgreedynlogn *****************************/
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////// forwardgreedynlogn //////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 Output knapsacksolver::forwardgreedynlogn(const Instance& instance, Info info)
 {
@@ -80,12 +82,14 @@ Output knapsacksolver::forwardgreedynlogn(const Instance& instance, Info info)
         sol.set(il_max->j, true);
     }
 
-    output.update_sol(sol, std::stringstream(), info);
+    output.update_solution(sol, std::stringstream(), info);
     LOG_FOLD_END(info, "");
     return output.algorithm_end(info);
 }
 
-/**************************** backwardgreedynlogn *****************************/
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////////// backwardgreedynlogn //////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 Output knapsacksolver::backwardgreedynlogn(const Instance& instance, Info info)
 {
@@ -94,7 +98,7 @@ Output knapsacksolver::backwardgreedynlogn(const Instance& instance, Info info)
     VER(info, "*** backwardgreedynlogn ***" << std::endl);
     Output output(instance, info);
 
-    output.update_sol(*instance.break_solution(), std::stringstream("break"), info);
+    output.update_solution(*instance.break_solution(), std::stringstream("break"), info);
 
     // If all items fit in the knapsack or if the break solution doesn't
     // contain any item, return sol.
@@ -152,14 +156,16 @@ Output knapsacksolver::backwardgreedynlogn(const Instance& instance, Info info)
     if (it_max != t.end()) {
         sol.set(it_max->j, false);
         sol.set(il_max->j, true);
-        output.update_sol(sol, std::stringstream(), info);
+        output.update_solution(sol, std::stringstream(), info);
     }
 
     LOG_FOLD_END(info, "");
     return output.algorithm_end(info);
 }
 
-/******************************** greedynlogn *********************************/
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////// greedynlogn //////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 Output knapsacksolver::greedynlogn(const Instance& instance, Info info)
 {
@@ -168,18 +174,18 @@ Output knapsacksolver::greedynlogn(const Instance& instance, Info info)
     Output output(instance, info);
 
     auto g_output = greedy(instance);
-    output.update_sol(g_output.solution, std::stringstream("greedy"), info);
+    output.update_solution(g_output.solution, std::stringstream("greedy"), info);
     std::string best = "greedy";
 
     auto f_output = forwardgreedynlogn(instance);
     if (output.lower_bound < f_output.lower_bound) {
-        output.update_sol(f_output.solution, std::stringstream("forward"), info);
+        output.update_solution(f_output.solution, std::stringstream("forward"), info);
         best = "forward";
     }
 
     auto b_output = backwardgreedynlogn(instance);
     if (output.lower_bound < b_output.lower_bound) {
-        output.update_sol(b_output.solution, std::stringstream("backward"), info);
+        output.update_solution(b_output.solution, std::stringstream("backward"), info);
         best = "backward";
     }
 

@@ -42,10 +42,174 @@ Download and uncompress the instances in the `data/` folder:
 https://drive.google.com/file/d/1k2Mp3Z5sb5tVJO8I5-WiAglqawk-l1k3/view?usp=sharing
 
 Solve:
+
 ```shell
 ./bazel-bin/knapsacksolver/main -v --algorithm combo --input data/largecoeff/knapPI_3_10000_10000000/knapPI_3_10000_10000000_50.csv --format pisinger
+```
+```
+=====================================
+           Knapsack Solver           
+=====================================
+
+Instance
+--------
+Number of items:  10000
+Capacity:         24552508933
+
+Algorithm
+---------
+Minknap
+
+Parameters
+----------
+Greedy:                 1
+Pairing:                10000
+Surrogate relaxation:   2000
+Combo core:             1
+Partial solution size:  64
+
+    T (ms)             LB             UB       GAP                 Comment
+    ------             --             --       ---                 -------
+         0              0            inf       inf                        
+       0.3    31604508753            inf       inf        initial solution
+       0.3    31604508753    31605222696    713943     dantzig upper bound
+       1.9    31604508786    31605222696    713910              it 18 (lb)
+       1.9    31604508806    31605222696    713890              it 18 (lb)
+       1.9    31604508812    31605222696    713884              it 18 (lb)
+       1.9    31604508819    31605222696    713877              it 18 (lb)
+       1.9    31604508824    31605222696    713872              it 18 (lb)
+       1.9    31604508833    31605222696    713863              it 18 (lb)
+       1.9    31604508933    31605222696    713763              it 18 (lb)
+       6.8    31604508933    31604508933         0    surrogate relaxation
+
+Final statistics
+----------------
+Value:                      31604508933
+Bound:                      31604508933
+Gap:                        0
+Gap (%):                    0
+Solution:                   OK
+Time (ms):                  11.8
+Number of recursive calls:  2
+```
+
+```shell
 ./bazel-bin/knapsacksolver/main -v --algorithm combo --input data/largecoeff/knapPI_5_10000_10000000/knapPI_5_10000_10000000_60.csv --format pisinger
+```
+```
+=====================================
+           Knapsack Solver           
+=====================================
+
+Instance
+--------
+Number of items:  10000
+Capacity:         29740614219
+
+Algorithm
+---------
+Minknap
+
+Parameters
+----------
+Greedy:                 1
+Pairing:                10000
+Surrogate relaxation:   2000
+Combo core:             1
+Partial solution size:  64
+
+    T (ms)             LB             UB       GAP                 Comment
+    ------             --             --       ---                 -------
+         0              0            inf       inf                        
+       0.4    37438591403            inf       inf        initial solution
+       0.4    37438591403    37439459371    867968     dantzig upper bound
+       0.4    37438593109    37439459371    866262              it 10 (lb)
+       1.2    37438593616    37439459371    865755              it 16 (lb)
+       1.2    37438593668    37439459371    865703              it 16 (lb)
+       1.7    37438594077    37439459371    865294              it 18 (lb)
+       1.7    37438594129    37439459371    865242              it 18 (lb)
+       2.7    37438594909    37439459371    864462              it 20 (lb)
+       2.7    37438595411    37439459371    863960              it 20 (lb)
+       2.7    37438596238    37439459371    863133              it 20 (lb)
+       2.8    37438597409    37439459371    861962              it 20 (lb)
+       2.8    37438598429    37439459371    860942              it 20 (lb)
+       2.8    37438601240    37439459371    858131              it 20 (lb)
+       2.8    37438602260    37439459371    857111              it 20 (lb)
+       2.8    37438603431    37439459371    855940              it 20 (lb)
+       2.8    37438604258    37439459371    855113              it 20 (lb)
+       2.8    37438611923    37439459371    847448              it 20 (lb)
+       2.8    37438612943    37439459371    846428              it 20 (lb)
+       2.8    37438614114    37439459371    845257              it 20 (lb)
+       2.8    37438618772    37439459371    840599              it 20 (lb)
+       2.8    37438619943    37439459371    839428              it 20 (lb)
+       4.1    37438624079    37439459371    835292              it 21 (lb)
+       4.1    37438624581    37439459371    834790              it 21 (lb)
+       4.1    37438625752    37439459371    833619              it 21 (lb)
+       4.1    37438626772    37439459371    832599              it 21 (lb)
+       4.1    37438632601    37439459371    826770              it 21 (lb)
+       4.2    37438643284    37439459371    816087              it 21 (lb)
+      10.1    37438643342    37439459371    816029              it 25 (lb)
+      10.1    37438644672    37439459371    814699              it 25 (lb)
+      10.1    37438647021    37439459371    812350              it 25 (lb)
+      12.4    37438647021    37439419666    772645    surrogate relaxation
+      13.5    37439041506    37439419666    378160  surrogate ins res (lb)
+      13.9    37439416751    37439419666      2915  surrogate ins res (lb)
+      13.9    37439416751    37439416751         0  surrogate ins res (ub)
+
+Final statistics
+----------------
+Value:                      37439416751
+Bound:                      37439416751
+Gap:                        0
+Gap (%):                    0
+Solution:                   OK
+Time (ms):                  18
+Number of recursive calls:  1
+```
+
+```shell
 ./bazel-bin/knapsacksolver/main -v --algorithm combo --input data/normal/knap_n100000_r100000000_x0.5 --format standard
+```
+```
+=====================================
+           Knapsack Solver           
+=====================================
+
+Instance
+--------
+Number of items:  100000
+Capacity:         2498481766944
+
+Algorithm
+---------
+Minknap
+
+Parameters
+----------
+Greedy:                 1
+Pairing:                10000
+Surrogate relaxation:   2000
+Combo core:             1
+Partial solution size:  64
+
+    T (ms)             LB             UB       GAP                 Comment
+    ------             --             --       ---                 -------
+       0.3              0            inf       inf                        
+       5.5  2698884873111            inf       inf        initial solution
+       5.5  2698884873111  2698885010148    137037     dantzig upper bound
+      12.1  2698884993895  2698885010148     16253              it 16 (lb)
+      16.6  2698885006118  2698885010148      4030              it 20 (lb)
+      33.7  2698885006118  2698885006118         0   tree search completed
+
+Final statistics
+----------------
+Value:                      2698885006118
+Bound:                      2698885006118
+Gap:                        0
+Gap (%):                    0
+Solution:                   OK
+Time (ms):                  34.5
+Number of recursive calls:  2
 ```
 
 For more options, see:

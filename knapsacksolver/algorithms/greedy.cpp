@@ -10,7 +10,10 @@ Output knapsacksolver::greedy(const Instance& instance, Info info)
 
     assert(instance.break_item() != -1);
 
-    output.update_sol(*instance.break_solution(), std::stringstream("break"), info);
+    output.update_solution(
+            *instance.break_solution(),
+            std::stringstream("break"),
+            info);
     std::string best_algo = "break";
     LOG(info, "break " << output.solution.profit() << std::endl);
     ItemPos b = instance.break_item();
@@ -43,12 +46,18 @@ Output knapsacksolver::greedy(const Instance& instance, Info info)
             Solution sol = output.solution;
             sol.set(b, true);
             sol.set(j, false);
-            output.update_sol(sol, std::stringstream("backward"), info);
+            output.update_solution(
+                    sol,
+                    std::stringstream("backward"),
+                    info);
         } else {
             best_algo = "forward";
             Solution sol = output.solution;
             sol.set(j, true);
-            output.update_sol(sol, std::stringstream("forward"), info);
+            output.update_solution(
+                    sol,
+                    std::stringstream("forward"),
+                    info);
         }
     }
 

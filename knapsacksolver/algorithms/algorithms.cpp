@@ -83,9 +83,8 @@ Output knapsacksolver::run(
     for(Counter i = 0; i < (Counter)algorithm_args.size(); ++i)
         algorithm_argv.push_back(const_cast<char*>(algorithm_args[i].c_str()));
 
-    if (algorithm_args[0] == "") {
-        std::cerr << "\033[32m" << "ERROR, missing argsrithm." << "\033[0m" << std::endl;
-        return Output(instance, info);
+    if (algorithm.empty() || algorithm_args[0].empty()) {
+        throw std::invalid_argument("Missing algorithm.");
 
         /*
          * Lower bounds
@@ -174,9 +173,8 @@ Output knapsacksolver::run(
         return surrelax_minknap(instance, info);
 
     } else {
-        std::cerr << "\033[31m" << "ERROR, unknown algorithm: " << algorithm_args[0] << "\033[0m" << std::endl;
-        assert(false);
-        return Output(instance, info);
+        throw std::invalid_argument(
+                "Unknown algorithm \"" + algorithm_args[0] + "\".");
     }
 }
 

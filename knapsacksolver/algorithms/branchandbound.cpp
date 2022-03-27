@@ -29,7 +29,7 @@ void branchandbound_rec(BranchAndBoundData& d)
     if (d.output.lower_bound < d.sol_curr.profit()) {
         std::stringstream ss;
         ss << "node " << d.number_of_node;
-        d.output.update_sol(d.sol_curr, ss, d.info);
+        d.output.update_solution(d.sol_curr, ss, d.info);
     }
 
     for (ItemPos j = d.j; j <= d.instance.last_item(); j++) {
@@ -62,7 +62,7 @@ Output knapsacksolver::branchandbound(Instance& instance, bool sort, Info info)
 
     ItemIdx n = instance.reduced_number_of_items();
     if (n == 0) {
-        output.update_ub(0, std::stringstream("no item"), info);
+        output.update_upper_bound(0, std::stringstream("no item"), info);
         LOG_FOLD_END(info, "no item");
         return output.algorithm_end(info);
     }
@@ -71,31 +71,59 @@ Output knapsacksolver::branchandbound(Instance& instance, bool sort, Info info)
     if (sort) {
         instance.sort(DBG(info));
         if (instance.break_item() == instance.last_item() + 1) {
-            if (output.lower_bound < instance.break_solution()->profit())
-                output.update_sol(*instance.break_solution(), std::stringstream("all items fit"), info);
-            output.update_ub(instance.break_solution()->profit(), std::stringstream(""), info);
+            if (output.lower_bound < instance.break_solution()->profit()) {
+                output.update_solution(
+                        *instance.break_solution(),
+                        std::stringstream("all items fit"),
+                        info);
+            }
+            output.update_upper_bound(
+                    instance.break_solution()->profit(),
+                    std::stringstream(""),
+                    info);
             LOG_FOLD_END(info, "all items fit in the knapsack");
             return output.algorithm_end(info);
         }
         auto g_output = greedynlogn(instance);
-        if (output.lower_bound < g_output.lower_bound)
-            output.update_sol(g_output.solution, std::stringstream("greedynlogn"), info);
+        if (output.lower_bound < g_output.lower_bound) {
+            output.update_solution(
+                    g_output.solution,
+                    std::stringstream("greedynlogn"),
+                    info);
+        }
 
         instance.reduce2(output.lower_bound, info);
         if (instance.reduced_capacity() < 0) {
-            output.update_ub(output.lower_bound, std::stringstream("negative capacity after reduction"), info);
+            output.update_upper_bound(
+                    output.lower_bound,
+                    std::stringstream("negative capacity after reduction"),
+                    info);
             LOG_FOLD_END(info, "c < 0");
             return output.algorithm_end(info);
         } else if (n == 0 || instance.reduced_capacity() == 0) {
-            if (output.lower_bound < instance.reduced_solution()->profit())
-                output.update_sol(*instance.reduced_solution(), std::stringstream("no item or null capacity after reduction"), info);
-            output.update_ub(output.lower_bound, std::stringstream(""), info);
+            if (output.lower_bound < instance.reduced_solution()->profit()) {
+                output.update_solution(
+                        *instance.reduced_solution(),
+                        std::stringstream("no item or null capacity after reduction"),
+                        info);
+            }
+            output.update_upper_bound(
+                    output.lower_bound,
+                    std::stringstream(""),
+                    info);
             LOG_FOLD_END(info, "no item or null capacity after reduction");
             return output.algorithm_end(info);
         } else if (instance.break_item() == instance.last_item() + 1) {
-            if (output.lower_bound < instance.break_solution()->profit())
-                output.update_sol(*instance.break_solution(), std::stringstream("all items fit in the knapsack after reduction"), info);
-            output.update_ub(output.lower_bound, std::stringstream(""), info);
+            if (output.lower_bound < instance.break_solution()->profit()) {
+                output.update_solution(
+                        *instance.break_solution(),
+                        std::stringstream("all items fit in the knapsack after reduction"),
+                        info);
+            }
+            output.update_upper_bound(
+                    output.lower_bound,
+                    std::stringstream(""),
+                    info);
             LOG_FOLD_END(info, "all items fit in the knapsack after reduction");
             return output.algorithm_end(info);
         }
@@ -105,7 +133,10 @@ Output knapsacksolver::branchandbound(Instance& instance, bool sort, Info info)
 
     Profit ub = (!sort)? ub_0(instance, 0, 0, instance.capacity(), j_max):
         std::max(ub_dantzig(instance), output.lower_bound);
-    output.update_ub(ub, std::stringstream("initial upper bound"), info);
+    output.update_upper_bound(
+            ub,
+            std::stringstream("initial upper bound"),
+            info);
 
     BranchAndBoundData d {
         .instance = instance,
@@ -119,8 +150,12 @@ Output knapsacksolver::branchandbound(Instance& instance, bool sort, Info info)
         .info = info,
     };
     branchandbound_rec(d);
-    if (info.check_time() && output.upper_bound > output.lower_bound)
-        output.update_ub(output.lower_bound, std::stringstream("tree search completed"), info);
+    if (info.check_time() && output.upper_bound > output.lower_bound) {
+        output.update_upper_bound(
+                output.lower_bound,
+                std::stringstream("tree search completed"),
+                info);
+    }
 
     LOG_FOLD_END(info, "");
     return output.algorithm_end(info);

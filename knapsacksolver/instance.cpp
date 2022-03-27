@@ -7,7 +7,9 @@
 
 using namespace knapsacksolver;
 
-/****************************** Create instances ******************************/
+////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////// Create instances ///////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 Instance::Instance(): f_(0), l_(-1) { }
 
@@ -55,9 +57,8 @@ Instance::Instance(std::string instance_path, std::string format):
     std::ifstream file(instance_path);
     std::ifstream file_sol(instance_path + ".sol");
     if (!file.good()) {
-        std::cerr << "\033[31m" << "ERROR, unable to open file \"" << instance_path << "\"" << "\033[0m" << std::endl;
-        assert(false);
-        return;
+        throw std::runtime_error(
+                "Unable to open file \"" + instance_path + "\".");
     }
 
     if (format == "standard") {
@@ -69,8 +70,8 @@ Instance::Instance(std::string instance_path, std::string format):
     } else if (format == "subsetsum_standard") {
         read_subsetsum_standard(file);
     } else {
-        std::cerr << "\033[31m" << "ERROR, unknown instance format: \"" << format << "\"" << "\033[0m" << std::endl;
-        assert(false);
+        throw std::invalid_argument(
+                "Unknown instance format \"" + format + "\".");
     }
 
     f_ = 0;
@@ -249,7 +250,9 @@ bool Instance::check()
     return true;
 }
 
-/******************************************************************************/
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 ItemPos Instance::max_efficiency_item(DBG(Info& info)) const
 {
@@ -387,7 +390,9 @@ Profit Instance::optimum() const
     return optimal_solution()->profit();
 }
 
-/******************************************************************************/
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 void Instance::compute_break_item(DBG(Info& info))
 {
@@ -429,7 +434,9 @@ Weight Instance::reduced_capacity() const
         capacity(): capacity() - reduced_solution()->weight();
 }
 
-/******************************************************************************/
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 void Instance::sort(DBG(Info& info))
 {
@@ -1200,7 +1207,9 @@ void Instance::fix(const std::vector<int> vec DBG(COMMA Info& info))
     LOG_FOLD_END(info, "fix");
 }
 
-/******************************************************************************/
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 void Instance::surrogate(Weight multiplier, ItemIdx bound DBG(COMMA Info& info))
 {
@@ -1233,7 +1242,9 @@ void Instance::surrogate(Weight multiplier, ItemIdx bound, ItemPos first DBG(COM
     sort_partially(DBG(info));
 }
 
-/******************************************************************************/
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 std::ostream& knapsacksolver::operator<<(std::ostream &os, const Interval& interval)
 {
@@ -1338,9 +1349,8 @@ void Instance::plot(std::string output_path)
 {
     std::ofstream file(output_path);
     if (!file.good()) {
-        std::cerr << "\033[31m" << "ERROR, unable to open file \"" << output_path << "\"" << "\033[0m" << std::endl;
-        assert(false);
-        return;
+        throw std::runtime_error(
+                "Unable to open file \"" + output_path + "\".");
     }
 
     file << "w p" << std::endl;
@@ -1349,13 +1359,12 @@ void Instance::plot(std::string output_path)
     file.close();
 }
 
-void Instance::write(std::string certificate_path)
+void Instance::write(std::string instance_path)
 {
-    std::ofstream file(certificate_path);
+    std::ofstream file(instance_path);
     if (!file.good()) {
-        std::cerr << "\033[31m" << "ERROR, unable to open file \"" << certificate_path << "\"" << "\033[0m" << std::endl;
-        assert(false);
-        return;
+        throw std::runtime_error(
+                "Unable to open file \"" + instance_path + "\".");
     }
 
     file << number_of_items() << " " << capacity() << std::endl << std::endl;
@@ -1368,9 +1377,8 @@ void Instance::plot_reduced(std::string output_path)
 {
     std::ofstream file(output_path);
     if (!file.good()) {
-        std::cerr << "\033[31m" << "ERROR, unable to open file \"" << output_path << "\"" << "\033[0m" << std::endl;
-        assert(false);
-        return;
+        throw std::runtime_error(
+                "Unable to open file \"" + output_path + "\".");
     }
 
     file << "w p" << std::endl;
@@ -1383,9 +1391,8 @@ void Instance::write_reduced(std::string instance_path)
 {
     std::ofstream file(instance_path);
     if (!file.good()) {
-        std::cerr << "\033[31m" << "ERROR, unable to open file \"" << instance_path << "\"" << "\033[0m" << std::endl;
-        assert(false);
-        return;
+        throw std::runtime_error(
+                "Unable to open file \"" + instance_path + "\".");
     }
 
     file << reduced_number_of_items() << " " << reduced_capacity() << std::endl << std::endl;
@@ -1394,3 +1401,18 @@ void Instance::write_reduced(std::string instance_path)
     file.close();
 }
 
+void knapsacksolver::init_display(
+        const Instance& instance,
+        optimizationtools::Info& info)
+{
+    VER(info,
+               "=====================================" << std::endl
+            << "           Knapsack Solver           " << std::endl
+            << "=====================================" << std::endl
+            << std::endl
+            << "Instance" << std::endl
+            << "--------" << std::endl
+            << "Number of items:  " << instance.number_of_items() << std::endl
+            << "Capacity:         " << instance.capacity() << std::endl
+            << std::endl);
+}

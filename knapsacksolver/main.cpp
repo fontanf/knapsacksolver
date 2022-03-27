@@ -11,10 +11,10 @@ int main(int argc, char *argv[])
     // Parse program options
 
     std::string algorithm = "bellman_array";
-    std::string    instance_path = "";
-    std::string      output_path = "";
+    std::string instance_path = "";
+    std::string output_path = "";
     std::string certificate_path = "";
-    std::string         log_path = "";
+    std::string log_path = "";
     std::string format = "standard";
     int loglevelmax = 999;
     int seed = 0;

@@ -12,8 +12,13 @@ void solvesurrelax(
         bool* end,
         Info info = Info());
 
-Output surrelax(const Instance& instance, Info info = Info());
-Output surrelax_minknap(const Instance& instance, Info info = Info());
+Output surrelax(
+        const Instance& instance,
+        Info info = Info());
+
+Output surrelax_minknap(
+        const Instance& instance,
+        Info info = Info());
 
 }
 

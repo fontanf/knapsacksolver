@@ -245,16 +245,26 @@ void knapsacksolver::solvesurrelax(
 
     // Trivial cases
     if (instance.reduced_number_of_items() == 0) {
-        Profit ub = (instance.reduced_solution() == NULL)? 0: instance.reduced_solution()->profit();
-        if (output.upper_bound == -1 || output.upper_bound > ub)
-            output.update_ub(ub, std::stringstream("surrogate relaxation"), info);
+        Profit ub = (instance.reduced_solution() == NULL)?
+            0:
+            instance.reduced_solution()->profit();
+        if (output.upper_bound == -1 || output.upper_bound > ub) {
+            output.update_upper_bound(
+                    ub,
+                    std::stringstream("surrogate relaxation"),
+                    info);
+        }
         LOG_FOLD_END(info, "no items");
         return;
     }
     Profit ub = ub_dantzig(instance);
     if (instance.break_capacity() == 0 || b == instance.last_item() + 1) {
-        if (output.upper_bound == -1 || output.upper_bound > ub)
-            output.update_ub(ub, std::stringstream("surrogate relaxation"), info);
+        if (output.upper_bound == -1 || output.upper_bound > ub) {
+            output.update_upper_bound(
+                    ub,
+                    std::stringstream("surrogate relaxation"),
+                    info);
+        }
         LOG_FOLD_END(info, "dantzig");
         return;
     }
@@ -272,7 +282,10 @@ void knapsacksolver::solvesurrelax(
         if (*end)
             return;
         Profit ub = std::max(o.ub, output.lower_bound);
-        output.update_ub(ub, std::stringstream("surrogate relaxation"), info);
+        output.update_upper_bound(
+                ub,
+                std::stringstream("surrogate relaxation"),
+                info);
         if (output.upper_bound == output.lower_bound || o.s == 0)
             return;
 
@@ -282,15 +295,24 @@ void knapsacksolver::solvesurrelax(
         if (output0.solution.profit() != output0.upper_bound)
             return;
         sol_sur = output0.solution;
-        output.update_sol(sol_sur, std::stringstream("surrogate instance resolution (lb)"), info);
+        output.update_solution(
+                sol_sur,
+                std::stringstream("surrogate ins res (lb)"),
+                info);
         ub = std::max(sol_sur.profit(), output.lower_bound);
-        output.update_ub(ub, std::stringstream("surrogate instance resolution (ub)"), info);
+        output.update_upper_bound(
+                ub,
+                std::stringstream("surrogate ins res (ub)"),
+                info);
     } else if (min_card(instance, output.lower_bound) == b + 1 DBG(COMMA info)) {
         UBS o = surrogate_solve(instance, b + 1, s_min, 0, end DBG(COMMA info));
         if (*end)
             return;
         Profit ub = std::max(o.ub, output.lower_bound);
-        output.update_ub(ub, std::stringstream("surrogate relaxation"), info);
+        output.update_upper_bound(
+                ub,
+                std::stringstream("surrogate relaxation"),
+                info);
         if (output.upper_bound == output.lower_bound || o.s == 0)
             return;
 
@@ -300,9 +322,15 @@ void knapsacksolver::solvesurrelax(
         if (output0.solution.profit() != output0.upper_bound)
             return;
         sol_sur = output0.solution;
-        output.update_sol(sol_sur, std::stringstream("surrogate instance resolution (lb)"), info);
+        output.update_solution(
+                sol_sur,
+                std::stringstream("surrogate ins res (lb)"),
+                info);
         ub = std::max(sol_sur.profit(), output.lower_bound);
-        output.update_ub(ub, std::stringstream("surrogate instance resolution (ub)"), info);
+        output.update_upper_bound(
+                ub,
+                std::stringstream("surrogate ins res (ub)"),
+                info);
     } else {
         Instance instance_2(instance);
         UBS o1 = surrogate_solve(
@@ -324,7 +352,10 @@ void knapsacksolver::solvesurrelax(
         if (*end)
             return;
         Profit ub = std::max(std::max(o1.ub, o2.ub), output.lower_bound);
-        output.update_ub(ub, std::stringstream("surrogate relaxation"), info);
+        output.update_upper_bound(
+                ub,
+                std::stringstream("surrogate relaxation"),
+                info);
         if (output.upper_bound == output.lower_bound || o1.s == 0 || o2.s == 0)
             return;
 
@@ -334,7 +365,10 @@ void knapsacksolver::solvesurrelax(
         if (output1.solution.profit() != output1.upper_bound)
             return;
         sol_sur1 = output1.solution;
-        output.update_sol(sol_sur1, std::stringstream("surrogate instance resolution (lb)"), info);
+        output.update_solution(
+                sol_sur1,
+                std::stringstream("surrogate ins res (lb)"),
+                info);
         if (*end || output.lower_bound == output.upper_bound)
             return;
 
@@ -344,20 +378,38 @@ void knapsacksolver::solvesurrelax(
         if (output2.solution.profit() != output2.upper_bound)
             return;
         sol_sur2 = output2.solution;
-        output.update_sol(sol_sur2, std::stringstream("surrogate instance resolution (lb)"), info);
+        output.update_solution(
+                sol_sur2,
+                std::stringstream("surrogate ins res (lb)"),
+                info);
 
-        ub = std::max(std::max(sol_sur1.profit(), sol_sur2.profit()), output.lower_bound);
-        output.update_ub(ub, std::stringstream("surrogate instance resolution (ub)"), info);
+        ub = std::max(
+                std::max(sol_sur1.profit(), sol_sur2.profit()),
+                output.lower_bound);
+        output.update_upper_bound(
+                ub,
+                std::stringstream("surrogate ins res (ub)"),
+                info);
     }
 
     LOG_FOLD_END(info, "");
 }
 
-/******************************************************************************/
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
-Output knapsacksolver::surrelax(const Instance& instance, Info info)
+Output knapsacksolver::surrelax(
+        const Instance& instance,
+        Info info)
 {
-    VER(info, "*** surrelax ***" << std::endl);
+    init_display(instance, info);
+    VER(info,
+               "Algorithm" << std::endl
+            << "---------" << std::endl
+            << "Surrogate Relaxation" << std::endl
+            << std::endl);
+
     Output output(instance, info);
 
     bool end = false;
@@ -379,9 +431,17 @@ Output knapsacksolver::surrelax(const Instance& instance, Info info)
     return output.algorithm_end(info);
 }
 
-Output knapsacksolver::surrelax_minknap(const Instance& instance, Info info)
+Output knapsacksolver::surrelax_minknap(
+        const Instance& instance,
+        Info info)
 {
-    VER(info, "*** surrelax_minknap ***" << std::endl);
+    init_display(instance, info);
+    VER(info,
+               "Algorithm" << std::endl
+            << "---------" << std::endl
+            << "Surrogate Relaxation / Minknap" << std::endl
+            << std::endl);
+
     Output output(instance, info);
 
     bool end = false;
@@ -389,12 +449,12 @@ Output knapsacksolver::surrelax_minknap(const Instance& instance, Info info)
     std::function<Output (Instance&, Info, bool*)> func
         = [](Instance& instance, Info info, bool* end)
         {
-            MinknapOptionalParameters p;
-            p.info = info;
-            p.end = end;
-            p.stop_if_end = true;
-            p.set_end = false;
-            return minknap(instance, p);
+            MinknapOptionalParameters parameters;
+            parameters.info = info;
+            parameters.end = end;
+            parameters.stop_if_end = true;
+            parameters.set_end = false;
+            return minknap(instance, parameters);
         };
 
     solvesurrelax(

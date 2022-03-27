@@ -10,10 +10,17 @@ using namespace knapsacksolver;
 
 struct ExpknapInternalData
 {
-    ExpknapInternalData(Instance& instance, ExpknapOptionalParameters& p, ExpknapOutput& output):
-        instance(instance), p(p), output(output), sol_curr(*instance.break_solution()) { }
+    ExpknapInternalData(
+            Instance& instance,
+            ExpknapOptionalParameters& parameters,
+            ExpknapOutput& output):
+        instance(instance),
+        parameters(parameters),
+        output(output),
+        sol_curr(*instance.break_solution()) { }
+
     Instance& instance;
-    ExpknapOptionalParameters& p;
+    ExpknapOptionalParameters& parameters;
     ExpknapOutput& output;
     Solution sol_curr;
     std::vector<std::thread> threads;
@@ -21,40 +28,45 @@ struct ExpknapInternalData
 
 void expknap_update_bounds(ExpknapInternalData& d)
 {
-    if (d.p.surrelax >= 0 && d.p.surrelax <= d.output.number_of_node) {
-        d.p.surrelax = -1;
+    if (d.parameters.surrelax >= 0
+            && d.parameters.surrelax <= d.output.number_of_node) {
+        d.parameters.surrelax = -1;
         std::function<Output (Instance&, Info, bool*)> func
-            = [&d](Instance& ins, Info info, bool* end)
+            = [&d](Instance& instance, Info info, bool* end)
             {
-                ExpknapOptionalParameters p;
-                p.info = info;
-                p.greedy = d.p.greedy;
-                p.greedynlogn = d.p.greedynlogn;
-                p.surrelax = -1;
-                p.combo_core = d.p.combo_core;
-                p.end = end;
-                p.stop_if_end = true;
-                p.set_end = false;
-                return expknap(ins, p);
+                ExpknapOptionalParameters parameters;
+                parameters.info = info;
+                parameters.greedy = d.parameters.greedy;
+                parameters.greedynlogn = d.parameters.greedynlogn;
+                parameters.surrelax = -1;
+                parameters.combo_core = d.parameters.combo_core;
+                parameters.end = end;
+                parameters.stop_if_end = true;
+                parameters.set_end = false;
+                return expknap(instance, parameters);
             };
         d.threads.push_back(std::thread(
                     solvesurrelax,
                     Instance::reset(d.instance),
                     std::ref(d.output),
                     func,
-                    d.p.end,
-                    Info(d.p.info, true, "surrelax")));
+                    d.parameters.end,
+                    Info(d.parameters.info, true, "surrelax")));
     }
-    if (d.p.greedynlogn >= 0 && d.p.greedynlogn <= d.output.number_of_node) {
-        d.p.greedynlogn = -1;
+    if (d.parameters.greedynlogn >= 0
+            && d.parameters.greedynlogn <= d.output.number_of_node) {
+        d.parameters.greedynlogn = -1;
         auto gn_output = greedynlogn(d.instance);
-        d.output.update_sol(gn_output.solution, std::stringstream("greedynlogn"), d.p.info);
+        d.output.update_solution(
+                gn_output.solution,
+                std::stringstream("greedynlogn"),
+                d.parameters.info);
     }
 }
 
 void expknap_rec(ExpknapInternalData& d, ItemPos s, ItemPos t)
 {
-    Info& info = d.p.info;
+    Info& info = d.parameters.info;
     d.output.number_of_node++; // Increment node number
     LOG_FOLD_START(info, "node number " << d.output.number_of_node
             << " s " << s << " t " << t
@@ -62,15 +74,15 @@ void expknap_rec(ExpknapInternalData& d, ItemPos s, ItemPos t)
             << std::endl);
 
     // Check end
-    if (d.p.stop_if_end && *(d.p.end)) {
+    if (d.parameters.stop_if_end && *(d.parameters.end)) {
         LOG_FOLD_END(info, "end");
         return;
     }
 
     // Check time
     if (!info.check_time()) {
-        if (d.p.set_end)
-            *(d.p.end) = true;
+        if (d.parameters.set_end)
+            *(d.parameters.end) = true;
         for (std::thread& thread: d.threads)
             thread.join();
         d.threads.clear();
@@ -92,7 +104,7 @@ void expknap_rec(ExpknapInternalData& d, ItemPos s, ItemPos t)
         if (d.output.solution.profit() < d.sol_curr.profit()) {
             std::stringstream ss;
             ss << "node " << d.output.number_of_node;
-            d.output.update_sol(d.sol_curr, ss, info);
+            d.output.update_solution(d.sol_curr, ss, info);
         }
 
         for (;;t++) {
@@ -114,7 +126,10 @@ void expknap_rec(ExpknapInternalData& d, ItemPos s, ItemPos t)
     } else {
         for (;;s--) {
             // Bounding test
-            Profit ub = ub_dembo_rev(d.instance, d.instance.bound_item_left(s, d.output.solution.profit() DBG(COMMA info)), d.sol_curr);
+            Profit ub = ub_dembo_rev(
+                    d.instance,
+                    d.instance.bound_item_left(s, d.output.solution.profit() DBG(COMMA info)),
+                    d.sol_curr);
             LOG(info, "s " << s << " ub " << ub << " lb " << d.output.solution.profit());
             if (ub <= d.output.solution.profit()) {
                 LOG_FOLD_END(info, " bound");
@@ -132,75 +147,104 @@ void expknap_rec(ExpknapInternalData& d, ItemPos s, ItemPos t)
     assert(false);
 }
 
-ExpknapOutput knapsacksolver::expknap(Instance& instance, ExpknapOptionalParameters p)
+ExpknapOutput knapsacksolver::expknap(
+        Instance& instance,
+        ExpknapOptionalParameters parameters)
 {
-    VER(p.info, "*** expknap"
-            << ((p.greedy)? " -g": "")
-            << " -s " << p.surrelax
-            << " -n " << p.greedynlogn
-            << ((p.combo_core)? " -c": "")
-            << " ***" << std::endl);
+    init_display(instance, parameters.info);
+    VER(parameters.info,
+               "Algorithm" << std::endl
+            << "---------" << std::endl
+            << "Expknap" << std::endl
+            << std::endl
+            << "Parameters" << std::endl
+            << "----------" << std::endl
+            << "Greedy:                 " << parameters.greedy << std::endl
+            << "Surrogate relaxation:   " << parameters.surrelax << std::endl
+            << "Combo core:             " << parameters.combo_core << std::endl
+            << std::endl);
 
-    LOG_FOLD_START(p.info, "*** expknap"
-            << ((p.greedy)? " -g": "")
-            << " -s " << p.surrelax
-            << " -n " << p.greedynlogn
-            << ((p.combo_core)? " -c": "")
+    LOG_FOLD_START(parameters.info, "*** expknap"
+            << ((parameters.greedy)? " -g": "")
+            << " -s " << parameters.surrelax
+            << " -n " << parameters.greedynlogn
+            << ((parameters.combo_core)? " -c": "")
             << " ***" << std::endl);
 
     bool end = false;
-    if (p.end == NULL)
-        p.end = &end;
+    if (parameters.end == NULL)
+        parameters.end = &end;
 
-    ExpknapOutput output(instance, p.info);
+    ExpknapOutput output(instance, parameters.info);
 
     if (instance.reduced_number_of_items() == 0) {
-        output.update_ub(output.lower_bound, std::stringstream("no item (ub)"), p.info);
-        LOG(p.info, "no item" << std::endl);
-        return output.algorithm_end(p.info);
+        output.update_upper_bound(
+                output.lower_bound,
+                std::stringstream("no item (ub)"),
+                parameters.info);
+        LOG(parameters.info, "no item" << std::endl);
+        return output.algorithm_end(parameters.info);
     }
 
-    instance.sort_partially(DBG(p.info));
+    instance.sort_partially(DBG(parameters.info));
     if (instance.break_item() == instance.last_item() + 1) {
-        if (output.lower_bound < instance.break_solution()->profit())
-            output.update_sol(*instance.break_solution(), std::stringstream("all items fit (lb)"), p.info);
-        output.update_ub(instance.break_solution()->profit(), std::stringstream("all items fit (ub)"), p.info);
-        LOG_FOLD_END(p.info, "all items fit in the knapsack");
-        return output.algorithm_end(p.info);
+        if (output.lower_bound < instance.break_solution()->profit()) {
+            output.update_solution(
+                    *instance.break_solution(),
+                    std::stringstream("all items fit (lb)"),
+                    parameters.info);
+        }
+        output.update_upper_bound(
+                instance.break_solution()->profit(),
+                std::stringstream("all items fit (ub)"),
+                parameters.info);
+        LOG_FOLD_END(parameters.info, "all items fit in the knapsack");
+        return output.algorithm_end(parameters.info);
     }
-    if (p.combo_core)
-        instance.init_combo_core(DBG(p.info));
+    if (parameters.combo_core)
+        instance.init_combo_core(DBG(parameters.info));
 
     // Compute initial lower bound
     Solution sol_tmp(instance);
-    if (p.greedy) {
+    if (parameters.greedy) {
         auto g_output = greedy(instance);
         sol_tmp = g_output.solution;
     } else {
         sol_tmp = *instance.break_solution();
     }
-    if (output.lower_bound < sol_tmp.profit())
-        output.update_sol(sol_tmp, std::stringstream("initial solution"), p.info);
+    if (output.lower_bound < sol_tmp.profit()) {
+        output.update_solution(
+                sol_tmp,
+                std::stringstream("initial solution"),
+                parameters.info);
+    }
 
     // Compute initial upper bound
     Profit ub_tmp = ub_dantzig(instance);
-    output.update_ub(ub_tmp, std::stringstream("dantzig upper bound"), p.info);
+    output.update_upper_bound(
+            ub_tmp,
+            std::stringstream("dantzig upper bound"),
+            parameters.info);
 
     if (output.solution.profit() == output.upper_bound)
-        return output.algorithm_end(p.info);
+        return output.algorithm_end(parameters.info);
 
-    ExpknapInternalData d(instance, p, output);
+    ExpknapInternalData d(instance, parameters, output);
     ItemPos b = instance.break_item();
     expknap_rec(d, b - 1, b);
-    if (p.info.check_time())
-        output.update_ub(output.lower_bound, std::stringstream("tree search completed (ub)"), p.info);
+    if (parameters.info.check_time()) {
+        output.update_upper_bound(
+                output.lower_bound,
+                std::stringstream("tree search completed (ub)"),
+                parameters.info);
+    }
 
-    if (p.set_end)
-        *(p.end) = true;
+    if (parameters.set_end)
+        *(parameters.end) = true;
     for (std::thread& thread: d.threads)
         thread.join();
     d.threads.clear();
 
-    return output.algorithm_end(p.info);
+    return output.algorithm_end(parameters.info);
 }
 

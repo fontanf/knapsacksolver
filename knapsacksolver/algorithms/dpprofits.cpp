@@ -6,16 +6,31 @@
 
 using namespace knapsacksolver;
 
-/****************************** dpprofits_array *******************************/
+////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////// dpprofits_array ////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
-Output knapsacksolver::dpprofits_array(const Instance& instance, Info info)
+Output knapsacksolver::dpprofits_array(
+        const Instance& instance,
+        Info info)
 {
-    VER(info, "*** dpprofits (array) ***" << std::endl);
+    init_display(instance, info);
+    VER(info,
+               "Algorithm" << std::endl
+            << "---------" << std::endl
+            << "Dynamic Programming - By Profits" << std::endl
+            << std::endl
+            << "Parameters" << std::endl
+            << "----------" << std::endl
+            << "Implementation:                  iterative" << std::endl
+            << "Method for retrieving solution:  no solution" << std::endl
+            << std::endl);
+
     Output output(instance, info);
 
     ItemIdx n = instance.reduced_number_of_items();
     if (n == 0) {
-        output.update_ub(0, std::stringstream("no item"), info);
+        output.update_upper_bound(0, std::stringstream("no item"), info);
         return output.algorithm_end(info);
     }
 
@@ -23,7 +38,10 @@ Output knapsacksolver::dpprofits_array(const Instance& instance, Info info)
     Weight c = instance.capacity();
     ItemPos j_max = instance.max_efficiency_item(DBG(info));
     Profit ub = ub_0(instance, 0, 0, instance.capacity(), j_max);
-    output.update_ub(ub, std::stringstream("initial upper bound"), info);
+    output.update_upper_bound(
+            ub,
+            std::stringstream("initial upper bound"),
+            info);
     std::vector<Weight> values(ub + 1, c + 1);
 
     // Compute optimal value
@@ -44,28 +62,44 @@ Output knapsacksolver::dpprofits_array(const Instance& instance, Info info)
                 if (w <= c && output.lower_bound < q) {
                     std::stringstream ss;
                     ss << "it " << j;
-                    output.update_lb(q, ss, info);
+                    output.update_lower_bound(q, ss, info);
                 }
             }
         }
     }
 
     // Update upper bound
-    output.update_ub(output.lower_bound, std::stringstream("tree search completed"), info);
+    output.update_upper_bound(
+            output.lower_bound,
+            std::stringstream("tree search completed"),
+            info);
 
     return output.algorithm_end(info);
 }
 
-/**************************** dpprofits_array_all *****************************/
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////////// dpprofits_array_all //////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 Output knapsacksolver::dpprofits_array_all(const Instance& instance, Info info)
 {
-    VER(info, "*** dpprofits (array, all) ***" << std::endl);
+    init_display(instance, info);
+    VER(info,
+               "Algorithm" << std::endl
+            << "---------" << std::endl
+            << "Dynamic Programming - By Profits" << std::endl
+            << std::endl
+            << "Parameters" << std::endl
+            << "----------" << std::endl
+            << "Implementation:                  iterative" << std::endl
+            << "Method for retrieving solution:  store all states" << std::endl
+            << std::endl);
+
     Output output(instance, info);
 
     ItemIdx n = instance.reduced_number_of_items();
     if (n == 0) {
-        output.update_ub(0, std::stringstream("no item"), info);
+        output.update_upper_bound(0, std::stringstream("no item"), info);
         return output.algorithm_end(info);
     }
 
@@ -73,7 +107,10 @@ Output knapsacksolver::dpprofits_array_all(const Instance& instance, Info info)
     Weight c = instance.capacity();
     ItemPos j_max = instance.max_efficiency_item(DBG(info));
     Profit ub = ub_0(instance, 0, 0, instance.capacity(), j_max);
-    output.update_ub(ub, std::stringstream("initial upper bound"), info);
+    output.update_upper_bound(
+            ub,
+            std::stringstream("initial upper bound"),
+            info);
     StateIdx values_size = (n + 1) * (ub + 1);
     std::vector<Weight> values(values_size);
 
@@ -98,14 +135,17 @@ Output knapsacksolver::dpprofits_array_all(const Instance& instance, Info info)
                 if (v1 <= c && output.lower_bound < q) {
                     std::stringstream ss;
                     ss << "it " << j;
-                    output.update_lb(q, ss, info);
+                    output.update_lower_bound(q, ss, info);
                 }
             }
         }
     }
 
     // Update upper bound
-    output.update_ub(output.lower_bound, std::stringstream("tree search completed"), info);
+    output.update_upper_bound(
+            output.lower_bound,
+            std::stringstream("tree search completed"),
+            info);
 
     // Retrieve optimal solution
     Weight q = output.lower_bound;
@@ -116,7 +156,7 @@ Output knapsacksolver::dpprofits_array_all(const Instance& instance, Info info)
             sol.set(j, true);
         }
     }
-    output.update_sol(sol, std::stringstream(), info);
+    output.update_solution(sol, std::stringstream(), info);
 
     return output.algorithm_end(info);
 }

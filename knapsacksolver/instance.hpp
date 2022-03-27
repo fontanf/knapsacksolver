@@ -301,5 +301,9 @@ std::ostream& operator<<(std::ostream &os, const Item& item);
 std::ostream& operator<<(std::ostream &os, const Interval& interval);
 std::ostream& operator<<(std::ostream &os, const Instance& instance);
 
+void init_display(
+        const Instance& instance,
+        optimizationtools::Info& info);
+
 }
 

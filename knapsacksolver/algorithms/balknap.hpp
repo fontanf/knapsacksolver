@@ -47,19 +47,25 @@ struct BalknapOptionalParameters
 
 struct BalknapOutput: Output
 {
-    BalknapOutput(const Instance& instance, Info& info): Output(instance, info) { }
+    BalknapOutput(
+            const Instance& instance,
+            Info& info):
+        Output(instance, info) { }
+
     Counter number_of_recursive_calls = 0;
 
     BalknapOutput& algorithm_end(Info& info)
     {
         PUT(info, "Algorithm", "RecursiveCallNumber", number_of_recursive_calls);
         Output::algorithm_end(info);
-        VER(info, "Number of recursive calls: " << number_of_recursive_calls << std::endl);
+        VER(info, "Number of recursive calls:  " << number_of_recursive_calls << std::endl);
         return *this;
     }
 };
 
-BalknapOutput balknap(Instance& instance, BalknapOptionalParameters p = {});
+BalknapOutput balknap(
+        Instance& instance,
+        BalknapOptionalParameters parameters = {});
 
 }
 
