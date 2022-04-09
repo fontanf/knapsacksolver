@@ -12,7 +12,7 @@ Output minknap_test(Instance& instance)
 Output greedy_test(Instance& instance)
 {
     Info info;
-    instance.sort_partially(DBG(info));
+    instance.sort_partially(FFOT_DBG(info));
     return greedy(instance, info);
 }
 

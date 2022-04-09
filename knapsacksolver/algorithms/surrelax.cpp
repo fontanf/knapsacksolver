@@ -7,11 +7,11 @@
 
 using namespace knapsacksolver;
 
-ItemIdx max_card(const Instance& instance DBG(COMMA Info& info))
+ItemIdx max_card(const Instance& instance FFOT_DBG(FFOT_COMMA Info& info))
 {
-    LOG_FOLD_START(info, "max_card" << std::endl);
+    FFOT_LOG_FOLD_START(info, "max_card" << std::endl);
     if (instance.reduced_number_of_items() == 1) {
-        LOG_FOLD_END(info, "1 item");
+        FFOT_LOG_FOLD_END(info, "1 item");
         return 1;
     }
 
@@ -65,17 +65,17 @@ ItemIdx max_card(const Instance& instance DBG(COMMA Info& info))
         r -= instance.item(index[j]).w;
     }
 
-    LOG_FOLD_END(info, "k " << k);
+    FFOT_LOG_FOLD_END(info, "k " << k);
     return k;
 }
 
-ItemIdx min_card(const Instance& instance, Profit lb DBG(COMMA Info& info))
+ItemIdx min_card(const Instance& instance, Profit lb FFOT_DBG(FFOT_COMMA Info& info))
 {
-    LOG_FOLD_START(info, "min_card" << std::endl);
+    FFOT_LOG_FOLD_START(info, "min_card" << std::endl);
 
     lb -= instance.reduced_solution()->profit();
     if (instance.reduced_number_of_items() <= 1) {
-        LOG_FOLD_END(info, "1 item");
+        FFOT_LOG_FOLD_END(info, "1 item");
         return (instance.item(1).p <= lb)? 1: 0;
     }
 
@@ -128,7 +128,7 @@ ItemIdx min_card(const Instance& instance, Profit lb DBG(COMMA Info& info))
         z += instance.item(index[j]).p;
     }
 
-    LOG_FOLD_END(info, "k " << k);
+    FFOT_LOG_FOLD_END(info, "k " << k);
     return k;
 }
 
@@ -144,9 +144,9 @@ UBS surrogate_solve(
         Weight s_min,
         Weight s_max,
         bool* end
-        DBG(COMMA Info& info))
+        FFOT_DBG(FFOT_COMMA Info& info))
 {
-    LOG_FOLD_START(info, "surrogate_solve k " << k << " s_min " << s_min << " s_max " << s_max << std::endl);
+    FFOT_LOG_FOLD_START(info, "surrogate_solve k " << k << " s_min " << s_min << " s_max " << s_max << std::endl);
     ItemPos first = instance.first_item();
     Profit ub = ub_dantzig(instance);
     Weight  s_prec = 0;
@@ -172,7 +172,7 @@ UBS surrogate_solve(
         if (*end)
             return {ub, s_best};
         s = (s1 + s2) / 2;
-        LOG_FOLD_START(info, "s1 " << s1 << " s " << s << " s2 " << s2 << std::endl);
+        FFOT_LOG_FOLD_START(info, "s1 " << s1 << " s " << s << " s2 " << s2 << std::endl);
 
         // Avoid INT overflow
         if (s_min == 0 && s != 0) {
@@ -181,7 +181,7 @@ UBS surrogate_solve(
                     || INT_FAST64_MAX / instance.number_of_items() < wmax+s
                     || wmax + s > wlim) {
                 s2 = s - 1;
-                LOG_FOLD_END(info, "");
+                FFOT_LOG_FOLD_END(info, "");
                 continue;
             } else {
                 wmax += s - s_prec;
@@ -193,7 +193,7 @@ UBS surrogate_solve(
                     || INT_FAST64_MAX / instance.number_of_items() < wabs
                     || wabs > wlim) {
                 s1 = s + 1;
-                LOG_FOLD_END(info, "");
+                FFOT_LOG_FOLD_END(info, "");
                 continue;
             } else {
                 wmax += s - s_prec;
@@ -201,12 +201,12 @@ UBS surrogate_solve(
             }
         }
 
-        instance.surrogate(s - s_prec, k, first DBG(COMMA info));
-        LOG_FOLD(info, instance);
+        instance.surrogate(s - s_prec, k, first FFOT_DBG(FFOT_COMMA info));
+        FFOT_LOG_FOLD(info, instance);
         Profit p = ub_dantzig(instance);
         ItemPos b = instance.break_item();
 
-        LOG(info, "b " << b << " p " << p << std::endl);
+        FFOT_LOG(info, "b " << b << " p " << p << std::endl);
 
         if (ub > p) {
             ub = p;
@@ -214,7 +214,7 @@ UBS surrogate_solve(
         }
 
         if (b == k && instance.break_capacity() == 0) {
-            LOG_FOLD_END(info, "");
+            FFOT_LOG_FOLD_END(info, "");
             break;
         }
 
@@ -224,10 +224,10 @@ UBS surrogate_solve(
             s2 = s - 1;
         }
         s_prec = s;
-        LOG_FOLD_END(info, "");
+        FFOT_LOG_FOLD_END(info, "");
     }
-    instance.surrogate(-s, k DBG(COMMA info));
-    LOG_FOLD_END(info, "ub " << ub << " s " << s_best);
+    instance.surrogate(-s, k FFOT_DBG(FFOT_COMMA info));
+    FFOT_LOG_FOLD_END(info, "ub " << ub << " s " << s_best);
     return {ub, s_best};
 }
 
@@ -238,9 +238,9 @@ void knapsacksolver::solvesurrelax(
         bool* end,
         Info info)
 {
-    LOG_FOLD_START(info, "surrogate relaxation lb " << output.lower_bound << std::endl);
+    FFOT_LOG_FOLD_START(info, "surrogate relaxation lb " << output.lower_bound << std::endl);
 
-    instance.sort_partially(DBG(info));
+    instance.sort_partially(FFOT_DBG(info));
     ItemPos b = instance.break_item();
 
     // Trivial cases
@@ -254,7 +254,7 @@ void knapsacksolver::solvesurrelax(
                     std::stringstream("surrogate relaxation"),
                     info);
         }
-        LOG_FOLD_END(info, "no items");
+        FFOT_LOG_FOLD_END(info, "no items");
         return;
     }
     Profit ub = ub_dantzig(instance);
@@ -265,20 +265,20 @@ void knapsacksolver::solvesurrelax(
                     std::stringstream("surrogate relaxation"),
                     info);
         }
-        LOG_FOLD_END(info, "dantzig");
+        FFOT_LOG_FOLD_END(info, "dantzig");
         return;
     }
 
     // Compte s_min and s_max
     // s_min and s_max should ideally be (-)pmax*wmax, but this may cause
     // overflow
-    Weight wmax = instance.item(instance.max_weight_item(DBG(info))).w;
-    Profit pmax = instance.item(instance.max_profit_item(DBG(info))).p;
+    Weight wmax = instance.item(instance.max_weight_item(FFOT_DBG(info))).w;
+    Profit pmax = instance.item(instance.max_profit_item(FFOT_DBG(info))).p;
     Weight s_max = (INT_FAST64_MAX / pmax > wmax)?  pmax*wmax:  INT_FAST64_MAX;
     Weight s_min = (INT_FAST64_MAX / pmax > wmax)? -pmax*wmax: -INT_FAST64_MAX;
 
-    if (max_card(instance DBG(COMMA info)) == b) {
-        UBS o = surrogate_solve(instance, b, 0, s_max, end DBG(COMMA info));
+    if (max_card(instance FFOT_DBG(FFOT_COMMA info)) == b) {
+        UBS o = surrogate_solve(instance, b, 0, s_max, end FFOT_DBG(FFOT_COMMA info));
         if (*end)
             return;
         Profit ub = std::max(o.ub, output.lower_bound);
@@ -290,7 +290,7 @@ void knapsacksolver::solvesurrelax(
             return;
 
         Solution sol_sur(output.solution.instance());
-        instance.surrogate(o.s, b DBG(COMMA info));
+        instance.surrogate(o.s, b FFOT_DBG(FFOT_COMMA info));
         Output output0 = func(instance, Info(info, false, ""), end);
         if (output0.solution.profit() != output0.upper_bound)
             return;
@@ -304,8 +304,8 @@ void knapsacksolver::solvesurrelax(
                 ub,
                 std::stringstream("surrogate ins res (ub)"),
                 info);
-    } else if (min_card(instance, output.lower_bound) == b + 1 DBG(COMMA info)) {
-        UBS o = surrogate_solve(instance, b + 1, s_min, 0, end DBG(COMMA info));
+    } else if (min_card(instance, output.lower_bound) == b + 1 FFOT_DBG(FFOT_COMMA info)) {
+        UBS o = surrogate_solve(instance, b + 1, s_min, 0, end FFOT_DBG(FFOT_COMMA info));
         if (*end)
             return;
         Profit ub = std::max(o.ub, output.lower_bound);
@@ -317,7 +317,7 @@ void knapsacksolver::solvesurrelax(
             return;
 
         Solution sol_sur(output.solution.instance());
-        instance.surrogate(o.s, b + 1 DBG(COMMA info));
+        instance.surrogate(o.s, b + 1 FFOT_DBG(FFOT_COMMA info));
         Output output0 = func(instance, Info(info, false, ""), end);
         if (output0.solution.profit() != output0.upper_bound)
             return;
@@ -339,7 +339,7 @@ void knapsacksolver::solvesurrelax(
                 0,
                 s_max,
                 end
-                DBG(COMMA info));
+                FFOT_DBG(FFOT_COMMA info));
         if (*end)
             return;
         UBS o2 = surrogate_solve(
@@ -348,7 +348,7 @@ void knapsacksolver::solvesurrelax(
                 s_min,
                 0,
                 end
-                DBG(COMMA info));
+                FFOT_DBG(FFOT_COMMA info));
         if (*end)
             return;
         Profit ub = std::max(std::max(o1.ub, o2.ub), output.lower_bound);
@@ -360,7 +360,7 @@ void knapsacksolver::solvesurrelax(
             return;
 
         Solution sol_sur1(output.solution.instance());
-        instance.surrogate(o1.s, b DBG(COMMA info));
+        instance.surrogate(o1.s, b FFOT_DBG(FFOT_COMMA info));
         Output output1 = func(instance, Info(info, false, ""), end);
         if (output1.solution.profit() != output1.upper_bound)
             return;
@@ -373,7 +373,7 @@ void knapsacksolver::solvesurrelax(
             return;
 
         Solution sol_sur2(output.solution.instance());
-        instance_2.surrogate(o2.s, b + 1 DBG(COMMA info));
+        instance_2.surrogate(o2.s, b + 1 FFOT_DBG(FFOT_COMMA info));
         Output output2 = func(instance_2, Info(info, false, ""), end);
         if (output2.solution.profit() != output2.upper_bound)
             return;
@@ -392,7 +392,7 @@ void knapsacksolver::solvesurrelax(
                 info);
     }
 
-    LOG_FOLD_END(info, "");
+    FFOT_LOG_FOLD_END(info, "");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -404,7 +404,7 @@ Output knapsacksolver::surrelax(
         Info info)
 {
     init_display(instance, info);
-    VER(info,
+    FFOT_VER(info,
                "Algorithm" << std::endl
             << "---------" << std::endl
             << "Surrogate Relaxation" << std::endl
@@ -436,7 +436,7 @@ Output knapsacksolver::surrelax_minknap(
         Info info)
 {
     init_display(instance, info);
-    VER(info,
+    FFOT_VER(info,
                "Algorithm" << std::endl
             << "---------" << std::endl
             << "Surrogate Relaxation / Minknap" << std::endl

@@ -20,7 +20,7 @@ Output knapsacksolver::bellman_array(
         Info info)
 {
     init_display(instance, info);
-    VER(info,
+    FFOT_VER(info,
                "Algorithm" << std::endl
             << "---------" << std::endl
             << "Dynamic Programming - Bellman" << std::endl
@@ -90,7 +90,7 @@ Output knapsacksolver::bellmanpar_array(
         Info info)
 {
     init_display(instance, info);
-    VER(info,
+    FFOT_VER(info,
                "Algorithm" << std::endl
             << "---------" << std::endl
             << "Dynamic Programming - Parallel Bellman" << std::endl
@@ -199,7 +199,7 @@ Output knapsacksolver::bellmanrec(
         Info info)
 {
     init_display(instance, info);
-    VER(info,
+    FFOT_VER(info,
                "Algorithm" << std::endl
             << "---------" << std::endl
             << "Dynamic Programming - Bellman" << std::endl
@@ -254,7 +254,7 @@ Output knapsacksolver::bellman_array_all(
         Info info)
 {
     init_display(instance, info);
-    VER(info,
+    FFOT_VER(info,
                "Algorithm" << std::endl
             << "---------" << std::endl
             << "Dynamic Programming - Bellman" << std::endl
@@ -328,7 +328,7 @@ Output knapsacksolver::bellman_array_one(
         Info info)
 {
     init_display(instance, info);
-    VER(info,
+    FFOT_VER(info,
                "Algorithm" << std::endl
             << "---------" << std::endl
             << "Dynamic Programming - Bellman" << std::endl
@@ -356,7 +356,7 @@ Output knapsacksolver::bellman_array_one(
     Solution sol(instance);
     while (sol.profit() != opt) {
         it++;
-        LOG(info, "it " << it << " n " << n << " opt_local " << opt_local << std::endl);
+        FFOT_LOG(info, "it " << it << " n " << n << " opt_local " << opt_local << std::endl);
 
         ItemPos last_item = -1;
 
@@ -377,7 +377,7 @@ Output knapsacksolver::bellman_array_one(
                 values[c] = values[c - wj] + pj;
                 last_item = j;
                 if (values[c] == opt_local) {
-                    LOG(info, "Optimal value reached (j " << j << ")");
+                    FFOT_LOG(info, "Optimal value reached (j " << j << ")");
                     goto end;
                 }
             }
@@ -387,7 +387,7 @@ Output knapsacksolver::bellman_array_one(
                 if (values[w - wj] + pj > values[w]) {
                     values[w] = values[w - wj] + pj;
                     if (values[w] == opt_local) {
-                        LOG(info, "Optimal value reached (j " << j << ")");
+                        FFOT_LOG(info, "Optimal value reached (j " << j << ")");
                         last_item = j;
                         goto end;
                     }
@@ -412,22 +412,22 @@ end:
                     info);
             opt = values[c];
             opt_local = opt;
-            LOG(info, "opt " << opt);
+            FFOT_LOG(info, "opt " << opt);
         }
 
         // Update solution and instancetance
-        LOG(info, " add " << last_item);
+        FFOT_LOG(info, " add " << last_item);
         sol.set(last_item, true);
         c -= instance.item(last_item).w;
         opt_local -= instance.item(last_item).p;
         n = last_item;
-        LOG(info, " p(S) " << sol.profit() << std::endl);
+        FFOT_LOG(info, " p(S) " << sol.profit() << std::endl);
     }
     output.update_solution(sol, std::stringstream(), info);
 
-    PUT(info, "Algorithm", "Iterations", it);
+    FFOT_PUT(info, "Algorithm", "Iterations", it);
     output.algorithm_end(info);
-    VER(info, "Iterations: " << it << std::endl);
+    FFOT_VER(info, "Iterations: " << it << std::endl);
     return output;
 }
 
@@ -441,7 +441,7 @@ Output knapsacksolver::bellman_array_part(
         Info info)
 {
     init_display(instance, info);
-    VER(info,
+    FFOT_VER(info,
                "Algorithm" << std::endl
             << "---------" << std::endl
             << "Dynamic Programming - Bellman" << std::endl
@@ -471,7 +471,7 @@ Output knapsacksolver::bellman_array_part(
     Profit opt_local = -1;
     while (sol.profit() != opt) {
         it++;
-        LOG(info, "it " << it << " n " << n << " opt_local " << opt_local << std::endl);
+        FFOT_LOG(info, "it " << it << " n " << n << " opt_local " << opt_local << std::endl);
 
         PartSolFactory1 psolf(instance, k, n - 1, 0, n - 1);
         Weight w_opt = c;
@@ -494,7 +494,7 @@ Output knapsacksolver::bellman_array_part(
                     values[w] = values[w - wj] + pj;
                     bisols[w] = psolf.add(bisols[w - wj], j);
                     if (values[w] == opt_local) {
-                        LOG(info, "Optimal value reached (j " << j << ")");
+                        FFOT_LOG(info, "Optimal value reached (j " << j << ")");
                         w_opt = w;
                         goto end;
                     }
@@ -519,23 +519,23 @@ end:
                     info);
             opt = values[w_opt];
             opt_local = opt;
-            LOG(info, "opt " << opt);
+            FFOT_LOG(info, "opt " << opt);
         }
 
-        LOG(info, " partsol " << psolf.print(bisols[w_opt]));
+        FFOT_LOG(info, " partsol " << psolf.print(bisols[w_opt]));
 
         // Update solution and instancetance
         psolf.update_solution(bisols[w_opt], sol);
         n -= psolf.size();
         c = instance.capacity() - sol.weight();
         opt_local = opt - sol.profit();
-        LOG(info, " p(S) " << sol.profit() << std::endl);
+        FFOT_LOG(info, " p(S) " << sol.profit() << std::endl);
     }
     output.update_solution(sol, std::stringstream(), info);
 
-    PUT(info, "Algorithm", "Iterations", it);
+    FFOT_PUT(info, "Algorithm", "Iterations", it);
     output.algorithm_end(info);
-    VER(info, "Iterations: " << it << std::endl);
+    FFOT_VER(info, "Iterations: " << it << std::endl);
     return output;
 }
 
@@ -578,7 +578,7 @@ void bellman_array_rec_rec(RecData d)
 {
     ItemPos k = (d.n1 + d.n2 - 1) / 2 + 1;
     std::vector<Profit>::iterator values_2 = d.values + d.c + 1;
-    LOG(d.info, "n1 " << d.n1 << " k " << k << " n2 " << d.n2 << " c " << d.c << std::endl);
+    FFOT_LOG(d.info, "n1 " << d.n1 << " k " << k << " n2 " << d.n2 << " c " << d.c << std::endl);
 
     opts_bellman_array(d.instance, d.n1, k, d.c, d.values, d.info);
     opts_bellman_array(d.instance, k, d.n2, d.c, values_2, d.info);
@@ -596,7 +596,7 @@ void bellman_array_rec_rec(RecData d)
         }
     }
     assert(z_max != -1);
-    LOG(d.info, "z_max " << z_max << " c1_opt " << c1_opt << " c2_opt " << c2_opt << std::endl);
+    FFOT_LOG(d.info, "z_max " << z_max << " c1_opt " << c1_opt << " c2_opt " << c2_opt << std::endl);
 
     if (d.n1 == k - 1)
         if (*(d.values + c1_opt) == d.instance.item(d.n1).p)
@@ -630,7 +630,7 @@ Output knapsacksolver::bellman_array_rec(
         Info info)
 {
     init_display(instance, info);
-    VER(info,
+    FFOT_VER(info,
                "Algorithm" << std::endl
             << "---------" << std::endl
             << "Dynamic Programming - Bellman" << std::endl
@@ -713,7 +713,7 @@ Output knapsacksolver::bellman_list(
         Info info)
 {
     init_display(instance, info);
-    VER(info,
+    FFOT_VER(info,
                "Algorithm" << std::endl
             << "---------" << std::endl
             << "Dynamic Programming - Bellman" << std::endl
@@ -725,29 +725,29 @@ Output knapsacksolver::bellman_list(
             << "Sort:                            " << sort << std::endl
             << std::endl);
 
-    LOG_FOLD_START(info, "bellman sort " << sort << std::endl);
+    FFOT_LOG_FOLD_START(info, "bellman sort " << sort << std::endl);
     Output output(instance, info);
 
     Weight  c = instance.capacity();
     ItemPos n = instance.number_of_items();
-    ItemPos j_max = instance.max_efficiency_item(DBG(info));
+    ItemPos j_max = instance.max_efficiency_item(FFOT_DBG(info));
 
     if (n == 0 || c == 0) {
         output.update_upper_bound(
                 0,
                 std::stringstream("no item or null capacity"),
                 info);
-        LOG_FOLD_END(info, "no item or null capacity");
+        FFOT_LOG_FOLD_END(info, "no item or null capacity");
         return output.algorithm_end(info);
     }
 
     if (!sort && INT_FAST64_MAX / instance.item(j_max).p < instance.capacity()) {
-        LOG_FOLD_END(info, "");
+        FFOT_LOG_FOLD_END(info, "");
         return output.algorithm_end(info);
     }
 
     if (sort) {
-        instance.sort(DBG(info));
+        instance.sort(FFOT_DBG(info));
         if (instance.break_item() == instance.last_item() + 1) {
             output.update_lower_bound(
                     instance.break_solution()->profit(),
@@ -757,7 +757,7 @@ Output knapsacksolver::bellman_list(
                     output.lower_bound,
                     std::stringstream("all item fit in the knapsack (ub)"),
                     info);
-            LOG_FOLD_END(info, "all items fit in the knapsack");
+            FFOT_LOG_FOLD_END(info, "all items fit in the knapsack");
             return output.algorithm_end(info);
         }
         auto g_output = greedynlogn(instance);
@@ -772,7 +772,7 @@ Output knapsacksolver::bellman_list(
                     output.lower_bound,
                     std::stringstream("negative capacity after reduction"),
                     info);
-            LOG_FOLD_END(info, "c < 0");
+            FFOT_LOG_FOLD_END(info, "c < 0");
             return output.algorithm_end(info);
         } else if (n == 0 || instance.reduced_capacity() == 0) {
             output.update_solution(
@@ -783,7 +783,7 @@ Output knapsacksolver::bellman_list(
                     output.lower_bound,
                     std::stringstream("no item or null capacity after reduction (ub)"),
                     info);
-            LOG_FOLD_END(info, "no item or null capacity after reduction");
+            FFOT_LOG_FOLD_END(info, "no item or null capacity after reduction");
             return output.algorithm_end(info);
         } else if (instance.break_item() == instance.last_item() + 1) {
             output.update_solution(
@@ -794,7 +794,7 @@ Output knapsacksolver::bellman_list(
                     output.lower_bound,
                     std::stringstream("all items fit in the knapsack after reduction (ub)"),
                     info);
-            LOG_FOLD_END(info, "all items fit in the knapsack after reduction");
+            FFOT_LOG_FOLD_END(info, "all items fit in the knapsack after reduction");
             return output.algorithm_end(info);
         }
     }
@@ -811,7 +811,7 @@ Output knapsacksolver::bellman_list(
     for (ItemPos j = instance.first_item(); j <= instance.last_item() && !l0.empty(); ++j) {
         // Check time
         if (!info.check_time()) {
-            LOG_FOLD_END(info, "no time left");
+            FFOT_LOG_FOLD_END(info, "no time left");
             return output.algorithm_end(info);
         }
 
@@ -881,7 +881,7 @@ Output knapsacksolver::bellman_list(
             std::stringstream("tree search completed"),
             info);
 
-    LOG_FOLD_END(info, "");
+    FFOT_LOG_FOLD_END(info, "");
     return output.algorithm_end(info);
 }
 
@@ -908,9 +908,9 @@ std::vector<BellmanState> opts_bellman_list(
         ItemPos j_max,
         Info& info)
 {
-    LOG_FOLD_START(info, "solve n1 " << n1 << " n2 " << n2 << " c " << c << std::endl);
+    FFOT_LOG_FOLD_START(info, "solve n1 " << n1 << " n2 " << n2 << " c " << c << std::endl);
     if (c == 0) {
-        LOG_FOLD_END(info, "c == 0");
+        FFOT_LOG_FOLD_END(info, "c == 0");
         return {{0, 0}};
     }
 
@@ -921,54 +921,54 @@ std::vector<BellmanState> opts_bellman_list(
             break;
         Weight wj = instance.item(j).w;
         Profit pj = instance.item(j).p;
-        LOG(info, "j " << j << " wj " << wj << " pj " << pj << std::endl);
+        FFOT_LOG(info, "j " << j << " wj " << wj << " pj " << pj << std::endl);
         std::vector<BellmanState> l;
         std::vector<BellmanState>::iterator it = l0.begin();
         std::vector<BellmanState>::iterator it1 = l0.begin();
         while (it != l0.end() || it1 != l0.end()) {
             if (it1 != l0.end() && (it == l0.end() || it->w > it1->w + wj)) {
                 BellmanState s1{it1->w+wj, it1->p+pj};
-                LOG(info, "s1 " << s1);
+                FFOT_LOG(info, "s1 " << s1);
                 if (s1.w > c) {
-                    LOG(info, " too large" << std::endl);
+                    FFOT_LOG(info, " too large" << std::endl);
                     break;
                 }
                 if (s1.p > l.back().p) {
                     if (s1.p > lb) // Update lower bound
                         lb = s1.p;
                     if (s1.w == l.back().w) {
-                        LOG(info, " replace" << std::endl);
+                        FFOT_LOG(info, " replace" << std::endl);
                         l.back() = s1;
                     } else {
                         Profit ub = ub_0(instance, j, s1.p, c - s1.w, j_max);
-                        LOG(info, " ub " << ub << " lb " << lb);
+                        FFOT_LOG(info, " ub " << ub << " lb " << lb);
                         if (ub >= lb) {
                             l.push_back(s1);
-                            LOG(info, " added" << std::endl);
+                            FFOT_LOG(info, " added" << std::endl);
                         } else {
-                            LOG(info, " ×" << std::endl);
+                            FFOT_LOG(info, " ×" << std::endl);
                         }
                     }
                 } else {
-                    LOG(info, " ×" << std::endl);
+                    FFOT_LOG(info, " ×" << std::endl);
                 }
                 it1++;
             } else {
-                LOG(info, "s0 " << *it);
+                FFOT_LOG(info, "s0 " << *it);
                 if (l.empty()) {
-                    LOG(info, " added" << std::endl);
+                    FFOT_LOG(info, " added" << std::endl);
                     l.push_back(*it);
                 } else {
                     if (it->p > l.back().p) {
                         if (it->w == l.back().w) {
-                            LOG(info, " replace" << std::endl);
+                            FFOT_LOG(info, " replace" << std::endl);
                             l.back() = *it;
                         } else {
-                            LOG(info, " added" << std::endl);
+                            FFOT_LOG(info, " added" << std::endl);
                             l.push_back(*it);
                         }
                     } else {
-                        LOG(info, " ×" << std::endl);
+                        FFOT_LOG(info, " ×" << std::endl);
                     }
                 }
                 ++it;
@@ -976,20 +976,20 @@ std::vector<BellmanState> opts_bellman_list(
         }
         l0 = std::move(l);
     }
-    LOG_FOLD_END(info, "");
+    FFOT_LOG_FOLD_END(info, "");
     return l0;
 }
 
 void bellman_list_rec_rec(BellmanListRecData d)
 {
     ItemPos k = (d.n1 + d.n2 - 1) / 2 + 1;
-    LOG_FOLD_START(d.info, "rec n1 " << d.n1 << " n2 " << d.n2 << " k " << k << " c " << d.c << std::endl);
+    FFOT_LOG_FOLD_START(d.info, "rec n1 " << d.n1 << " n2 " << d.n2 << " k " << k << " c " << d.c << std::endl);
 
     std::vector<BellmanState> l1 = opts_bellman_list(
             d.instance, d.n1, k, d.c, d.j_max, d.info);
     std::vector<BellmanState> l2 = opts_bellman_list(
             d.instance, k, d.n2, d.c, d.j_max, d.info);
-    LOG(d.info, "l1.size() " << l1.size() << " l2.size() " << l2.size() << std::endl);
+    FFOT_LOG(d.info, "l1.size() " << l1.size() << " l2.size() " << l2.size() << std::endl);
 
     Profit z_max  = -1;
     Weight i1_opt = 0;
@@ -998,7 +998,7 @@ void bellman_list_rec_rec(BellmanListRecData d)
     for (StateIdx i1 = 0; i1 < (StateIdx)l1.size(); ++i1) {
         while (l1[i1].w + l2[i2].w > d.c)
             i2--;
-        LOG(d.info, "i1 " << i1 << " l1[i1].w " << l1[i1].w << " i2 " << i2 << " l2[i2].w " << l2[i2].w << std::endl);
+        FFOT_LOG(d.info, "i1 " << i1 << " l1[i1].w " << l1[i1].w << " i2 " << i2 << " l2[i2].w " << l2[i2].w << std::endl);
         assert(i2 >= 0);
         Profit z = l1[i1].p + l2[i2].p;
         if (z_max < z) {
@@ -1018,7 +1018,7 @@ void bellman_list_rec_rec(BellmanListRecData d)
             i2_opt = i2;
         }
     }
-    LOG(d.info, "z_max " << z_max << std::endl );
+    FFOT_LOG(d.info, "z_max " << z_max << std::endl );
 
     if (d.n1 == k - 1)
         if (l1[i1_opt].p == d.instance.item(d.n1).p)
@@ -1046,14 +1046,14 @@ void bellman_list_rec_rec(BellmanListRecData d)
                 .j_max = d.j_max,
                 .info = d.info});
 
-    LOG_FOLD_END(d.info, "");
+    FFOT_LOG_FOLD_END(d.info, "");
 }
 
 Output knapsacksolver::bellman_list_rec(
         const Instance& instance,
         Info info)
 {
-    VER(info,
+    FFOT_VER(info,
                "Algorithm" << std::endl
             << "---------" << std::endl
             << "Dynamic Programming - Bellman" << std::endl
@@ -1064,7 +1064,7 @@ Output knapsacksolver::bellman_list_rec(
             << "Method for retrieving solution:  recursive scheme" << std::endl
             << std::endl);
 
-    LOG_FOLD_START(info, "*** bellman (list, rec) ***" << std::endl);
+    FFOT_LOG_FOLD_START(info, "*** bellman (list, rec) ***" << std::endl);
     Output output(instance, info);
     ItemPos n = instance.number_of_items();
 
@@ -1082,13 +1082,13 @@ Output knapsacksolver::bellman_list_rec(
                 sol.profit(),
                 std::stringstream("one item (ub)"),
                 info);
-        LOG_FOLD_END(info, "");
+        FFOT_LOG_FOLD_END(info, "");
         return output.algorithm_end(info);
     }
 
-    ItemPos j_max = instance.max_efficiency_item(DBG(info));
+    ItemPos j_max = instance.max_efficiency_item(FFOT_DBG(info));
     if (INT_FAST64_MAX / instance.item(j_max).p < instance.capacity()) {
-        LOG_FOLD_END(info, "");
+        FFOT_LOG_FOLD_END(info, "");
         return output.algorithm_end(info);
     }
 
@@ -1102,7 +1102,7 @@ Output knapsacksolver::bellman_list_rec(
         .j_max = j_max,
         .info = info});
     if (!info.check_time()) {
-        LOG_FOLD_END(info, "");
+        FFOT_LOG_FOLD_END(info, "");
         return output.algorithm_end(info);
     }
 
@@ -1114,7 +1114,7 @@ Output knapsacksolver::bellman_list_rec(
             sol.profit(),
             std::stringstream("tree search completed (ub)"),
             info);
-    LOG_FOLD_END(info, "");
+    FFOT_LOG_FOLD_END(info, "");
     return output.algorithm_end(info);
 }
 

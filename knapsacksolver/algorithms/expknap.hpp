@@ -51,9 +51,9 @@ struct ExpknapOutput: Output
 
     ExpknapOutput& algorithm_end(Info& info)
     {
-        PUT(info, "Algorithm", "NodeNumber", number_of_node);
+        FFOT_PUT(info, "Algorithm", "NodeNumber", number_of_node);
         Output::algorithm_end(info);
-        VER(info, "Node number: " << number_of_node << std::endl);
+        FFOT_VER(info, "Node number: " << number_of_node << std::endl);
         return *this;
     }
 };

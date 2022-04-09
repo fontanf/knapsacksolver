@@ -68,14 +68,14 @@ void expknap_rec(ExpknapInternalData& d, ItemPos s, ItemPos t)
 {
     Info& info = d.parameters.info;
     d.output.number_of_node++; // Increment node number
-    LOG_FOLD_START(info, "node number " << d.output.number_of_node
+    FFOT_LOG_FOLD_START(info, "node number " << d.output.number_of_node
             << " s " << s << " t " << t
             << " w " << d.sol_curr.weight() << " p " << d.sol_curr.profit()
             << std::endl);
 
     // Check end
     if (d.parameters.stop_if_end && *(d.parameters.end)) {
-        LOG_FOLD_END(info, "end");
+        FFOT_LOG_FOLD_END(info, "end");
         return;
     }
 
@@ -86,13 +86,13 @@ void expknap_rec(ExpknapInternalData& d, ItemPos s, ItemPos t)
         for (std::thread& thread: d.threads)
             thread.join();
         d.threads.clear();
-        LOG_FOLD_END(info, "time");
+        FFOT_LOG_FOLD_END(info, "time");
         return;
     }
 
     // If UB reached, then stop
     if (d.output.solution.profit() == d.output.upper_bound) {
-        LOG_FOLD_END(info, "lb == ub");
+        FFOT_LOG_FOLD_END(info, "lb == ub");
         return;
     }
 
@@ -109,16 +109,16 @@ void expknap_rec(ExpknapInternalData& d, ItemPos s, ItemPos t)
 
         for (;;t++) {
             // Bounding test
-            Profit ub = ub_dembo(d.instance, d.instance.bound_item_right(t, d.output.solution.profit() DBG(COMMA info)), d.sol_curr);
-            LOG(info, "t " << t << " ub " << ub << " lb " << d.output.solution.profit());
+            Profit ub = ub_dembo(d.instance, d.instance.bound_item_right(t, d.output.solution.profit() FFOT_DBG(FFOT_COMMA info)), d.sol_curr);
+            FFOT_LOG(info, "t " << t << " ub " << ub << " lb " << d.output.solution.profit());
             if (ub <= d.output.solution.profit()) {
-                LOG_FOLD_END(info, " bound");
+                FFOT_LOG_FOLD_END(info, " bound");
                 return;
             }
 
             // Recursive call
             assert(t <= d.instance.last_item());
-            LOG(info, " add (" << d.instance.item(t) << ")" << std::endl);
+            FFOT_LOG(info, " add (" << d.instance.item(t) << ")" << std::endl);
             d.sol_curr.set(t, true); // Add item t
             expknap_rec(d, s, t + 1);
             d.sol_curr.set(t, false); // Remove item t
@@ -128,17 +128,17 @@ void expknap_rec(ExpknapInternalData& d, ItemPos s, ItemPos t)
             // Bounding test
             Profit ub = ub_dembo_rev(
                     d.instance,
-                    d.instance.bound_item_left(s, d.output.solution.profit() DBG(COMMA info)),
+                    d.instance.bound_item_left(s, d.output.solution.profit() FFOT_DBG(FFOT_COMMA info)),
                     d.sol_curr);
-            LOG(info, "s " << s << " ub " << ub << " lb " << d.output.solution.profit());
+            FFOT_LOG(info, "s " << s << " ub " << ub << " lb " << d.output.solution.profit());
             if (ub <= d.output.solution.profit()) {
-                LOG_FOLD_END(info, " bound");
+                FFOT_LOG_FOLD_END(info, " bound");
                 return;
             }
 
             // Recursive call
             assert(s >= d.instance.first_item());
-            LOG(info, " remove (" << d.instance.item(s) << ")" << std::endl);
+            FFOT_LOG(info, " remove (" << d.instance.item(s) << ")" << std::endl);
             d.sol_curr.set(s, false); // Remove item s
             expknap_rec(d, s - 1, t);
             d.sol_curr.set(s, true); // Add item s
@@ -152,7 +152,7 @@ ExpknapOutput knapsacksolver::expknap(
         ExpknapOptionalParameters parameters)
 {
     init_display(instance, parameters.info);
-    VER(parameters.info,
+    FFOT_VER(parameters.info,
                "Algorithm" << std::endl
             << "---------" << std::endl
             << "Expknap" << std::endl
@@ -164,7 +164,7 @@ ExpknapOutput knapsacksolver::expknap(
             << "Combo core:             " << parameters.combo_core << std::endl
             << std::endl);
 
-    LOG_FOLD_START(parameters.info, "*** expknap"
+    FFOT_LOG_FOLD_START(parameters.info, "*** expknap"
             << ((parameters.greedy)? " -g": "")
             << " -s " << parameters.surrelax
             << " -n " << parameters.greedynlogn
@@ -182,11 +182,11 @@ ExpknapOutput knapsacksolver::expknap(
                 output.lower_bound,
                 std::stringstream("no item (ub)"),
                 parameters.info);
-        LOG(parameters.info, "no item" << std::endl);
+        FFOT_LOG(parameters.info, "no item" << std::endl);
         return output.algorithm_end(parameters.info);
     }
 
-    instance.sort_partially(DBG(parameters.info));
+    instance.sort_partially(FFOT_DBG(parameters.info));
     if (instance.break_item() == instance.last_item() + 1) {
         if (output.lower_bound < instance.break_solution()->profit()) {
             output.update_solution(
@@ -198,11 +198,11 @@ ExpknapOutput knapsacksolver::expknap(
                 instance.break_solution()->profit(),
                 std::stringstream("all items fit (ub)"),
                 parameters.info);
-        LOG_FOLD_END(parameters.info, "all items fit in the knapsack");
+        FFOT_LOG_FOLD_END(parameters.info, "all items fit in the knapsack");
         return output.algorithm_end(parameters.info);
     }
     if (parameters.combo_core)
-        instance.init_combo_core(DBG(parameters.info));
+        instance.init_combo_core(FFOT_DBG(parameters.info));
 
     // Compute initial lower bound
     Solution sol_tmp(instance);

@@ -21,7 +21,7 @@ BalknapOutput knapsacksolver::balknap(
         BalknapOptionalParameters parameters)
 {
     init_display(instance, parameters.info);
-    VER(parameters.info,
+    FFOT_VER(parameters.info,
                "Algorithm" << std::endl
             << "---------" << std::endl
             << "Balknap" << std::endl
@@ -35,7 +35,7 @@ BalknapOutput knapsacksolver::balknap(
             << "Partial solution size:  " << parameters.partial_solution_size << std::endl
             << std::endl);
 
-    LOG_FOLD_START(parameters.info, "*** balknap"
+    FFOT_LOG_FOLD_START(parameters.info, "*** balknap"
             << " -k " << parameters.partial_solution_size
             << ((parameters.greedy)? " -g": "")
             << " -n " << parameters.greedynlogn
@@ -49,7 +49,7 @@ BalknapOutput knapsacksolver::balknap(
     BalknapOutput output(instance, parameters.info);
     balknap_main(instance, parameters, output);
 
-    LOG_FOLD_END(parameters.info, "balknap");
+    FFOT_LOG_FOLD_END(parameters.info, "balknap");
     return output.algorithm_end(parameters.info);
 }
 
@@ -119,7 +119,7 @@ void balknap_main(
 {
     Info& info = parameters.info;
     output.number_of_recursive_calls++;
-    LOG_FOLD_START(info, "balknap_main"
+    FFOT_LOG_FOLD_START(info, "balknap_main"
             << " number_of_recursive_calls " << output.number_of_recursive_calls
             << std::endl);
 
@@ -137,7 +137,7 @@ void balknap_main(
                 output.lower_bound,
                 std::stringstream("no item of null capacity (ub)"),
                 parameters.info);
-        LOG_FOLD_END(info, "no item or null capacity");
+        FFOT_LOG_FOLD_END(info, "no item or null capacity");
         return;
     } else if (instance.reduced_number_of_items() == 1) {
         Solution sol_tmp = (instance.reduced_solution() == NULL)?
@@ -152,15 +152,15 @@ void balknap_main(
                 output.lower_bound,
                 std::stringstream("one item (ub)"),
                 parameters.info);
-        LOG_FOLD_END(parameters.info, "one item");
+        FFOT_LOG_FOLD_END(parameters.info, "one item");
         return;
     }
 
     // Sorting
     if (parameters.ub == 'b') {
-        instance.sort_partially(DBG(info));
+        instance.sort_partially(FFOT_DBG(info));
     } else if (parameters.ub == 't') {
-        instance.sort(DBG(info));
+        instance.sort(FFOT_DBG(info));
     }
     if (instance.break_item() == instance.last_item() + 1) {
         output.update_solution(
@@ -171,7 +171,7 @@ void balknap_main(
                 output.lower_bound,
                 std::stringstream("all items fit in the knapsack (ub)"),
                 parameters.info);
-        LOG_FOLD_END(parameters.info, "all items fit in the knapsack");
+        FFOT_LOG_FOLD_END(parameters.info, "all items fit in the knapsack");
         return;
     }
 
@@ -206,7 +206,7 @@ void balknap_main(
                 output.lower_bound,
                 std::stringstream("negative capacity after reduction"),
                 info);
-        LOG_FOLD_END(info, "c < 0");
+        FFOT_LOG_FOLD_END(info, "c < 0");
         return;
     }
 
@@ -235,7 +235,7 @@ void balknap_main(
                 output.lower_bound,
                 std::stringstream("no item of null capacity after reduction (ub)"),
                 parameters.info);
-        LOG_FOLD_END(parameters.info, "no item or null capacity after reduction");
+        FFOT_LOG_FOLD_END(parameters.info, "no item or null capacity after reduction");
         return;
     } else if (n == 1) {
         Solution sol_tmp = (instance.reduced_solution() == NULL)?
@@ -250,7 +250,7 @@ void balknap_main(
                 output.lower_bound,
                 std::stringstream("one item after reduction (ub)"),
                 parameters.info);
-        LOG_FOLD_END(parameters.info, "one item after reduction");
+        FFOT_LOG_FOLD_END(parameters.info, "one item after reduction");
         return;
     } else if (instance.break_item() == instance.last_item() + 1) {
         output.update_solution(
@@ -261,7 +261,7 @@ void balknap_main(
                 output.lower_bound,
                 std::stringstream("all items fit in the knapsack after reduction (ub)"),
                 parameters.info);
-        LOG_FOLD_END(parameters.info, "all items fit in the knapsack after reduction");
+        FFOT_LOG_FOLD_END(parameters.info, "all items fit in the knapsack after reduction");
         return;
     }
 
@@ -277,7 +277,7 @@ void balknap_main(
             parameters.info);
 
     if (output.solution.profit() == output.upper_bound) {
-        LOG_FOLD_END(parameters.info, "lower bound == upper bound");
+        FFOT_LOG_FOLD_END(parameters.info, "lower bound == upper bound");
         return;
     }
 
@@ -312,19 +312,19 @@ void balknap_main(
             return;
         }
         if (parameters.stop_if_end && *(parameters.end)) {
-            LOG_FOLD_END(parameters.info, "end");
+            FFOT_LOG_FOLD_END(parameters.info, "end");
             return;
         }
         if (output.solution.profit() == output.upper_bound
                 || best_state.first.pi == output.upper_bound)
             break;
 
-        LOG(info, "t " << t << " (" << instance.item(t) << ")" << std::endl);
+        FFOT_LOG(info, "t " << t << " (" << instance.item(t) << ")" << std::endl);
         Weight wt = instance.item(t).w;
         Profit pt = instance.item(t).p;
 
         // Bounding
-        LOG(info, "bound" << std::endl);
+        FFOT_LOG(info, "bound" << std::endl);
         Profit ub_t = -1;
         for (auto s = d.map.begin(); s != d.map.end() && s->first.mu <= c;) {
             Profit pi = s->first.pi;
@@ -340,7 +340,7 @@ void balknap_main(
                     ub_dembo_rev(instance, s->second.a, pi, c-mu);
             }
             if (ub_local < lb) {
-                LOG(info, "remove " << *s << std::endl);
+                FFOT_LOG(info, "remove " << *s << std::endl);
                 d.map.erase(s++);
             } else {
                 if (ub_t < ub_local)
@@ -363,12 +363,12 @@ void balknap_main(
         if (best_state.first.pi == output.upper_bound)
             goto end;
         if (parameters.stop_if_end && *(parameters.end)) {
-            LOG_FOLD_END(parameters.info, "end");
+            FFOT_LOG_FOLD_END(parameters.info, "end");
             return;
         }
 
         // Add item t
-        LOG(info, "add" << std::endl);
+        FFOT_LOG(info, "add" << std::endl);
         auto s = d.map.upper_bound({c+1,0});
         auto hint = s;
         hint--;
@@ -376,7 +376,7 @@ void balknap_main(
             std::pair<BalknapState, BalknapValue> s1 = {
                 {s->first.mu + wt, s->first.pi + pt},
                 {s->second.a, f, psolf.add(s->second.sol, t)}};
-            LOG(info, s1);
+            FFOT_LOG(info, s1);
             Weight mu_ = s1.first.mu;
             Profit pi_ = s1.first.pi;
 
@@ -406,11 +406,11 @@ void balknap_main(
                     ub_dembo_rev(instance, s->second.a - 1, pi_, c-mu_);
             }
             if (ub_local <= lb) {
-                LOG(info, " ×" << std::endl);
+                FFOT_LOG(info, " ×" << std::endl);
                 continue;
             }
 
-            LOG(info, " ok" << std::endl);
+            FFOT_LOG(info, " ok" << std::endl);
             hint = d.map.insert(hint, s1);
             if (hint->second.a < s->second.a) {
                 hint->second.a = s->second.a;
@@ -420,11 +420,11 @@ void balknap_main(
         }
 
         // Remove previously added items
-        LOG(info, "remove" << std::endl);
+        FFOT_LOG(info, "remove" << std::endl);
         for (auto s = d.map.rbegin(); s != d.map.rend() && s->first.mu > c; ++s) {
             if (s->first.mu > c + wt)
                 continue;
-            LOG(info, *s << std::endl);
+            FFOT_LOG(info, *s << std::endl);
 
             balknap_update_bounds(d);
             if (!parameters.info.check_time()) {
@@ -436,7 +436,7 @@ void balknap_main(
                 return;
             }
             if (parameters.stop_if_end && *(parameters.end)) {
-                LOG_FOLD_END(parameters.info, "end");
+                FFOT_LOG_FOLD_END(parameters.info, "end");
                 return;
             }
             if (output.solution.profit() == output.upper_bound
@@ -444,7 +444,7 @@ void balknap_main(
                 break;
 
             for (ItemPos j = s->second.a_prec; j < s->second.a; ++j) {
-                LOG(info, "j " << j);
+                FFOT_LOG(info, "j " << j);
                 Weight mu_ = s->first.mu - instance.item(j).w;
                 Profit pi_ = s->first.pi - instance.item(j).p;
                 std::pair<BalknapState, BalknapValue> s1 = {
@@ -477,11 +477,11 @@ void balknap_main(
                         ub_dembo_rev(instance, j - 1, pi_, c-mu_);
                 }
                 if (ub_local <= lb) {
-                    LOG(info, " ×" << std::endl);
+                    FFOT_LOG(info, " ×" << std::endl);
                     continue;
                 }
 
-                LOG(info, " ok" << std::endl);
+                FFOT_LOG(info, " ok" << std::endl);
                 auto res = d.map.insert(s1);
                 if (!res.second) {
                     if (res.first->second.a < j) {
@@ -502,26 +502,26 @@ end:
 
     if (parameters.set_end)
         *(parameters.end) = true;
-    LOG(parameters.info, "end" << std::endl);
+    FFOT_LOG(parameters.info, "end" << std::endl);
     for (std::thread& thread: d.threads)
         thread.join();
     d.threads.clear();
-    LOG(parameters.info, "end2" << std::endl);
+    FFOT_LOG(parameters.info, "end2" << std::endl);
 
     if (output.lower_bound == output.solution.profit())
         return;
 
-    LOG(info, "best_state " << best_state << std::endl);
-    LOG(info, "partial sol " << std::bitset<64>(best_state.second.sol) << std::endl);
+    FFOT_LOG(info, "best_state " << best_state << std::endl);
+    FFOT_LOG(info, "partial sol " << std::bitset<64>(best_state.second.sol) << std::endl);
 
     // Reduce instance to items from best_state.second.a to last_item and remove
     // the items from the partial solution from the instance.
     // Then run the algorithm again.
-    instance.set_first_item(best_state.second.a DBG(COMMA info));
+    instance.set_first_item(best_state.second.a FFOT_DBG(FFOT_COMMA info));
     instance.set_last_item(last_item);
-    instance.fix(psolf.vector(best_state.second.sol) DBG(COMMA info));
+    instance.fix(psolf.vector(best_state.second.sol) FFOT_DBG(FFOT_COMMA info));
 
-    LOG_FOLD_END(info, "balknap_main");
+    FFOT_LOG_FOLD_END(info, "balknap_main");
     balknap_main(instance, parameters, output);
 }
 

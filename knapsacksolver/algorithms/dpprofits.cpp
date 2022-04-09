@@ -15,7 +15,7 @@ Output knapsacksolver::dpprofits_array(
         Info info)
 {
     init_display(instance, info);
-    VER(info,
+    FFOT_VER(info,
                "Algorithm" << std::endl
             << "---------" << std::endl
             << "Dynamic Programming - By Profits" << std::endl
@@ -36,7 +36,7 @@ Output knapsacksolver::dpprofits_array(
 
     // Initialize memory table
     Weight c = instance.capacity();
-    ItemPos j_max = instance.max_efficiency_item(DBG(info));
+    ItemPos j_max = instance.max_efficiency_item(FFOT_DBG(info));
     Profit ub = ub_0(instance, 0, 0, instance.capacity(), j_max);
     output.update_upper_bound(
             ub,
@@ -84,7 +84,7 @@ Output knapsacksolver::dpprofits_array(
 Output knapsacksolver::dpprofits_array_all(const Instance& instance, Info info)
 {
     init_display(instance, info);
-    VER(info,
+    FFOT_VER(info,
                "Algorithm" << std::endl
             << "---------" << std::endl
             << "Dynamic Programming - By Profits" << std::endl
@@ -105,7 +105,7 @@ Output knapsacksolver::dpprofits_array_all(const Instance& instance, Info info)
 
     // Initialize memory table
     Weight c = instance.capacity();
-    ItemPos j_max = instance.max_efficiency_item(DBG(info));
+    ItemPos j_max = instance.max_efficiency_item(FFOT_DBG(info));
     Profit ub = ub_0(instance, 0, 0, instance.capacity(), j_max);
     output.update_upper_bound(
             ub,

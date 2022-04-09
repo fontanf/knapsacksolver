@@ -23,9 +23,9 @@ std::vector<Item> remove_dominated_items(std::vector<Item>& v)
 
 Output knapsacksolver::forwardgreedynlogn(const Instance& instance, Info info)
 {
-    LOG_FOLD_START(info, "forwardgreedynlogn b " << instance.break_item()
+    FFOT_LOG_FOLD_START(info, "forwardgreedynlogn b " << instance.break_item()
             << " n " << instance.number_of_items() << std::endl;);
-    VER(info, "*** forwardgreedynlogn ***" << std::endl);
+    FFOT_VER(info, "*** forwardgreedynlogn ***" << std::endl);
     Output output(instance, info);
 
     Solution sol = *instance.break_solution();
@@ -34,7 +34,7 @@ Output knapsacksolver::forwardgreedynlogn(const Instance& instance, Info info)
     // contain any item, return sol.
     if (instance.break_item() >= instance.number_of_items() - 1
             || instance.break_item() == 0) {
-        LOG_FOLD_END(info, "");
+        FFOT_LOG_FOLD_END(info, "");
         return output.algorithm_end(info);
     }
 
@@ -83,7 +83,7 @@ Output knapsacksolver::forwardgreedynlogn(const Instance& instance, Info info)
     }
 
     output.update_solution(sol, std::stringstream(), info);
-    LOG_FOLD_END(info, "");
+    FFOT_LOG_FOLD_END(info, "");
     return output.algorithm_end(info);
 }
 
@@ -93,9 +93,9 @@ Output knapsacksolver::forwardgreedynlogn(const Instance& instance, Info info)
 
 Output knapsacksolver::backwardgreedynlogn(const Instance& instance, Info info)
 {
-    LOG_FOLD_START(info, "backwardgreedynlogn b " << instance.break_item()
+    FFOT_LOG_FOLD_START(info, "backwardgreedynlogn b " << instance.break_item()
             << " n " << instance.number_of_items() << std::endl;);
-    VER(info, "*** backwardgreedynlogn ***" << std::endl);
+    FFOT_VER(info, "*** backwardgreedynlogn ***" << std::endl);
     Output output(instance, info);
 
     output.update_solution(*instance.break_solution(), std::stringstream("break"), info);
@@ -104,7 +104,7 @@ Output knapsacksolver::backwardgreedynlogn(const Instance& instance, Info info)
     // contain any item, return sol.
     if (instance.break_item() >= instance.number_of_items() - 1
             || instance.break_item() == 0) {
-        LOG_FOLD_END(info, "");
+        FFOT_LOG_FOLD_END(info, "");
         return output.algorithm_end(info);
     }
 
@@ -159,7 +159,7 @@ Output knapsacksolver::backwardgreedynlogn(const Instance& instance, Info info)
         output.update_solution(sol, std::stringstream(), info);
     }
 
-    LOG_FOLD_END(info, "");
+    FFOT_LOG_FOLD_END(info, "");
     return output.algorithm_end(info);
 }
 
@@ -169,8 +169,8 @@ Output knapsacksolver::backwardgreedynlogn(const Instance& instance, Info info)
 
 Output knapsacksolver::greedynlogn(const Instance& instance, Info info)
 {
-    VER(info, "*** greedynlogn ***" << std::endl);
-    LOG_FOLD_START(info, "greedynlogn" << std::endl;);
+    FFOT_VER(info, "*** greedynlogn ***" << std::endl);
+    FFOT_LOG_FOLD_START(info, "greedynlogn" << std::endl;);
     Output output(instance, info);
 
     auto g_output = greedy(instance);
@@ -189,8 +189,8 @@ Output knapsacksolver::greedynlogn(const Instance& instance, Info info)
         best = "backward";
     }
 
-    LOG_FOLD_END(info, "");
-    PUT(info, "Algorithm", "Best", best);
+    FFOT_LOG_FOLD_END(info, "");
+    FFOT_PUT(info, "Algorithm", "Best", best);
     return output.algorithm_end(info);
 }
 

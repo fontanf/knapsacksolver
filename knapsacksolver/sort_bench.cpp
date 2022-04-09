@@ -24,11 +24,11 @@ int main(int argc, char *argv[])
 
     Info info_1;
     std::cout << "Conmplete sorting" << std::endl;
-    ins_eff.sort(DBG(info_1));
+    ins_eff.sort(FFOT_DBG(info_1));
 
     Info info_2;
     std::cout << "Partial sorting" << std::endl;
-    ins_eff.sort_partially(DBG(info_2));
+    ins_eff.sort_partially(FFOT_DBG(info_2));
 
     return 0;
 }

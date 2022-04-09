@@ -15,7 +15,7 @@ TEST(Instance, Sort)
             {10, 12},
             {10, 20}});
     Info info;
-    instancetance.sort(DBG(info));
+    instancetance.sort(FFOT_DBG(info));
 
     EXPECT_EQ(instancetance.item(4).p, 5);
     EXPECT_EQ(instancetance.item(3).p, 10);
@@ -43,7 +43,7 @@ TEST(Instance, SortPartially)
             {8, 1},
             {9, 1}});
     Info info;
-    instancetance.sort_partially(DBG(info));
+    instancetance.sort_partially(FFOT_DBG(info));
     EXPECT_EQ(instancetance.item(instancetance.break_item()).j, 2);
 }
 
@@ -60,7 +60,7 @@ TEST(Instance, SortPartially2)
             {5, 1},
             {6, 1}});
     Info info;
-    instancetance.sort_partially(DBG(info));
+    instancetance.sort_partially(FFOT_DBG(info));
     EXPECT_EQ(instancetance.item(instancetance.break_item()).j, 4);
 }
 
@@ -93,7 +93,7 @@ TEST(Instance, SortPartially3)
             std::cout << "}" << std::endl;
 
             Info info_tmp;
-            instance.sort_partially(DBG(info_tmp COMMA) 2);
+            instance.sort_partially(FFOT_DBG(info_tmp FFOT_COMMA) 2);
 
             Solution sol(instance);
             ItemPos b = instance.break_item();

@@ -56,9 +56,9 @@ struct BalknapOutput: Output
 
     BalknapOutput& algorithm_end(Info& info)
     {
-        PUT(info, "Algorithm", "RecursiveCallNumber", number_of_recursive_calls);
+        FFOT_PUT(info, "Algorithm", "RecursiveCallNumber", number_of_recursive_calls);
         Output::algorithm_end(info);
-        VER(info, "Number of recursive calls:  " << number_of_recursive_calls << std::endl);
+        FFOT_VER(info, "Number of recursive calls:  " << number_of_recursive_calls << std::endl);
         return *this;
     }
 };

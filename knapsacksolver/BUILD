@@ -14,7 +14,7 @@ cc_library(
         ],
         deps = [
                 "//knapsacksolver/algorithms:dembo",
-                "@optimizationtools//optimizationtools:info",
+                "@optimizationtools//optimizationtools/utils:info",
         ],
         linkopts = select({
                 "@bazel_tools//src/conditions:windows": [],
@@ -30,7 +30,7 @@ cc_library(
                 "instance.hpp",
                 "solution.hpp"
         ],
-        deps = ["@optimizationtools//optimizationtools:info",],
+        deps = ["@optimizationtools//optimizationtools/utils:info",],
         visibility = ["//visibility:public"],
 )
 

@@ -4,8 +4,8 @@ using namespace knapsacksolver;
 
 Output knapsacksolver::greedy(const Instance& instance, Info info)
 {
-    LOG_FOLD_START(info, "greedy" << std::endl);
-    VER(info, "*** greedy ***" << std::endl);
+    FFOT_LOG_FOLD_START(info, "greedy" << std::endl);
+    FFOT_VER(info, "*** greedy ***" << std::endl);
     Output output(instance, info);
 
     assert(instance.break_item() != -1);
@@ -15,7 +15,7 @@ Output knapsacksolver::greedy(const Instance& instance, Info info)
             std::stringstream("break"),
             info);
     std::string best_algo = "break";
-    LOG(info, "break " << output.solution.profit() << std::endl);
+    FFOT_LOG(info, "break " << output.solution.profit() << std::endl);
     ItemPos b = instance.break_item();
 
     if (b < instance.last_item()) {
@@ -61,8 +61,8 @@ Output knapsacksolver::greedy(const Instance& instance, Info info)
         }
     }
 
-    LOG_FOLD_END(info, "greedy " << output.solution.profit());
-    PUT(info, "Algorithm", "Best", best_algo);
+    FFOT_LOG_FOLD_END(info, "greedy " << output.solution.profit());
+    FFOT_PUT(info, "Algorithm", "Best", best_algo);
     return output.algorithm_end(info);
 }
 

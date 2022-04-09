@@ -19,7 +19,7 @@ MinknapOutput knapsacksolver::minknap(
         MinknapOptionalParameters parameters)
 {
     init_display(instance, parameters.info);
-    VER(parameters.info,
+    FFOT_VER(parameters.info,
                "Algorithm" << std::endl
             << "---------" << std::endl
             << "Minknap" << std::endl
@@ -33,7 +33,7 @@ MinknapOutput knapsacksolver::minknap(
             << "Partial solution size:  " << parameters.partial_solution_size << std::endl
             << std::endl);
 
-    LOG_FOLD_START(parameters.info, "*** minknap"
+    FFOT_LOG_FOLD_START(parameters.info, "*** minknap"
             << " -k " << parameters.partial_solution_size
             << ((parameters.greedy)? " -g": "")
             << " -p " << parameters.pairing
@@ -48,7 +48,7 @@ MinknapOutput knapsacksolver::minknap(
     MinknapOutput output(instance, parameters.info);
     minknap_main(instance, parameters, output);
 
-    LOG_FOLD_END(parameters.info, "minknap");
+    FFOT_LOG_FOLD_END(parameters.info, "minknap");
     return output.algorithm_end(parameters.info);
 }
 
@@ -103,10 +103,10 @@ void minknap_main(
         MinknapOutput& output)
 {
     output.number_of_recursive_calls++;
-    LOG_FOLD_START(parameters.info, "minknap_main"
+    FFOT_LOG_FOLD_START(parameters.info, "minknap_main"
             << " number_of_recursive_calls " << output.number_of_recursive_calls
             << std::endl);
-    LOG_FOLD(parameters.info, instance);
+    FFOT_LOG_FOLD(parameters.info, instance);
 
     MinknapInternalData d(instance, parameters, output);
     Weight  c = instance.reduced_capacity();
@@ -123,7 +123,7 @@ void minknap_main(
                 output.lower_bound,
                 std::stringstream("no item of null capacity (ub)"),
                 parameters.info);
-        LOG_FOLD_END(parameters.info, "no item or null capacity");
+        FFOT_LOG_FOLD_END(parameters.info, "no item or null capacity");
         return;
     } else if (n == 1) {
         Solution sol_tmp = (instance.reduced_solution() == NULL)? Solution(instance): *instance.reduced_solution();
@@ -136,12 +136,12 @@ void minknap_main(
                 output.lower_bound,
                 std::stringstream("one item (ub)"),
                 parameters.info);
-        LOG_FOLD_END(parameters.info, "one item");
+        FFOT_LOG_FOLD_END(parameters.info, "one item");
         return;
     }
 
     // Sort partially
-    instance.sort_partially(DBG(parameters.info));
+    instance.sort_partially(FFOT_DBG(parameters.info));
     if (instance.break_item() == instance.last_item() + 1) {
         output.update_solution(
                 *instance.break_solution(),
@@ -151,12 +151,12 @@ void minknap_main(
                 output.lower_bound,
                 std::stringstream("all items fit in the knapsack (ub)"),
                 parameters.info);
-        LOG_FOLD_END(parameters.info, "all items fit in the knapsack");
+        FFOT_LOG_FOLD_END(parameters.info, "all items fit in the knapsack");
         return;
     }
     if (output.number_of_recursive_calls == 1 && parameters.combo_core) {
-        instance.init_combo_core(DBG(parameters.info));
-        LOG_FOLD(parameters.info, instance);
+        instance.init_combo_core(FFOT_DBG(parameters.info));
+        FFOT_LOG_FOLD(parameters.info, instance);
     }
 
     // Compute initial lower bound
@@ -182,7 +182,7 @@ void minknap_main(
             parameters.info);
 
     if (output.solution.profit() == output.upper_bound) {
-        LOG_FOLD_END(parameters.info, "lower bound == upper bound");
+        FFOT_LOG_FOLD_END(parameters.info, "lower bound == upper bound");
         return;
     }
 
@@ -194,7 +194,7 @@ void minknap_main(
     d.t = instance.break_item();
     d.w_max = w_bar;
     d.best_state = d.l0.front();
-    LOG_FOLD(parameters.info, instance);
+    FFOT_LOG_FOLD(parameters.info, instance);
     while (!d.l0.empty() && (d.t <= instance.last_item() || d.s >= instance.first_item())) {
         minknap_update_bounds(d); // Update bounds
         if (!parameters.info.check_time()) {
@@ -206,7 +206,7 @@ void minknap_main(
             return;
         }
         if (parameters.stop_if_end && *(parameters.end)) {
-            LOG_FOLD_END(parameters.info, "end");
+            FFOT_LOG_FOLD_END(parameters.info, "end");
             return;
         }
         if (output.solution.profit() == output.upper_bound
@@ -214,7 +214,7 @@ void minknap_main(
             break;
 
         if (d.t <= instance.last_item()) {
-            LOG(parameters.info, "f " << instance.first_item()
+            FFOT_LOG(parameters.info, "f " << instance.first_item()
                     << " s'' " << instance.s_second()
                     << " s' " << instance.s_prime()
                     << " s " << d.s
@@ -235,7 +235,7 @@ void minknap_main(
                 return;
             }
             if (parameters.stop_if_end && *(parameters.end)) {
-                LOG_FOLD_END(parameters.info, "end");
+                FFOT_LOG_FOLD_END(parameters.info, "end");
                 return;
             }
             if (d.best_state.p == output.upper_bound)
@@ -243,7 +243,7 @@ void minknap_main(
         }
 
         if (d.s >= instance.first_item()) {
-            LOG(parameters.info, "f " << instance.first_item()
+            FFOT_LOG(parameters.info, "f " << instance.first_item()
                     << " s'' " << instance.s_second()
                     << " s' " << instance.s_prime()
                     << " s " << d.s
@@ -258,7 +258,7 @@ void minknap_main(
             if (!parameters.info.check_time())
                 break;
             if (parameters.stop_if_end && *(parameters.end)) {
-                LOG_FOLD_END(parameters.info, "end");
+                FFOT_LOG_FOLD_END(parameters.info, "end");
                 return;
             }
             if (d.best_state.p == output.upper_bound)
@@ -272,11 +272,11 @@ void minknap_main(
 
     if (parameters.set_end)
         *(parameters.end) = true;
-    LOG(parameters.info, "end" << std::endl);
+    FFOT_LOG(parameters.info, "end" << std::endl);
     for (std::thread& thread: d.threads)
         thread.join();
     d.threads.clear();
-    LOG(parameters.info, "end2" << std::endl);
+    FFOT_LOG(parameters.info, "end2" << std::endl);
     //if (!d.sur_)
         //*(d.end_) = false;
 
@@ -284,15 +284,15 @@ void minknap_main(
         return;
 
     //assert(best_state_.p >= lb_);
-    LOG_FOLD(parameters.info, instance);
-    instance.set_first_item(d.s + 1 DBG(COMMA parameters.info));
+    FFOT_LOG_FOLD(parameters.info, instance);
+    instance.set_first_item(d.s + 1 FFOT_DBG(FFOT_COMMA parameters.info));
     instance.set_last_item(d.t - 1);
-    LOG(parameters.info, "best_state " << d.best_state << std::endl);
-    LOG(parameters.info, d.psolf.print(d.best_state.sol) << std::endl);
-    instance.fix(d.psolf.vector(d.best_state.sol) DBG(COMMA parameters.info));
+    FFOT_LOG(parameters.info, "best_state " << d.best_state << std::endl);
+    FFOT_LOG(parameters.info, d.psolf.print(d.best_state.sol) << std::endl);
+    instance.fix(d.psolf.vector(d.best_state.sol) FFOT_DBG(FFOT_COMMA parameters.info));
     assert(instance.reduced_capacity() >= 0);
 
-    LOG_FOLD_END(parameters.info, "minknap_main");
+    FFOT_LOG_FOLD_END(parameters.info, "minknap_main");
     minknap_main(instance, parameters, output);
 }
 
@@ -307,20 +307,20 @@ void add_item(MinknapInternalData& d)
     Profit lb = (d.output.number_of_recursive_calls == 1)?
         d.output.lower_bound:
         d.output.lower_bound - 1;
-    LOG_FOLD_START(info, "add_item"
+    FFOT_LOG_FOLD_START(info, "add_item"
             << " s " << d.s
             << " t " << d.t
             << " item " << instance.item(d.t - 1)
             << " lb " << lb
             << std::endl);
     d.psolf.add_item(d.t - 1);
-    LOG(info, "psolf " << d.psolf.print() << std::endl);
+    FFOT_LOG(info, "psolf " << d.psolf.print() << std::endl);
     d.best_state.sol = d.psolf.remove(d.best_state.sol);
     Weight c = instance.capacity();
     Weight wt = instance.item(d.t - 1).w;
     Profit pt = instance.item(d.t - 1).p;
-    ItemPos sx = instance.bound_item_left(d.s, lb DBG(COMMA info));
-    ItemPos tx = instance.bound_item_right(d.t, lb DBG(COMMA info));
+    ItemPos sx = instance.bound_item_left(d.s, lb FFOT_DBG(FFOT_COMMA info));
+    ItemPos tx = instance.bound_item_right(d.t, lb FFOT_DBG(FFOT_COMMA info));
     Weight w_max = instance.capacity() + d.w_max - instance.reduced_solution()->weight();
 
     d.l.clear();
@@ -330,14 +330,14 @@ void add_item(MinknapInternalData& d)
         if (it == d.l0.end() || it->w > it1->w + wt) {
             Weight w = it1->w + wt;
             if (w > w_max) {
-                LOG(info, " ×" << std::endl);
+                FFOT_LOG(info, " ×" << std::endl);
                 it1++;
                 continue;
             }
 
             Profit p = it1->p + pt;
             if (!d.l.empty() && p <= d.l.back().p) {
-                LOG(info, " ×" << std::endl);
+                FFOT_LOG(info, " ×" << std::endl);
                 it1++;
                 continue;
             }
@@ -345,15 +345,15 @@ void add_item(MinknapInternalData& d)
             Profit ub = (w <= c)?
                 ub_dembo(instance, tx, p, c - w):
                 ub_dembo_rev(instance, sx, p, c - w);
-            LOG(info, " ub " << ub << " lb " << lb);
+            FFOT_LOG(info, " ub " << ub << " lb " << lb);
             if (ub <= lb) {
-                LOG(info, " ×" << std::endl);
+                FFOT_LOG(info, " ×" << std::endl);
                 it1++;
                 continue;
             }
 
             MinknapState s1{w, p, d.psolf.add(it1->sol)};
-            LOG(info, "state " << *it1 << " => " << s1);
+            FFOT_LOG(info, "state " << *it1 << " => " << s1);
 
             // Update lower bound
             if (s1.w <= c && s1.p > lb) {
@@ -372,20 +372,20 @@ void add_item(MinknapInternalData& d)
             } else {
                 d.l.push_back(s1);
             }
-            LOG(info, " ok" << std::endl);
+            FFOT_LOG(info, " ok" << std::endl);
             it1++;
         } else {
             assert(it != d.l0.end());
-            LOG(info, "state " << *it);
+            FFOT_LOG(info, "state " << *it);
 
             if (it->w > w_max) {
-                LOG(info, " ×" << std::endl);
+                FFOT_LOG(info, " ×" << std::endl);
                 it++;
                 continue;
             }
 
             if (!d.l.empty() && it->p <= d.l.back().p) {
-                LOG(info, " ×" << std::endl);
+                FFOT_LOG(info, " ×" << std::endl);
                 it++;
                 continue;
             }
@@ -393,9 +393,9 @@ void add_item(MinknapInternalData& d)
             Profit ub = (it->w <= c)?
                 ub_dembo(instance, tx, it->p, c - it->w):
                 ub_dembo_rev(instance, sx, it->p, c - it->w);
-            LOG(info, " ub " << ub << " lb " << lb);
+            FFOT_LOG(info, " ub " << ub << " lb " << lb);
             if (ub <= lb) {
-                LOG(info, " ×" << std::endl);
+                FFOT_LOG(info, " ×" << std::endl);
                 it++;
                 continue;
             }
@@ -406,12 +406,12 @@ void add_item(MinknapInternalData& d)
             } else {
                 d.l.push_back(*it);
             }
-            LOG(info, " ok" << std::endl);
+            FFOT_LOG(info, " ok" << std::endl);
             ++it;
         }
     }
     d.l0.swap(d.l);
-    LOG_FOLD_END(info, "add_item");
+    FFOT_LOG_FOLD_END(info, "add_item");
 }
 
 void remove_item(MinknapInternalData& d)
@@ -421,20 +421,20 @@ void remove_item(MinknapInternalData& d)
     Profit lb = (d.output.number_of_recursive_calls == 1)?
         d.output.lower_bound:
         d.output.lower_bound - 1;
-    LOG_FOLD_START(info, "remove_item"
+    FFOT_LOG_FOLD_START(info, "remove_item"
             << " s " << d.s
             << " t " << d.t
             << " item " << instance.item(d.s + 1)
             << " lb " << lb << std::endl);
     d.psolf.add_item(d.s + 1);
-    LOG(info, "psolf " << d.psolf.print() << std::endl);
+    FFOT_LOG(info, "psolf " << d.psolf.print() << std::endl);
     d.best_state.sol = d.psolf.add(d.best_state.sol);
     Weight c = instance.capacity();
     Weight ws = instance.item(d.s + 1).w;
     Profit ps = instance.item(d.s + 1).p;
     d.w_max -= ws;
-    ItemPos sx = instance.bound_item_left(d.s, lb DBG(COMMA info));
-    ItemPos tx = instance.bound_item_right(d.t, lb DBG(COMMA info));
+    ItemPos sx = instance.bound_item_left(d.s, lb FFOT_DBG(FFOT_COMMA info));
+    ItemPos tx = instance.bound_item_right(d.t, lb FFOT_DBG(FFOT_COMMA info));
     Weight w_max = instance.capacity() + d.w_max - instance.reduced_solution()->weight();
 
     d.l.clear();
@@ -442,16 +442,16 @@ void remove_item(MinknapInternalData& d)
     std::vector<MinknapState>::iterator it1 = d.l0.begin();
     while (it != d.l0.end() || it1 != d.l0.end()) {
         if (it1 == d.l0.end() || it->w <= it1->w - ws) {
-            LOG(info, "state " << *it);
+            FFOT_LOG(info, "state " << *it);
 
             if (it->w > w_max) {
-                LOG(info, " ×" << std::endl);
+                FFOT_LOG(info, " ×" << std::endl);
                 it++;
                 continue;
             }
 
             if (!d.l.empty() && it->p <= d.l.back().p) {
-                LOG(info, " ×" << std::endl);
+                FFOT_LOG(info, " ×" << std::endl);
                 it++;
                 continue;
             }
@@ -459,9 +459,9 @@ void remove_item(MinknapInternalData& d)
             Profit ub = (it->w <= c)?
                 ub_dembo(instance, tx, it->p, c - it->w):
                 ub_dembo_rev(instance, sx, it->p, c - it->w);
-            LOG(info, " ub " << ub << " lb " << lb);
+            FFOT_LOG(info, " ub " << ub << " lb " << lb);
             if (ub <= lb) {
-                LOG(info, " ×" << std::endl);
+                FFOT_LOG(info, " ×" << std::endl);
                 it++;
                 continue;
             }
@@ -472,19 +472,19 @@ void remove_item(MinknapInternalData& d)
             } else {
                 d.l.push_back(*it);
             }
-            LOG(info, " ok" << std::endl);
+            FFOT_LOG(info, " ok" << std::endl);
             ++it;
         } else {
             Weight w = it1->w - ws;
             if (w > w_max) {
-                LOG(info, " ×" << std::endl);
+                FFOT_LOG(info, " ×" << std::endl);
                 it1++;
                 continue;
             }
 
             Profit p = it1->p - ps;
             if (!d.l.empty() && p <= d.l.back().p) {
-                LOG(info, " ×" << std::endl);
+                FFOT_LOG(info, " ×" << std::endl);
                 it1++;
                 continue;
             }
@@ -492,15 +492,15 @@ void remove_item(MinknapInternalData& d)
             Profit ub = (w <= c)?
                 ub_dembo(instance, tx, p, c - w):
                 ub_dembo_rev(instance, sx, p, c - w);
-            LOG(info, " ub " << ub << " lb " << lb);
+            FFOT_LOG(info, " ub " << ub << " lb " << lb);
             if (ub <= lb) {
-                LOG(info, " ×" << std::endl);
+                FFOT_LOG(info, " ×" << std::endl);
                 it1++;
                 continue;
             }
 
             MinknapState s1{it1->w - ws, it1->p - ps, d.psolf.remove(it1->sol)};
-            LOG(info, "state " << *it1 << " => " << s1);
+            FFOT_LOG(info, "state " << *it1 << " => " << s1);
 
             // Update lower bound
             if (s1.w <= c && s1.p > lb) {
@@ -519,12 +519,12 @@ void remove_item(MinknapInternalData& d)
             } else {
                 d.l.push_back(s1);
             }
-            LOG(info, " ok" << std::endl);
+            FFOT_LOG(info, " ok" << std::endl);
             it1++;
         }
     }
     d.l0.swap(d.l);
-    LOG_FOLD_END(info, "remove_item");
+    FFOT_LOG_FOLD_END(info, "remove_item");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -534,7 +534,7 @@ void remove_item(MinknapInternalData& d)
 ItemPos minknap_find_state(MinknapInternalData& d, bool right)
 {
     Instance& instance = d.instance;
-    LOG_FOLD_START(d.parameters.info, "minknap_find_state" << std::endl);
+    FFOT_LOG_FOLD_START(d.parameters.info, "minknap_find_state" << std::endl);
 
     Profit lb0 = 0;
     ItemIdx j = -1;
@@ -545,7 +545,7 @@ ItemPos minknap_find_state(MinknapInternalData& d, bool right)
             continue;
         if (instance.t_prime() < t && t <= instance.t_second())
             continue;
-        LOG(d.parameters.info, "t " << t << std::endl);
+        FFOT_LOG(d.parameters.info, "t " << t << std::endl);
         Weight w = (right)?
             instance.capacity() - instance.item(t).w:
             instance.capacity() + instance.item(t).w;
@@ -554,7 +554,7 @@ ItemPos minknap_find_state(MinknapInternalData& d, bool right)
         ItemPos f = 0;
         ItemPos l = d.l0.size() - 1; // l0_[l] > w
         while (f + 1 < l) {
-            LOG(d.parameters.info, "f " << f << " l " << l << std::endl);
+            FFOT_LOG(d.parameters.info, "f " << f << " l " << l << std::endl);
             ItemPos m = (f + l) / 2;
             if (d.l0[m].w >= w) {
                 assert(l != m);
@@ -564,10 +564,10 @@ ItemPos minknap_find_state(MinknapInternalData& d, bool right)
                 f = m;
             }
         }
-        LOG(d.parameters.info, "f " << f << " l " << l << std::endl);
+        FFOT_LOG(d.parameters.info, "f " << f << " l " << l << std::endl);
         if (f != (StateIdx)d.l0.size() - 1 && d.l0[f + 1].w <= w)
             f++;
-        LOG(d.parameters.info, "f " << f << " l " << l << std::endl);
+        FFOT_LOG(d.parameters.info, "f " << f << " l " << l << std::endl);
         assert(f < (StateIdx)d.l0.size());
         assert(d.l0[f].w <= w);
         assert(f == (StateIdx)d.l0.size() - 1 || d.l0[f + 1].w > w);
@@ -579,7 +579,7 @@ ItemPos minknap_find_state(MinknapInternalData& d, bool right)
             lb0 = lb;
         }
     }
-    LOG_FOLD_END(d.parameters.info, "minknap_find_state");
+    FFOT_LOG_FOLD_END(d.parameters.info, "minknap_find_state");
     return j;
 }
 
@@ -616,13 +616,13 @@ void minknap_update_bounds(MinknapInternalData& d)
     }
     if (d.parameters.pairing >= 0
             && d.parameters.pairing <= (StateIdx)d.l0.size()) {
-        LOG_FOLD_START(info, "pairing" << std::endl);
+        FFOT_LOG_FOLD_START(info, "pairing" << std::endl);
         d.parameters.pairing *= 10;
 
         if (d.t <= instance.last_item()) {
             ItemPos j = minknap_find_state(d, true);
             if (j != -1) {
-                instance.add_item_to_core(d.s, d.t, j DBG(COMMA info));
+                instance.add_item_to_core(d.s, d.t, j FFOT_DBG(FFOT_COMMA info));
                 ++d.t;
                 add_item(d);
                 if (d.output.solution.profit() == d.output.upper_bound
@@ -635,12 +635,12 @@ void minknap_update_bounds(MinknapInternalData& d)
         if (d.s >= instance.first_item()) {
             ItemPos j = minknap_find_state(d, false);
             if (j != -1) {
-                instance.add_item_to_core(d.s, d.t, j DBG(COMMA info));
+                instance.add_item_to_core(d.s, d.t, j FFOT_DBG(FFOT_COMMA info));
                 --d.s;
                 remove_item(d);
             }
         }
-        LOG_FOLD_END(info, "pairing");
+        FFOT_LOG_FOLD_END(info, "pairing");
     }
 }
 

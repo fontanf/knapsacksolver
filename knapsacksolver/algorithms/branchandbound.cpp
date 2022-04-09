@@ -57,19 +57,19 @@ void branchandbound_rec(BranchAndBoundData& d)
 
 Output knapsacksolver::branchandbound(Instance& instance, bool sort, Info info)
 {
-    VER(info, "*** branchandbound" << ((sort)? " (sort)": "") << " ***" << std::endl);
+    FFOT_VER(info, "*** branchandbound" << ((sort)? " (sort)": "") << " ***" << std::endl);
     Output output(instance, info);
 
     ItemIdx n = instance.reduced_number_of_items();
     if (n == 0) {
         output.update_upper_bound(0, std::stringstream("no item"), info);
-        LOG_FOLD_END(info, "no item");
+        FFOT_LOG_FOLD_END(info, "no item");
         return output.algorithm_end(info);
     }
 
     ItemPos j_max = -1;
     if (sort) {
-        instance.sort(DBG(info));
+        instance.sort(FFOT_DBG(info));
         if (instance.break_item() == instance.last_item() + 1) {
             if (output.lower_bound < instance.break_solution()->profit()) {
                 output.update_solution(
@@ -81,7 +81,7 @@ Output knapsacksolver::branchandbound(Instance& instance, bool sort, Info info)
                     instance.break_solution()->profit(),
                     std::stringstream(""),
                     info);
-            LOG_FOLD_END(info, "all items fit in the knapsack");
+            FFOT_LOG_FOLD_END(info, "all items fit in the knapsack");
             return output.algorithm_end(info);
         }
         auto g_output = greedynlogn(instance);
@@ -98,7 +98,7 @@ Output knapsacksolver::branchandbound(Instance& instance, bool sort, Info info)
                     output.lower_bound,
                     std::stringstream("negative capacity after reduction"),
                     info);
-            LOG_FOLD_END(info, "c < 0");
+            FFOT_LOG_FOLD_END(info, "c < 0");
             return output.algorithm_end(info);
         } else if (n == 0 || instance.reduced_capacity() == 0) {
             if (output.lower_bound < instance.reduced_solution()->profit()) {
@@ -111,7 +111,7 @@ Output knapsacksolver::branchandbound(Instance& instance, bool sort, Info info)
                     output.lower_bound,
                     std::stringstream(""),
                     info);
-            LOG_FOLD_END(info, "no item or null capacity after reduction");
+            FFOT_LOG_FOLD_END(info, "no item or null capacity after reduction");
             return output.algorithm_end(info);
         } else if (instance.break_item() == instance.last_item() + 1) {
             if (output.lower_bound < instance.break_solution()->profit()) {
@@ -124,11 +124,11 @@ Output knapsacksolver::branchandbound(Instance& instance, bool sort, Info info)
                     output.lower_bound,
                     std::stringstream(""),
                     info);
-            LOG_FOLD_END(info, "all items fit in the knapsack after reduction");
+            FFOT_LOG_FOLD_END(info, "all items fit in the knapsack after reduction");
             return output.algorithm_end(info);
         }
     } else {
-        j_max = instance.max_efficiency_item(DBG(info));
+        j_max = instance.max_efficiency_item(FFOT_DBG(info));
     }
 
     Profit ub = (!sort)? ub_0(instance, 0, 0, instance.capacity(), j_max):
@@ -157,7 +157,7 @@ Output knapsacksolver::branchandbound(Instance& instance, bool sort, Info info)
                 info);
     }
 
-    LOG_FOLD_END(info, "");
+    FFOT_LOG_FOLD_END(info, "");
     return output.algorithm_end(info);
 }
 

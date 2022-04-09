@@ -159,7 +159,7 @@ std::string Solution::to_string_items() const
 Output::Output(const Instance& instance, Info& info): solution(instance)
 {
     info.reset_time();
-    VER(info,
+    FFOT_VER(info,
                std::setw(10) << "T (ms)"
             << std::setw(15) << "LB"
             << std::setw(15) << "UB"
@@ -181,7 +181,7 @@ void Output::print(Info& info, const std::stringstream& s) const
     std::string gap_str = (upper_bound == -1)? "inf": std::to_string(upper_bound - lower_bound);
     double t = round(info.elapsed_time() * 10000) / 10;
 
-    VER(info,
+    FFOT_VER(info,
                std::setw(10) << t
             << std::setw(15) << lower_bound
             << std::setw(15) << ub_str
@@ -209,8 +209,8 @@ void Output::update_lower_bound(
         info.output->number_of_solutions++;
         double t = round(info.elapsed_time() * 10000) / 10;
         std::string sol_str = "Solution" + std::to_string(info.output->number_of_solutions);
-        PUT(info, sol_str, "Cost", lower_bound);
-        PUT(info, sol_str, "Time", t);
+        FFOT_PUT(info, sol_str, "Cost", lower_bound);
+        FFOT_PUT(info, sol_str, "Time", t);
         if (!info.output->only_write_at_the_end)
             solution.write(info.output->certificate_path);
     }
@@ -240,8 +240,8 @@ void Output::update_solution(
         info.output->number_of_solutions++;
         double t = round(info.elapsed_time() * 10000) / 10;
         std::string sol_str = "Solution" + std::to_string(info.output->number_of_solutions);
-        PUT(info, sol_str, "Cost", lower_bound);
-        PUT(info, sol_str, "Time", t);
+        FFOT_PUT(info, sol_str, "Cost", lower_bound);
+        FFOT_PUT(info, sol_str, "Time", t);
         if (!info.output->only_write_at_the_end)
             solution.write(info.output->certificate_path);
     }
@@ -266,8 +266,8 @@ void Output::update_upper_bound(
         info.output->number_of_bounds++;
         double t = round(info.elapsed_time() * 10000) / 10;
         std::string sol_str = "Bound" + std::to_string(info.output->number_of_bounds);
-        PUT(info, sol_str, "Cost", upper_bound);
-        PUT(info, sol_str, "Time", t);
+        FFOT_PUT(info, sol_str, "Cost", upper_bound);
+        FFOT_PUT(info, sol_str, "Time", t);
         if (!info.output->only_write_at_the_end)
             solution.write(info.output->certificate_path);
     }
@@ -284,11 +284,11 @@ Output& Output::algorithm_end(Info& info)
     double gap = (lower_bound == 0 || upper_bound == -1)?
         std::numeric_limits<double>::infinity():
         (double)(10000 * (upper_bound - lower_bound) / lower_bound) / 100;
-    PUT(info, "Solution", "Value", lower_bound);
-    PUT(info, "Bound", "Value", upper_bound);
-    PUT(info, "Solution", "Time", t);
-    PUT(info, "Bound", "Time", t);
-    VER(info,
+    FFOT_PUT(info, "Solution", "Value", lower_bound);
+    FFOT_PUT(info, "Bound", "Value", upper_bound);
+    FFOT_PUT(info, "Solution", "Time", t);
+    FFOT_PUT(info, "Bound", "Time", t);
+    FFOT_VER(info,
             std::endl
             << "Final statistics" << std::endl
             << "----------------" << std::endl
@@ -307,9 +307,9 @@ Output& Output::algorithm_end(Info& info)
 Profit knapsacksolver::algorithm_end(Profit upper_bound, Info& info)
 {
     double t = round(info.elapsed_time() * 10000) / 10;
-    PUT(info, "Bound", "Value", upper_bound);
-    PUT(info, "Bound", "Time", t);
-    VER(info,
+    FFOT_PUT(info, "Bound", "Value", upper_bound);
+    FFOT_PUT(info, "Bound", "Time", t);
+    FFOT_VER(info,
             std::endl
             << "Final statistics" << std::endl
             << "----------------" << std::endl
