@@ -152,8 +152,8 @@ ExpknapOutput knapsacksolver::expknap(
         ExpknapOptionalParameters parameters)
 {
     init_display(instance, parameters.info);
-    FFOT_VER(parameters.info,
-               "Algorithm" << std::endl
+    parameters.info.os()
+            << "Algorithm" << std::endl
             << "---------" << std::endl
             << "Expknap" << std::endl
             << std::endl
@@ -162,7 +162,7 @@ ExpknapOutput knapsacksolver::expknap(
             << "Greedy:                 " << parameters.greedy << std::endl
             << "Surrogate relaxation:   " << parameters.surrelax << std::endl
             << "Combo core:             " << parameters.combo_core << std::endl
-            << std::endl);
+            << std::endl;
 
     FFOT_LOG_FOLD_START(parameters.info, "*** expknap"
             << ((parameters.greedy)? " -g": "")

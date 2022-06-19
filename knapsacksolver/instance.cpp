@@ -1015,10 +1015,10 @@ void Instance::reduce1(Profit lb, Info& info)
 
     remove_big_items(FFOT_DBG(info));
 
-    FFOT_VER(info, "Reduction: " << lb << " - "
+    info.os() << "Reduction: " << lb << " - "
             << "n " << reduced_number_of_items() << "/" << number_of_items()
             << " ("  << ((double)reduced_number_of_items() / (double)number_of_items()) << ") -"
-            << " c " << ((double)reduced_capacity()    / (double)capacity()) << std::endl);
+            << " c " << ((double)reduced_capacity()    / (double)capacity()) << std::endl;
     FFOT_LOG(info, "n " << reduced_number_of_items() << "/" << number_of_items() << std::endl);
     FFOT_LOG(info, "c " << reduced_capacity() << "/" << capacity() << std::endl);
     FFOT_LOG_FOLD_END(info, "reduce1");
@@ -1128,10 +1128,10 @@ void Instance::reduce2(Profit lb, Info& info)
     remove_big_items(FFOT_DBG(info));
     compute_break_item(FFOT_DBG(info));
 
-    FFOT_VER(info, "Reduction: " << lb << " - "
+    info.os() << "Reduction: " << lb << " - "
             << "n " << reduced_number_of_items() << "/" << number_of_items()
             << " ("  << ((double)reduced_number_of_items() / (double)number_of_items()) << ") -"
-            << " c " << ((double)reduced_capacity()    / (double)capacity()) << std::endl);
+            << " c " << ((double)reduced_capacity()    / (double)capacity()) << std::endl;
     FFOT_LOG(info, "n " << reduced_number_of_items() << "/" << number_of_items() << std::endl);
     FFOT_LOG(info, "c " << reduced_capacity() << "/" << capacity() << std::endl);
     FFOT_LOG(info, "reduced solution " << reduced_solution()->to_string_items() << std::endl);
@@ -1405,8 +1405,8 @@ void knapsacksolver::init_display(
         const Instance& instance,
         optimizationtools::Info& info)
 {
-    FFOT_VER(info,
-               "=====================================" << std::endl
+    info.os()
+            << "=====================================" << std::endl
             << "           Knapsack Solver           " << std::endl
             << "=====================================" << std::endl
             << std::endl
@@ -1414,5 +1414,5 @@ void knapsacksolver::init_display(
             << "--------" << std::endl
             << "Number of items:  " << instance.number_of_items() << std::endl
             << "Capacity:         " << instance.capacity() << std::endl
-            << std::endl);
+            << std::endl;
 }

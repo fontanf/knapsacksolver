@@ -57,7 +57,7 @@ void branchandbound_rec(BranchAndBoundData& d)
 
 Output knapsacksolver::branchandbound(Instance& instance, bool sort, Info info)
 {
-    FFOT_VER(info, "*** branchandbound" << ((sort)? " (sort)": "") << " ***" << std::endl);
+    info.os() << "*** branchandbound" << ((sort)? " (sort)": "") << " ***" << std::endl;
     Output output(instance, info);
 
     ItemIdx n = instance.reduced_number_of_items();

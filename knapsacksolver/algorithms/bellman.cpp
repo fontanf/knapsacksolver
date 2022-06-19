@@ -20,8 +20,8 @@ Output knapsacksolver::bellman_array(
         Info info)
 {
     init_display(instance, info);
-    FFOT_VER(info,
-               "Algorithm" << std::endl
+    info.os()
+            << "Algorithm" << std::endl
             << "---------" << std::endl
             << "Dynamic Programming - Bellman" << std::endl
             << std::endl
@@ -29,7 +29,7 @@ Output knapsacksolver::bellman_array(
             << "----------" << std::endl
             << "Implementation:                  iterative" << std::endl
             << "Method for retrieving solution:  no solution" << std::endl
-            << std::endl);
+            << std::endl;
 
     Output output(instance, info);
     Weight c = instance.capacity();
@@ -90,8 +90,8 @@ Output knapsacksolver::bellmanpar_array(
         Info info)
 {
     init_display(instance, info);
-    FFOT_VER(info,
-               "Algorithm" << std::endl
+    info.os()
+            << "Algorithm" << std::endl
             << "---------" << std::endl
             << "Dynamic Programming - Parallel Bellman" << std::endl
             << std::endl
@@ -99,7 +99,7 @@ Output knapsacksolver::bellmanpar_array(
             << "----------" << std::endl
             << "Implementation:                  iterative" << std::endl
             << "Method for retrieving solution:  no solution" << std::endl
-            << std::endl);
+            << std::endl;
 
     Output output(instance, info);
     ItemIdx n = instance.number_of_items();
@@ -199,8 +199,8 @@ Output knapsacksolver::bellmanrec(
         Info info)
 {
     init_display(instance, info);
-    FFOT_VER(info,
-               "Algorithm" << std::endl
+    info.os()
+            << "Algorithm" << std::endl
             << "---------" << std::endl
             << "Dynamic Programming - Bellman" << std::endl
             << std::endl
@@ -208,7 +208,7 @@ Output knapsacksolver::bellmanrec(
             << "----------" << std::endl
             << "Implementation:                  recursive" << std::endl
             << "Method for retrieving solution:  no solution" << std::endl
-            << std::endl);
+            << std::endl;
 
     Output output(instance, info);
 
@@ -254,8 +254,8 @@ Output knapsacksolver::bellman_array_all(
         Info info)
 {
     init_display(instance, info);
-    FFOT_VER(info,
-               "Algorithm" << std::endl
+    info.os()
+            << "Algorithm" << std::endl
             << "---------" << std::endl
             << "Dynamic Programming - Bellman" << std::endl
             << std::endl
@@ -263,7 +263,7 @@ Output knapsacksolver::bellman_array_all(
             << "----------" << std::endl
             << "Implementation:                  iterative" << std::endl
             << "Method for retrieving solution:  store all states" << std::endl
-            << std::endl);
+            << std::endl;
 
     Output output(instance, info);
 
@@ -328,8 +328,8 @@ Output knapsacksolver::bellman_array_one(
         Info info)
 {
     init_display(instance, info);
-    FFOT_VER(info,
-               "Algorithm" << std::endl
+    info.os()
+            << "Algorithm" << std::endl
             << "---------" << std::endl
             << "Dynamic Programming - Bellman" << std::endl
             << std::endl
@@ -337,7 +337,7 @@ Output knapsacksolver::bellman_array_one(
             << "----------" << std::endl
             << "Implementation:                  iterative" << std::endl
             << "Method for retrieving solution:  single line" << std::endl
-            << std::endl);
+            << std::endl;
 
     Output output(instance, info);
 
@@ -425,9 +425,9 @@ end:
     }
     output.update_solution(sol, std::stringstream(), info);
 
-    FFOT_PUT(info, "Algorithm", "Iterations", it);
+    info.add_to_json("Algorithm", "Iterations", it);
     output.algorithm_end(info);
-    FFOT_VER(info, "Iterations: " << it << std::endl);
+    info.os() << "Iterations: " << it << std::endl;
     return output;
 }
 
@@ -441,8 +441,8 @@ Output knapsacksolver::bellman_array_part(
         Info info)
 {
     init_display(instance, info);
-    FFOT_VER(info,
-               "Algorithm" << std::endl
+    info.os()
+            << "Algorithm" << std::endl
             << "---------" << std::endl
             << "Dynamic Programming - Bellman" << std::endl
             << std::endl
@@ -450,7 +450,7 @@ Output knapsacksolver::bellman_array_part(
             << "----------" << std::endl
             << "Implementation:                  iterative" << std::endl
             << "Method for retrieving solution:  partial solution in states" << std::endl
-            << std::endl);
+            << std::endl;
 
     Output output(instance, info);
 
@@ -533,9 +533,9 @@ end:
     }
     output.update_solution(sol, std::stringstream(), info);
 
-    FFOT_PUT(info, "Algorithm", "Iterations", it);
+    info.add_to_json("Algorithm", "Iterations", it);
     output.algorithm_end(info);
-    FFOT_VER(info, "Iterations: " << it << std::endl);
+    info.os() << "Iterations: " << it << std::endl;
     return output;
 }
 
@@ -630,8 +630,8 @@ Output knapsacksolver::bellman_array_rec(
         Info info)
 {
     init_display(instance, info);
-    FFOT_VER(info,
-               "Algorithm" << std::endl
+    info.os()
+            << "Algorithm" << std::endl
             << "---------" << std::endl
             << "Dynamic Programming - Bellman" << std::endl
             << std::endl
@@ -639,7 +639,7 @@ Output knapsacksolver::bellman_array_rec(
             << "----------" << std::endl
             << "Implementation:                  iterative" << std::endl
             << "Method for retrieving solution:  recursive scheme" << std::endl
-            << std::endl);
+            << std::endl;
 
     Output output(instance, info);
 
@@ -713,8 +713,8 @@ Output knapsacksolver::bellman_list(
         Info info)
 {
     init_display(instance, info);
-    FFOT_VER(info,
-               "Algorithm" << std::endl
+    info.os()
+            << "Algorithm" << std::endl
             << "---------" << std::endl
             << "Dynamic Programming - Bellman" << std::endl
             << std::endl
@@ -723,7 +723,7 @@ Output knapsacksolver::bellman_list(
             << "Implementation:                  states" << std::endl
             << "Method for retrieving solution:  no solution" << std::endl
             << "Sort:                            " << sort << std::endl
-            << std::endl);
+            << std::endl;
 
     FFOT_LOG_FOLD_START(info, "bellman sort " << sort << std::endl);
     Output output(instance, info);
@@ -1053,8 +1053,8 @@ Output knapsacksolver::bellman_list_rec(
         const Instance& instance,
         Info info)
 {
-    FFOT_VER(info,
-               "Algorithm" << std::endl
+    info.os()
+            << "Algorithm" << std::endl
             << "---------" << std::endl
             << "Dynamic Programming - Bellman" << std::endl
             << std::endl
@@ -1062,7 +1062,7 @@ Output knapsacksolver::bellman_list_rec(
             << "----------" << std::endl
             << "Implementation:                  states" << std::endl
             << "Method for retrieving solution:  recursive scheme" << std::endl
-            << std::endl);
+            << std::endl;
 
     FFOT_LOG_FOLD_START(info, "*** bellman (list, rec) ***" << std::endl);
     Output output(instance, info);

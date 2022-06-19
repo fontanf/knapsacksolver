@@ -404,11 +404,11 @@ Output knapsacksolver::surrelax(
         Info info)
 {
     init_display(instance, info);
-    FFOT_VER(info,
-               "Algorithm" << std::endl
+    info.os()
+            << "Algorithm" << std::endl
             << "---------" << std::endl
             << "Surrogate Relaxation" << std::endl
-            << std::endl);
+            << std::endl;
 
     Output output(instance, info);
 
@@ -436,11 +436,11 @@ Output knapsacksolver::surrelax_minknap(
         Info info)
 {
     init_display(instance, info);
-    FFOT_VER(info,
-               "Algorithm" << std::endl
+    info.os()
+            << "Algorithm" << std::endl
             << "---------" << std::endl
             << "Surrogate Relaxation / Minknap" << std::endl
-            << std::endl);
+            << std::endl;
 
     Output output(instance, info);
 

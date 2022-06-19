@@ -21,8 +21,8 @@ BalknapOutput knapsacksolver::balknap(
         BalknapOptionalParameters parameters)
 {
     init_display(instance, parameters.info);
-    FFOT_VER(parameters.info,
-               "Algorithm" << std::endl
+    parameters.info.os()
+            << "Algorithm" << std::endl
             << "---------" << std::endl
             << "Balknap" << std::endl
             << std::endl
@@ -33,7 +33,7 @@ BalknapOutput knapsacksolver::balknap(
             << "n log(n) Greedy:        " << parameters.greedynlogn << std::endl
             << "Surrogate relaxation:   " << parameters.surrelax << std::endl
             << "Partial solution size:  " << parameters.partial_solution_size << std::endl
-            << std::endl);
+            << std::endl;
 
     FFOT_LOG_FOLD_START(parameters.info, "*** balknap"
             << " -k " << parameters.partial_solution_size

@@ -15,8 +15,8 @@ Output knapsacksolver::dpprofits_array(
         Info info)
 {
     init_display(instance, info);
-    FFOT_VER(info,
-               "Algorithm" << std::endl
+    info.os()
+            << "Algorithm" << std::endl
             << "---------" << std::endl
             << "Dynamic Programming - By Profits" << std::endl
             << std::endl
@@ -24,7 +24,7 @@ Output knapsacksolver::dpprofits_array(
             << "----------" << std::endl
             << "Implementation:                  iterative" << std::endl
             << "Method for retrieving solution:  no solution" << std::endl
-            << std::endl);
+            << std::endl;
 
     Output output(instance, info);
 
@@ -84,8 +84,8 @@ Output knapsacksolver::dpprofits_array(
 Output knapsacksolver::dpprofits_array_all(const Instance& instance, Info info)
 {
     init_display(instance, info);
-    FFOT_VER(info,
-               "Algorithm" << std::endl
+    info.os()
+            << "Algorithm" << std::endl
             << "---------" << std::endl
             << "Dynamic Programming - By Profits" << std::endl
             << std::endl
@@ -93,7 +93,7 @@ Output knapsacksolver::dpprofits_array_all(const Instance& instance, Info info)
             << "----------" << std::endl
             << "Implementation:                  iterative" << std::endl
             << "Method for retrieving solution:  store all states" << std::endl
-            << std::endl);
+            << std::endl;
 
     Output output(instance, info);
 

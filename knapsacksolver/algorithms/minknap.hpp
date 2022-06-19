@@ -57,9 +57,9 @@ struct MinknapOutput: Output
 
     MinknapOutput& algorithm_end(Info& info)
     {
-        FFOT_PUT(info, "Algorithm", "RecursiveCallNumber", number_of_recursive_calls);
+        info.add_to_json("Algorithm", "RecursiveCallNumber", number_of_recursive_calls);
         Output::algorithm_end(info);
-        FFOT_VER(info, "Number of recursive calls:  " << number_of_recursive_calls << std::endl);
+        info.os() << "Number of recursive calls:  " << number_of_recursive_calls << std::endl;
         return *this;
     }
 };

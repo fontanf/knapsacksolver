@@ -5,7 +5,7 @@ using namespace knapsacksolver;
 Output knapsacksolver::greedy(const Instance& instance, Info info)
 {
     FFOT_LOG_FOLD_START(info, "greedy" << std::endl);
-    FFOT_VER(info, "*** greedy ***" << std::endl);
+    info.os() << "*** greedy ***" << std::endl;
     Output output(instance, info);
 
     assert(instance.break_item() != -1);
@@ -62,7 +62,7 @@ Output knapsacksolver::greedy(const Instance& instance, Info info)
     }
 
     FFOT_LOG_FOLD_END(info, "greedy " << output.solution.profit());
-    FFOT_PUT(info, "Algorithm", "Best", best_algo);
+    info.add_to_json("Algorithm", "Best", best_algo);
     return output.algorithm_end(info);
 }
 

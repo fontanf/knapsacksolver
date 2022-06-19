@@ -4,7 +4,7 @@ using namespace knapsacksolver;
 
 Profit knapsacksolver::ub_dantzig(const Instance& instance, Info info)
 {
-    FFOT_VER(info, "*** dantzig ***" << std::endl);
+    info.os() << "*** dantzig ***" << std::endl;
     assert(instance.sort_status() >= 1);
 
     ItemPos b = instance.break_item();

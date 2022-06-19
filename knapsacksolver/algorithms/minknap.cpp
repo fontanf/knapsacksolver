@@ -19,8 +19,8 @@ MinknapOutput knapsacksolver::minknap(
         MinknapOptionalParameters parameters)
 {
     init_display(instance, parameters.info);
-    FFOT_VER(parameters.info,
-               "Algorithm" << std::endl
+    parameters.info.os()
+            << "Algorithm" << std::endl
             << "---------" << std::endl
             << "Minknap" << std::endl
             << std::endl
@@ -31,7 +31,7 @@ MinknapOutput knapsacksolver::minknap(
             << "Surrogate relaxation:   " << parameters.surrelax << std::endl
             << "Combo core:             " << parameters.combo_core << std::endl
             << "Partial solution size:  " << parameters.partial_solution_size << std::endl
-            << std::endl);
+            << std::endl;
 
     FFOT_LOG_FOLD_START(parameters.info, "*** minknap"
             << " -k " << parameters.partial_solution_size
