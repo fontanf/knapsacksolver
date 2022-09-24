@@ -304,7 +304,7 @@ void knapsacksolver::solvesurrelax(
                 ub,
                 std::stringstream("surrogate ins res (ub)"),
                 info);
-    } else if (min_card(instance, output.lower_bound) == b + 1 FFOT_DBG(FFOT_COMMA info)) {
+    } else if (min_card(instance, output.lower_bound FFOT_DBG(FFOT_COMMA info)) == b + 1) {
         UBS o = surrogate_solve(instance, b + 1, s_min, 0, end FFOT_DBG(FFOT_COMMA info));
         if (*end)
             return;
