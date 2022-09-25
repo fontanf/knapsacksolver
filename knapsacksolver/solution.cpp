@@ -280,13 +280,13 @@ Output& Output::algorithm_end(Info& info)
     double t = round(info.elapsed_time() * 10000) / 10;
     std::string ub_str = (upper_bound == -1)? "inf": std::to_string(upper_bound);
     std::string gap_str = (upper_bound == -1)? "inf": std::to_string(upper_bound - lower_bound);
-    std::string sol_str = (solution.feasible() && solution.profit() == lower_bound)? "OK": "none";
+    std::string sol_str = (solution.feasible() && solution.profit() == lower_bound)? "1": "0";
     double gap = (lower_bound == 0 || upper_bound == -1)?
         std::numeric_limits<double>::infinity():
         (double)(10000 * (upper_bound - lower_bound) / lower_bound) / 100;
     info.add_to_json("Solution", "Value", lower_bound);
-    info.add_to_json("Bound", "Value", upper_bound);
     info.add_to_json("Solution", "Time", t);
+    info.add_to_json("Bound", "Value", upper_bound);
     info.add_to_json("Bound", "Time", t);
     info.os()
             << std::endl
@@ -297,6 +297,8 @@ Output& Output::algorithm_end(Info& info)
             << "Gap:                        " << gap_str << std::endl
             << "Gap (%):                    " << gap << std::endl
             << "Solution:                   " << sol_str << std::endl
+            << "Number of items:            " << solution.number_of_items() << std::endl
+            << "Weight:                     " << solution.weight() << std::endl
             << "Time (ms):                  " << t << std::endl;
 
     info.write_json_output();
