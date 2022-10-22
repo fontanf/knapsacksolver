@@ -13,11 +13,14 @@ using namespace knapsacksolver;
 
 Instance::Instance(): f_(0), l_(-1) { }
 
-void Instance::add_item(Weight w, Profit p)
+void Instance::add_item(Weight weight, Profit profit)
 {
-    ItemIdx j = items_.size();
-    items_.push_back({j, w, p});
-    l_ = j;
+    Item item;
+    item.j = items_.size();
+    item.w = weight;
+    item.p = profit;
+    items_.push_back(item);
+    l_ = items_.size() - 1;
 }
 
 void Instance::clear()
@@ -330,9 +333,18 @@ std::vector<Item> Instance::get_isum() const
     std::vector<Item> isum;
     isum.reserve(number_of_items()+1);
     isum.clear();
-    isum.push_back({0, 0, 0});
-    for (ItemPos j = 1; j <= number_of_items(); ++j)
-        isum.push_back({j, isum[j - 1].w + item(j - 1).w, isum[j - 1].p + item(j - 1).p});
+    Item it;
+    it.j = 0;
+    it.w = 0;
+    it.p = 0;
+    isum.push_back(it);
+    for (ItemPos j = 1; j <= number_of_items(); ++j) {
+        Item it;
+        it.j = j;
+        it.w = isum[j - 1].w + item(j - 1).w;
+        it.p = isum[j - 1].p + item(j - 1).p;
+        isum.push_back(it);
+    }
     return isum;
 }
 
@@ -1047,7 +1059,10 @@ void Instance::reduce2(Profit lb, Info& info)
 
     for (ItemPos j = f_; j <= b_; ++j) {
         FFOT_LOG(info, "j " << j << " (" << item(j) << ")");
-        Item ubitem = {0, capacity() + item(j).w, 0};
+        Item ubitem;
+        ubitem.j = 0;
+        ubitem.w = capacity() + item(j).w;
+        ubitem.p = 0;
         ItemPos bb = ub_item(isum, ubitem);
         FFOT_LOG(info, " bb " << bb);
         Profit ub = 0;
@@ -1082,7 +1097,10 @@ void Instance::reduce2(Profit lb, Info& info)
             continue;
         FFOT_LOG(info, "j " << j << " (" << item(j) << ")");
 
-        Item ubitem = {0, capacity() - item(j).w, 0};
+        Item ubitem;
+        ubitem.j = 0;
+        ubitem.w = capacity() - item(j).w;
+        ubitem.p = 0;
         ItemPos bb = ub_item(isum, ubitem);
         FFOT_LOG(info, " bb " << bb);
 

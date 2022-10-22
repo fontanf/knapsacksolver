@@ -23,8 +23,10 @@ ExpknapOptionalParameters read_expknap_args(std::vector<char*> argv)
         std::cout << desc << std::endl;;
         throw "";
     }
-    if (vm.count("greedy")) p.greedy = true;
-    if (vm.count("combo-core")) p.combo_core = true;
+    if (vm.count("greedy"))
+        p.greedy = true;
+    if (vm.count("combo-core"))
+        p.combo_core = true;
     return p;
 }
 
@@ -47,7 +49,8 @@ BalknapOptionalParameters read_balknap_args(std::vector<char*> argv)
         std::cout << desc << std::endl;;
         throw "";
     }
-    if (vm.count("greedy")) p.greedy = true;
+    if (vm.count("greedy"))
+        p.greedy = true;
     return p;
 }
 
@@ -70,8 +73,10 @@ MinknapOptionalParameters read_minknap_args(std::vector<char*> argv)
         std::cout << desc << std::endl;;
         throw "";
     }
-    if (vm.count("greedy")) p.greedy = true;
-    if (vm.count("combo-core")) p.combo_core = true;
+    if (vm.count("greedy"))
+        p.greedy = true;
+    if (vm.count("combo-core"))
+        p.combo_core = true;
     return p;
 }
 
@@ -86,9 +91,9 @@ Output knapsacksolver::run(
     if (algorithm.empty() || algorithm_args[0].empty()) {
         throw std::invalid_argument("Missing algorithm.");
 
-        /*
-         * Lower bounds
-         */
+    /*
+     * Lower bounds
+     */
     } else if (algorithm_args[0] == "greedy") {
         instance.sort_partially(FFOT_DBG(info));
         return greedy(instance, info);
@@ -102,9 +107,9 @@ Output knapsacksolver::run(
         instance.sort_partially(FFOT_DBG(info));
         return backwardgreedynlogn(instance, info);
 
-        /*
-         * Exact argsrithms
-         */
+    /*
+     * Exact argsrithms
+     */
     } else if (algorithm_args[0] == "bellman_array") { // Bellman
         return bellman_array(instance, info);
     } else if (algorithm_args[0] == "bellmanpar_array") {
@@ -158,9 +163,9 @@ Output knapsacksolver::run(
         p.info = info;
         return minknap(instance, p);
 
-        /*
-         * Upper bounds
-         */
+    /*
+     * Upper bounds
+     */
     } else if (algorithm_args[0] == "dantzig") { // Dantzig
         Info info_tmp;
         Output output(instance, info_tmp);

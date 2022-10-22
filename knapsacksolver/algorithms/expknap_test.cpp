@@ -7,7 +7,7 @@ using namespace knapsacksolver;
 Output minknap_test(Instance& ins)
 {
     Info info = Info()
-        //.set_verbose(true)
+        //.set_verbosity_level(1)
         ;
     MinknapOptionalParameters p;
     p.info = info;
@@ -17,7 +17,7 @@ Output minknap_test(Instance& ins)
 Output expknap_test(Instance& ins)
 {
     Info info = Info()
-        //.set_verbose(true)
+        //.set_verbosity_level(1)
         //.set_log2stderr(true)
         ;
     ExpknapOptionalParameters p;
@@ -28,7 +28,7 @@ Output expknap_test(Instance& ins)
 Output expknap_combocore_test(Instance& ins)
 {
     Info info = Info()
-        //.set_verbose(true)
+        //.set_verbosity_level(1)
         //.set_log2stderr(true)
         ;
     ExpknapOptionalParameters p;

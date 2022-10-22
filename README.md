@@ -168,7 +168,7 @@ Number of recursive calls:  1
 ```
 
 ```shell
-./bazel-bin/knapsacksolver/main -v --algorithm combo --input data/normal/knap_n100000_r100000000_x0.5 --format standard
+./bazel-bin/knapsacksolver/main -v 1 --algorithm combo --input data/knapsack/normal/knap_n100000_r100000000_x0.5 --format standard
 ```
 ```
 =====================================

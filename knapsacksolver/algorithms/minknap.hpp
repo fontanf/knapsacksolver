@@ -51,13 +51,16 @@ struct MinknapOptionalParameters
 
 struct MinknapOutput: Output
 {
-    MinknapOutput(const Instance& instance, Info& info): Output(instance, info) { }
+    MinknapOutput(
+            const Instance& instance,
+            Info& info):
+        Output(instance, info) { }
 
     Counter number_of_recursive_calls = 0;
 
     MinknapOutput& algorithm_end(Info& info)
     {
-        info.add_to_json("Algorithm", "RecursiveCallNumber", number_of_recursive_calls);
+        info.add_to_json("Algorithm", "NumberOfRecursiveCalls", number_of_recursive_calls);
         Output::algorithm_end(info);
         info.os() << "Number of recursive calls:  " << number_of_recursive_calls << std::endl;
         return *this;

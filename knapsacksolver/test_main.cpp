@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
     //std::cout << ins << std::endl;
 
     Info info = Info()
-        .set_verbose(true)
+        .set_verbosity_level(1)
         //.set_log2stderr(true)
         //.set_logfile("log.txt")
         ;

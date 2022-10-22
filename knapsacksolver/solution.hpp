@@ -14,12 +14,8 @@ public:
     Solution(const Instance& instance);
     /** Create a solution from a certificate file. */
     Solution(const Instance& instance, std::string certificate_path);
-    /** Copy constructor. */
-    Solution(const Solution& solution);
     /** Copy assignment operator. */
     Solution& operator=(const Solution& solution);
-    /** Destructor. */
-    ~Solution() { }
 
     /** Get the instance of the solution. */
     inline const Instance& instance() const { return instance_; }

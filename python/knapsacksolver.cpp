@@ -11,7 +11,7 @@ knapsacksolver::Solution solve(
 {
     std::mt19937_64 gen(0);
     optimizationtools::Info info = optimizationtools::Info()
-        .set_verbose(verbose)
+        .set_verbosity_level(verbose)
         ;
     return run(algorithm, instance, gen, info).solution;
 }

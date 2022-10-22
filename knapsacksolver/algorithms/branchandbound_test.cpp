@@ -7,7 +7,7 @@ using namespace knapsacksolver;
 Output minknap_test(Instance& ins)
 {
     Info info = Info()
-        //.set_verbose(true)
+        //.set_verbosity_level(1)
         ;
     MinknapOptionalParameters p;
     p.info = info;
@@ -17,7 +17,7 @@ Output minknap_test(Instance& ins)
 Output branchandbound_test(Instance& ins)
 {
     Info info = Info()
-        //.set_verbose(true)
+        //.set_verbosity_level(1)
         ;
     return branchandbound(ins, false, info);
 }
@@ -25,7 +25,7 @@ Output branchandbound_test(Instance& ins)
 Output branchandbound_sort_test(Instance& ins)
 {
     Info info = Info()
-        //.set_verbose(true)
+        //.set_verbosity_level(1)
         ;
     return branchandbound(ins, true, info);
 }

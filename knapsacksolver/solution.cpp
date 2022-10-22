@@ -30,14 +30,6 @@ Solution::Solution(
     }
 }
 
-Solution::Solution(const Solution& solution):
-    instance_(solution.instance_),
-    number_of_items_(solution.number_of_items_),
-    profit_(solution.profit_),
-    weight_(solution.weight_),
-    x_(solution.x_)
-{ }
-
 Solution& Solution::operator=(const Solution& solution)
 {
     if (this != &solution) {

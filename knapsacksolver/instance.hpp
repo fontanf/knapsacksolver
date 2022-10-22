@@ -32,14 +32,17 @@ class PartSolFactory2;
 
 struct Item
 {
-    Item(ItemIdx j, Weight w, Profit p): j(j), w(w), p(p) { }
-    /** Index, 0 <= j < n, must be different for each item. */
+    /** Unique id of the item. */
     ItemIdx j = -1;
-    /** Weight, w >= 0. */
+
+    /** Weight of the item, w >= 0. */
     Weight w = -1;
-    /** Profit, p >= 0 */
+
+    /** Profit of the item, p >= 0 */
     Profit p = -1;
-    Effciency efficiency() const { return (double)p/(double)w; }
+
+    /** Compute the efficiency of the item. */
+    Effciency efficiency() const { return (double)p / (double)w; }
 };
 
 struct Interval
@@ -63,9 +66,9 @@ public:
     /** Manual constructor. */
     Instance();
     /** Add an item to the knapsack. */
-    void add_item(Weight w, Profit p);
+    void add_item(Weight weight, Profit progit);
     /** Set the capacity of the knapsack. */
-    void set_capacity(Weight c) { capacity_ = c; }
+    void set_capacity(Weight capacity) { capacity_ = capacity; }
     /** Clear the instance. */
     void clear();
 
@@ -75,21 +78,24 @@ public:
     void set_optimal_solution(Solution& sol);
 
     /** Copy constructor. */
-    Instance(const Instance& ins);
+    Instance(const Instance& instance);
     /** Copy assignment operator. */
-    Instance& operator=(const Instance& ins);
+    Instance& operator=(const Instance& instance);
     /** Destructor. */
     ~Instance();
 
     /** Copy constructor without algorithmic informations. */
-    static Instance reset(const Instance& ins);
+    static Instance reset(const Instance& instance);
 
     /*
      * Getters
      */
 
+    /** Get the number of items in the instance. */
     inline ItemIdx number_of_items() const { return items_.size(); }
-    inline Weight  capacity()    const { return capacity_; }
+    /** Get the capacity of the instance. */
+    inline Weight capacity() const { return capacity_; }
+    /** Get an item. */
     inline const Item& item(ItemIdx j) const { assert(j >= 0 && j < number_of_items()); return items_[j]; }
     inline std::string path() const { return path_; }
 
@@ -181,8 +187,8 @@ public:
     const Solution* reduced_solution() const { return reduced_solution_.get(); }
 
     inline ItemIdx reduced_number_of_items() const { return l_-f_+1; }
-    inline ItemPos first_item()  const { return f_; }
-    inline ItemPos last_item()   const { return l_; }
+    inline ItemPos first_item() const { return f_; }
+    inline ItemPos last_item() const { return l_; }
     Weight reduced_capacity() const;
 
     /** Reduce item f..j-1, and add them to the reduced solution */
@@ -198,11 +204,11 @@ public:
     /** Get the break solution of the instance. */
     const Solution* break_solution() const { return break_solution_.get(); }
     /** Get the position of the break item of the instance. */
-    ItemPos break_item()     const { return b_; }
+    ItemPos break_item() const { return b_; }
     /** Get the break profit of the instance. */
-    Profit break_profit()   const;
+    Profit break_profit() const;
     /** Get the break weight of the instance. */
-    Weight break_weight()   const;
+    Weight break_weight() const;
     /** Get the break capacity of the instance. */
     Weight break_capacity() const;
 

@@ -8,7 +8,7 @@ using namespace knapsacksolver;
 Output bellman_array_test(Instance& ins)
 {
     Info info = Info()
-        //.set_verbose(true)
+        //.set_verbosity_level(1)
         //.set_log2stderr(true)
         ;
     return bellman_array(ins, info);
@@ -17,7 +17,7 @@ Output bellman_array_test(Instance& ins)
 Output minknap_1_test(Instance& ins)
 {
     Info info = Info()
-        //.set_verbose(true)
+        //.set_verbosity_level(1)
         //.set_log2stderr(true)
         ;
     auto p = MinknapOptionalParameters().set_pure();
@@ -29,7 +29,7 @@ Output minknap_1_test(Instance& ins)
 Output minknap_2_test(Instance& ins)
 {
     Info info = Info()
-        //.set_verbose(true)
+        //.set_verbosity_level(1)
         //.set_log2stderr(true)
         ;
     auto p = MinknapOptionalParameters().set_pure();
@@ -41,7 +41,7 @@ Output minknap_2_test(Instance& ins)
 Output minknap_3_test(Instance& ins)
 {
     Info info = Info()
-        //.set_verbose(true)
+        //.set_verbosity_level(1)
         //.set_log2stderr(true)
         ;
     auto p = MinknapOptionalParameters().set_pure();
@@ -53,7 +53,7 @@ Output minknap_3_test(Instance& ins)
 Output minknap_combocore_k1_test(Instance& ins)
 {
     Info info = Info()
-        //.set_verbose(true)
+        //.set_verbosity_level(1)
         //.set_log2stderr(true)
         ;
     auto p = MinknapOptionalParameters().set_pure();
@@ -66,7 +66,7 @@ Output minknap_combocore_k1_test(Instance& ins)
 Output minknap_combocore_k2_test(Instance& ins)
 {
     Info info = Info()
-        //.set_verbose(true)
+        //.set_verbosity_level(1)
         //.set_log2stderr(true)
         ;
     auto p = MinknapOptionalParameters().set_pure();
@@ -79,7 +79,7 @@ Output minknap_combocore_k2_test(Instance& ins)
 Output minknap_combocore_k3_test(Instance& ins)
 {
     Info info = Info()
-        //.set_verbose(true)
+        //.set_verbosity_level(1)
         //.set_log2stderr(true)
         ;
     auto p = MinknapOptionalParameters().set_pure();
@@ -92,7 +92,7 @@ Output minknap_combocore_k3_test(Instance& ins)
 Output minknap_pairing_test(Instance& ins)
 {
     Info info = Info()
-        //.set_verbose(true)
+        //.set_verbosity_level(1)
         //.set_log2stderr(true)
         ;
     auto p = MinknapOptionalParameters().set_pure();

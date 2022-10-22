@@ -6,7 +6,7 @@ using namespace knapsacksolver;
 Output bellman_array_test(Instance& ins)
 {
     Info info = Info()
-        //.set_verbose(true)
+        //.set_verbosity_level(1)
         ;
     return bellman_array(ins, info);
 }
@@ -14,7 +14,7 @@ Output bellman_array_test(Instance& ins)
 Output bellmanpar_array_test(Instance& ins)
 {
     Info info = Info()
-        //.set_verbose(true)
+        //.set_verbosity_level(1)
         ;
     return bellmanpar_array(ins, info);
 }
@@ -22,7 +22,7 @@ Output bellmanpar_array_test(Instance& ins)
 Output bellmanrec_test(Instance& ins)
 {
     Info info = Info()
-        //.set_verbose(true)
+        //.set_verbosity_level(1)
         ;
     return bellmanrec(ins, info);
 }
@@ -30,7 +30,7 @@ Output bellmanrec_test(Instance& ins)
 Output bellman_array_all_test(Instance& ins)
 {
     Info info = Info()
-        //.set_verbose(true)
+        //.set_verbosity_level(1)
         ;
     return bellman_array_all(ins, info);
 }
@@ -38,7 +38,7 @@ Output bellman_array_all_test(Instance& ins)
 Output bellman_array_one_test(Instance& ins)
 {
     Info info = Info()
-        //.set_verbose(true)
+        //.set_verbosity_level(1)
         ;
     return bellman_array_one(ins, info);
 }
@@ -46,7 +46,7 @@ Output bellman_array_one_test(Instance& ins)
 Output bellman_array_part1_test(Instance& ins)
 {
     Info info = Info()
-        //.set_verbose(true)
+        //.set_verbosity_level(1)
         ;
     return bellman_array_part(ins, 1, info);
 }
@@ -54,7 +54,7 @@ Output bellman_array_part1_test(Instance& ins)
 Output bellman_array_part2_test(Instance& ins)
 {
     Info info = Info()
-        //.set_verbose(true)
+        //.set_verbosity_level(1)
         ;
     return bellman_array_part(ins, 2, info);
 }
@@ -62,7 +62,7 @@ Output bellman_array_part2_test(Instance& ins)
 Output bellman_array_part3_test(Instance& ins)
 {
     Info info = Info()
-        //.set_verbose(true)
+        //.set_verbosity_level(1)
         ;
     return bellman_array_part(ins, 3, info);
 }
@@ -70,7 +70,7 @@ Output bellman_array_part3_test(Instance& ins)
 Output bellman_array_rec_test(Instance& ins)
 {
     Info info = Info()
-        //.set_verbose(true)
+        //.set_verbosity_level(1)
         ;
     return bellman_array_rec(ins, info);
 }
@@ -78,7 +78,7 @@ Output bellman_array_rec_test(Instance& ins)
 Output bellman_list_test(Instance& ins)
 {
     Info info = Info()
-        //.set_verbose(true)
+        //.set_verbosity_level(1)
         ;
     return bellman_list(ins, false, info);
 }
@@ -86,7 +86,7 @@ Output bellman_list_test(Instance& ins)
 Output bellman_list_sort_test(Instance& ins)
 {
     Info info = Info()
-        //.set_verbose(true)
+        //.set_verbosity_level(1)
         ;
     return bellman_list(ins, true, info);
 }
@@ -94,7 +94,7 @@ Output bellman_list_sort_test(Instance& ins)
 Output bellman_list_rec_test(Instance& ins)
 {
     Info info = Info()
-        //.set_verbose(true)
+        //.set_verbosity_level(1)
         ;
     return bellman_list_rec(ins, info);
 }

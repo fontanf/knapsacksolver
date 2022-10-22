@@ -7,7 +7,7 @@ using namespace knapsacksolver;
 Output minknap_test(Instance& ins)
 {
     Info info = Info()
-        .set_verbose(true)
+        .set_verbosity_level(1)
         ;
     MinknapOptionalParameters p;
     p.info = info;
@@ -17,7 +17,7 @@ Output minknap_test(Instance& ins)
 Output balknap_1_b_test(Instance& ins)
 {
     Info info = Info()
-        .set_verbose(true)
+        .set_verbosity_level(1)
         ;
     BalknapOptionalParameters p;
     p.info = info;
@@ -28,7 +28,7 @@ Output balknap_1_b_test(Instance& ins)
 Output balknap_2_b_test(Instance& ins)
 {
     Info info = Info()
-        .set_verbose(true)
+        .set_verbosity_level(1)
         ;
     BalknapOptionalParameters p;
     p.info = info;
@@ -40,7 +40,7 @@ Output balknap_2_b_test(Instance& ins)
 Output balknap_3_b_test(Instance& ins)
 {
     Info info = Info()
-        .set_verbose(true)
+        .set_verbosity_level(1)
         ;
     BalknapOptionalParameters p;
     p.info = info;
@@ -52,7 +52,7 @@ Output balknap_3_b_test(Instance& ins)
 Output balknap_1_t_test(Instance& ins)
 {
     Info info = Info()
-        .set_verbose(true)
+        .set_verbosity_level(1)
         ;
     BalknapOptionalParameters p;
     p.info = info;
@@ -64,7 +64,7 @@ Output balknap_1_t_test(Instance& ins)
 Output balknap_2_t_test(Instance& ins)
 {
     Info info = Info()
-        .set_verbose(true)
+        .set_verbosity_level(1)
         ;
     BalknapOptionalParameters p;
     p.info = info;
@@ -76,7 +76,7 @@ Output balknap_2_t_test(Instance& ins)
 Output balknap_3_t_test(Instance& ins)
 {
     Info info = Info()
-        .set_verbose(true)
+        .set_verbosity_level(1)
         ;
     BalknapOptionalParameters p;
     p.info = info;

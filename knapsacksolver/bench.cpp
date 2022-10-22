@@ -12,129 +12,168 @@ using namespace knapsacksolver;
 std::string path(std::string d, ItemPos n)
 {
     if (d == "u3") {
-        return "data/smallcoeff/knapPI_1_" + std::to_string(n) + "_1000/"
-                             + "knapPI_1_" + std::to_string(n) + "_1000_";
+        return "data/knapsack/smallcoeff/"
+            "knapPI_1_" + std::to_string(n) + "_1000/"
+            "knapPI_1_" + std::to_string(n) + "_1000_";
     } else if (d == "u4") {
-        return "data/smallcoeff/knapPI_1_" + std::to_string(n) + "_10000/"
-                             + "knapPI_1_" + std::to_string(n) + "_10000_";
+        return "data/knapsack/smallcoeff/"
+            "knapPI_1_" + std::to_string(n) + "_10000/"
+            "knapPI_1_" + std::to_string(n) + "_10000_";
     } else if (d == "u5") {
-        return "data/largecoeff/knapPI_1_" + std::to_string(n) + "_100000/"
-                             + "knapPI_1_" + std::to_string(n) + "_100000_";
+        return "data/knapsack/largecoeff/"
+            "knapPI_1_" + std::to_string(n) + "_100000/"
+            "knapPI_1_" + std::to_string(n) + "_100000_";
     } else if (d == "u6") {
-        return "data/largecoeff/knapPI_1_" + std::to_string(n) + "_1000000/"
-                             + "knapPI_1_" + std::to_string(n) + "_1000000_";
+        return "data/knapsack/largecoeff/"
+            "knapPI_1_" + std::to_string(n) + "_1000000/"
+            "knapPI_1_" + std::to_string(n) + "_1000000_";
     } else if (d == "u7") {
-        return "data/largecoeff/knapPI_1_" + std::to_string(n) + "_10000000/"
-                             + "knapPI_1_" + std::to_string(n) + "_10000000_";
+        return "data/knapsack/largecoeff/"
+            "knapPI_1_" + std::to_string(n) + "_10000000/"
+            "knapPI_1_" + std::to_string(n) + "_10000000_";
 
     } else if (d == "wc3") {
-        return "data/smallcoeff/knapPI_2_" + std::to_string(n) + "_1000/"
-                             + "knapPI_2_" + std::to_string(n) + "_1000_";
+        return "data/knapsack/smallcoeff/"
+            "knapPI_2_" + std::to_string(n) + "_1000/"
+            "knapPI_2_" + std::to_string(n) + "_1000_";
     } else if (d == "wc4") {
-        return "data/smallcoeff/knapPI_2_" + std::to_string(n) + "_10000/"
-                             + "knapPI_2_" + std::to_string(n) + "_10000_";
+        return "data/knapsack/smallcoeff/"
+            "knapPI_2_" + std::to_string(n) + "_10000/"
+            "knapPI_2_" + std::to_string(n) + "_10000_";
     } else if (d == "wc5") {
-        return "data/largecoeff/knapPI_2_" + std::to_string(n) + "_100000/"
-                             + "knapPI_2_" + std::to_string(n) + "_100000_";
+        return "data/knapsack/largecoeff/"
+            "knapPI_2_" + std::to_string(n) + "_100000/"
+            "knapPI_2_" + std::to_string(n) + "_100000_";
     } else if (d == "wc6") {
-        return "data/largecoeff/knapPI_2_" + std::to_string(n) + "_1000000/"
-                             + "knapPI_2_" + std::to_string(n) + "_1000000_";
+        return "data/knapsack/largecoeff/"
+            "knapPI_2_" + std::to_string(n) + "_1000000/"
+            "knapPI_2_" + std::to_string(n) + "_1000000_";
     } else if (d == "wc7") {
-        return "data/largecoeff/knapPI_2_" + std::to_string(n) + "_10000000/"
-                             + "knapPI_2_" + std::to_string(n) + "_10000000_";
+        return "data/knapsack/largecoeff/"
+            "knapPI_2_" + std::to_string(n) + "_10000000/"
+            "knapPI_2_" + std::to_string(n) + "_10000000_";
 
     } else if (d == "sc3") {
-        return "data/smallcoeff/knapPI_3_" + std::to_string(n) + "_1000/"
-                             + "knapPI_3_" + std::to_string(n) + "_1000_";
+        return "data/knapsack/smallcoeff/"
+            "knapPI_3_" + std::to_string(n) + "_1000/"
+            "knapPI_3_" + std::to_string(n) + "_1000_";
     } else if (d == "sc4") {
-        return "data/smallcoeff/knapPI_3_" + std::to_string(n) + "_10000/"
-                             + "knapPI_3_" + std::to_string(n) + "_10000_";
+        return "data/knapsack/smallcoeff/"
+            "knapPI_3_" + std::to_string(n) + "_10000/"
+            "knapPI_3_" + std::to_string(n) + "_10000_";
     } else if (d == "sc5") {
-        return "data/largecoeff/knapPI_3_" + std::to_string(n) + "_100000/"
-                             + "knapPI_3_" + std::to_string(n) + "_100000_";
+        return "data/knapsack/largecoeff/"
+            "knapPI_3_" + std::to_string(n) + "_100000/"
+            "knapPI_3_" + std::to_string(n) + "_100000_";
     } else if (d == "sc6") {
-        return "data/largecoeff/knapPI_3_" + std::to_string(n) + "_1000000/"
-                             + "knapPI_3_" + std::to_string(n) + "_1000000_";
+        return "data/knapsack/largecoeff/"
+            "knapPI_3_" + std::to_string(n) + "_1000000/"
+            "knapPI_3_" + std::to_string(n) + "_1000000_";
     } else if (d == "sc7") {
-        return "data/largecoeff/knapPI_3_" + std::to_string(n) + "_10000000/"
-                             + "knapPI_3_" + std::to_string(n) + "_10000000_";
+        return "data/knapsack/largecoeff/"
+            "knapPI_3_" + std::to_string(n) + "_10000000/"
+            "knapPI_3_" + std::to_string(n) + "_10000000_";
 
     } else if (d == "isc3") {
-        return "data/smallcoeff/knapPI_4_" + std::to_string(n) + "_1000/"
-                             + "knapPI_4_" + std::to_string(n) + "_1000_";
+        return "data/knapsack/smallcoeff/"
+            "knapPI_4_" + std::to_string(n) + "_1000/"
+            "knapPI_4_" + std::to_string(n) + "_1000_";
     } else if (d == "isc4") {
-        return "data/smallcoeff/knapPI_4_" + std::to_string(n) + "_10000/"
-                             + "knapPI_4_" + std::to_string(n) + "_10000_";
+        return "data/knapsack/smallcoeff/"
+            "knapPI_4_" + std::to_string(n) + "_10000/"
+            "knapPI_4_" + std::to_string(n) + "_10000_";
     } else if (d == "isc5") {
-        return "data/largecoeff/knapPI_4_" + std::to_string(n) + "_100000/"
-                             + "knapPI_4_" + std::to_string(n) + "_100000_";
+        return "data/knapsack/largecoeff/"
+            "knapPI_4_" + std::to_string(n) + "_100000/"
+            "knapPI_4_" + std::to_string(n) + "_100000_";
     } else if (d == "isc6") {
-        return "data/largecoeff/knapPI_4_" + std::to_string(n) + "_1000000/"
-                             + "knapPI_4_" + std::to_string(n) + "_1000000_";
+        return "data/knapsack/largecoeff/"
+            "knapPI_4_" + std::to_string(n) + "_1000000/"
+            "knapPI_4_" + std::to_string(n) + "_1000000_";
     } else if (d == "isc7") {
-        return "data/largecoeff/knapPI_4_" + std::to_string(n) + "_10000000/"
-                             + "knapPI_4_" + std::to_string(n) + "_10000000_";
+        return "data/knapsack/largecoeff/"
+            "knapPI_4_" + std::to_string(n) + "_10000000/"
+            "knapPI_4_" + std::to_string(n) + "_10000000_";
 
     } else if (d == "asc3") {
-        return "data/smallcoeff/knapPI_5_" + std::to_string(n) + "_1000/"
-                             + "knapPI_5_" + std::to_string(n) + "_1000_";
+        return "data/knapsack/smallcoeff/"
+            "knapPI_5_" + std::to_string(n) + "_1000/"
+            "knapPI_5_" + std::to_string(n) + "_1000_";
     } else if (d == "asc4") {
-        return "data/smallcoeff/knapPI_5_" + std::to_string(n) + "_10000/"
-                             + "knapPI_5_" + std::to_string(n) + "_10000_";
+        return "data/knapsack/smallcoeff/"
+            "knapPI_5_" + std::to_string(n) + "_10000/"
+            "knapPI_5_" + std::to_string(n) + "_10000_";
     } else if (d == "asc5") {
-        return "data/largecoeff/knapPI_5_" + std::to_string(n) + "_100000/"
-                             + "knapPI_5_" + std::to_string(n) + "_100000_";
+        return "data/knapsack/largecoeff/"
+            "knapPI_5_" + std::to_string(n) + "_100000/"
+            "knapPI_5_" + std::to_string(n) + "_100000_";
     } else if (d == "asc6") {
-        return "data/largecoeff/knapPI_5_" + std::to_string(n) + "_1000000/"
-                             + "knapPI_5_" + std::to_string(n) + "_1000000_";
+        return "data/knapsack/largecoeff/"
+            "knapPI_5_" + std::to_string(n) + "_1000000/"
+            "knapPI_5_" + std::to_string(n) + "_1000000_";
     } else if (d == "asc7") {
-        return "data/largecoeff/knapPI_5_" + std::to_string(n) + "_10000000/"
-                             + "knapPI_5_" + std::to_string(n) + "_10000000_";
+        return "data/knapsack/largecoeff/"
+            "knapPI_5_" + std::to_string(n) + "_10000000/"
+            "knapPI_5_" + std::to_string(n) + "_10000000_";
 
     } else if (d == "ss3") {
-        return "data/smallcoeff/knapPI_6_" + std::to_string(n) + "_1000/"
-                             + "knapPI_6_" + std::to_string(n) + "_1000_";
+        return "data/knapsack/smallcoeff/"
+            "knapPI_6_" + std::to_string(n) + "_1000/"
+            "knapPI_6_" + std::to_string(n) + "_1000_";
     } else if (d == "ss4") {
-        return "data/smallcoeff/knapPI_6_" + std::to_string(n) + "_10000/"
-                             + "knapPI_6_" + std::to_string(n) + "_10000_";
+        return "data/knapsack/smallcoeff/"
+            "knapPI_6_" + std::to_string(n) + "_10000/"
+            "knapPI_6_" + std::to_string(n) + "_10000_";
     } else if (d == "ss5") {
-        return "data/largecoeff/knapPI_6_" + std::to_string(n) + "_100000/"
-                             + "knapPI_6_" + std::to_string(n) + "_100000_";
+        return "data/knapsack/largecoeff/"
+            "knapPI_6_" + std::to_string(n) + "_100000/"
+            "knapPI_6_" + std::to_string(n) + "_100000_";
     } else if (d == "ss6") {
-        return "data/largecoeff/knapPI_6_" + std::to_string(n) + "_1000000/"
-                             + "knapPI_6_" + std::to_string(n) + "_1000000_";
+        return "data/knapsack/largecoeff/"
+            "knapPI_6_" + std::to_string(n) + "_1000000/"
+            "knapPI_6_" + std::to_string(n) + "_1000000_";
     } else if (d == "ss7") {
-        return "data/largecoeff/knapPI_6_" + std::to_string(n) + "_10000000/"
-                             + "knapPI_6_" + std::to_string(n) + "_10000000_";
+        return "data/knapsack/largecoeff/"
+            "knapPI_6_" + std::to_string(n) + "_10000000/"
+            "knapPI_6_" + std::to_string(n) + "_10000000_";
 
     } else if (d == "sw5") {
-        return "data/smallcoeff/knapPI_9_" + std::to_string(n) + "_1000/"
-                             + "knapPI_9_" + std::to_string(n) + "_1000_";
+        return "data/knapsack/smallcoeff/"
+            "knapPI_9_" + std::to_string(n) + "_1000/"
+            "knapPI_9_" + std::to_string(n) + "_1000_";
     } else if (d == "sw7") {
-        return "data/largecoeff/knapPI_9_" + std::to_string(n) + "_1000000/"
-                             + "knapPI_9_" + std::to_string(n) + "_1000000_";
+        return "data/knapsack/largecoeff/"
+            "knapPI_9_" + std::to_string(n) + "_1000000/"
+            "knapPI_9_" + std::to_string(n) + "_1000000_";
     } else if (d == "sw8") {
-        return "data/largecoeff/knapPI_9_" + std::to_string(n) + "_1000000/"
-                             + "knapPI_9_" + std::to_string(n) + "_1000000_";
+        return "data/knapsack/largecoeff/"
+            "knapPI_9_" + std::to_string(n) + "_1000000/"
+            "knapPI_9_" + std::to_string(n) + "_1000000_";
 
     } else if (d == "sp/u3") {
-        return "data/hardinstances/knapPI_11_" + std::to_string(n) + "_1000/"
-                                + "knapPI_11_" + std::to_string(n) + "_1000_";
+        return "data/knapsack/hardinstances/"
+            "knapPI_11_" + std::to_string(n) + "_1000/"
+            "knapPI_11_" + std::to_string(n) + "_1000_";
     } else if (d == "sp/wc3") {
-        return "data/hardinstances/knapPI_12_" + std::to_string(n) + "_1000/"
-                                + "knapPI_12_" + std::to_string(n) + "_1000_";
+        return "data/knapsack/hardinstances/"
+            "knapPI_12_" + std::to_string(n) + "_1000/"
+            "knapPI_12_" + std::to_string(n) + "_1000_";
     } else if (d == "sp/sc3") {
-        return "data/hardinstances/knapPI_13_" + std::to_string(n) + "_1000/"
-                                + "knapPI_13_" + std::to_string(n) + "_1000_";
+        return "data/knapsack/hardinstances/"
+            "knapPI_13_" + std::to_string(n) + "_1000/"
+            "knapPI_13_" + std::to_string(n) + "_1000_";
     } else if (d == "mstr3") {
-        return "data/hardinstances/knapPI_14_" + std::to_string(n) + "_1000/"
-                                + "knapPI_14_" + std::to_string(n) + "_1000_";
+        return "data/knapsack/hardinstances/"
+            "knapPI_14_" + std::to_string(n) + "_1000/"
+            "knapPI_14_" + std::to_string(n) + "_1000_";
     } else if (d == "pceil3") {
-        return "data/hardinstances/knapPI_15_" + std::to_string(n) + "_1000/"
-                                + "knapPI_15_" + std::to_string(n) + "_1000_";
+        return "data/knapsack/hardinstances/"
+            "knapPI_15_" + std::to_string(n) + "_1000/"
+            "knapPI_15_" + std::to_string(n) + "_1000_";
     } else if (d == "circle3") {
-        return "data/hardinstances/knapPI_16_" + std::to_string(n) + "_1000/"
-                                + "knapPI_16_" + std::to_string(n) + "_1000_";
+        return "data/knapsack/hardinstances/"
+            "knapPI_16_" + std::to_string(n) + "_1000/"
+            "knapPI_16_" + std::to_string(n) + "_1000_";
     }
     return "";
 }
@@ -143,7 +182,7 @@ void bench_literature(
         std::string algorithm,
         std::string dataset_name,
         std::vector<std::string>& dataset,
-        std::mt19937_64& gen)
+        std::mt19937_64& generator)
 {
     std::ofstream file(algorithm + "_" + dataset_name + ".csv");
 
@@ -170,9 +209,25 @@ void bench_literature(
                 try {
                     Info info = Info()
                         .set_time_limit(t_max - t_total)
-                        //.set_verbose(true)
+                        //.set_verbosity_level(1)
                         ;
-                    run(algorithm, instance, gen, info);
+                    auto output = run(algorithm, instance, generator, info);
+
+                    if (instance.optimal_solution() != NULL) {
+                        if (output.solution.feasible()
+                                && output.solution.profit() > instance.optimum()) {
+                            throw std::runtime_error(
+                                    "Computed solution strictly better"
+                                    " than provided optimum.");
+                        }
+                        if (output.upper_bound != -1
+                                && output.upper_bound < instance.optimum()) {
+                            throw std::runtime_error(
+                                    "Computed upper bound strictly lower"
+                                    " than provided optimum.");
+                        }
+                    }
+
                     double t = info.elapsed_time();
                     t_total += t;
                 } catch (...) {
@@ -197,7 +252,10 @@ void bench_literature(
     file << std::endl; // CSV
 }
 
-void bench_normal(std::string algorithm, double time_limit, std::mt19937_64& gen)
+void bench_normal(
+        std::string algorithm,
+        double time_limit,
+        std::mt19937_64& generator)
 {
     std::vector<ItemIdx> ns {100, 1000, 10000, 100000};
     std::vector<Weight> rs {1000, 10000, 100000, 1000000, 10000000, 100000000};
@@ -235,18 +293,19 @@ void bench_normal(std::string algorithm, double time_limit, std::mt19937_64& gen
                     << "x " << std::right << std::setw(5) << x
                     << std::flush;
 
-                Instance instance("data/normal/knap_n" + std::to_string(n)
+                Instance instance(
+                        "data/knapsack/normal/knap_n" + std::to_string(n)
                         + "_r" + std::to_string(r)
                         + "_x0." + std::to_string((int)(10 * x)), "standard");
                 double t = time_limit + 1;
                 Info info = Info()
                     .set_time_limit(time_limit)
-                    //.set_verbose(true)
+                    //.set_verbosity_level(1)
                     ;
                 Output output(instance, info);
                 try {
                     info.reset_time();
-                    output = run(algorithm, instance, gen, info);
+                    output = run(algorithm, instance, generator, info);
                     t = info.elapsed_time();
                 } catch (...) {
                 }
