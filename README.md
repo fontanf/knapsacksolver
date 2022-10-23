@@ -44,7 +44,7 @@ https://drive.google.com/file/d/1k2Mp3Z5sb5tVJO8I5-WiAglqawk-l1k3/view?usp=shari
 Solve:
 
 ```shell
-./bazel-bin/knapsacksolver/main -v --algorithm combo --input data/largecoeff/knapPI_3_10000_10000000/knapPI_3_10000_10000000_50.csv --format pisinger
+./bazel-bin/knapsacksolver/main -v 1 --algorithm combo --input data/knapsack/largecoeff/knapPI_3_10000_10000000/knapPI_3_10000_10000000_50.csv --format pisinger
 ```
 ```
 =====================================
@@ -94,7 +94,7 @@ Number of recursive calls:  2
 ```
 
 ```shell
-./bazel-bin/knapsacksolver/main -v --algorithm combo --input data/largecoeff/knapPI_5_10000_10000000/knapPI_5_10000_10000000_60.csv --format pisinger
+./bazel-bin/knapsacksolver/main -v 1 --algorithm combo --input data/knapsack/largecoeff/knapPI_5_10000_10000000/knapPI_5_10000_10000000_60.csv --format pisinger
 ```
 ```
 =====================================

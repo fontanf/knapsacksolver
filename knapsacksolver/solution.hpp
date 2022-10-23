@@ -5,6 +5,9 @@
 namespace knapsacksolver
 {
 
+/**
+ * Solution class for a Knapsack Problem.
+ */
 class Solution
 {
 
@@ -14,6 +17,8 @@ public:
     Solution(const Instance& instance);
     /** Create a solution from a certificate file. */
     Solution(const Instance& instance, std::string certificate_path);
+    /** Copy constructor. */
+    Solution(const Solution&) = default;
     /** Copy assignment operator. */
     Solution& operator=(const Solution& solution);
 

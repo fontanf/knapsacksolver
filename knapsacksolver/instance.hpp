@@ -51,6 +51,9 @@ struct Interval
     ItemPos l;
 };
 
+/**
+ * Instance class for a Knapsack Problem.
+ */
 class Instance
 {
 
