@@ -1,4 +1,4 @@
-#include "subsetsumsolver/algorithms.hpp"
+#include "subsetsumsolver/algorithms/algorithms.hpp"
 
 #include <boost/program_options.hpp>
 
@@ -18,6 +18,12 @@ Output subsetsumsolver::run(
 
     } else if (algorithm_args[0] == "dynamic_programming_bellman_array") {
         return dynamic_programming_bellman_array(instance, info);
+    } else if (algorithm_args[0] == "dynamic_programming_bellman_list") {
+        return dynamic_programming_bellman_list(instance, info);
+    } else if (algorithm_args[0] == "dynamic_programming_bellman_word_ram") {
+        return dynamic_programming_bellman_word_ram(instance, info);
+    } else if (algorithm_args[0] == "dynamic_programming_bellman_word_ram_rec") {
+        return dynamic_programming_bellman_word_ram_rec(instance, info);
 
     } else {
         throw std::invalid_argument(

@@ -5,12 +5,10 @@ cc_library(
         hdrs = [
                 "instance.hpp",
                 "solution.hpp",
-                "algorithms/dynamic_programming_bellman.hpp",
         ],
         srcs = [
                 "instance.cpp",
                 "solution.cpp",
-                "algorithms/dynamic_programming_bellman.cpp",
         ],
         deps = [
                 "@optimizationtools//optimizationtools/utils:info",
@@ -19,24 +17,10 @@ cc_library(
         visibility = ["//visibility:public"],
 )
 
-cc_library(
-        name = "algorithms",
-        hdrs = ["algorithms.hpp"],
-        srcs = ["algorithms.cpp"],
-        deps = [
-                ":subsetsumsolver",
-                "@boost//:program_options",
-        ],
-        copts = STDCPP,
-        visibility = ["//visibility:public"],
-)
-
 cc_binary(
         name = "main",
         srcs = ["main.cpp"],
-        deps = [
-                ":algorithms",
-        ],
+        deps = ["//subsetsumsolver/algorithms:algorithms"],
         copts = STDCPP,
 )
 

@@ -1,4 +1,4 @@
-#include "subsetsumsolver/algorithms.hpp"
+#include "subsetsumsolver/algorithms/algorithms.hpp"
 
 #include <boost/program_options.hpp>
 
