@@ -10,6 +10,8 @@ A solver for the Subset Sum Problem.
     * List (only optimal value) `-a dynamic_programming_bellman_list`
     * Word RAM (only optimal value) `-a dynamic_programming_bellman_word_ram`
     * Word RAM with recursive scheme `-a dynamic_programming_bellman_word_ram_rec`
+  * Balancing
+    * Array (only optimal value) `-a dynamic_programming_balancing_array`
 
 ## Usage (command line)
 

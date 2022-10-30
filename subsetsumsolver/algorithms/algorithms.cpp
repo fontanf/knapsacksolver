@@ -24,6 +24,8 @@ Output subsetsumsolver::run(
         return dynamic_programming_bellman_word_ram(instance, info);
     } else if (algorithm_args[0] == "dynamic_programming_bellman_word_ram_rec") {
         return dynamic_programming_bellman_word_ram_rec(instance, info);
+    } else if (algorithm_args[0] == "dynamic_programming_balancing_array") {
+        return dynamic_programming_balancing_array(instance, info);
 
     } else {
         throw std::invalid_argument(

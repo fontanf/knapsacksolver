@@ -10,11 +10,21 @@ cc_library(
 )
 
 cc_library(
+        name = "dynamic_programming_balancing",
+        hdrs = ["dynamic_programming_balancing.hpp"],
+        srcs = ["dynamic_programming_balancing.cpp"],
+        deps = ["//subsetsumsolver:subsetsumsolver"],
+        copts = STDCPP,
+        visibility = ["//visibility:public"],
+)
+
+cc_library(
         name = "algorithms",
         hdrs = ["algorithms.hpp"],
         srcs = ["algorithms.cpp"],
         deps = [
                 ":dynamic_programming_bellman",
+                ":dynamic_programming_balancing",
                 "@boost//:program_options",
         ],
         copts = STDCPP,

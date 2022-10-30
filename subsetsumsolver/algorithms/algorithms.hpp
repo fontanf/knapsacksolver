@@ -1,6 +1,7 @@
 #pragma once
 
 #include "subsetsumsolver/algorithms/dynamic_programming_bellman.hpp"
+#include "subsetsumsolver/algorithms/dynamic_programming_balancing.hpp"
 
 #include <random>
 
