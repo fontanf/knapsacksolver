@@ -85,5 +85,57 @@ int main(int argc, char *argv[])
     }
     */
 
+    // evenodd6.
+    std::cout << "Generate evenodd6..." << std::endl;
+    for (ItemPos n: {1000, 3000, 5000, 8000, 10000, 20000, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000}) {
+        for (int seed = 0; seed < 1; ++seed) {
+            generator.seed(seed);
+            Instance instance = generate_evenodd6(n, generator);
+            std::string instance_path
+                = "data/subsetsum/evenodd6/evenodd6_"
+                + std::to_string(n) + "_" + std::to_string(seed);
+            instance.write(instance_path);
+        }
+    }
+
+    // evenodd8.
+    std::cout << "Generate evenodd8..." << std::endl;
+    for (ItemPos n: {10, 50, 100, 150, 200, 300, 500, 1000, 5000, 10000, 50000}) {
+        for (int seed = 0; seed < 1; ++seed) {
+            generator.seed(seed);
+            Instance instance = generate_evenodd8(n, generator);
+            std::string instance_path
+                = "data/subsetsum/evenodd8/evenodd8_"
+                + std::to_string(n) + "_" + std::to_string(seed);
+            instance.write(instance_path);
+        }
+    }
+
+    // tenfive6.
+    std::cout << "Generate tenfive6..." << std::endl;
+    for (ItemPos n: {1000, 3000, 5000, 8000, 10000, 20000, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000}) {
+        for (int seed = 0; seed < 1; ++seed) {
+            generator.seed(seed);
+            Instance instance = generate_tenfive6(n, generator);
+            std::string instance_path
+                = "data/subsetsum/tenfive6/tenfive6_"
+                + std::to_string(n) + "_" + std::to_string(seed);
+            instance.write(instance_path);
+        }
+    }
+
+    // tenfive8.
+    std::cout << "Generate tenfive8..." << std::endl;
+    for (ItemPos n: {10, 50, 100, 150, 200, 300, 500, 1000, 5000, 10000, 50000}) {
+        for (int seed = 0; seed < 1; ++seed) {
+            generator.seed(seed);
+            Instance instance = generate_tenfive8(n, generator);
+            std::string instance_path
+                = "data/subsetsum/tenfive8/tenfive8_"
+                + std::to_string(n) + "_" + std::to_string(seed);
+            instance.write(instance_path);
+        }
+    }
+
     return 0;
 }

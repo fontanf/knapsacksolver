@@ -29,4 +29,44 @@ Instance generate_somatoth(
         ItemPos number_of_items,
         std::mt19937_64& generator);
 
+/**
+ * See:
+ * "A low-space algorithm for the subset-sum problem on GPU" (Curtis and
+ * Sanches, 2017)
+ * https://doi.org/10.1016/j.cor.2017.02.006
+ */
+Instance generate_evenodd6(
+        ItemPos number_of_items,
+        std::mt19937_64& generator);
+
+/**
+ * See:
+ * "A low-space algorithm for the subset-sum problem on GPU" (Curtis and
+ * Sanches, 2017)
+ * https://doi.org/10.1016/j.cor.2017.02.006
+ */
+Instance generate_evenodd8(
+        ItemPos number_of_items,
+        std::mt19937_64& generator);
+
+/**
+ * See:
+ * "A low-space algorithm for the subset-sum problem on GPU" (Curtis and
+ * Sanches, 2017)
+ * https://doi.org/10.1016/j.cor.2017.02.006
+ */
+Instance generate_tenfive6(
+        ItemPos number_of_items,
+        std::mt19937_64& generator);
+
+/**
+ * See:
+ * "A low-space algorithm for the subset-sum problem on GPU" (Curtis and
+ * Sanches, 2017)
+ * https://doi.org/10.1016/j.cor.2017.02.006
+ */
+Instance generate_tenfive8(
+        ItemPos number_of_items,
+        std::mt19937_64& generator);
+
 }

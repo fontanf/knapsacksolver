@@ -41,10 +41,10 @@ Instance subsetsumsolver::generate_evenodd(
         std::mt19937_64& generator)
 {
     Instance instance;
-    std::uniform_int_distribution<Weight> distribution(1, 1e3);
+    std::uniform_int_distribution<Weight> distribution(1, 1e3 / 2);
     instance.set_capacity(2 * (number_of_items * 1e3 / 8) + 1);
     for (ItemPos pos = 0; pos < number_of_items; ++pos)
-        instance.add_item(distribution(generator));
+        instance.add_item(2 * distribution(generator));
     return instance;
 }
 
@@ -112,5 +112,65 @@ Instance subsetsumsolver::generate_somatoth(
         }
     }
 
+    return instance;
+}
+
+Instance subsetsumsolver::generate_evenodd6(
+        ItemPos number_of_items,
+        std::mt19937_64& generator)
+{
+    Instance instance;
+    std::uniform_int_distribution<Weight> distribution(1, 1e6 / 2);
+    instance.set_capacity((number_of_items * 1e6 / 60) + 1);
+    for (ItemPos pos = 0; pos < number_of_items; ++pos)
+        instance.add_item(2 * distribution(generator));
+    return instance;
+}
+
+Instance subsetsumsolver::generate_evenodd8(
+        ItemPos number_of_items,
+        std::mt19937_64& generator)
+{
+    Instance instance;
+    std::uniform_int_distribution<Weight> distribution(1, 1e8 / 2);
+    Weight w_sum = 0;
+    for (ItemPos pos = 0; pos < number_of_items; ++pos) {
+        Weight wj = 2 * distribution(generator);
+        instance.add_item(wj);
+        w_sum += wj;
+    }
+    instance.set_capacity(w_sum / 2 + 1);
+    return instance;
+}
+
+Instance subsetsumsolver::generate_tenfive6(
+        ItemPos number_of_items,
+        std::mt19937_64& generator)
+{
+    Instance instance;
+    std::uniform_int_distribution<Weight> distribution(1, 1e5);
+    Weight w_sum = 0;
+    for (ItemPos pos = 0; pos < number_of_items; ++pos) {
+        Weight wj = 10 * distribution(generator);
+        instance.add_item(wj);
+        w_sum += wj;
+    }
+    instance.set_capacity((w_sum / 600) * 10 + 5);
+    return instance;
+}
+
+Instance subsetsumsolver::generate_tenfive8(
+        ItemPos number_of_items,
+        std::mt19937_64& generator)
+{
+    Instance instance;
+    std::uniform_int_distribution<Weight> distribution(1, 1e7);
+    Weight w_sum = 0;
+    for (ItemPos pos = 0; pos < number_of_items; ++pos) {
+        Weight wj = 10 * distribution(generator);
+        instance.add_item(wj);
+        w_sum += wj;
+    }
+    instance.set_capacity((w_sum / 20) * 10 + 5);
     return instance;
 }
