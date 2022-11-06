@@ -5,14 +5,14 @@
 using namespace knapsacksolver;
 namespace po = boost::program_options;
 
-ExpknapOptionalParameters read_expknap_args(std::vector<char*> argv)
+BranchAndBoundPrimalDualOptionalParameters read_branch_and_bound_primal_dual_args(std::vector<char*> argv)
 {
-    ExpknapOptionalParameters p;
+    BranchAndBoundPrimalDualOptionalParameters p;
     po::options_description desc("Allowed options");
     desc.add_options()
         ("greedy,g", "")
-        ("greedynlogn,n", po::value<StateIdx>(&p.greedynlogn), "")
-        ("surrelax,s", po::value<StateIdx>(&p.surrelax), "")
+        ("greedy-nlogn,n", po::value<StateIdx>(&p.greedy_nlogn), "")
+        ("surrogate-relaxation,s", po::value<StateIdx>(&p.surrogate_relaxation), "")
         ("combo-core,c", "")
         ;
     po::variables_map vm;
@@ -30,15 +30,15 @@ ExpknapOptionalParameters read_expknap_args(std::vector<char*> argv)
     return p;
 }
 
-BalknapOptionalParameters read_balknap_args(std::vector<char*> argv)
+DynamicProgrammingBalancingOptionalParameters read_dynamic_programming_balancing_args(std::vector<char*> argv)
 {
-    BalknapOptionalParameters p;
+    DynamicProgrammingBalancingOptionalParameters p;
     po::options_description desc("Allowed options");
     desc.add_options()
         ("upper-bound,u", po::value<char>(&p.ub), "")
         ("greedy,g", "")
-        ("greedynlogn,n", po::value<StateIdx>(&p.greedynlogn), "")
-        ("surrelax,s", po::value<StateIdx>(&p.surrelax), "")
+        ("greedy-nlogn,n", po::value<StateIdx>(&p.greedy_nlogn), "")
+        ("surrogate-relaxation,s", po::value<StateIdx>(&p.surrogate_relaxation), "")
         ("partial-solution-size,k", po::value<ItemIdx>(&p.partial_solution_size), "")
         ;
     po::variables_map vm;
@@ -54,14 +54,14 @@ BalknapOptionalParameters read_balknap_args(std::vector<char*> argv)
     return p;
 }
 
-MinknapOptionalParameters read_minknap_args(std::vector<char*> argv)
+DynamicProgrammingPrimalDualOptionalParameters read_dynamic_programming_primal_dual_args(std::vector<char*> argv)
 {
-    MinknapOptionalParameters p;
+    DynamicProgrammingPrimalDualOptionalParameters p;
     po::options_description desc("Allowed options");
     desc.add_options()
         ("greedy,g", "")
         ("pairing,p", po::value<StateIdx>(&p.pairing), "")
-        ("surrelax,s", po::value<StateIdx>(&p.surrelax), "")
+        ("surrogate_relaxation,s", po::value<StateIdx>(&p.surrogate_relaxation), "")
         ("combo-core,c", "")
         ("partial-solution-size,k", po::value<ItemIdx>(&p.partial_solution_size), "")
         ;
@@ -91,91 +91,94 @@ Output knapsacksolver::run(
     if (algorithm.empty() || algorithm_args[0].empty()) {
         throw std::invalid_argument("Missing algorithm.");
 
-    /*
-     * Lower bounds
-     */
     } else if (algorithm_args[0] == "greedy") {
         instance.sort_partially(FFOT_DBG(info));
         return greedy(instance, info);
-    } else if (algorithm_args[0] == "greedynlogn") {
+    } else if (algorithm_args[0] == "greedy_nlogn") {
         instance.sort_partially(FFOT_DBG(info));
-        return greedynlogn(instance, info);
-    } else if (algorithm_args[0] == "greedynlogn_for") {
+        return greedy_nlogn(instance, info);
+    } else if (algorithm_args[0] == "greedy_nlogn_forward") {
         instance.sort_partially(FFOT_DBG(info));
-        return forwardgreedynlogn(instance, info);
-    } else if (algorithm_args[0] == "greedynlogn_back") {
+        return greedy_nlogn_forward(instance, info);
+    } else if (algorithm_args[0] == "greedy_nlogn_backward") {
         instance.sort_partially(FFOT_DBG(info));
-        return backwardgreedynlogn(instance, info);
+        return greedy_nlogn_backward(instance, info);
 
-    /*
-     * Exact argsrithms
-     */
-    } else if (algorithm_args[0] == "bellman_array") { // Bellman
-        return bellman_array(instance, info);
-    } else if (algorithm_args[0] == "bellmanpar_array") {
-        return bellmanpar_array(instance, info);
-    } else if (algorithm_args[0] == "bellman_rec") {
-        return bellmanrec(instance, info);
-    } else if (algorithm_args[0] == "bellman_array_all") {
-        return bellman_array_all(instance, info);
-    } else if (algorithm_args[0] == "bellman_array_one") {
-        return bellman_array_one(instance, info);
-    } else if (algorithm_args[0] == "bellman_array_part") {
-        return bellman_array_part(instance, 64, info);
-    } else if (algorithm_args[0] == "bellman_array_rec") {
-        return bellman_array_rec(instance, info);
-    } else if (algorithm_args[0] == "bellman_list") {
-        return bellman_list(instance, false, info);
-    } else if (algorithm_args[0] == "bellman_list_sort") {
-        return bellman_list(instance, true, info);
-    } else if (algorithm_args[0] == "bellman_list_rec") {
-        return bellman_list_rec(instance, info);
-    } else if (algorithm_args[0] == "dpprofits_array") { // DPProfits
-        return dpprofits_array(instance, info);
-    } else if (algorithm_args[0] == "dpprofits_array_all") {
-        return dpprofits_array_all(instance, info);
-    } else if (algorithm_args[0] == "branchandbound") { // Branch-and-bound
-        return branchandbound(instance, false, info);
-    } else if (algorithm_args[0] == "branchandbound_sort") {
-        return branchandbound(instance, true, info);
-    } else if (algorithm_args[0] == "expknap") { // Expknap
-        ExpknapOptionalParameters p = read_expknap_args(algorithm_argv);
-        p.info = info;
-        return expknap(instance, p);
-    } else if (algorithm_args[0] == "expknap_combo") {
-        auto p = ExpknapOptionalParameters().set_combo();
-        p.info = info;
-        return expknap(instance, p);
-    } else if (algorithm_args[0] == "balknap") { // Balknap
-        BalknapOptionalParameters p = read_balknap_args(algorithm_argv);
-        p.info = info;
-        return balknap(instance, p);
-    } else if (algorithm_args[0] == "balknap_combo") {
-        auto p = BalknapOptionalParameters().set_combo();
-        p.info = info;
-        return balknap(instance, p);
-    } else if (algorithm_args[0] == "minknap") { // Minknap
-        MinknapOptionalParameters p = read_minknap_args(algorithm_argv);
-        p.info = info;
-        return minknap(instance, p);
-    } else if (algorithm_args[0] == "minknap_combo" || algorithm_args[0] == "combo") {
-        auto p = MinknapOptionalParameters().set_combo();
-        p.info = info;
-        return minknap(instance, p);
+    } else if (algorithm_args[0] == "dynamic_programming_bellman_array") { // DP Bellman
+        return dynamic_programming_bellman_array(instance, info);
+    } else if (algorithm_args[0] == "dynamic_programming_bellman_array_parallel") {
+        return dynamic_programming_bellman_array_parallel(instance, info);
+    } else if (algorithm_args[0] == "dynamic_programming_bellman_rec") {
+        return dynamic_programming_bellman_rec(instance, info);
+    } else if (algorithm_args[0] == "dynamic_programming_bellman_array_all") {
+        return dynamic_programming_bellman_array_all(instance, info);
+    } else if (algorithm_args[0] == "dynamic_programming_bellman_array_one") {
+        return dynamic_programming_bellman_array_one(instance, info);
+    } else if (algorithm_args[0] == "dynamic_programming_bellman_array_part") {
+        return dynamic_programming_bellman_array_part(instance, 64, info);
+    } else if (algorithm_args[0] == "dynamic_programming_bellman_array_rec") {
+        return dynamic_programming_bellman_array_rec(instance, info);
+    } else if (algorithm_args[0] == "dynamic_programming_bellman_list") {
+        return dynamic_programming_bellman_list(instance, false, info);
+    } else if (algorithm_args[0] == "dynamic_programming_bellman_list_sort") {
+        return dynamic_programming_bellman_list(instance, true, info);
+    } else if (algorithm_args[0] == "dynamic_programming_bellman_list_rec") {
+        return dynamic_programming_bellman_list_rec(instance, info);
 
-    /*
-     * Upper bounds
-     */
+    } else if (algorithm_args[0] == "dynamic_programming_profits_array") { // DP by profits
+        return dynamic_programming_profits_array(instance, info);
+    } else if (algorithm_args[0] == "dynamic_programming_profits_array_all") {
+        return dynamic_programming_profits_array_all(instance, info);
+
+    } else if (algorithm_args[0] == "dynamic_programming_balancing"
+            || algorithm_args[0] == "balknap") { // DP balancing
+        DynamicProgrammingBalancingOptionalParameters p
+            = read_dynamic_programming_balancing_args(algorithm_argv);
+        p.info = info;
+        return dynamic_programming_balancing(instance, p);
+    } else if (algorithm_args[0] == "dynamic_programming_balancing_combo"
+            || algorithm_args[0] == "balknap_combo") {
+        auto p = DynamicProgrammingBalancingOptionalParameters().set_combo();
+        p.info = info;
+        return dynamic_programming_balancing(instance, p);
+
+    } else if (algorithm_args[0] == "dynamic_programming_primal_dual"
+            || algorithm_args[0] == "minknap") { // DP primal-dual
+        DynamicProgrammingPrimalDualOptionalParameters p
+            = read_dynamic_programming_primal_dual_args(algorithm_argv);
+        p.info = info;
+        return dynamic_programming_primal_dual(instance, p);
+    } else if (algorithm_args[0] == "dynamic_programming_primal_dual_combo"
+            || algorithm_args[0] == "combo") {
+        auto p = DynamicProgrammingPrimalDualOptionalParameters().set_combo();
+        p.info = info;
+        return dynamic_programming_primal_dual(instance, p);
+
+    } else if (algorithm_args[0] == "branch_and_bound") { // Branch-and-bound
+        return branch_and_bound(instance, false, info);
+    } else if (algorithm_args[0] == "branch_and_bound_sort") {
+        return branch_and_bound(instance, true, info);
+
+    } else if (algorithm_args[0] == "branch_and_bound_primal_dual") { // BranchAndBoundPrimalDual
+        BranchAndBoundPrimalDualOptionalParameters p
+            = read_branch_and_bound_primal_dual_args(algorithm_argv);
+        p.info = info;
+        return branch_and_bound_primal_dual(instance, p);
+    } else if (algorithm_args[0] == "branch_and_bound_primal_dual_combo") {
+        auto p = BranchAndBoundPrimalDualOptionalParameters().set_combo();
+        p.info = info;
+        return branch_and_bound_primal_dual(instance, p);
+
     } else if (algorithm_args[0] == "dantzig") { // Dantzig
         Info info_tmp;
         Output output(instance, info_tmp);
         instance.sort_partially(FFOT_DBG(info_tmp));
-        output.upper_bound = ub_dantzig(instance, info);
+        output.upper_bound = upper_bound_dantzig(instance, info);
         return output;
-    } else if (algorithm_args[0] == "surrelax") { // Surrogate relaxation
-        return surrelax(instance, info);
-    } else if (algorithm_args[0] == "surrelax_minknap") { // Surrogate relaxation
-        return surrelax_minknap(instance, info);
+    } else if (algorithm_args[0] == "surrogate_relaxation") { // Surrogate relaxation
+        return surrogate_relaxation(instance, info);
+    } else if (algorithm_args[0] == "solve_surrogate_instance") {
+        return solve_surrogate_instance(instance, info);
 
     } else {
         throw std::invalid_argument(

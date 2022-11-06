@@ -10,22 +10,58 @@ All classical and state-of-the-art algorithms are implemented. Most of them are 
 
 ##### Table of Contents
 
+ * [Implemented algorithms](#implemented-algorithms)
  * [Usage](#usage)
    * [Command line](#command-line)
    * [C++ library](#c-library)
    * [Python interface](#python-interface)
- * [Implemented algorithms](#implemented-algorithms)
-   * [Lower bounds](#lower-bounds)
-   * [Upper bounds](#upper-bounds)
-   * [Exact algorithms](#exact-algorithms)
-     * [Classical algorithms](#classical-algorithms)
-     * [State of the art algorithms](#state-of-the-art-algorithms)
  * [Results](#results)
    * [Dynamic Programming: recursive vs iterative implementation](#dynamic-programming-recursive-vs-iterative-implementation)
    * [Dynamic Programming: cost of retrieving an optimal solution](#dynamic-programming-cost-of-retrieving-an-optimal-solution)
    * [Dynamic Programming: sequencial vs parallel implementation](#dynamic-programming-sequencial-vs-parallel-implementation)
    * [Normal dataset](#normal-dataset)
    * [Literature dataset](#literature-dataset)
+
+## Implemented algorithms
+
+* Greedy
+  * `O(n)` `-a greedy`
+  * `O(n log n)`
+    * Forward `-a greedy_nlogn_forward`
+    * Backward `-a greedy_nlogn_backward`
+    * Best of Forward and Backward `-a greedy_nlogn`
+
+* Upper bounds
+  * Dantzig upper bound `-a dantzig`
+  * Surrogate relaxation
+    * Only solve relaxation `-a surrogate_relaxation`
+    * Solve relaxation and surrogate instance with `dynamic_programming_primal_dual`: `-a solve_surrogate_instance`
+
+* Dynamic Programming
+  * Bellman
+    * Recursive `-a dynamic_programming_bellman_rec`
+    * Array (only optimal value) `-a dynamic_programming_bellman_array`
+    * Array + parallel (only optimal value) `-a dynamic_programming_bellman_array_parallel`
+    * Array (all) `-a dynamic_programming_bellman_array_all`
+    * Array (one) `-a dynamic_programming_bellman_array_one`
+    * Array (partial solution) `-a dynamic_programming_bellman_array_part`
+    * Array (recursive scheme) `-a dynamic_programming_bellman_array_rec`
+    * List (only optimal value) `-a dynamic_programming_bellman_list`
+    * List + sort (only optimal value) `-a dynamic_programming_bellman_list_sort`
+    * List (recursive scheme) `-a dynamic_programming_bellman_list_rec`
+  * By profits
+    * Array (only optimal value) `-a dynamic_programming_profits_array`
+    * Array (all) `-a dynamic_programming_profits_array_all`
+  * Balancing (balknap)
+    * List (partial solution) `-a "dynamic_programming_balancing -g -u t -n -1 -s -1 -k 64"`, `-a balknap`
+  * Primal-dual (minknap, combo)
+    * List (partial solution) `-a "dynamic_programming_primal_dual -c -g -p -1 -s -1 -k 64"`, `-a dynamic_programming_primal_dual_combo`, `-a combo`
+
+* Branch-and-bound
+  * Primal
+    * `-a branch_and_bound`
+    * `-a branch_and_bound_sort`
+  * Primal-dual (expknap) `-a "branch_and_bound_primal_dual -c -g -n -1 -s -1"`,  `expknap`, `-a branch_and_bound_primal_dual_combo`
 
 ## Usage
 
@@ -236,7 +272,7 @@ git_repository(
 And then in the `BUILD` file, add the dependency to the concerned rule:
 ```
         deps = [
-                "@knapsacksolver//knapsacksolver/algorithms:minknap",
+                "@knapsacksolver//knapsacksolver/algorithms:dynamic_programming_primal_dual",
         ],
 ```
 * Then an example of how to create an instance and solve it can be found here:
@@ -267,65 +303,11 @@ instance.set_capacity(c // 2)
 
 # Solve
 solution = knapsacksolver.solve(instance)
-# or solution = knapsacksolver.solve(instance, algorithm = "minknap", verbose = True)
+# or solution = knapsacksolver.solve(instance, algorithm = "dynamic_programming_primal_dual", verbose = True)
 solution.number_of_items()
 solution.profit()
 solution.contains(0)
 ```
-
-## Implemented algorithms
-
-### Lower bounds
-
-- O(n) Greedy, run Forward and Backward Greedy algorithms and return the best solution `-a greedy` :heavy_check_mark:
-- O(n log n) Greedy algorithms similar to the one described in "A fast algorithm for strongly correlated knapsack problems" (Pisinger, 1998)
-  - Forward O(n log n) Greedy `-a greedynlogn_for` :heavy_check_mark:
-  - Backward O(n log n) Greedy `-a greedynlogn_back` :heavy_check_mark:
-  - Best between O(n) Greedy and Forward and Backward O(n log n) Greedy algorithms `-a greedynlogn` :heavy_check_mark:
-
-### Upper bounds
-
-- Dantzig Upper bound `-a dantzig` :heavy_check_mark:
-- Surrogate relaxation Upper bound
-  - only solve relaxation: `-a surrelax` :heavy_check_mark:
-  - solve relaxation and surrogate instance with `minknap`: `-a surrelax_minknap` :heavy_check_mark:
-
-### Exact algorithms
-
-#### Classical algorithms
-
-- `array` and `list` refer to the type of memory used. Lists are slower but eliminate dominated states and allow the use of Upper bounds.
-- `all`, `one`, `part` and `rec` refer to the method used to retrieve the optimal solution:
-  - none: no solution retrieved, only the optimal value is returned
-  - `all`: keep all states in memory and backtrack
-  - `one`: keep only the last states in memory, retrieve the last item added and run the algorithm again to retrieve the complete optimal solution
-  - `part`: keep a partial solution in each state and run the algorithm again while the global solution is not complete. `k` indicates the size of the partial solution (<=64).
-  - `rec`: use the recursive scheme
-- `sort` indicates that the items are fully sorted at the beginning, allowing the use of better Upper bounds.
-
-Algorithms:
-- Dynamic programming with Bellman recursion
-  - Top-down (recursive): `-a bellman_rec` :heavy_check_mark:
-  - Bottom-up (iterative), array: `-a bellman_array` :heavy_check_mark: `-a bellman_array_all` :heavy_check_mark: `-a bellman_array_one` :heavy_check_mark: `-a bellman_array_part` :heavy_check_mark: `-a bellman_array_rec` :heavy_check_mark:
-  - Bottom-up (iterative), lists: `-a bellman_list` :heavy_check_mark: `-a bellman_list_sort` :heavy_check_mark: `-a bellman_list_rec` :heavy_check_mark:
-  - Bottom-up (iterative), array, parallel: `-a bellmanpar_array` :heavy_check_mark:
-- Dynamic programming by Profits `-a dpprofits_array` :heavy_check_mark: `-a dpprofits_array_all` :heavy_check_mark:
-- Primal Branch-and-bound `-a branchandbound` :heavy_check_mark: `-a branchandbound_sort` :heavy_check_mark:
-
-#### State of the art algorithms
-
-Options
-- `-c`: use `combo` core
-- `-g`: `greedy` will be executed at the beginning of the algorithm
-- `-n X`: `greedynlogn` will be executed at Xth node / if state number goes over X
-- `-p X`: state pairing with items outside the core will be executed if state number goes over X
-- `-s X`: surrogate relaxation and instance will be solved at Xth node / if state number goes over X
-- `-k X`: partial solution size (1 <= X <= 64)
-
-Algorithms:
-- Primal-dual Branch-and-bound `-a "expknap -c -g -n -1 -s -1"`, `-a expknap_combo` :heavy_check_mark:
-- Balanced Dynamic programming. The list implementation requires a map. Therefore, its asymptotical complexity is slightly greater than the one with an array. However, the possiblity of combining the dynamic programming with bouding makes it more performant. Still, two versions are implemented. Options `-u` can be set to `b` (partial sorting, Dembo Upper bound with break item) or `t` (complete sorting, better Upper Bound) `-a "balknap -g -u t -n -1 -s -1 -k 64"` :heavy_check_mark:
-- Primal-dual Dynamic programming (only with list) `-a "minknap -c -g -p -1 -s -1 -k 64"`, `-a combo` :heavy_check_mark:
 
 ## Results
 
@@ -337,10 +319,10 @@ Algorithms:
 
 Run benchmarks:
 ```shell
-bazel run //knapsacksolver:bench -- -a bellman_array bellman_array_part bellman_array_rec bellmanpar_array bellman_array_all bellman_rec -d easy
-bazel run //knapsacksolver:bench -- -a expknap expknap_combo balknap balknap_combo minknap combo -d normal
-bazel run //knapsacksolver:bench -- -a expknap expknap_combo balknap minknap combo -d easy difficultlarge difficultsmall
-bazel run //knapsacksolver:bench -- -a bellman_list_sort -d difficultsmall
+bazel run //knapsacksolver:bench -- -a dynamic_programming_bellman_array dynamic_programming_bellman_array_part dynamic_programming_bellman_array_rec bellmanpar_array dynamic_programming_bellman_array_all dynamic_programming_bellman_rec -d easy
+bazel run //knapsacksolver:bench -- -a branch_and_bound_primal_dual branch_and_bound_primal_dual_combo dynamic_programming_balancing dynamic_programming_balancing_combo dynamic_programming_primal_dual dynamic_programming_primal_dual_combo -d normal
+bazel run //knapsacksolver:bench -- -a branch_and_bound_primal_dual branch_and_bound_primal_dual_combo dynamic_programming_balancing dynamic_programming_primal_dual dynamic_programming_primal_dual_combo -d easy difficultlarge difficultsmall
+bazel run //knapsacksolver:bench -- -a dynamic_programming_bellman_list_sort -d difficultsmall
 ```
 
 Output files are created in `bazel-out/k8-opt/bin/knapsacksolver/bench.runfiles/__main__/`.
@@ -348,23 +330,23 @@ Output files are created in `bazel-out/k8-opt/bin/knapsacksolver/bench.runfiles/
 ### Dynamic Programming: recursive vs iterative implementation
 
 Except for very sparse instances (like SW), the iterative implementation is about 10 times faster.
-- ![Recursive implementation](bench/bellman_rec_easy.csv)
-- ![Iterative implementation](bench/bellman_array_all_easy.csv)
+- ![Recursive implementation](bench/dynamic_programming_bellman_rec_easy.csv)
+- ![Iterative implementation](bench/dynamic_programming_bellman_array_all_easy.csv)
 
 ### Dynamic Programming: cost of retrieving an optimal solution
 
 The recursive scheme is clearly the fastest to retrieve an optimal solution.
 It still requires 2 times more time than the implementation returning only the optimal value.
-- ![Only optimal value](bench/bellman_array_easy.csv)
-- ![Keeping the whole array](bench/bellman_array_all_easy.csv)
-- ![Storing partial solutions in states](bench/bellman_array_part_easy.csv)
-- ![Recursive scheme](bench/bellman_array_rec_easy.csv)
+- ![Only optimal value](bench/dynamic_programming_bellman_array_easy.csv)
+- ![Keeping the whole array](bench/dynamic_programming_bellman_array_all_easy.csv)
+- ![Storing partial solutions in states](bench/dynamic_programming_bellman_array_part_easy.csv)
+- ![Recursive scheme](bench/dynamic_programming_bellman_array_rec_easy.csv)
 
 ### Dynamic Programming: sequencial vs parallel implementation
 
 The parallel algorithm is implemented as follows: items are divided in two sets of same size. The all-capacities version of the knapsack problem is solved for both sets with the classical `bellman` recursion. Then, the optimal value is computed by merging the information from both arrays.
-- ![Sequencial](bench/bellman_array_easy.csv)
-- ![Parallel](bench/bellmanpar_array_easy.csv)
+- ![Sequencial](bench/dynamic_programming_bellman_array_easy.csv)
+- ![Parallel](bench/dynamic_programming_bellman_array_parallel_easy.csv)
 
 ### Normal dataset
 
@@ -377,32 +359,32 @@ pj ~ N(wj,    wj / 10), 1 <= pj <= r
 c = r * (1 - x) + ∑wj * x;
 ```
 
-* [expknap](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/knapsack/master/bench/expknap.json)
-* [expknap_combo](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/knapsack/master/bench/expknap_combo.json)
-* [balknap](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/knapsack/master/bench/balknap.json)
-* [balknap_combo](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/knapsack/master/bench/balknap_combo.json)
-* [minknap](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/knapsack/master/bench/minknap.json)
-* [combo](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/knapsack/master/bench/combo.json)
+* [branch_and_bound_primal_dual](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/knapsack/master/bench/branch_and_bound_primal_dual.json)
+* [branch_and_bound_primal_dual_combo](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/knapsack/master/bench/branch_and_bound_primal_dual_combo.json)
+* [dynamic_programming_balancing](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/knapsack/master/bench/dynamic_programming_balancing.json)
+* [dynamic_programming_balancing_combo](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/knapsack/master/bench/dynamic_programming_balancing_combo.json)
+* [dynamic_programming_primal_dual](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/knapsack/master/bench/dynamic_programming_primal_dual.json)
+* [dynamic_programming_primal_dual_combo](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/knapsack/master/bench/dynamic_programming_primal_dual_combo.json)
 
 Remarks:
-- The superiority of `minknap` is clear
+- The superiority of `dynamic_programming_primal_dual` is clear
 - `combo` optimizations do not help:
 
 ### Literature dataset
 
-| Algorithm       | Instances                                                                                                                                                        |
-| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `expknap`       | ![easy](bench/expknap_easy.csv),        ![difficult large](bench/expknap_difficultlarge.csv),        ![difficult small](bench/expknap_difficultsmall.csv)        |
-| `expknap_combo` | ![easy](bench/expknap_combo_easy.csv),  ![difficult large](bench/expknap_combo_difficultlarge.csv),  ![difficult small](bench/expknap_combo_difficultsmall.csv)  |
-| `balknap`       | ![easy](bench/balknap_easy.csv),        ![difficult large](bench/balknap_difficultlarge.csv),        ![difficult small](bench/balknap_difficultsmall.csv)        |
-| `minknap`       | ![easy](bench/minknap_easy.csv),        ![difficult large](bench/minknap_difficultlarge.csv),        ![difficult small](bench/minknap_difficultsmall.csv)        |
-| `combo`         | ![easy](bench/combo_easy.csv),          ![difficult large](bench/combo_difficultlarge.csv),          ![difficult small](bench/combo_difficultsmall.csv)          |
+| Algorithm                                | Instances                                                                                                                                                                                                                                |
+| ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `branch_and_bound_primal_dual`           | ![easy](bench/branch_and_bound_primal_dual_easy.csv),           ![difficult large](bench/branch_and_bound_primal_dual_difficultlarge.csv),           ![difficult small](bench/branch_and_bound_primal_dual_difficultsmall.csv)           |
+| `branch_and_bound_primal_dual_combo`     | ![easy](bench/branch_and_bound_primal_dual_combo_easy.csv),     ![difficult large](bench/branch_and_bound_primal_dual_combo_difficultlarge.csv),     ![difficult small](bench/branch_and_bound_primal_dual_combo_difficultsmall.csv)     |
+| `dynamic_programming_balancing`          | ![easy](bench/dynamic_programming_balancing_easy.csv),          ![difficult large](bench/dynamic_programming_balancing_difficultlarge.csv),          ![difficult small](bench/dynamic_programming_balancing_difficultsmall.csv)          |
+| `dynamic_programming_primal_dual`        | ![easy](bench/dynamic_programming_primal_dual_easy.csv),        ![difficult large](bench/dynamic_programming_primal_dual_difficultlarge.csv),        ![difficult small](bench/dynamic_programming_primal_dual_difficultsmall.csv)        |
+| `dynamic_programming_primal_dual_combo`  | ![easy](bench/dynamic_programming_primal_dual_combo_easy.csv),  ![difficult large](bench/dynamic_programming_primal_dual_combo_difficultlarge.csv),  ![difficult small](bench/dynamic_programming_primal_dual_combo_difficultsmall.csv)  |
 
 Remarks:
 - These subset sum, strongly correlated and inverse strongly correlated instances are easy to solve since the upper bound happens to always be optimal.
-- With `combo` optimizations, `expknap` is able to solve strongly correlated and inverse strongly correlated instances. It also solves more almost strongly correlated instances.
-- Performances of `minknap` and `combo` seems to match the results from the literature. Furthermore, taking advantage of parallelization, this implementation of `combo` is able to solve all instances of the `difficultlarge` dataset.
-- `balknap` is very competitive on small instances (R = 1000). Compared to `minknap`:
+- With `combo` optimizations, `branch_and_bound_primal_dual` is able to solve strongly correlated and inverse strongly correlated instances. It also solves more almost strongly correlated instances.
+- Performances of `dynamic_programming_primal_dual` and `combo` seems to match the results from the literature. Furthermore, taking advantage of parallelization, this implementation of `combo` is able to solve all instances of the `difficultlarge` dataset.
+- `dynamic_programming_balancing` is very competitive on small instances (R = 1000). Compared to `dynamic_programming_primal_dual`:
   - it performs a lot better on `sc`, `isc`, `spanner`, `mstr` and `pceil` instances.
   - it performs slighlty worse on `u`, `wc` and `ss` instances.
   - it performs a lot worse on `asc` and `circle` instances.

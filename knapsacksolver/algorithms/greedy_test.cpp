@@ -1,12 +1,12 @@
 #include "knapsacksolver/tester.hpp"
-#include "knapsacksolver/algorithms/minknap.hpp"
+#include "knapsacksolver/algorithms/dynamic_programming_primal_dual.hpp"
 #include "knapsacksolver/algorithms/greedy.hpp"
 
 using namespace knapsacksolver;
 
-Output minknap_test(Instance& instance)
+Output dynamic_programming_primal_dual_test(Instance& instance)
 {
-    return minknap(instance);
+    return dynamic_programming_primal_dual(instance);
 }
 
 Output greedy_test(Instance& instance)
@@ -17,7 +17,7 @@ Output greedy_test(Instance& instance)
 }
 
 std::vector<Output (*)(Instance&)> f = {
-        minknap_test,
+        dynamic_programming_primal_dual_test,
         greedy_test,
 };
 

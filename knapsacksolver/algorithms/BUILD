@@ -14,7 +14,7 @@ cc_test(
         deps = [
                 "//knapsacksolver:tester",
                 ":greedy",
-                ":minknap",
+                ":dynamic_programming_primal_dual",
         ],
         timeout = "moderate",
 )
@@ -22,9 +22,9 @@ cc_test(
 ################################################################################
 
 cc_library(
-        name = "greedynlogn",
-        hdrs = ["greedynlogn.hpp"],
-        srcs = ["greedynlogn.cpp"],
+        name = "greedy_nlogn",
+        hdrs = ["greedy_nlogn.hpp"],
+        srcs = ["greedy_nlogn.cpp"],
         deps = [
                 "//knapsacksolver:knapsacksolver",
                 ":greedy",
@@ -33,12 +33,12 @@ cc_library(
 )
 
 cc_test(
-        name = "greedynlogn_test",
-        srcs = ["greedynlogn_test.cpp"],
+        name = "greedy_nlogn_test",
+        srcs = ["greedy_nlogn_test.cpp"],
         deps = [
                 "//knapsacksolver:tester",
-                ":greedynlogn",
-                ":minknap"
+                ":greedy_nlogn",
+                ":dynamic_programming_primal_dual"
         ],
         timeout = "moderate",
 )
@@ -47,9 +47,9 @@ cc_test(
 ################################################################################
 
 cc_library(
-        name = "dantzig",
-        hdrs = ["dantzig.hpp"],
-        srcs = ["dantzig.cpp"],
+        name = "upper_bound_dantzig",
+        hdrs = ["upper_bound_dantzig.hpp"],
+        srcs = ["upper_bound_dantzig.cpp"],
         deps = ["//knapsacksolver:knapsacksolver"],
         visibility = ["//visibility:public"],
 )
@@ -57,9 +57,9 @@ cc_library(
 ################################################################################
 
 cc_library(
-        name = "dembo",
-        hdrs = ["dembo.hpp"],
-        srcs = ["dembo.cpp"],
+        name = "upper_bound_dembo",
+        hdrs = ["upper_bound_dembo.hpp"],
+        srcs = ["upper_bound_dembo.cpp"],
         deps = ["//knapsacksolver:knapsacksolver_hpp"],
         visibility = ["//visibility:public"],
 )
@@ -67,25 +67,25 @@ cc_library(
 ################################################################################
 
 cc_library(
-        name = "surrelax",
-        hdrs = ["surrelax.hpp"],
-        srcs = ["surrelax.cpp"],
+        name = "surrogate_relaxation",
+        hdrs = ["surrogate_relaxation.hpp"],
+        srcs = ["surrogate_relaxation.cpp"],
         deps = [
                 "//knapsacksolver:knapsacksolver",
-                ":dantzig",
-                ":minknap_hpp",
+                ":upper_bound_dantzig",
+                ":dynamic_programming_primal_dual_hpp",
         ],
         copts = STDCPP,
         visibility = ["//visibility:public"],
 )
 
 cc_test(
-        name = "surrelax_test",
-        srcs = ["surrelax_test.cpp"],
+        name = "surrogate_relaxation_test",
+        srcs = ["surrogate_relaxation_test.cpp"],
         deps = [
                 "//knapsacksolver:tester",
-                ":surrelax",
-                ":minknap",
+                ":surrogate_relaxation",
+                ":dynamic_programming_primal_dual",
         ],
         copts = STDCPP,
         timeout = "moderate",
@@ -95,26 +95,26 @@ cc_test(
 ################################################################################
 
 cc_library(
-        name = "branchandbound",
-        hdrs = ["branchandbound.hpp"],
-        srcs = ["branchandbound.cpp"],
+        name = "branch_and_bound",
+        hdrs = ["branch_and_bound.hpp"],
+        srcs = ["branch_and_bound.cpp"],
         deps = [
                 "//knapsacksolver:knapsacksolver",
-                ":dembo",
-                ":dantzig",
-                ":greedynlogn",
+                ":upper_bound_dembo",
+                ":upper_bound_dantzig",
+                ":greedy_nlogn",
         ],
         copts = STDCPP,
         visibility = ["//visibility:public"],
 )
 
 cc_test(
-        name = "branchandbound_test",
-        srcs = ["branchandbound_test.cpp"],
+        name = "branch_and_bound_test",
+        srcs = ["branch_and_bound_test.cpp"],
         deps = [
                 "//knapsacksolver:tester",
-                ":branchandbound",
-                ":minknap",
+                ":branch_and_bound",
+                ":dynamic_programming_primal_dual",
         ],
         timeout = "moderate",
 )
@@ -122,14 +122,14 @@ cc_test(
 ################################################################################
 
 cc_library(
-        name = "bellman",
-        hdrs = ["bellman.hpp"],
-        srcs = ["bellman.cpp"],
+        name = "dynamic_programming_bellman",
+        hdrs = ["dynamic_programming_bellman.hpp"],
+        srcs = ["dynamic_programming_bellman.cpp"],
         deps = [
                 "//knapsacksolver:knapsacksolver",
-                ":dembo",
-                ":dantzig",
-                ":greedynlogn",
+                ":upper_bound_dembo",
+                ":upper_bound_dantzig",
+                ":greedy_nlogn",
         ],
         copts = STDCPP,
         linkopts = select({
@@ -140,11 +140,11 @@ cc_library(
 )
 
 cc_test(
-        name = "bellman_test",
-        srcs = ["bellman_test.cpp"],
+        name = "dynamic_programming_bellman_test",
+        srcs = ["dynamic_programming_bellman_test.cpp"],
         deps = [
                 "//knapsacksolver:tester",
-                ":bellman"
+                ":dynamic_programming_bellman"
         ],
         timeout = "moderate",
 )
@@ -152,23 +152,23 @@ cc_test(
 ################################################################################
 
 cc_library(
-        name = "dpprofits",
-        hdrs = ["dpprofits.hpp"],
-        srcs = ["dpprofits.cpp"],
+        name = "dynamic_programming_profits",
+        hdrs = ["dynamic_programming_profits.hpp"],
+        srcs = ["dynamic_programming_profits.cpp"],
         deps = [
                 "//knapsacksolver:knapsacksolver",
-                ":dembo"
+                ":upper_bound_dembo"
         ],
         visibility = ["//visibility:public"],
 )
 
 cc_test(
-        name = "dpprofits_test",
-        srcs = ["dpprofits_test.cpp"],
+        name = "dynamic_programming_profits_test",
+        srcs = ["dynamic_programming_profits_test.cpp"],
         deps = [
                 "//knapsacksolver:tester",
-                ":dpprofits",
-                ":bellman",
+                ":dynamic_programming_profits",
+                ":dynamic_programming_bellman",
         ],
         timeout = "moderate",
 )
@@ -176,27 +176,27 @@ cc_test(
 ################################################################################
 
 cc_library(
-        name = "balknap",
-        hdrs = ["balknap.hpp"],
-        srcs = ["balknap.cpp"],
+        name = "dynamic_programming_balancing",
+        hdrs = ["dynamic_programming_balancing.hpp"],
+        srcs = ["dynamic_programming_balancing.cpp"],
         deps = [
                 "//knapsacksolver:knapsacksolver",
                 ":greedy",
-                ":greedynlogn",
-                ":dembo",
-                ":surrelax",
+                ":greedy_nlogn",
+                ":upper_bound_dembo",
+                ":surrogate_relaxation",
         ],
         copts = STDCPP,
         visibility = ["//visibility:public"],
 )
 
 cc_test(
-        name = "balknap_test",
-        srcs = ["balknap_test.cpp"],
+        name = "dynamic_programming_balancing_test",
+        srcs = ["dynamic_programming_balancing_test.cpp"],
         deps = [
                 "//knapsacksolver:tester",
-                ":balknap",
-                ":minknap",
+                ":dynamic_programming_balancing",
+                ":dynamic_programming_primal_dual",
         ],
         timeout = "moderate",
 )
@@ -204,27 +204,27 @@ cc_test(
 ################################################################################
 
 cc_library(
-        name = "expknap",
-        hdrs = ["expknap.hpp"],
-        srcs = ["expknap.cpp"],
+        name = "branch_and_bound_primal_dual",
+        hdrs = ["branch_and_bound_primal_dual.hpp"],
+        srcs = ["branch_and_bound_primal_dual.cpp"],
         deps = [
                 "//knapsacksolver:knapsacksolver",
                 ":greedy",
-                ":greedynlogn",
-                ":dembo",
-                ":surrelax",
+                ":greedy_nlogn",
+                ":upper_bound_dembo",
+                ":surrogate_relaxation",
         ],
         copts = STDCPP,
         visibility = ["//visibility:public"],
 )
 
 cc_test(
-        name = "expknap_test",
-        srcs = ["expknap_test.cpp"],
+        name = "branch_and_bound_primal_dual_test",
+        srcs = ["branch_and_bound_primal_dual_test.cpp"],
         deps = [
                 "//knapsacksolver:tester",
-                ":expknap",
-                ":minknap",
+                ":branch_and_bound_primal_dual",
+                ":dynamic_programming_primal_dual",
         ],
         timeout = "moderate",
 )
@@ -232,35 +232,35 @@ cc_test(
 ################################################################################
 
 cc_library(
-        name = "minknap",
-        hdrs = ["minknap.hpp"],
-        srcs = ["minknap.cpp"],
+        name = "dynamic_programming_primal_dual",
+        hdrs = ["dynamic_programming_primal_dual.hpp"],
+        srcs = ["dynamic_programming_primal_dual.cpp"],
         deps = [
                 "//knapsacksolver:knapsacksolver",
                 ":greedy",
-                ":greedynlogn",
-                ":dembo",
-                ":surrelax",
+                ":greedy_nlogn",
+                ":upper_bound_dembo",
+                ":surrogate_relaxation",
         ],
         copts = STDCPP,
         visibility = ["//visibility:public"],
 )
 
 cc_library(
-        name = "minknap_hpp",
-        hdrs = ["minknap.hpp"],
+        name = "dynamic_programming_primal_dual_hpp",
+        hdrs = ["dynamic_programming_primal_dual.hpp"],
         srcs = [],
         deps = [],
         visibility = ["//visibility:public"],
 )
 
 cc_test(
-        name = "minknap_test",
-        srcs = ["minknap_test.cpp"],
+        name = "dynamic_programming_primal_dual_test",
+        srcs = ["dynamic_programming_primal_dual_test.cpp"],
         deps = [
                 "//knapsacksolver:tester",
-                ":minknap",
-                ":bellman",
+                ":dynamic_programming_primal_dual",
+                ":dynamic_programming_bellman",
         ],
         timeout = "long",
 )
@@ -273,15 +273,15 @@ cc_library(
         srcs = ["algorithms.cpp"],
         deps = [
                 ":greedy",
-                ":greedynlogn",
-                ":dembo",
-                ":surrelax",
-                ":branchandbound",
-                ":expknap",
-                ":bellman",
-                ":dpprofits",
-                ":balknap",
-                ":minknap",
+                ":greedy_nlogn",
+                ":upper_bound_dembo",
+                ":surrogate_relaxation",
+                ":branch_and_bound",
+                ":branch_and_bound_primal_dual",
+                ":dynamic_programming_bellman",
+                ":dynamic_programming_profits",
+                ":dynamic_programming_balancing",
+                ":dynamic_programming_primal_dual",
                 "@boost//:program_options",
         ],
         copts = STDCPP,

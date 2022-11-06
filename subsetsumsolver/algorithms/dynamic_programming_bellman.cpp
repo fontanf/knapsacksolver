@@ -42,6 +42,7 @@ Output subsetsumsolver::dynamic_programming_bellman_array(
         //    std::cout << (values[w] >= 0);
         //std::cout << std::endl;
 
+        // If optimum reached, stop.
         if (values[c] != -1)
             break;
     }

@@ -13,7 +13,7 @@ cc_library(
                 "solution.cpp"
         ],
         deps = [
-                "//knapsacksolver/algorithms:dembo",
+                "//knapsacksolver/algorithms:upper_bound_dembo",
                 "@optimizationtools//optimizationtools/utils:info",
         ],
         linkopts = select({
@@ -40,7 +40,7 @@ cc_library(
         srcs = ["generator.cpp"],
         deps = [
                 ":knapsacksolver",
-                "//knapsacksolver/algorithms:minknap"
+                "//knapsacksolver/algorithms:dynamic_programming_primal_dual"
         ],
         visibility = ["//visibility:public"],
 )

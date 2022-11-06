@@ -10,8 +10,8 @@ class PartSolFactory1
 
 public:
 
-    PartSolFactory1(const Instance& ins, ItemPos size, ItemPos b, ItemPos f, ItemPos l):
-        instance_(ins), size_(size), b_(b), f_(f), l_(l)
+    PartSolFactory1(const Instance& instance, ItemPos size, ItemPos b, ItemPos f, ItemPos l):
+        instance_(instance), size_(size), b_(b), f_(f), l_(l)
     {
         if (l-f+1 < size) {
             x1_ = f;

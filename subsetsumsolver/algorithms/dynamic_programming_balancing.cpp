@@ -66,6 +66,10 @@ Output subsetsumsolver::dynamic_programming_balancing_array(
         }
 
         values_pred.swap(values_next);
+
+        // If optimum reached, stop.
+        if (values_pred[c - offset] != 0)
+            break;
     }
 
     // Retrieve optimal value.

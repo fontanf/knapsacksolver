@@ -1,6 +1,6 @@
 #include "knapsacksolver/instance.hpp"
 #include "knapsacksolver/solution.hpp"
-#include "knapsacksolver/algorithms/dembo.hpp"
+#include "knapsacksolver/algorithms/upper_bound_dembo.hpp"
 
 #include <sstream>
 #include <iomanip>
@@ -633,7 +633,7 @@ void Instance::sort_right(Profit lb FFOT_DBG(FFOT_COMMA Info& info))
         Profit p = break_solution()->profit() + item(break_item()).p + item(j).p;
         Weight r = break_capacity() - item(break_item()).w - item(j).w;
         assert(r < 0);
-        Profit ub = ub_dembo_rev(*this, break_item(), p, r);
+        Profit ub = upper_bound_dembo_rev(*this, break_item(), p, r);
         FFOT_LOG(info, " ub " << ub);
         if (item(j).w <= reduced_capacity() && ub > lb) {
             k++;
@@ -674,7 +674,7 @@ void Instance::sort_left(Profit lb FFOT_DBG(FFOT_COMMA Info& info))
         Profit p = break_solution()->profit() - item(j).p;
         Weight r = break_capacity() + item(j).w;
         assert(r > 0);
-        Profit ub = ub_dembo(*this, break_item(), p, r);
+        Profit ub = upper_bound_dembo(*this, break_item(), p, r);
         FFOT_LOG(info, " ub " << ub);
         if (item(j).w <= reduced_capacity() && ub > lb) {
             k--;

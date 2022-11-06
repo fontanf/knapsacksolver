@@ -29,10 +29,10 @@ int main(int argc, char *argv[])
         //.set_logfile("log.txt")
         ;
 
-    MinknapOptionalParameters p;
+    DynamicProgrammingPrimalDualOptionalParameters p;
     p.info = info;
     p.set_combo();
-    auto output = minknap(ins, p);
+    auto output = dynamic_programming_primal_dual(ins, p);
 
 }
 

@@ -1,7 +1,7 @@
 #include "knapsacksolver/generator.hpp"
 
 #include "knapsacksolver/instance.hpp"
-#include "knapsacksolver/algorithms/minknap.hpp"
+#include "knapsacksolver/algorithms/dynamic_programming_primal_dual.hpp"
 
 #include <random>
 #include <cmath>

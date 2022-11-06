@@ -10,7 +10,7 @@ class PartSolFactory2
 
 public:
 
-    PartSolFactory2(const Instance& ins, ItemPos size): instance_(ins), size_(size)
+    PartSolFactory2(const Instance& instance, ItemPos size): instance_(instance), size_(size)
     {
         idx_ = std::vector<ItemPos>(size, -1);
     }
@@ -20,7 +20,7 @@ public:
         std::fill(idx_.begin(), idx_.end(), -1);
     }
 
-    PartSolFactory2(Instance& ins): PartSolFactory2(ins, 64) {  }
+    PartSolFactory2(Instance& instance): PartSolFactory2(instance, 64) {  }
 
     ItemPos size() const { return size_; }
 
