@@ -3,13 +3,12 @@
 using namespace subsetsumsolver;
 
 Solution::Solution(const Instance& instance):
-    instance_(instance),
+    instance_(&instance),
     contains_(instance.number_of_items(), 0)
 { }
 
 Solution::Solution(const Instance& instance, std::string certificate_path):
-    instance_(instance),
-    contains_(instance.number_of_items(), 0)
+    Solution(instance)
 {
     if (certificate_path.empty())
         return;
@@ -26,17 +25,6 @@ Solution::Solution(const Instance& instance, std::string certificate_path):
         file >> j;
         add(j);
     }
-}
-
-Solution& Solution::operator=(
-        const Solution& solution)
-{
-    if (this != &solution) {
-        contains_ = solution.contains_;
-        number_of_items_ = solution.number_of_items_;
-        weight_ = solution.weight_;
-    }
-    return *this;
 }
 
 void Solution::add(ItemId j)

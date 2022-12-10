@@ -23,12 +23,6 @@ public:
     /** Create a solution from a file. */
     Solution(const Instance& instance, std::string certificate_path);
 
-    /** Copy constructor. */
-    Solution(const Solution&) = default;
-
-    /** Copy assignment operator. */
-    Solution& operator=(const Solution& solution);
-
     /** Add an item to the solution. */
     void add(ItemId j);
 
@@ -37,7 +31,7 @@ public:
      */
 
     /** Get the instance. */
-    inline const Instance& instance() const { return instance_; }
+    inline const Instance& instance() const { return *instance_; }
 
     /** Get the number of items in the solution. */
     inline ItemPos number_of_items() const { return number_of_items_; }
@@ -67,7 +61,7 @@ public:
 private:
 
     /** Instance. */
-    const Instance& instance_;
+    const Instance* instance_;
 
     /** Number of items in the solution. */
     ItemPos number_of_items_ = 0;
