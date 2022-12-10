@@ -12,9 +12,11 @@ A solver for the Subset Sum Problem.
     * Word RAM with recursive scheme `-a dynamic_programming_bellman_word_ram_rec`
   * Balancing
     * Array (only optimal value) `-a dynamic_programming_balancing_array`
+<!---
   * Primal-dual
     * Array `-a dynamic_programming_primal_dual_array`
     * Word RAM (only optimal value) `-a dynamic_programming_primal_dual_word_ram`
+--->
 
 ## Usage (command line)
 
