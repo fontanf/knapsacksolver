@@ -199,11 +199,12 @@ Output& Output::algorithm_end(optimizationtools::Info& info)
             << std::endl
             << "Final statistics" << std::endl
             << "----------------" << std::endl
-            << "Value:                    " << lower_bound << std::endl
+            << "Value:                    " << lower_bound << " / " << solution.instance().capacity() << " (" << (double)lower_bound / solution.instance().capacity() * 100 << "%)" << std::endl
             << "Has solution:             " << (solution.weight() == lower_bound) << std::endl
             << "Bound:                    " << upper_bound << std::endl
             << "Gap:                      " << upper_bound - lower_bound << std::endl
             << "Gap (%):                  " << gap() << std::endl
+            << "Number of items:          " << solution.number_of_items() << " / " << solution.instance().number_of_items() << " (" << (double)solution.number_of_items() / solution.instance().number_of_items() * 100 << "%)" << std::endl
             << "Time (s):                 " << time << std::endl;
 
     info.write_json_output();

@@ -242,7 +242,7 @@ Instance Instance::reset(const Instance& instance)
     instance_new.capacity_ = instance.capacity_;
     instance_new.f_ = 0;
     instance_new.l_ = instance.items_.size() - 1;
-    return instance;
+    return instance_new;
 }
 
 bool Instance::check()

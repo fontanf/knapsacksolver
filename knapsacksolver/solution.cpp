@@ -289,8 +289,8 @@ Output& Output::algorithm_end(Info& info)
             << "Gap:                        " << gap_str << std::endl
             << "Gap (%):                    " << gap << std::endl
             << "Solution:                   " << sol_str << std::endl
-            << "Number of items:            " << solution.number_of_items() << std::endl
-            << "Weight:                     " << solution.weight() << std::endl
+            << "Number of items:            " << solution.number_of_items() << " / " << solution.instance().number_of_items() << " (" << (double)solution.number_of_items() / solution.instance().number_of_items() * 100 << "%)" << std::endl
+            << "Weight:                     " << solution.weight() << " / " << solution.instance().capacity() << " (" << (double)solution.weight() / solution.instance().capacity() * 100 << "%)" << std::endl
             << "Time (ms):                  " << t << std::endl;
 
     info.write_json_output();
