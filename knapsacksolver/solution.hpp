@@ -13,33 +13,46 @@ class Solution
 
 public:
 
+    /*
+     * Constructors and destructor.
+     */
+
     /** Create an empty solution. */
     Solution(const Instance& instance);
+
     /** Create a solution from a certificate file. */
     Solution(const Instance& instance, std::string certificate_path);
-    /** Copy constructor. */
-    Solution(const Solution&) = default;
-    /** Copy assignment operator. */
-    Solution& operator=(const Solution& solution);
+
+    void update(const Solution& solution);
+
+    /*
+     * Getters.
+     */
 
     /** Get the instance of the solution. */
-    inline const Instance& instance() const { return instance_; }
+    inline const Instance& instance() const { return *instance_; }
+
     /** Get the weight of the solution. */
     inline Weight weight() const { return weight_; }
+
     /** Get the remaining capacity of the solution. */
-    inline Weight remaining_capacity() const { return instance_.capacity() - weight(); }
+    inline Weight remaining_capacity() const { return instance().capacity() - weight(); }
+
     /** Get the profit of the solution. */
     inline Profit profit() const { return profit_; }
+
     /** Get the number of items in the solution. */
     inline ItemIdx number_of_items() const { return number_of_items_; }
+
     /**
      * Get the solution vector 'x'.
      *
      * 'x[j] == true' iff item 'j' is in the solution.
      */
     const std::vector<int>& data() const { return x_; }
+
     /** Return 'true' iff the solution is feasible. */
-    inline bool feasible() const { return weight_ <= instance_.capacity(); }
+    inline bool feasible() const { return weight_ <= instance().capacity(); }
 
     /**
      * Add/remove an item to/from the solution.
@@ -51,14 +64,18 @@ public:
      * instance, not its ID!
      */
     void set(ItemPos j, int b);
+
     /** Return 'true' iff the solution contains the item at position 'j'. */
     int contains(ItemPos j) const;
+
     /** Return 'true' iff the solution contains item 'j'. */
     int contains_idx(ItemIdx j) const;
+
     /** Clear the solution. */
     void clear();
 
     void update_from_partsol(const PartSolFactory1& psolf, PartSol1 psol);
+
     void update_from_partsol(const PartSolFactory2& psolf, PartSol2 psol);
 
     /**
@@ -68,19 +85,25 @@ public:
     void write(std::string certificate_path);
 
     std::string to_string_binary() const;
+
     std::string to_string_binary_ordered() const;
+
     std::string to_string_items() const;
 
 private:
 
     /** Instance. */
-    const Instance& instance_;
+    const Instance* instance_;
+
     /** Number of items in the solution. */
     ItemIdx number_of_items_ = 0;
+
     /** Profit of the solution. */
     Profit profit_ = 0;
+
     /** Weight of the solution. */
     Weight weight_ = 0;
+
     /**
      * Vector of the solution.
      *

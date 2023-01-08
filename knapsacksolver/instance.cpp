@@ -11,7 +11,11 @@ using namespace knapsacksolver;
 /////////////////////////////// Create instances ///////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-Instance::Instance(): f_(0), l_(-1) { }
+Instance::Instance():
+    f_(0),
+    l_(-1)
+{
+}
 
 void Instance::add_item(Weight weight, Profit profit)
 {
@@ -188,15 +192,21 @@ Instance::Instance(const Instance& instance):
 {
     if (instance.optimal_solution() != nullptr) {
         optimal_solution_ = std::unique_ptr<Solution>(new Solution(*this));
-        *optimal_solution_ = *instance.optimal_solution();
+        for (ItemIdx j = 0; j < number_of_items(); ++j)
+            if (instance.optimal_solution()->contains(j))
+                optimal_solution_->set(j, 1);
     }
     if (instance.break_solution() != nullptr) {
         break_solution_ = std::unique_ptr<Solution>(new Solution(*this));
-        *break_solution_ = *instance.break_solution();
+        for (ItemIdx j = 0; j < number_of_items(); ++j)
+            if (instance.break_solution()->contains(j))
+                break_solution_->set(j, 1);
     }
     if (instance.reduced_solution() != nullptr) {
         reduced_solution_ = std::unique_ptr<Solution>(new Solution(*this));
-        *reduced_solution_ = *instance.reduced_solution();
+        for (ItemIdx j = 0; j < number_of_items(); ++j)
+            if (instance.reduced_solution()->contains(j))
+                reduced_solution_->set(j, 1);
     }
 }
 
@@ -219,15 +229,21 @@ Instance& Instance::operator=(const Instance& instance)
 
         if (instance.optimal_solution() != nullptr) {
             optimal_solution_ = std::unique_ptr<Solution>(new Solution(*this));
-            *optimal_solution_ = *instance.optimal_solution();
+            for (ItemIdx j = 0; j < number_of_items(); ++j)
+                if (instance.optimal_solution()->contains(j))
+                    optimal_solution_->set(j, 1);
         }
         if (instance.break_solution() != nullptr) {
             break_solution_ = std::unique_ptr<Solution>(new Solution(*this));
-            *break_solution_ = *instance.break_solution();
+            for (ItemIdx j = 0; j < number_of_items(); ++j)
+                if (instance.break_solution()->contains(j))
+                    break_solution_->set(j, 1);
         }
         if (instance.reduced_solution() != nullptr) {
             reduced_solution_ = std::unique_ptr<Solution>(new Solution(*this));
-            *reduced_solution_ = *instance.reduced_solution();
+            for (ItemIdx j = 0; j < number_of_items(); ++j)
+                if (instance.reduced_solution()->contains(j))
+                    reduced_solution_->set(j, 1);
         }
     }
     return *this;
@@ -238,7 +254,7 @@ Instance::~Instance() { }
 Instance Instance::reset(const Instance& instance)
 {
     Instance instance_new;
-    instance_new.items_  = instance.items_;
+    instance_new.items_ = instance.items_;
     instance_new.capacity_ = instance.capacity_;
     instance_new.f_ = 0;
     instance_new.l_ = instance.items_.size() - 1;
@@ -1254,7 +1270,7 @@ void Instance::surrogate(Weight multiplier, ItemIdx bound, ItemPos first FFOT_DB
     }
     capacity_ += multiplier * bound;
     if (capacity_ <= reduced_solution()->weight())
-        capacity_ =  reduced_solution()->weight();
+        capacity_ = reduced_solution()->weight();
 
     sort_status_ = 0;
     sort_partially(FFOT_DBG(info));

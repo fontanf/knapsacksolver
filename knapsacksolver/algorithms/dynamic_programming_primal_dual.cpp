@@ -608,6 +608,12 @@ void dynamic_programming_primal_dual_update_bounds(DynamicProgrammingPrimalDualI
                 parameters.set_end = false;
                 return dynamic_programming_primal_dual(instance, parameters);
             };
+        //solve_surrogate_relaxation(
+        //            Instance::reset(instance),
+        //            std::ref(d.output),
+        //            func,
+        //            d.parameters.end,
+        //            Info(info, true, "surrogate_relaxation"));
         d.threads.push_back(std::thread(
                     solve_surrogate_relaxation,
                     Instance::reset(instance),

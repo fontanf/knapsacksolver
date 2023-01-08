@@ -207,6 +207,25 @@ Output& Output::algorithm_end(optimizationtools::Info& info)
             << "Number of items:          " << solution.number_of_items() << " / " << solution.instance().number_of_items() << " (" << (double)solution.number_of_items() / solution.instance().number_of_items() * 100 << "%)" << std::endl
             << "Time (s):                 " << time << std::endl;
 
+    if (info.verbosity_level() >= 2) {
+        info.os()
+            << std::endl
+            << std::setw(12) << "Item"
+            << std::setw(12) << "Weight"
+            << std::endl
+            << std::setw(12) << "----"
+            << std::setw(12) << "------"
+            << std::endl;
+        for (ItemId j = 0; j < solution.instance().number_of_items(); ++j) {
+            if (solution.contains(j)) {
+                info.os()
+                    << std::setw(12) << j
+                    << std::setw(12) << solution.instance().weight(j)
+                    << std::endl;
+            }
+        }
+    }
+
     info.write_json_output();
     solution.write(info.output->certificate_path);
     return *this;

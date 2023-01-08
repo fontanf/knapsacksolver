@@ -30,8 +30,10 @@ public:
 
     /** Manual constructor. */
     Instance() { }
+
     /** Add an item to the knapsack. */
     void add_item(Weight weight) { weights_.push_back(weight); };
+
     /** Set the capacity of the knapsack. */
     void set_capacity(Weight capacity) { capacity_ = capacity; }
 
@@ -41,8 +43,10 @@ public:
 
     /** Get the number of items in the instance. */
     inline ItemPos number_of_items() const { return weights_.size(); }
+
     /** Get the capacity of the instance. */
     inline Weight capacity() const { return capacity_; }
+
     /** Get the weight of an item. */
     inline Weight weight(ItemId j) const { return weights_[j]; }
 

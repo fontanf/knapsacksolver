@@ -149,9 +149,9 @@ UBS surrogate_solve(
     FFOT_LOG_FOLD_START(info, "surrogate_solve k " << k << " s_min " << s_min << " s_max " << s_max << std::endl);
     ItemPos first = instance.first_item();
     Profit ub = upper_bound_dantzig(instance);
-    Weight  s_prec = 0;
-    Weight  s = 0;
-    Weight  s_best = 0;
+    Weight s_prec = 0;
+    Weight s = 0;
+    Weight s_best = 0;
     Weight s1 = s_min;
     Weight s2 = s_max;
     Weight wmax = instance.item(instance.first_item()).w;
@@ -289,12 +289,12 @@ void knapsacksolver::solve_surrogate_relaxation(
         if (output.upper_bound == output.lower_bound || o.s == 0)
             return;
 
-        Solution sol_sur(output.solution.instance());
         instance.surrogate(o.s, b FFOT_DBG(FFOT_COMMA info));
         Output output0 = func(instance, Info(info, false, ""), end);
         if (output0.solution.profit() != output0.upper_bound)
             return;
-        sol_sur = output0.solution;
+        Solution sol_sur(output.solution.instance());
+        sol_sur.update(output0.solution);
         output.update_solution(
                 sol_sur,
                 std::stringstream("surrogate ins res (lb)"),
@@ -316,12 +316,12 @@ void knapsacksolver::solve_surrogate_relaxation(
         if (output.upper_bound == output.lower_bound || o.s == 0)
             return;
 
-        Solution sol_sur(output.solution.instance());
         instance.surrogate(o.s, b + 1 FFOT_DBG(FFOT_COMMA info));
         Output output0 = func(instance, Info(info, false, ""), end);
         if (output0.solution.profit() != output0.upper_bound)
             return;
-        sol_sur = output0.solution;
+        Solution sol_sur(output.solution.instance());
+        sol_sur.update(output0.solution);
         output.update_solution(
                 sol_sur,
                 std::stringstream("surrogate ins res (lb)"),
@@ -351,6 +351,7 @@ void knapsacksolver::solve_surrogate_relaxation(
                 FFOT_DBG(FFOT_COMMA info));
         if (*end)
             return;
+        //std::cout << o1.ub << " " << o2.ub << " " << output.lower_bound << std::endl;
         Profit ub = std::max(std::max(o1.ub, o2.ub), output.lower_bound);
         output.update_upper_bound(
                 ub,
@@ -359,12 +360,12 @@ void knapsacksolver::solve_surrogate_relaxation(
         if (output.upper_bound == output.lower_bound || o1.s == 0 || o2.s == 0)
             return;
 
-        Solution sol_sur1(output.solution.instance());
         instance.surrogate(o1.s, b FFOT_DBG(FFOT_COMMA info));
         Output output1 = func(instance, Info(info, false, ""), end);
         if (output1.solution.profit() != output1.upper_bound)
             return;
-        sol_sur1 = output1.solution;
+        Solution sol_sur1(output.solution.instance());
+        sol_sur1.update(output1.solution);
         output.update_solution(
                 sol_sur1,
                 std::stringstream("surrogate ins res (lb)"),
@@ -372,12 +373,12 @@ void knapsacksolver::solve_surrogate_relaxation(
         if (*end || output.lower_bound == output.upper_bound)
             return;
 
-        Solution sol_sur2(output.solution.instance());
         instance_2.surrogate(o2.s, b + 1 FFOT_DBG(FFOT_COMMA info));
         Output output2 = func(instance_2, Info(info, false, ""), end);
         if (output2.solution.profit() != output2.upper_bound)
             return;
-        sol_sur2 = output2.solution;
+        Solution sol_sur2(output.solution.instance());
+        sol_sur2.update(output2.solution);
         output.update_solution(
                 sol_sur2,
                 std::stringstream("surrogate ins res (lb)"),

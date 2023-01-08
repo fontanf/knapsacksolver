@@ -5,15 +5,14 @@
 using namespace knapsacksolver;
 
 Solution::Solution(const Instance& instance):
-    instance_(instance),
+    instance_(&instance),
     x_(instance.number_of_items(), 0)
 { }
 
 Solution::Solution(
         const Instance& instance,
         std::string certificate_path):
-    instance_(instance),
-    x_(instance.number_of_items(), 0)
+    Solution(instance)
 {
     if (certificate_path.empty())
         return;
@@ -30,27 +29,17 @@ Solution::Solution(
     }
 }
 
-Solution& Solution::operator=(const Solution& solution)
+void Solution::update(const Solution& solution)
 {
-    if (this != &solution) {
-        if (&this->instance() == &solution.instance()) {
-            number_of_items_ = solution.number_of_items_;
-            profit_ = solution.profit_;
-            weight_ = solution.weight_;
-            x_ = solution.x_;
-        } else {
-            // Used to convert a solution of a surrogate instance to a
-            // solution of its original instance.
-            number_of_items_ = solution.number_of_items_;
-            x_ = solution.x_;
-            profit_ = solution.profit_;
-            weight_ = 0;
-            for (ItemPos j = 0; j < instance().number_of_items(); ++j)
-                if (contains(j))
-                    weight_ += instance().item(j).w;
-        }
-    }
-    return *this;
+    // Used to convert a solution of a surrogate instance to a
+    // solution of its original instance.
+    number_of_items_ = solution.number_of_items_;
+    x_ = solution.x_;
+    profit_ = solution.profit_;
+    weight_ = 0;
+    for (ItemPos j = 0; j < instance().number_of_items(); ++j)
+        if (contains(j))
+            weight_ += instance().item(j).w;
 }
 
 int Solution::contains(ItemPos j) const
@@ -220,6 +209,10 @@ void Output::update_solution(
         return;
 
     info.lock();
+
+    if (&solution_new.instance() != &solution.instance()) {
+        throw std::runtime_error("update_solution");
+    }
 
     if (solution.profit() < solution_new.profit()) {
         solution = solution_new;
