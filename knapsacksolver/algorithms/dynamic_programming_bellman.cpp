@@ -824,7 +824,7 @@ Output knapsacksolver::dynamic_programming_bellman_list(
         std::vector<BellmanState>::iterator it1 = l0.begin();
         while (it != l0.end() || it1 != l0.end()) {
             if (it1 != l0.end() && (it == l0.end() || it->w > it1->w + wj)) {
-                BellmanState s1{.w = it1->w + wj, .p = it1->p + pj};
+                BellmanState s1{it1->w + wj, it1->p + pj};
                 if (s1.w > c)
                     break;
 

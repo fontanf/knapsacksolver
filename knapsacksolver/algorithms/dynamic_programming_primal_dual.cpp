@@ -191,7 +191,7 @@ void dynamic_programming_primal_dual_main(
     // Recursion
     Weight w_bar = instance.break_solution()->weight();
     Profit p_bar = instance.break_solution()->profit();
-    d.l0 = {{.w = w_bar, .p = p_bar, .sol = 0}};
+    d.l0 = {{w_bar, p_bar, 0}};
     d.s = instance.break_item() - 1;
     d.t = instance.break_item();
     d.w_max = w_bar;
