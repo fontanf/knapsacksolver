@@ -366,6 +366,8 @@ std::vector<Item> Instance::get_isum() const
 
 ItemPos Instance::gamma1(FFOT_DBG(Info& info)) const
 {
+    if (break_item() == first_item())
+        return -1;
     Weight w = break_weight() - item(break_item() - 1).w;
     ItemPos k = -1;
     for (ItemPos j = break_item() + 1; j <= last_item(); ++j)
