@@ -26,7 +26,9 @@ public:
      */
 
     /** Create instance from file. */
-    Instance(std::string instance_path, std::string format);
+    Instance(
+            std::string instance_path,
+            std::string format);
 
     /** Manual constructor. */
     Instance() { }
@@ -48,7 +50,7 @@ public:
     inline Weight capacity() const { return capacity_; }
 
     /** Get the weight of an item. */
-    inline Weight weight(ItemId j) const { return weights_[j]; }
+    inline Weight weight(ItemId item_id) const { return weights_[item_id]; }
 
     /*
      * Export.

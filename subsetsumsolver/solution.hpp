@@ -24,7 +24,7 @@ public:
     Solution(const Instance& instance, std::string certificate_path);
 
     /** Add an item to the solution. */
-    void add(ItemId j);
+    void add(ItemId item_id);
 
     /*
      * Getters.
@@ -40,7 +40,7 @@ public:
     inline Weight weight() const { return weight_; }
 
     /** Return 'true' iff the solution contains item 'j'. */
-    int8_t contains(ItemId j) const { return contains_[j]; }
+    int8_t contains(ItemId item_id) const { return contains_[item_id]; }
 
     /** Return 'true' iff the solution is feasible. */
     bool feasible() const { return weight_ <= instance().capacity(); }

@@ -2,7 +2,9 @@
 
 using namespace knapsacksolver;
 
-Output knapsacksolver::greedy(const Instance& instance, Info info)
+Output knapsacksolver::greedy(
+        const Instance& instance,
+        Info info)
 {
     FFOT_LOG_FOLD_START(info, "greedy" << std::endl);
     info.os() << "*** greedy ***" << std::endl;

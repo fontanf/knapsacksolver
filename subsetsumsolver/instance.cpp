@@ -24,13 +24,13 @@ Instance::Instance(
 
 void Instance::read_standard(std::ifstream& file)
 {
-    ItemId n;
-    Weight w;
-    file >> n >> w;
-    set_capacity(w);
-    for (ItemPos j = 0; j < n; ++j) {
-        file >> w;
-        add_item(w);
+    ItemId number_of_items;
+    Weight weight;
+    file >> number_of_items >> weight;
+    set_capacity(weight);
+    for (ItemPos item_id = 0; item_id < number_of_items; ++item_id) {
+        file >> weight;
+        add_item(weight);
     }
 }
 
@@ -54,10 +54,10 @@ std::ostream& Instance::print(
             << std::setw(12) << "----"
             << std::setw(12) << "------"
             << std::endl;
-        for (ItemId j = 0; j < number_of_items(); ++j) {
+        for (ItemId item_id = 0; item_id < number_of_items(); ++item_id) {
             os
-                << std::setw(12) << j
-                << std::setw(12) << weight(j)
+                << std::setw(12) << item_id
+                << std::setw(12) << weight(item_id)
                 << std::endl;
         }
     }
@@ -75,8 +75,8 @@ void Instance::write(
     }
 
     file << number_of_items() << " " << capacity() << std::endl;
-    for (ItemId j = 0; j < number_of_items(); ++j)
-        file << weight(j) << std::endl;
+    for (ItemId item_id = 0; item_id < number_of_items(); ++item_id)
+        file << weight(item_id) << std::endl;
 }
 
 void subsetsumsolver::init_display(

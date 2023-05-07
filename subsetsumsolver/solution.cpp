@@ -18,20 +18,20 @@ Solution::Solution(const Instance& instance, std::string certificate_path):
                 "Unable to open file \"" + certificate_path + "\".");
     }
 
-    ItemPos n;
-    ItemPos j;
-    file >> n;
-    for (ItemPos pos = 0; pos < n; ++pos) {
-        file >> j;
-        add(j);
+    ItemPos number_of_items;
+    ItemPos item_id;
+    file >> number_of_items;
+    for (ItemPos pos = 0; pos < number_of_items; ++pos) {
+        file >> item_id;
+        add(item_id);
     }
 }
 
-void Solution::add(ItemId j)
+void Solution::add(ItemId item_id)
 {
-    contains_[j] = 1;
+    contains_[item_id] = 1;
     number_of_items_++;
-    weight_ += instance().weight(j);
+    weight_ += instance().weight(item_id);
 }
 
 void Solution::write(std::string certificate_path)
@@ -45,9 +45,9 @@ void Solution::write(std::string certificate_path)
     }
 
     file << number_of_items() << std::endl;
-    for (ItemId j = 0; j < instance().number_of_items(); ++j)
-        if (contains(j))
-            file << j << std::endl;
+    for (ItemId item_id = 0; item_id < instance().number_of_items(); ++item_id)
+        if (contains(item_id))
+            file << item_id << std::endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -216,11 +216,13 @@ Output& Output::algorithm_end(optimizationtools::Info& info)
             << std::setw(12) << "----"
             << std::setw(12) << "------"
             << std::endl;
-        for (ItemId j = 0; j < solution.instance().number_of_items(); ++j) {
-            if (solution.contains(j)) {
+        for (ItemId item_id = 0;
+                item_id < solution.instance().number_of_items();
+                ++item_id) {
+            if (solution.contains(item_id)) {
                 info.os()
-                    << std::setw(12) << j
-                    << std::setw(12) << solution.instance().weight(j)
+                    << std::setw(12) << item_id
+                    << std::setw(12) << solution.instance().weight(item_id)
                     << std::endl;
             }
         }
