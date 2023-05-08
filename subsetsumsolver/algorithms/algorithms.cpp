@@ -6,7 +6,10 @@ using namespace subsetsumsolver;
 namespace po = boost::program_options;
 
 Output subsetsumsolver::run(
-        std::string algorithm, Instance& instance, std::mt19937_64&, Info info)
+        std::string algorithm,
+        Instance& instance,
+        std::mt19937_64&,
+        optimizationtools::Info info)
 {
     std::vector<std::string> algorithm_args = po::split_unix(algorithm);
     std::vector<char*> algorithm_argv;

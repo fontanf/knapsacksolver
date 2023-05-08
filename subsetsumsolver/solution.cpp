@@ -1,5 +1,7 @@
 #include "subsetsumsolver/solution.hpp"
 
+#include "optimizationtools/utils/utils.hpp"
+
 using namespace subsetsumsolver;
 
 Solution::Solution(const Instance& instance):
@@ -7,7 +9,9 @@ Solution::Solution(const Instance& instance):
     contains_(instance.number_of_items(), 0)
 { }
 
-Solution::Solution(const Instance& instance, std::string certificate_path):
+Solution::Solution(
+        const Instance& instance,
+        std::string certificate_path):
     Solution(instance)
 {
     if (certificate_path.empty())
@@ -32,6 +36,36 @@ void Solution::add(ItemId item_id)
     contains_[item_id] = 1;
     number_of_items_++;
     weight_ += instance().weight(item_id);
+}
+
+std::ostream& Solution::print(
+        std::ostream& os,
+        int verbose) const
+{
+    if (verbose >= 1) {
+        os
+            << "Number of items:  " << optimizationtools::Ratio<ItemId>(number_of_items(), instance().number_of_items()) << std::endl
+            << "Weight:           " << optimizationtools::Ratio<ItemId>(weight(), instance().capacity()) << std::endl
+            << "Feasible:         " << feasible() << std::endl
+            ;
+    }
+
+    if (verbose >= 2) {
+        os << std::endl
+            << std::setw(12) << "Item"
+            << std::endl
+            << std::setw(12) << "------"
+            << std::endl;
+        for (ItemId item_id = 0;
+                item_id < number_of_items();
+                ++item_id) {
+            os
+                << std::setw(12) << item_id
+                << std::endl;
+        }
+    }
+
+    return os;
 }
 
 void Solution::write(std::string certificate_path)
@@ -76,7 +110,6 @@ Output::Output(
             << std::setw(24) << "-------"
             << std::endl;
     print(info, std::stringstream(""));
-    info.reset_time();
 }
 
 bool Output::optimal() const
@@ -84,15 +117,20 @@ bool Output::optimal() const
     return (lower_bound == upper_bound);
 }
 
-double Output::gap() const
-{
-    return (double)(upper_bound - lower_bound) / upper_bound;
-}
-
 void Output::print(
         optimizationtools::Info& info,
         const std::stringstream& s) const
 {
+    double absolute_optimality_gap = optimizationtools::absolute_optimality_gap(
+            optimizationtools::ObjectiveDirection::Maximize,
+            true,
+            lower_bound,
+            upper_bound);
+    double relative_optimality_gap = optimizationtools::relative_optimality_gap(
+            optimizationtools::ObjectiveDirection::Minimize,
+            true,
+            lower_bound,
+            upper_bound);
     double t = info.elapsed_time();
     std::streamsize precision = std::cout.precision();
 
@@ -100,8 +138,8 @@ void Output::print(
             << std::setw(10) << std::fixed << std::setprecision(3) << t << std::defaultfloat << std::setprecision(precision)
             << std::setw(14) << lower_bound
             << std::setw(14) << upper_bound
-            << std::setw(14) << upper_bound - lower_bound
-            << std::setw(10) << std::fixed << std::setprecision(2) << gap() << std::defaultfloat << std::setprecision(precision)
+            << std::setw(14) << absolute_optimality_gap
+            << std::setw(10) << std::fixed << std::setprecision(2) << relative_optimality_gap * 100 << std::defaultfloat << std::setprecision(precision)
             << std::setw(24) << s.str() << std::endl;
 
     if (!info.output->only_write_at_the_end)
@@ -123,10 +161,12 @@ void Output::update_solution(
         lower_bound = solution_new.weight();
         print(info, s);
 
+        double t = info.elapsed_time();
+
         info.output->number_of_solutions++;
-        double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
         std::string sol_str = "Solution" + std::to_string(info.output->number_of_solutions);
         info.add_to_json(sol_str, "Value", lower_bound);
+        info.add_to_json(sol_str, "HasSolution", true);
         info.add_to_json(sol_str, "Time", t);
         if (!info.output->only_write_at_the_end)
             solution.write(info.output->certificate_path);
@@ -149,10 +189,12 @@ void Output::update_lower_bound(
         lower_bound = lower_bound_new;
         print(info, s);
 
+        double t = info.elapsed_time();
+
         info.output->number_of_bounds++;
-        double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
-        std::string sol_str = "Bound" + std::to_string(info.output->number_of_bounds);
+        std::string sol_str = "Solution" + std::to_string(info.output->number_of_bounds);
         info.add_to_json(sol_str, "Value", lower_bound);
+        info.add_to_json(sol_str, "HasSolution", false);
         info.add_to_json(sol_str, "Time", t);
         if (!info.output->only_write_at_the_end)
             solution.write(info.output->certificate_path);
@@ -175,8 +217,9 @@ void Output::update_upper_bound(
         upper_bound = upper_bound_new;
         print(info, s);
 
+        double t = info.elapsed_time();
+
         info.output->number_of_bounds++;
-        double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
         std::string sol_str = "Bound" + std::to_string(info.output->number_of_bounds);
         info.add_to_json(sol_str, "Value", upper_bound);
         info.add_to_json(sol_str, "Time", t);
@@ -189,7 +232,17 @@ void Output::update_upper_bound(
 
 Output& Output::algorithm_end(optimizationtools::Info& info)
 {
-    time = (double)std::round(info.elapsed_time() * 10000) / 10000;
+    double absolute_optimality_gap = optimizationtools::absolute_optimality_gap(
+            optimizationtools::ObjectiveDirection::Minimize,
+            true,
+            lower_bound,
+            upper_bound);
+    double relative_optimality_gap = optimizationtools::relative_optimality_gap(
+            optimizationtools::ObjectiveDirection::Minimize,
+            true,
+            lower_bound,
+            upper_bound);
+    time = info.elapsed_time();
 
     info.add_to_json("Solution", "Value", lower_bound);
     info.add_to_json("Bound", "Value", upper_bound);
@@ -199,13 +252,19 @@ Output& Output::algorithm_end(optimizationtools::Info& info)
             << std::endl
             << "Final statistics" << std::endl
             << "----------------" << std::endl
-            << "Value:                    " << lower_bound << " / " << solution.instance().capacity() << " (" << (double)lower_bound / solution.instance().capacity() * 100 << "%)" << std::endl
-            << "Has solution:             " << (solution.weight() == lower_bound) << std::endl
-            << "Bound:                    " << upper_bound << std::endl
-            << "Gap:                      " << upper_bound - lower_bound << std::endl
-            << "Gap (%):                  " << gap() << std::endl
-            << "Number of items:          " << solution.number_of_items() << " / " << solution.instance().number_of_items() << " (" << (double)solution.number_of_items() / solution.instance().number_of_items() * 100 << "%)" << std::endl
-            << "Time (s):                 " << time << std::endl;
+            << "Value:                        " << lower_bound << " / " << solution.instance().capacity() << " (" << (double)lower_bound / solution.instance().capacity() * 100 << "%)" << std::endl
+            << "Has solution:                 " << (solution.weight() == lower_bound) << std::endl
+            << "Bound:                        " << upper_bound << std::endl
+            << "Absolute optimality gap:      " << absolute_optimality_gap << std::endl
+            << "Relative optimality gap (%):  " << relative_optimality_gap * 100 << std::endl
+            << "Number of items:              " << solution.number_of_items() << " / " << solution.instance().number_of_items() << " (" << (double)solution.number_of_items() / solution.instance().number_of_items() * 100 << "%)" << std::endl
+            << "Time (s):                     " << time << std::endl
+            ;
+    print_statistics(info);
+    info.os() << std::endl
+        << "Solution" << std::endl
+        << "--------" << std::endl ;
+    solution.print(info.os(), info.verbosity_level());
 
     if (info.verbosity_level() >= 2) {
         info.os()

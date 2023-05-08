@@ -6,7 +6,7 @@ namespace subsetsumsolver
 {
 
 /**
- * Solution class for a Subset Sum Problem.
+ * Solution class for a subset sum problem.
  */
 class Solution
 {
@@ -14,20 +14,22 @@ class Solution
 public:
 
     /*
-     * Constructors and destructor.
+     * Constructors and destructor
      */
 
     /** Create an empty solution. */
     Solution(const Instance& instance);
 
     /** Create a solution from a file. */
-    Solution(const Instance& instance, std::string certificate_path);
+    Solution(
+            const Instance& instance,
+            std::string certificate_path);
 
     /** Add an item to the solution. */
     void add(ItemId item_id);
 
     /*
-     * Getters.
+     * Getters
      */
 
     /** Get the instance. */
@@ -52,8 +54,13 @@ public:
     bool better(Weight lower_bound) const { return feasible() && weight() > lower_bound; };
 
     /*
-     * Export.
+     * Export
      */
+
+    /** Print the instance. */
+    std::ostream& print(
+            std::ostream& os,
+            int verbose = 1) const;
 
     /** Write the solution to a file. */
     void write(std::string filepath);
@@ -81,40 +88,59 @@ std::ostream& operator<<(std::ostream& os, const Solution& solution);
 //////////////////////////////////// Output ////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * Output structure for a subset sum problem.
+ */
 struct Output
 {
+    /** Constructor. */
     Output(
             const Instance& instance,
             optimizationtools::Info& info);
 
+    /** Solution. */
     Solution solution;
+
+    /** Lower bound. */
     Weight lower_bound = 0;
+
+    /** Upper bound. */
     Weight upper_bound = -1;
+
+    /** Elapsed time. */
     double time = -1;
 
+    /** Return 'true' iff the solution is optimal. */
     bool optimal() const;
 
-    double gap() const;
-
+    /** Print current state. */
     void print(
             optimizationtools::Info& info,
             const std::stringstream& s) const;
 
+    /** Update the solution. */
     void update_solution(
             const Solution& solution_new,
             const std::stringstream& s,
             optimizationtools::Info& info);
 
+    /** Update the lower bound. */
     void update_lower_bound(
             Weight lower_bound_new,
             const std::stringstream& s,
             optimizationtools::Info& info);
 
+    /** Update the upper bound. */
     void update_upper_bound(
             Weight upper_bound_new,
             const std::stringstream& s,
             optimizationtools::Info& info);
 
+    /** Print the algorithm statistics. */
+    virtual void print_statistics(
+            optimizationtools::Info& info) const { (void)info; }
+
+    /** Method to call at the end of the algorithm. */
     Output& algorithm_end(
             optimizationtools::Info& info);
 };

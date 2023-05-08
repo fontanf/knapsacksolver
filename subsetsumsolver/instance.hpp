@@ -5,8 +5,6 @@
 namespace subsetsumsolver
 {
 
-using optimizationtools::Info;
-
 typedef int64_t Weight;
 typedef int64_t ItemId;
 typedef int64_t ItemPos;
@@ -14,7 +12,7 @@ typedef int64_t StateId;
 typedef int64_t Counter;
 
 /**
- * Instance class for a Subset Sum Problem.
+ * Instance class for a subset sum problem.
  */
 class Instance
 {

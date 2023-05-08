@@ -7,7 +7,7 @@ namespace subsetsumsolver
 
 Output dynamic_programming_balancing_array(
         const Instance& instance,
-        Info info = Info());
+        optimizationtools::Info info = optimizationtools::Info());
 
 }
 

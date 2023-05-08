@@ -39,8 +39,8 @@ Examples:
 
 Instance
 --------
-Number of items:          1000
-Capacity:                 250000
+Number of items:  1000
+Capacity:         250000
 
 Algorithm
 ---------
@@ -53,16 +53,23 @@ Method for retrieving solution:  Recursive scheme
 
      T (s)            UB            LB           GAP   GAP (%)                 Comment
      -----            --            --           ---   -------                 -------
-     0.000             0        250000        250000      1.00                        
+     0.000             0        250000        250000   -100.00                        
      0.008        250000        250000             0      0.00   tree search completed
 
 Final statistics
 ----------------
-Value:                    250000
-Has solution:             1
-Bound:                    250000
-Gap:                      0
-Gap (%):                  0
-Time (s):                 0.0076
+Value:                        250000 / 250000 (100%)
+Has solution:                 1
+Bound:                        250000
+Absolute optimality gap:      0
+Relative optimality gap (%):  0
+Number of items:              484 / 1000 (48.4%)
+Time (s):                     0.00778721
+
+Solution
+--------
+Number of items:  484 / 1000 (48.4%)
+Weight:           250000 / 250000 (100%)
+Feasible:         1
 ```
 

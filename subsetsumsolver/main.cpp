@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
     std::mt19937_64 generator(seed);
     Instance instance(instance_path, format);
 
-    Info info = Info()
+    optimizationtools::Info info = optimizationtools::Info()
         .set_verbosity_level(verbosity_level)
         .set_time_limit(time_limit)
         .set_certificate_path(certificate_path)

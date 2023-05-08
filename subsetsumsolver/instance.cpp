@@ -40,8 +40,8 @@ std::ostream& Instance::print(
 {
     if (verbose >= 1) {
         os
-            << "Number of items:          " << number_of_items() << std::endl
-            << "Capacity:                 " << capacity() << std::endl
+            << "Number of items:  " << number_of_items() << std::endl
+            << "Capacity:         " << capacity() << std::endl
             ;
     }
 

@@ -12,7 +12,7 @@ Output run(
         std::string algorithm,
         Instance& instance,
         std::mt19937_64& generator,
-        Info info);
+        optimizationtools::Info info);
 
 }
 

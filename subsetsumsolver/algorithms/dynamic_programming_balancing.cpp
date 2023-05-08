@@ -8,7 +8,7 @@ using namespace subsetsumsolver;
 
 Output subsetsumsolver::dynamic_programming_balancing_array(
         const Instance& instance,
-        Info info)
+        optimizationtools::Info info)
 {
     init_display(instance, info);
     info.os()
