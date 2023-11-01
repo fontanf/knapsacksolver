@@ -1,11 +1,11 @@
-#include "knapsacksolver/algorithms/algorithms.hpp"
+#include "knapsacksolver/knapsack/algorithms/algorithms.hpp"
 
 #include <pybind11/pybind11.h>
 
 namespace py = pybind11;
 
-knapsacksolver::Solution solve(
-        knapsacksolver::Instance& instance,
+knapsacksolver::knapsack::Solution solve(
+        knapsacksolver::knapsack::Instance& instance,
         std::string algorithm,
         bool verbose)
 {
@@ -18,18 +18,18 @@ knapsacksolver::Solution solve(
 
 PYBIND11_MODULE(knapsacksolver, m)
 {
-    py::class_<knapsacksolver::Instance>(m, "Instance")
+    py::class_<knapsacksolver::knapsack::Instance>(m, "Instance")
         .def(py::init<>())
         .def(py::init<std::string, std::string>(),
             py::arg("instance_path"),
             py::arg("format") = "standard")
-        .def("set_capacity", &knapsacksolver::Instance::set_capacity)
-        .def("add_item", &knapsacksolver::Instance::add_item);
-    py::class_<knapsacksolver::Solution>(m, "Solution")
-        .def("contains", &knapsacksolver::Solution::contains_idx)
-        .def("number_of_items", &knapsacksolver::Solution::number_of_items)
-        .def("profit", &knapsacksolver::Solution::profit)
-        .def("weight", &knapsacksolver::Solution::weight);
+        .def("set_capacity", &knapsacksolver::knapsack::Instance::set_capacity)
+        .def("add_item", &knapsacksolver::knapsack::Instance::add_item);
+    py::class_<knapsacksolver::knapsack::Solution>(m, "Solution")
+        .def("contains", &knapsacksolver::knapsack::Solution::contains_idx)
+        .def("number_of_items", &knapsacksolver::knapsack::Solution::number_of_items)
+        .def("profit", &knapsacksolver::knapsack::Solution::profit)
+        .def("weight", &knapsacksolver::knapsack::Solution::weight);
     m.def("solve", &solve,
             py::arg("instance"),
             py::arg("algorithm") = "minknap",

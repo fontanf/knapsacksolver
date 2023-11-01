@@ -5,7 +5,7 @@ pybind_extension(
         name = "knapsacksolver",
         srcs = ["knapsacksolver.cpp"],
         deps = [
-                "//knapsacksolver/algorithms:algorithms",
+                "//knapsacksolver/knapsack/algorithms:algorithms",
         ],
         copts = STDCPP,
 )
