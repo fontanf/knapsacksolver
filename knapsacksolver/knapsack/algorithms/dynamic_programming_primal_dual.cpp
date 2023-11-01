@@ -1,0 +1,654 @@
+#include "knapsacksolver/knapsack/algorithms/dynamic_programming_primal_dual.hpp"
+
+#include "knapsacksolver/knapsack/part_solution_2.hpp"
+#include "knapsacksolver/knapsack/algorithms/greedy.hpp"
+#include "knapsacksolver/knapsack/algorithms/greedy_nlogn.hpp"
+#include "knapsacksolver/knapsack/algorithms/upper_bound_dembo.hpp"
+#include "knapsacksolver/knapsack/algorithms/upper_bound_dantzig.hpp"
+#include "knapsacksolver/knapsack/algorithms/surrogate_relaxation.hpp"
+
+using namespace knapsacksolver::knapsack;
+
+void dynamic_programming_primal_dual_main(
+        Instance& instance,
+        DynamicProgrammingPrimalDualOptionalParameters& parameters,
+        DynamicProgrammingPrimalDualOutput& output);
+
+DynamicProgrammingPrimalDualOutput knapsacksolver::knapsack::dynamic_programming_primal_dual(
+        Instance& instance,
+        DynamicProgrammingPrimalDualOptionalParameters parameters)
+{
+    init_display(instance, parameters.info);
+    parameters.info.os()
+            << "Algorithm" << std::endl
+            << "---------" << std::endl
+            << "Dynamic programming - Primal-dual" << std::endl
+            << std::endl
+            << "Parameters" << std::endl
+            << "----------" << std::endl
+            << "Implementation:                  States" << std::endl
+            << "Method for retrieving solution:  Partial solution in states" << std::endl
+            << "Greedy:                          " << parameters.greedy << std::endl
+            << "Pairing:                         " << parameters.pairing << std::endl
+            << "Surrogate relaxation:            " << parameters.surrogate_relaxation << std::endl
+            << "Combo core:                      " << parameters.combo_core << std::endl
+            << "Partial solution size:           " << parameters.partial_solution_size << std::endl
+            << std::endl;
+
+    FFOT_LOG_FOLD_START(parameters.info, "*** dynamic_programming_primal_dual"
+            << " -k " << parameters.partial_solution_size
+            << ((parameters.greedy)? " -g": "")
+            << " -p " << parameters.pairing
+            << " -s " << parameters.surrogate_relaxation
+            << ((parameters.combo_core)? " -c": "")
+            << " ***" << std::endl);
+
+    bool end = false;
+    if (parameters.end == NULL)
+        parameters.end = &end;
+
+    DynamicProgrammingPrimalDualOutput output(instance, parameters.info);
+    dynamic_programming_primal_dual_main(instance, parameters, output);
+
+    FFOT_LOG_FOLD_END(parameters.info, "dynamic_programming_primal_dual");
+    return output.algorithm_end(parameters.info);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+struct DynamicProgrammingPrimalDualState
+{
+    Weight w;
+    Profit p;
+    PartSol2 sol;
+};
+
+std::ostream& operator<<(std::ostream& os, const DynamicProgrammingPrimalDualState& s)
+{
+    os << "(" << s.w << " " << s.p << ")";
+    return os;
+}
+
+struct DynamicProgrammingPrimalDualInternalData
+{
+    DynamicProgrammingPrimalDualInternalData(
+            Instance& instance,
+            DynamicProgrammingPrimalDualOptionalParameters& parameters,
+            DynamicProgrammingPrimalDualOutput& output):
+        instance(instance),
+        parameters(parameters),
+        output(output),
+        psolf(instance, parameters.partial_solution_size) { }
+
+    Instance& instance;
+    DynamicProgrammingPrimalDualOptionalParameters& parameters;
+    DynamicProgrammingPrimalDualOutput& output;
+    PartSolFactory2 psolf;
+    ItemPos s;
+    ItemPos t;
+    Weight w_max;
+    std::vector<DynamicProgrammingPrimalDualState> l0;
+    std::vector<DynamicProgrammingPrimalDualState> l;
+    DynamicProgrammingPrimalDualState best_state;
+    std::vector<std::thread> threads;
+};
+
+void add_item(DynamicProgrammingPrimalDualInternalData& d);
+void remove_item(DynamicProgrammingPrimalDualInternalData& d);
+void dynamic_programming_primal_dual_update_bounds(DynamicProgrammingPrimalDualInternalData& d);
+
+void dynamic_programming_primal_dual_main(
+        Instance& instance,
+        DynamicProgrammingPrimalDualOptionalParameters& parameters,
+        DynamicProgrammingPrimalDualOutput& output)
+{
+    output.number_of_recursive_calls++;
+    FFOT_LOG_FOLD_START(parameters.info, "dynamic_programming_primal_dual_main"
+            << " number_of_recursive_calls " << output.number_of_recursive_calls
+            << std::endl);
+    FFOT_LOG_FOLD(parameters.info, instance);
+
+    DynamicProgrammingPrimalDualInternalData d(instance, parameters, output);
+    Weight  c = instance.reduced_capacity();
+    ItemPos n = instance.reduced_number_of_items();
+
+    // Trivial cases
+    if (n == 0 || c == 0) {
+        Solution sol_tmp = (instance.reduced_solution() == NULL)? Solution(instance): *instance.reduced_solution();
+        output.update_solution(
+                sol_tmp,
+                std::stringstream("no item or null capacity (lb)"),
+                parameters.info);
+        output.update_upper_bound(
+                output.lower_bound,
+                std::stringstream("no item of null capacity (ub)"),
+                parameters.info);
+        FFOT_LOG_FOLD_END(parameters.info, "no item or null capacity");
+        return;
+    } else if (n == 1) {
+        Solution sol_tmp = (instance.reduced_solution() == NULL)? Solution(instance): *instance.reduced_solution();
+        sol_tmp.set(instance.first_item(), true);
+        output.update_solution(
+                sol_tmp,
+                std::stringstream("one item (lb)"),
+                parameters.info);
+        output.update_upper_bound(
+                output.lower_bound,
+                std::stringstream("one item (ub)"),
+                parameters.info);
+        FFOT_LOG_FOLD_END(parameters.info, "one item");
+        return;
+    }
+
+    // Sort partially
+    instance.sort_partially(FFOT_DBG(parameters.info));
+    if (instance.break_item() == instance.last_item() + 1) {
+        output.update_solution(
+                *instance.break_solution(),
+                std::stringstream("all items fit in the knapsack (lb)"),
+                parameters.info);
+        output.update_upper_bound(
+                output.lower_bound,
+                std::stringstream("all items fit in the knapsack (ub)"),
+                parameters.info);
+        FFOT_LOG_FOLD_END(parameters.info, "all items fit in the knapsack");
+        return;
+    }
+    if (output.number_of_recursive_calls == 1 && parameters.combo_core) {
+        instance.init_combo_core(FFOT_DBG(parameters.info));
+        FFOT_LOG_FOLD(parameters.info, instance);
+    }
+
+    // Compute initial lower bound
+    Solution sol_tmp(instance);
+    if (parameters.greedy) {
+        auto g_output = greedy(instance);
+        sol_tmp = g_output.solution;
+    } else {
+        sol_tmp = *instance.break_solution();
+    }
+    if (output.lower_bound < sol_tmp.profit()) {
+        output.update_solution(
+                sol_tmp,
+                std::stringstream("initial solution"),
+                parameters.info);
+    }
+
+    // Compute initial upper bound
+    Profit ub_tmp = upper_bound_dantzig(instance);
+    output.update_upper_bound(
+            ub_tmp,
+            std::stringstream("dantzig upper bound"),
+            parameters.info);
+
+    if (output.solution.profit() == output.upper_bound) {
+        FFOT_LOG_FOLD_END(parameters.info, "lower bound == upper bound");
+        return;
+    }
+
+    // Recursion
+    Weight w_bar = instance.break_solution()->weight();
+    Profit p_bar = instance.break_solution()->profit();
+    d.l0 = {{w_bar, p_bar, 0}};
+    d.s = instance.break_item() - 1;
+    d.t = instance.break_item();
+    d.w_max = w_bar;
+    d.best_state = d.l0.front();
+    FFOT_LOG_FOLD(parameters.info, instance);
+    while (!d.l0.empty() && (d.t <= instance.last_item() || d.s >= instance.first_item())) {
+        dynamic_programming_primal_dual_update_bounds(d); // Update bounds
+        if (!parameters.info.check_time()) {
+            if (parameters.set_end)
+                *(parameters.end) = true;
+            for (std::thread& thread: d.threads)
+                thread.join();
+            d.threads.clear();
+            return;
+        }
+        if (parameters.stop_if_end && *(parameters.end)) {
+            FFOT_LOG_FOLD_END(parameters.info, "end");
+            return;
+        }
+        if (output.solution.profit() == output.upper_bound
+                || d.best_state.p == output.upper_bound)
+            break;
+
+        if (d.t <= instance.last_item()) {
+            FFOT_LOG(parameters.info, "f " << instance.first_item()
+                    << " s'' " << instance.s_second()
+                    << " s' " << instance.s_prime()
+                    << " s " << d.s
+                    << " b " << instance.break_item()
+                    << " t " << d.t
+                    << " t' " << instance.t_prime()
+                    << " t'' " << instance.t_second()
+                    << " l " << instance.last_item()
+                    << std::endl);
+            ++d.t;
+            add_item(d);
+            if (!parameters.info.check_time()) {
+                if (parameters.set_end)
+                    *(parameters.end) = true;
+                for (std::thread& thread: d.threads)
+                    thread.join();
+                d.threads.clear();
+                return;
+            }
+            if (parameters.stop_if_end && *(parameters.end)) {
+                FFOT_LOG_FOLD_END(parameters.info, "end");
+                return;
+            }
+            if (d.best_state.p == output.upper_bound)
+                break;
+        }
+
+        if (d.s >= instance.first_item()) {
+            FFOT_LOG(parameters.info, "f " << instance.first_item()
+                    << " s'' " << instance.s_second()
+                    << " s' " << instance.s_prime()
+                    << " s " << d.s
+                    << " b " << instance.break_item()
+                    << " t " << d.t
+                    << " t' " << instance.t_prime()
+                    << " t'' " << instance.t_second()
+                    << " l " << instance.last_item()
+                    << std::endl);
+            --d.s;
+            remove_item(d);
+            if (!parameters.info.check_time())
+                break;
+            if (parameters.stop_if_end && *(parameters.end)) {
+                FFOT_LOG_FOLD_END(parameters.info, "end");
+                return;
+            }
+            if (d.best_state.p == output.upper_bound)
+                break;
+        }
+    }
+    output.update_upper_bound(
+            output.lower_bound,
+            std::stringstream("tree search completed"),
+            parameters.info);
+
+    if (parameters.set_end)
+        *(parameters.end) = true;
+    FFOT_LOG(parameters.info, "end" << std::endl);
+    for (std::thread& thread: d.threads)
+        thread.join();
+    d.threads.clear();
+    FFOT_LOG(parameters.info, "end2" << std::endl);
+    //if (!d.sur_)
+        //*(d.end_) = false;
+
+    if (output.lower_bound == output.solution.profit())
+        return;
+
+    //assert(best_state_.p >= lb_);
+    FFOT_LOG_FOLD(parameters.info, instance);
+    instance.set_first_item(d.s + 1 FFOT_DBG(FFOT_COMMA parameters.info));
+    instance.set_last_item(d.t - 1);
+    FFOT_LOG(parameters.info, "best_state " << d.best_state << std::endl);
+    FFOT_LOG(parameters.info, d.psolf.print(d.best_state.sol) << std::endl);
+    instance.fix(d.psolf.vector(d.best_state.sol) FFOT_DBG(FFOT_COMMA parameters.info));
+    assert(instance.reduced_capacity() >= 0);
+
+    FFOT_LOG_FOLD_END(parameters.info, "dynamic_programming_primal_dual_main");
+    dynamic_programming_primal_dual_main(instance, parameters, output);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void add_item(DynamicProgrammingPrimalDualInternalData& d)
+{
+    Instance& instance = d.instance;
+    Info& info = d.parameters.info;
+    Profit lb = (d.output.number_of_recursive_calls == 1)?
+        d.output.lower_bound:
+        d.output.lower_bound - 1;
+    FFOT_LOG_FOLD_START(info, "add_item"
+            << " s " << d.s
+            << " t " << d.t
+            << " item " << instance.item(d.t - 1)
+            << " lb " << lb
+            << std::endl);
+    d.psolf.add_item(d.t - 1);
+    FFOT_LOG(info, "psolf " << d.psolf.print() << std::endl);
+    d.best_state.sol = d.psolf.remove(d.best_state.sol);
+    Weight c = instance.capacity();
+    Weight wt = instance.item(d.t - 1).w;
+    Profit pt = instance.item(d.t - 1).p;
+    ItemPos sx = instance.bound_item_left(d.s, lb FFOT_DBG(FFOT_COMMA info));
+    ItemPos tx = instance.bound_item_right(d.t, lb FFOT_DBG(FFOT_COMMA info));
+    Weight w_max = instance.capacity() + d.w_max - instance.reduced_solution()->weight();
+
+    d.l.clear();
+    std::vector<DynamicProgrammingPrimalDualState>::iterator it = d.l0.begin();
+    std::vector<DynamicProgrammingPrimalDualState>::iterator it1 = d.l0.begin();
+    while (it != d.l0.end() || it1 != d.l0.end()) {
+        if (it == d.l0.end() || it->w > it1->w + wt) {
+            Weight w = it1->w + wt;
+            if (w > w_max) {
+                FFOT_LOG(info, " ×" << std::endl);
+                it1++;
+                continue;
+            }
+
+            Profit p = it1->p + pt;
+            if (!d.l.empty() && p <= d.l.back().p) {
+                FFOT_LOG(info, " ×" << std::endl);
+                it1++;
+                continue;
+            }
+
+            Profit ub = (w <= c)?
+                upper_bound_dembo(instance, tx, p, c - w):
+                upper_bound_dembo_rev(instance, sx, p, c - w);
+            FFOT_LOG(info, " ub " << ub << " lb " << lb);
+            if (ub <= lb) {
+                FFOT_LOG(info, " ×" << std::endl);
+                it1++;
+                continue;
+            }
+
+            DynamicProgrammingPrimalDualState s1{w, p, d.psolf.add(it1->sol)};
+            FFOT_LOG(info, "state " << *it1 << " => " << s1);
+
+            // Update lower bound
+            if (s1.w <= c && s1.p > lb) {
+                if (d.output.number_of_recursive_calls == 1) {
+                    std::stringstream ss;
+                    ss << "it " << d.t - d.s << " (lb)";
+                    d.output.update_lower_bound(s1.p, ss, info);
+                    lb = s1.p;
+                }
+                d.best_state = s1;
+                assert(d.output.lower_bound <= d.output.upper_bound);
+            }
+
+            if (!d.l.empty() && s1.w == d.l.back().w) {
+                d.l.back() = s1;
+            } else {
+                d.l.push_back(s1);
+            }
+            FFOT_LOG(info, " ok" << std::endl);
+            it1++;
+        } else {
+            assert(it != d.l0.end());
+            FFOT_LOG(info, "state " << *it);
+
+            if (it->w > w_max) {
+                FFOT_LOG(info, " ×" << std::endl);
+                it++;
+                continue;
+            }
+
+            if (!d.l.empty() && it->p <= d.l.back().p) {
+                FFOT_LOG(info, " ×" << std::endl);
+                it++;
+                continue;
+            }
+
+            Profit ub = (it->w <= c)?
+                upper_bound_dembo(instance, tx, it->p, c - it->w):
+                upper_bound_dembo_rev(instance, sx, it->p, c - it->w);
+            FFOT_LOG(info, " ub " << ub << " lb " << lb);
+            if (ub <= lb) {
+                FFOT_LOG(info, " ×" << std::endl);
+                it++;
+                continue;
+            }
+
+            it->sol = d.psolf.remove(it->sol);
+            if (!d.l.empty() && it->w == d.l.back().w) {
+                d.l.back() = *it;
+            } else {
+                d.l.push_back(*it);
+            }
+            FFOT_LOG(info, " ok" << std::endl);
+            ++it;
+        }
+    }
+    d.l0.swap(d.l);
+    FFOT_LOG_FOLD_END(info, "add_item");
+}
+
+void remove_item(DynamicProgrammingPrimalDualInternalData& d)
+{
+    Instance& instance = d.instance;
+    Info& info = d.parameters.info;
+    Profit lb = (d.output.number_of_recursive_calls == 1)?
+        d.output.lower_bound:
+        d.output.lower_bound - 1;
+    FFOT_LOG_FOLD_START(info, "remove_item"
+            << " s " << d.s
+            << " t " << d.t
+            << " item " << instance.item(d.s + 1)
+            << " lb " << lb << std::endl);
+    d.psolf.add_item(d.s + 1);
+    FFOT_LOG(info, "psolf " << d.psolf.print() << std::endl);
+    d.best_state.sol = d.psolf.add(d.best_state.sol);
+    Weight c = instance.capacity();
+    Weight ws = instance.item(d.s + 1).w;
+    Profit ps = instance.item(d.s + 1).p;
+    d.w_max -= ws;
+    ItemPos sx = instance.bound_item_left(d.s, lb FFOT_DBG(FFOT_COMMA info));
+    ItemPos tx = instance.bound_item_right(d.t, lb FFOT_DBG(FFOT_COMMA info));
+    Weight w_max = instance.capacity() + d.w_max - instance.reduced_solution()->weight();
+
+    d.l.clear();
+    std::vector<DynamicProgrammingPrimalDualState>::iterator it = d.l0.begin();
+    std::vector<DynamicProgrammingPrimalDualState>::iterator it1 = d.l0.begin();
+    while (it != d.l0.end() || it1 != d.l0.end()) {
+        if (it1 == d.l0.end() || it->w <= it1->w - ws) {
+            FFOT_LOG(info, "state " << *it);
+
+            if (it->w > w_max) {
+                FFOT_LOG(info, " ×" << std::endl);
+                it++;
+                continue;
+            }
+
+            if (!d.l.empty() && it->p <= d.l.back().p) {
+                FFOT_LOG(info, " ×" << std::endl);
+                it++;
+                continue;
+            }
+
+            Profit ub = (it->w <= c)?
+                upper_bound_dembo(instance, tx, it->p, c - it->w):
+                upper_bound_dembo_rev(instance, sx, it->p, c - it->w);
+            FFOT_LOG(info, " ub " << ub << " lb " << lb);
+            if (ub <= lb) {
+                FFOT_LOG(info, " ×" << std::endl);
+                it++;
+                continue;
+            }
+
+            it->sol = d.psolf.add(it->sol);
+            if (!d.l.empty() && it->w == d.l.back().w) {
+                d.l.back() = *it;
+            } else {
+                d.l.push_back(*it);
+            }
+            FFOT_LOG(info, " ok" << std::endl);
+            ++it;
+        } else {
+            Weight w = it1->w - ws;
+            if (w > w_max) {
+                FFOT_LOG(info, " ×" << std::endl);
+                it1++;
+                continue;
+            }
+
+            Profit p = it1->p - ps;
+            if (!d.l.empty() && p <= d.l.back().p) {
+                FFOT_LOG(info, " ×" << std::endl);
+                it1++;
+                continue;
+            }
+
+            Profit ub = (w <= c)?
+                upper_bound_dembo(instance, tx, p, c - w):
+                upper_bound_dembo_rev(instance, sx, p, c - w);
+            FFOT_LOG(info, " ub " << ub << " lb " << lb);
+            if (ub <= lb) {
+                FFOT_LOG(info, " ×" << std::endl);
+                it1++;
+                continue;
+            }
+
+            DynamicProgrammingPrimalDualState s1{it1->w - ws, it1->p - ps, d.psolf.remove(it1->sol)};
+            FFOT_LOG(info, "state " << *it1 << " => " << s1);
+
+            // Update lower bound
+            if (s1.w <= c && s1.p > lb) {
+                if (d.output.number_of_recursive_calls == 1) {
+                    std::stringstream ss;
+                    ss << "it " << d.t - d.s << " (lb)";
+                    d.output.update_lower_bound(s1.p, ss, info);
+                    lb = s1.p;
+                }
+                d.best_state = s1;
+                assert(d.output.lower_bound <= d.output.upper_bound);
+            }
+
+            if (!d.l.empty() && s1.w == d.l.back().w) {
+                d.l.back() = s1;
+            } else {
+                d.l.push_back(s1);
+            }
+            FFOT_LOG(info, " ok" << std::endl);
+            it1++;
+        }
+    }
+    d.l0.swap(d.l);
+    FFOT_LOG_FOLD_END(info, "remove_item");
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+ItemPos dynamic_programming_primal_dual_find_state(DynamicProgrammingPrimalDualInternalData& d, bool right)
+{
+    Instance& instance = d.instance;
+    FFOT_LOG_FOLD_START(d.parameters.info, "dynamic_programming_primal_dual_find_state" << std::endl);
+
+    Profit lb0 = 0;
+    ItemIdx j = -1;
+    ItemPos first = (right)? d.t: instance.first_item();
+    ItemPos last  = (right)? instance.last_item(): d.s;
+    for (ItemPos t=first; t<=last; ++t) {
+        if (instance.s_second() <= t && t < instance.s_prime())
+            continue;
+        if (instance.t_prime() < t && t <= instance.t_second())
+            continue;
+        FFOT_LOG(d.parameters.info, "t " << t << std::endl);
+        Weight w = (right)?
+            instance.capacity() - instance.item(t).w:
+            instance.capacity() + instance.item(t).w;
+        if (d.l0.front().w > w)
+            continue;
+        ItemPos f = 0;
+        ItemPos l = d.l0.size() - 1; // l0_[l] > w
+        while (f + 1 < l) {
+            FFOT_LOG(d.parameters.info, "f " << f << " l " << l << std::endl);
+            ItemPos m = (f + l) / 2;
+            if (d.l0[m].w >= w) {
+                assert(l != m);
+                l = m;
+            } else {
+                assert(f != m);
+                f = m;
+            }
+        }
+        FFOT_LOG(d.parameters.info, "f " << f << " l " << l << std::endl);
+        if (f != (StateIdx)d.l0.size() - 1 && d.l0[f + 1].w <= w)
+            f++;
+        FFOT_LOG(d.parameters.info, "f " << f << " l " << l << std::endl);
+        assert(f < (StateIdx)d.l0.size());
+        assert(d.l0[f].w <= w);
+        assert(f == (StateIdx)d.l0.size() - 1 || d.l0[f + 1].w > w);
+        Profit lb = (right)?
+            d.l0[f].p + instance.item(t).p:
+            d.l0[f].p - instance.item(t).p;
+        if (lb0 < lb) {
+            j = t;
+            lb0 = lb;
+        }
+    }
+    FFOT_LOG_FOLD_END(d.parameters.info, "dynamic_programming_primal_dual_find_state");
+    return j;
+}
+
+void dynamic_programming_primal_dual_update_bounds(DynamicProgrammingPrimalDualInternalData& d)
+{
+    Instance& instance = d.instance;
+    Info& info = d.parameters.info;
+
+    if (d.parameters.surrogate_relaxation >= 0
+            && d.parameters.surrogate_relaxation <= (StateIdx)d.l0.size()) {
+        d.parameters.surrogate_relaxation = -1;
+        std::function<Output (Instance&, Info, bool*)> func
+            = [&d](Instance& instance, Info info, bool* end)
+            {
+                DynamicProgrammingPrimalDualOptionalParameters parameters;
+                parameters.info = info;
+                parameters.partial_solution_size = d.parameters.partial_solution_size;
+                parameters.pairing = d.parameters.pairing;
+                parameters.greedy = d.parameters.greedy;
+                parameters.surrogate_relaxation = -1;
+                parameters.combo_core = d.parameters.combo_core;
+                parameters.end = end;
+                parameters.stop_if_end = true;
+                parameters.set_end = false;
+                return dynamic_programming_primal_dual(instance, parameters);
+            };
+        //solve_surrogate_relaxation(
+        //            Instance::reset(instance),
+        //            std::ref(d.output),
+        //            func,
+        //            d.parameters.end,
+        //            Info(info, true, "surrogate_relaxation"));
+        d.threads.push_back(std::thread(
+                    solve_surrogate_relaxation,
+                    Instance::reset(instance),
+                    std::ref(d.output),
+                    func,
+                    d.parameters.end,
+                    Info(info, true, "surrogate_relaxation")));
+    }
+    if (d.parameters.pairing >= 0
+            && d.parameters.pairing <= (StateIdx)d.l0.size()) {
+        FFOT_LOG_FOLD_START(info, "pairing" << std::endl);
+        d.parameters.pairing *= 10;
+
+        if (d.t <= instance.last_item()) {
+            ItemPos j = dynamic_programming_primal_dual_find_state(d, true);
+            if (j != -1) {
+                instance.add_item_to_core(d.s, d.t, j FFOT_DBG(FFOT_COMMA info));
+                ++d.t;
+                add_item(d);
+                if (d.output.solution.profit() == d.output.upper_bound
+                        || !info.check_time()
+                        || (d.parameters.stop_if_end && *(d.parameters.end)))
+                    return;
+            }
+        }
+
+        if (d.s >= instance.first_item()) {
+            ItemPos j = dynamic_programming_primal_dual_find_state(d, false);
+            if (j != -1) {
+                instance.add_item_to_core(d.s, d.t, j FFOT_DBG(FFOT_COMMA info));
+                --d.s;
+                remove_item(d);
+            }
+        }
+        FFOT_LOG_FOLD_END(info, "pairing");
+    }
+}
+

@@ -1,0 +1,77 @@
+#include "knapsacksolver/subsetsum/algorithms/algorithms.hpp"
+
+#include <boost/program_options.hpp>
+
+using namespace knapsacksolver::subsetsum;
+
+int main(int argc, char *argv[])
+{
+    namespace po = boost::program_options;
+
+    // Parse program options
+
+    std::string algorithm = "dynamic-programming-bellman-array";
+    std::string instance_path = "";
+    std::string output_path = "";
+    std::string certificate_path = "";
+    std::string log_path = "";
+    std::string format = "standard";
+    int verbosity_level = 0;
+    int loglevelmax = 999;
+    int seed = 0;
+    double time_limit = std::numeric_limits<double>::infinity();
+
+    po::options_description desc("Allowed options");
+    desc.add_options()
+        ("help,h", "produce help message")
+        ("algorithm,a", po::value<std::string>(&algorithm), "set algorithm")
+        ("input,i", po::value<std::string>(&instance_path)->required(), "set input path (required)")
+        ("format,f", po::value<std::string>(&format), "set input file format (default: standard)")
+        ("output,o", po::value<std::string>(&output_path), "set JSON output path")
+        ("certificate,c", po::value<std::string>(&certificate_path), "set certificate path")
+        ("time-limit,t", po::value<double>(&time_limit), "set time limit (in s)")
+        ("seed,s", po::value<int>(&seed), "set seed")
+        ("verbosity-level,v", po::value<int>(&verbosity_level), "Verbosity level")
+        ("log,l", po::value<std::string>(&log_path), "set log path")
+        ("loglevelmax", po::value<int>(&loglevelmax), "set log max level")
+        ("log2stderr", "write log to stderr")
+        ;
+    po::variables_map vm;
+    po::store(po::parse_command_line(argc, argv, desc), vm);
+    if (vm.count("help")) {
+        std::cout << desc << std::endl;;
+        return 1;
+    }
+    try {
+        po::notify(vm);
+    } catch (const po::required_option& e) {
+        std::cout << desc << std::endl;;
+        return 1;
+    }
+
+    // Run algorithm
+
+    std::mt19937_64 generator(seed);
+    Instance instance(instance_path, format);
+
+    optimizationtools::Info info = optimizationtools::Info()
+        .set_verbosity_level(verbosity_level)
+        .set_time_limit(time_limit)
+        .set_certificate_path(certificate_path)
+        .set_json_output_path(output_path)
+        .set_only_write_at_the_end(true)
+        .set_log_path(log_path)
+        .set_log2stderr(vm.count("log2stderr"))
+        .set_maximum_log_level(loglevelmax)
+        ;
+
+    std::vector<std::string> algorithm_args = po::split_unix(algorithm);
+    std::vector<char*> algorithm_argv;
+    for(Counter i = 0; i < (Counter)algorithm_args.size(); ++i)
+        algorithm_argv.push_back(const_cast<char*>(algorithm_args[i].c_str()));
+
+    auto output = run(algorithm, instance, generator, info);
+
+    return 0;
+}
+

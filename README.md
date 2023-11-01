@@ -1,6 +1,6 @@
-# Knapsack Solver
+# KnapsackSolver
 
-A solver for the 0-1 Knapsack Problem.
+A solver for the 0-1 knapsack problem.
 
 All classical and state-of-the-art algorithms are implemented. Most of them are described in the "Knapsack Problem" book (Kellerer et al., 2004).
 
@@ -24,44 +24,65 @@ All classical and state-of-the-art algorithms are implemented. Most of them are 
 
 ## Implemented algorithms
 
+### Knapsack
+
 * Greedy
   * `O(n)` `-a greedy`
   * `O(n log n)`
-    * Forward `-a greedy_nlogn_forward`
-    * Backward `-a greedy_nlogn_backward`
-    * Best of Forward and Backward `-a greedy_nlogn`
+    * Forward `-a greedy-nlogn-forward`
+    * Backward `-a greedy-nlogn-backward`
+    * Best of Forward and Backward `-a greedy-nlogn`
 
 * Upper bounds
   * Dantzig upper bound `-a dantzig`
   * Surrogate relaxation
-    * Only solve relaxation `-a surrogate_relaxation`
-    * Solve relaxation and surrogate instance with `dynamic_programming_primal_dual`: `-a solve_surrogate_instance`
+    * Only solve relaxation `-a surrogate-relaxation`
+    * Solve relaxation and surrogate instance with `dynamic-programming-primal-dual`: `-a solve-surrogate-instance`
 
 * Dynamic Programming
   * Bellman
-    * Recursive `-a dynamic_programming_bellman_rec`
-    * Array (only optimal value) `-a dynamic_programming_bellman_array`
-    * Array + parallel (only optimal value) `-a dynamic_programming_bellman_array_parallel`
-    * Array (all) `-a dynamic_programming_bellman_array_all`
-    * Array (one) `-a dynamic_programming_bellman_array_one`
-    * Array (partial solution) `-a dynamic_programming_bellman_array_part`
-    * Array (recursive scheme) `-a dynamic_programming_bellman_array_rec`
-    * List (only optimal value) `-a dynamic_programming_bellman_list`
-    * List + sort (only optimal value) `-a dynamic_programming_bellman_list_sort`
-    * List (recursive scheme) `-a dynamic_programming_bellman_list_rec`
+    * Recursive `-a dynamic-programming-bellman-rec`
+    * Array (only optimal value) `-a dynamic-programming-bellman-array`
+    * Array + parallel (only optimal value) `-a dynamic-programming-bellman-array-parallel`
+    * Array (all) `-a dynamic-programming-bellman-array-all`
+    * Array (one) `-a dynamic-programming-bellman-array-one`
+    * Array (partial solution) `-a dynamic-programming-bellman-array-part`
+    * Array (recursive scheme) `-a dynamic-programming-bellman-array-rec`
+    * List (only optimal value) `-a dynamic-programming-bellman-list`
+    * List + sort (only optimal value) `-a dynamic-programming-bellman-list-sort`
+    * List (recursive scheme) `-a dynamic-programming-bellman-list-rec`
   * By profits
-    * Array (only optimal value) `-a dynamic_programming_profits_array`
-    * Array (all) `-a dynamic_programming_profits_array_all`
+    * Array (only optimal value) `-a dynamic-programming-profits-array`
+    * Array (all) `-a dynamic-programming-profits-array-all`
   * Balancing (balknap)
-    * List (partial solution) `-a "dynamic_programming_balancing -g -u t -n -1 -s -1 -k 64"`, `-a balknap`
+    * List (partial solution) `-a "dynamic-programming-balancing -g -u t -n -1 -s -1 -k 64"`, `-a balknap`
   * Primal-dual (minknap, combo)
-    * List (partial solution) `-a "dynamic_programming_primal_dual -c -g -p -1 -s -1 -k 64"`, `-a dynamic_programming_primal_dual_combo`, `-a combo`
+    * List (partial solution) `-a "dynamic-programming-primal-dual -c -g -p -1 -s -1 -k 64"`, `-a dynamic-programming-primal-dual-combo`, `-a combo`
 
 * Branch-and-bound
   * Primal
-    * `-a branch_and_bound`
-    * `-a branch_and_bound_sort`
-  * Primal-dual (expknap) `-a "branch_and_bound_primal_dual -c -g -n -1 -s -1"`,  `expknap`, `-a branch_and_bound_primal_dual_combo`
+    * `-a branch-and-bound`
+    * `-a branch-and-bound-sort`
+  * Primal-dual (expknap) `-a "branch-and-bound-primal-dual -c -g -n -1 -s -1"`,  `expknap`, `-a branch-and-bound-primal-dual-combo`
+
+### Subset sum
+
+* Dynamic programming
+  * Bellman
+    * Array `-a dynamic-programming-bellman-array`
+    * List (only optimal value) `-a dynamic-programming-bellman-list`
+    * Word RAM (only optimal value) `-a dynamic-programming-bellman-word-ram`
+    * Word RAM with recursive scheme `-a dynamic-programming-bellman-word-ram-rec`
+  * Balancing
+    * Array (only optimal value) `-a dynamic-programming-balancing-array`
+
+### Multiple-choice subset sum
+
+* Dynamic programming
+  * Bellman
+    * Array `-a dynamic-programming-bellman-array`
+    * Word RAM (only optimal value) `-a dynamic-programming-bellman-word-ram`
+    * Word RAM with recursive scheme `-a dynamic-programming-bellman-word-ram-rec`
 
 ## Usage
 
@@ -80,12 +101,16 @@ https://drive.google.com/file/d/1k2Mp3Z5sb5tVJO8I5-WiAglqawk-l1k3/view?usp=shari
 Solve:
 
 ```shell
-./bazel-bin/knapsacksolver/main -v 1 --algorithm combo --input data/knapsack/largecoeff/knapPI_3_10000_10000000/knapPI_3_10000_10000000_50.csv --format pisinger
+./bazel-bin/knapsacksolver/knapsack/main -v 1 --algorithm combo --input data/knapsack/largecoeff/knapPI_3_10000_10000000/knapPI_3_10000_10000000_50.csv --format pisinger
 ```
 ```
-=====================================
-           Knapsack Solver           
-=====================================
+====================================
+           KnapsackSolver           
+====================================
+
+Problem
+--------
+Knapsack problem
 
 Instance
 --------
@@ -94,29 +119,31 @@ Capacity:         24552508933
 
 Algorithm
 ---------
-Minknap
+Dynamic programming - Primal-dual
 
 Parameters
 ----------
-Greedy:                 1
-Pairing:                10000
-Surrogate relaxation:   2000
-Combo core:             1
-Partial solution size:  64
+Implementation:                  States
+Method for retrieving solution:  Partial solution in states
+Greedy:                          1
+Pairing:                         10000
+Surrogate relaxation:            2000
+Combo core:                      1
+Partial solution size:           64
 
     T (ms)             LB             UB       GAP                 Comment
     ------             --             --       ---                 -------
          0              0            inf       inf                        
-       0.3    31604508753            inf       inf        initial solution
-       0.3    31604508753    31605222696    713943     dantzig upper bound
-       1.9    31604508786    31605222696    713910              it 18 (lb)
-       1.9    31604508806    31605222696    713890              it 18 (lb)
-       1.9    31604508812    31605222696    713884              it 18 (lb)
-       1.9    31604508819    31605222696    713877              it 18 (lb)
-       1.9    31604508824    31605222696    713872              it 18 (lb)
-       1.9    31604508833    31605222696    713863              it 18 (lb)
-       1.9    31604508933    31605222696    713763              it 18 (lb)
-       6.8    31604508933    31604508933         0    surrogate relaxation
+       0.4    31604508753            inf       inf        initial solution
+       0.4    31604508753    31605222696    713943     dantzig upper bound
+       1.7    31604508786    31605222696    713910              it 18 (lb)
+       1.7    31604508806    31605222696    713890              it 18 (lb)
+       1.7    31604508812    31605222696    713884              it 18 (lb)
+       1.7    31604508819    31605222696    713877              it 18 (lb)
+       1.7    31604508824    31605222696    713872              it 18 (lb)
+       1.7    31604508833    31605222696    713863              it 18 (lb)
+       1.7    31604508933    31605222696    713763              it 18 (lb)
+       6.6    31604508933    31604508933         0    surrogate relaxation
 
 Final statistics
 ----------------
@@ -124,18 +151,24 @@ Value:                      31604508933
 Bound:                      31604508933
 Gap:                        0
 Gap (%):                    0
-Solution:                   OK
-Time (ms):                  11.8
+Solution:                   1
+Number of items:            7052 / 10000 (70.52%)
+Weight:                     24552508933 / 24552508933 (100%)
+Time (ms):                  7.4
 Number of recursive calls:  2
 ```
 
 ```shell
-./bazel-bin/knapsacksolver/main -v 1 --algorithm combo --input data/knapsack/largecoeff/knapPI_5_10000_10000000/knapPI_5_10000_10000000_60.csv --format pisinger
+./bazel-bin/knapsacksolver/knapsack/main -v 1 --algorithm combo --input data/knapsack/largecoeff/knapPI_5_10000_10000000/knapPI_5_10000_10000000_60.csv --format pisinger
 ```
 ```
-=====================================
-           Knapsack Solver           
-=====================================
+====================================
+           KnapsackSolver           
+====================================
+
+Problem
+--------
+Knapsack problem
 
 Instance
 --------
@@ -144,29 +177,31 @@ Capacity:         29740614219
 
 Algorithm
 ---------
-Minknap
+Dynamic programming - Primal-dual
 
 Parameters
 ----------
-Greedy:                 1
-Pairing:                10000
-Surrogate relaxation:   2000
-Combo core:             1
-Partial solution size:  64
+Implementation:                  States
+Method for retrieving solution:  Partial solution in states
+Greedy:                          1
+Pairing:                         10000
+Surrogate relaxation:            2000
+Combo core:                      1
+Partial solution size:           64
 
     T (ms)             LB             UB       GAP                 Comment
     ------             --             --       ---                 -------
          0              0            inf       inf                        
-       0.4    37438591403            inf       inf        initial solution
-       0.4    37438591403    37439459371    867968     dantzig upper bound
-       0.4    37438593109    37439459371    866262              it 10 (lb)
-       1.2    37438593616    37439459371    865755              it 16 (lb)
-       1.2    37438593668    37439459371    865703              it 16 (lb)
-       1.7    37438594077    37439459371    865294              it 18 (lb)
-       1.7    37438594129    37439459371    865242              it 18 (lb)
-       2.7    37438594909    37439459371    864462              it 20 (lb)
-       2.7    37438595411    37439459371    863960              it 20 (lb)
-       2.7    37438596238    37439459371    863133              it 20 (lb)
+       0.5    37438591403            inf       inf        initial solution
+       0.5    37438591403    37439459371    867968     dantzig upper bound
+       0.5    37438593109    37439459371    866262              it 10 (lb)
+         1    37438593616    37439459371    865755              it 16 (lb)
+         1    37438593668    37439459371    865703              it 16 (lb)
+       1.6    37438594077    37439459371    865294              it 18 (lb)
+       1.6    37438594129    37439459371    865242              it 18 (lb)
+       2.8    37438594909    37439459371    864462              it 20 (lb)
+       2.8    37438595411    37439459371    863960              it 20 (lb)
+       2.8    37438596238    37439459371    863133              it 20 (lb)
        2.8    37438597409    37439459371    861962              it 20 (lb)
        2.8    37438598429    37439459371    860942              it 20 (lb)
        2.8    37438601240    37439459371    858131              it 20 (lb)
@@ -174,23 +209,23 @@ Partial solution size:  64
        2.8    37438603431    37439459371    855940              it 20 (lb)
        2.8    37438604258    37439459371    855113              it 20 (lb)
        2.8    37438611923    37439459371    847448              it 20 (lb)
-       2.8    37438612943    37439459371    846428              it 20 (lb)
-       2.8    37438614114    37439459371    845257              it 20 (lb)
-       2.8    37438618772    37439459371    840599              it 20 (lb)
-       2.8    37438619943    37439459371    839428              it 20 (lb)
+       2.9    37438612943    37439459371    846428              it 20 (lb)
+       2.9    37438614114    37439459371    845257              it 20 (lb)
+       2.9    37438618772    37439459371    840599              it 20 (lb)
+       2.9    37438619943    37439459371    839428              it 20 (lb)
        4.1    37438624079    37439459371    835292              it 21 (lb)
        4.1    37438624581    37439459371    834790              it 21 (lb)
        4.1    37438625752    37439459371    833619              it 21 (lb)
        4.1    37438626772    37439459371    832599              it 21 (lb)
        4.1    37438632601    37439459371    826770              it 21 (lb)
-       4.2    37438643284    37439459371    816087              it 21 (lb)
-      10.1    37438643342    37439459371    816029              it 25 (lb)
-      10.1    37438644672    37439459371    814699              it 25 (lb)
-      10.1    37438647021    37439459371    812350              it 25 (lb)
-      12.4    37438647021    37439419666    772645    surrogate relaxation
+       4.1    37438643284    37439459371    816087              it 21 (lb)
+      10.7    37438643342    37439459371    816029              it 25 (lb)
+      10.7    37438644672    37439459371    814699              it 25 (lb)
+      10.7    37438647021    37439459371    812350              it 25 (lb)
+      12.2    37438647021    37439419666    772645    surrogate relaxation
       13.5    37439041506    37439419666    378160  surrogate ins res (lb)
       13.9    37439416751    37439419666      2915  surrogate ins res (lb)
-      13.9    37439416751    37439416751         0  surrogate ins res (ub)
+        14    37439416751    37439416751         0  surrogate ins res (ub)
 
 Final statistics
 ----------------
@@ -198,18 +233,24 @@ Value:                      37439416751
 Bound:                      37439416751
 Gap:                        0
 Gap (%):                    0
-Solution:                   OK
-Time (ms):                  18
+Solution:                   1
+Number of items:            7699 / 10000 (76.99%)
+Weight:                     29740614093 / 29740614219 (100%)
+Time (ms):                  16.8
 Number of recursive calls:  1
 ```
 
 ```shell
-./bazel-bin/knapsacksolver/main -v 1 --algorithm combo --input data/knapsack/normal/knap_n100000_r100000000_x0.5 --format standard
+./bazel-bin/knapsacksolver/knapsack/main -v 1 --algorithm combo --input data/knapsack/normal/knap_n100000_r100000000_x0.5 --format standard
 ```
 ```
-=====================================
-           Knapsack Solver           
-=====================================
+====================================
+           KnapsackSolver           
+====================================
+
+Problem
+--------
+Knapsack problem
 
 Instance
 --------
@@ -218,24 +259,26 @@ Capacity:         2498481766944
 
 Algorithm
 ---------
-Minknap
+Dynamic programming - Primal-dual
 
 Parameters
 ----------
-Greedy:                 1
-Pairing:                10000
-Surrogate relaxation:   2000
-Combo core:             1
-Partial solution size:  64
+Implementation:                  States
+Method for retrieving solution:  Partial solution in states
+Greedy:                          1
+Pairing:                         10000
+Surrogate relaxation:            2000
+Combo core:                      1
+Partial solution size:           64
 
     T (ms)             LB             UB       GAP                 Comment
     ------             --             --       ---                 -------
-       0.3              0            inf       inf                        
-       5.5  2698884873111            inf       inf        initial solution
-       5.5  2698884873111  2698885010148    137037     dantzig upper bound
-      12.1  2698884993895  2698885010148     16253              it 16 (lb)
-      16.6  2698885006118  2698885010148      4030              it 20 (lb)
-      33.7  2698885006118  2698885006118         0   tree search completed
+         0              0            inf       inf                        
+       5.2  2698884873111            inf       inf        initial solution
+       5.2  2698884873111  2698885010148    137037     dantzig upper bound
+       7.8  2698884993895  2698885010148     16253              it 16 (lb)
+      12.9  2698885006118  2698885010148      4030              it 20 (lb)
+      30.3  2698885006118  2698885006118         0   tree search completed
 
 Final statistics
 ----------------
@@ -243,14 +286,64 @@ Value:                      2698885006118
 Bound:                      2698885006118
 Gap:                        0
 Gap (%):                    0
-Solution:                   OK
-Time (ms):                  34.5
+Solution:                   1
+Number of items:            49971 / 100000 (49.971%)
+Weight:                     2498481766106 / 2498481766944 (100%)
+Time (ms):                  31.5
 Number of recursive calls:  2
+```
+
+```shell
+./bazel-bin/knapsacksolver/subsetsum/main -v 1 -i data/subsetsum/pthree/pthree_1000_1 -a dynamic-programming-bellman-word-ram-rec
+```
+```
+====================================
+           KnapsackSolver           
+====================================
+
+Problem
+--------
+Subset sum problem
+
+Instance
+--------
+Number of items:  1000
+Capacity:         250000
+
+Algorithm
+---------
+Dynamic programming - Bellman
+
+Parameters
+----------
+Implementation:                  Word RAM
+Method for retrieving solution:  Recursive scheme
+
+     T (s)            UB            LB           GAP   GAP (%)                 Comment
+     -----            --            --           ---   -------                 -------
+     0.000             0        250000        250000   -100.00                        
+     0.036        250000        250000             0      0.00   tree search completed
+
+Final statistics
+----------------
+Value:                        250000 / 250000 (100%)
+Has solution:                 1
+Bound:                        250000
+Absolute optimality gap:      0
+Relative optimality gap (%):  0
+Number of items:              484 / 1000 (48.4%)
+Time (s):                     0.0355509
+
+Solution
+--------
+Number of items:  484 / 1000 (48.4%)
+Weight:           250000 / 250000 (100%)
+Feasible:         1
 ```
 
 For more options, see:
 ```
-./bazel-bin/knapsacksolver/main --help
+./bazel-bin/knapsacksolver/knapsack/main --help
 ```
 
 Run tests:
@@ -264,7 +357,7 @@ bazel test -- //...
 If you use Bazel, just add the following lines to the `WORKSPACE` file:
 ```
 git_repository(
-    name = "knapsack",
+    name = "knapsacksolver",
     remote = "https://github.com/fontanf/knapsacksolver.git",
     commit = "c45720bd8f220d44863d0c8a6a4cc8aa6d5841c8",
 )
@@ -303,7 +396,7 @@ instance.set_capacity(c // 2)
 
 # Solve
 solution = knapsacksolver.solve(instance)
-# or solution = knapsacksolver.solve(instance, algorithm = "dynamic_programming_primal_dual", verbose = True)
+# or solution = knapsacksolver.solve(instance, algorithm = "dynamic-programming-primal-dual", verbose = True)
 solution.number_of_items()
 solution.profit()
 solution.contains(0)
@@ -319,10 +412,10 @@ solution.contains(0)
 
 Run benchmarks:
 ```shell
-bazel run //knapsacksolver:bench -- -a dynamic_programming_bellman_array dynamic_programming_bellman_array_part dynamic_programming_bellman_array_rec bellmanpar_array dynamic_programming_bellman_array_all dynamic_programming_bellman_rec -d easy
-bazel run //knapsacksolver:bench -- -a branch_and_bound_primal_dual branch_and_bound_primal_dual_combo dynamic_programming_balancing dynamic_programming_balancing_combo dynamic_programming_primal_dual dynamic_programming_primal_dual_combo -d normal
-bazel run //knapsacksolver:bench -- -a branch_and_bound_primal_dual branch_and_bound_primal_dual_combo dynamic_programming_balancing dynamic_programming_primal_dual dynamic_programming_primal_dual_combo -d easy difficultlarge difficultsmall
-bazel run //knapsacksolver:bench -- -a dynamic_programming_bellman_list_sort -d difficultsmall
+bazel run //knapsacksolver:bench -- -a dynamic-programming-bellman-array dynamic-programming-bellman-array-part dynamic-programming-bellman-array-rec bellmanpar-array dynamic-programming-bellman-array-all dynamic-programming-bellman-rec -d easy
+bazel run //knapsacksolver:bench -- -a branch-and-bound-primal-dual branch-and-bound-primal-dual-combo dynamic-programming-balancing dynamic-programming-balancing-combo dynamic-programming-primal-dual dynamic-programming-primal-dual-combo -d normal
+bazel run //knapsacksolver:bench -- -a branch-and-bound-primal-dual branch-and-bound-primal-dual-combo dynamic-programming-balancing dynamic-programming-primal-dual dynamic-programming-primal-dual-combo -d easy difficultlarge difficultsmall
+bazel run //knapsacksolver:bench -- -a dynamic-programming-bellman-list-sort -d difficultsmall
 ```
 
 Output files are created in `bazel-out/k8-opt/bin/knapsacksolver/bench.runfiles/__main__/`.
@@ -359,32 +452,32 @@ pj ~ N(wj,    wj / 10), 1 <= pj <= r
 c = r * (1 - x) + ∑wj * x;
 ```
 
-* [branch_and_bound_primal_dual](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/knapsack/master/bench/branch_and_bound_primal_dual.json)
-* [branch_and_bound_primal_dual_combo](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/knapsack/master/bench/branch_and_bound_primal_dual_combo.json)
-* [dynamic_programming_balancing](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/knapsack/master/bench/dynamic_programming_balancing.json)
-* [dynamic_programming_balancing_combo](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/knapsack/master/bench/dynamic_programming_balancing_combo.json)
-* [dynamic_programming_primal_dual](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/knapsack/master/bench/dynamic_programming_primal_dual.json)
-* [dynamic_programming_primal_dual_combo](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/knapsack/master/bench/dynamic_programming_primal_dual_combo.json)
+* [branch-and-bound-primal-dual](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/knapsack/master/bench/branch_and_bound_primal_dual.json)
+* [branch-and-bound-primal-dual-combo](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/knapsack/master/bench/branch_and_bound_primal_dual_combo.json)
+* [dynamic-programming-balancing](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/knapsack/master/bench/dynamic_programming_balancing.json)
+* [dynamic-programming-balancing-combo](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/knapsack/master/bench/dynamic_programming_balancing_combo.json)
+* [dynamic-programming-primal-dual](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/knapsack/master/bench/dynamic_programming_primal_dual.json)
+* [dynamic-programming-primal-dual-combo](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/knapsack/master/bench/dynamic_programming_primal_dual_combo.json)
 
 Remarks:
-- The superiority of `dynamic_programming_primal_dual` is clear
+- The superiority of `dynamic-programming-primal-dual` is clear
 - `combo` optimizations do not help:
 
 ### Literature dataset
 
 | Algorithm                                | Instances                                                                                                                                                                                                                                |
 | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `branch_and_bound_primal_dual`           | ![easy](bench/branch_and_bound_primal_dual_easy.csv),           ![difficult large](bench/branch_and_bound_primal_dual_difficultlarge.csv),           ![difficult small](bench/branch_and_bound_primal_dual_difficultsmall.csv)           |
-| `branch_and_bound_primal_dual_combo`     | ![easy](bench/branch_and_bound_primal_dual_combo_easy.csv),     ![difficult large](bench/branch_and_bound_primal_dual_combo_difficultlarge.csv),     ![difficult small](bench/branch_and_bound_primal_dual_combo_difficultsmall.csv)     |
-| `dynamic_programming_balancing`          | ![easy](bench/dynamic_programming_balancing_easy.csv),          ![difficult large](bench/dynamic_programming_balancing_difficultlarge.csv),          ![difficult small](bench/dynamic_programming_balancing_difficultsmall.csv)          |
-| `dynamic_programming_primal_dual`        | ![easy](bench/dynamic_programming_primal_dual_easy.csv),        ![difficult large](bench/dynamic_programming_primal_dual_difficultlarge.csv),        ![difficult small](bench/dynamic_programming_primal_dual_difficultsmall.csv)        |
-| `dynamic_programming_primal_dual_combo`  | ![easy](bench/dynamic_programming_primal_dual_combo_easy.csv),  ![difficult large](bench/dynamic_programming_primal_dual_combo_difficultlarge.csv),  ![difficult small](bench/dynamic_programming_primal_dual_combo_difficultsmall.csv)  |
+| `branch-and-bound-primal-dual`           | ![easy](bench/branch_and_bound_primal_dual_easy.csv),           ![difficult large](bench/branch_and_bound_primal_dual_difficultlarge.csv),           ![difficult small](bench/branch_and_bound_primal_dual_difficultsmall.csv)           |
+| `branch-and-bound-primal-dual-combo`     | ![easy](bench/branch_and_bound_primal_dual_combo_easy.csv),     ![difficult large](bench/branch_and_bound_primal_dual_combo_difficultlarge.csv),     ![difficult small](bench/branch_and_bound_primal_dual_combo_difficultsmall.csv)     |
+| `dynamic-programming-balancing`          | ![easy](bench/dynamic_programming_balancing_easy.csv),          ![difficult large](bench/dynamic_programming_balancing_difficultlarge.csv),          ![difficult small](bench/dynamic_programming_balancing_difficultsmall.csv)          |
+| `dynamic-programming-primal-dual`        | ![easy](bench/dynamic_programming_primal_dual_easy.csv),        ![difficult large](bench/dynamic_programming_primal_dual_difficultlarge.csv),        ![difficult small](bench/dynamic_programming_primal_dual_difficultsmall.csv)        |
+| `dynamic-programming-primal-dual-combo`  | ![easy](bench/dynamic_programming_primal_dual_combo_easy.csv),  ![difficult large](bench/dynamic_programming_primal_dual_combo_difficultlarge.csv),  ![difficult small](bench/dynamic_programming_primal_dual_combo_difficultsmall.csv)  |
 
 Remarks:
 - These subset sum, strongly correlated and inverse strongly correlated instances are easy to solve since the upper bound happens to always be optimal.
-- With `combo` optimizations, `branch_and_bound_primal_dual` is able to solve strongly correlated and inverse strongly correlated instances. It also solves more almost strongly correlated instances.
-- Performances of `dynamic_programming_primal_dual` and `combo` seems to match the results from the literature. Furthermore, taking advantage of parallelization, this implementation of `combo` is able to solve all instances of the `difficultlarge` dataset.
-- `dynamic_programming_balancing` is very competitive on small instances (R = 1000). Compared to `dynamic_programming_primal_dual`:
+- With `combo` optimizations, `branch-and-bound-primal-dual` is able to solve strongly correlated and inverse strongly correlated instances. It also solves more almost strongly correlated instances.
+- Performances of `dynamic-programming-primal-dual` and `combo` seems to match the results from the literature. Furthermore, taking advantage of parallelization, this implementation of `combo` is able to solve all instances of the `difficultlarge` dataset.
+- `dynamic-programming-balancing` is very competitive on small instances (R = 1000). Compared to `dynamic-programming-primal-dual`:
   - it performs a lot better on `sc`, `isc`, `spanner`, `mstr` and `pceil` instances.
   - it performs slighlty worse on `u`, `wc` and `ss` instances.
   - it performs a lot worse on `asc` and `circle` instances.
