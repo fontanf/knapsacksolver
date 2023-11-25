@@ -18,17 +18,17 @@ namespace knapsack
 
 using optimizationtools::Info;
 
-typedef int64_t Profit;
-typedef int64_t Weight;
-typedef int64_t ItemIdx;
-typedef int64_t ItemPos;
-typedef int64_t StateIdx;
-typedef int64_t Counter;
-typedef double Effciency;
+using Profit = int64_t;
+using Weight = int64_t;
+using ItemIdx = int64_t;
+using ItemPos = int64_t;
+using StateIdx = int64_t;
+using Counter = int64_t;
+using Effciency = double;
 
 class Solution;
-typedef int64_t PartSol1;
-typedef int64_t PartSol2;
+using PartSol1 = int64_t;
+using PartSol2 = int64_t;
 class PartSolFactory1;
 class PartSolFactory2;
 

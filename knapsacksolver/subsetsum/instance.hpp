@@ -7,11 +7,11 @@ namespace knapsacksolver
 namespace subsetsum
 {
 
-typedef int64_t Weight;
-typedef int64_t ItemId;
-typedef int64_t ItemPos;
-typedef int64_t StateId;
-typedef int64_t Counter;
+using Weight = int64_t;
+using ItemId = int64_t;
+using ItemPos = int64_t;
+using StateId = int64_t;
+using Counter = int64_t;
 
 /**
  * Instance class for a subset sum problem.

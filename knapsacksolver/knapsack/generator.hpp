@@ -7,7 +7,7 @@ namespace knapsacksolver
 namespace knapsack
 {
 
-typedef int_fast64_t Seed;
+using Seed = int_fast64_t;
 
 /**
  * The item number is n.
