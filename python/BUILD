@@ -5,7 +5,8 @@ pybind_extension(
         name = "knapsacksolver",
         srcs = ["knapsacksolver.cpp"],
         deps = [
-                "//knapsacksolver/knapsack/algorithms:algorithms",
+            "//knapsacksolver/knapsack/algorithms:dynamic_programming_bellman",
+            "//knapsacksolver/knapsack/algorithms:dynamic_programming_primal_dual",
         ],
         copts = STDCPP,
 )

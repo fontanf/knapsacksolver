@@ -4,14 +4,17 @@ cc_library(
         name = "subsetsumsolver",
         hdrs = [
                 "instance.hpp",
+                "instance_builder.hpp",
                 "solution.hpp",
+                "algorithm_formatter.hpp",
         ],
         srcs = [
                 "instance.cpp",
+                "instance_builder.cpp",
                 "solution.cpp",
+                "algorithm_formatter.cpp",
         ],
         deps = [
-                "@optimizationtools//optimizationtools/utils:info",
                 "@optimizationtools//optimizationtools/utils:utils",
         ],
         copts = STDCPP,
@@ -21,7 +24,11 @@ cc_library(
 cc_binary(
         name = "main",
         srcs = ["main.cpp"],
-        deps = ["//knapsacksolver/subsetsum/algorithms:algorithms"],
+        deps = [
+                "//knapsacksolver/subsetsum/algorithms:dynamic_programming_bellman",
+                "//knapsacksolver/subsetsum/algorithms:dynamic_programming_balancing",
+                "@boost//:program_options",
+        ],
         copts = STDCPP,
 )
 
@@ -44,4 +51,3 @@ cc_binary(
                 ":generator",
         ],
 )
-

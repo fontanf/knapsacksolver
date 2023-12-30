@@ -1,18 +1,56 @@
 #include "knapsacksolver/knapsack/algorithms/upper_bound_dantzig.hpp"
 
+#include "knapsacksolver/knapsack/algorithm_formatter.hpp"
+#include "knapsacksolver/knapsack/upper_bound.hpp"
+
 using namespace knapsacksolver::knapsack;
 
-Profit knapsacksolver::knapsack::upper_bound_dantzig(const Instance& instance, Info info)
+const Output knapsacksolver::knapsack::upper_bound_dantzig(
+        const Instance& instance,
+        const UpperBoundDantzigParameters& parameters)
 {
-    info.os() << "*** dantzig ***" << std::endl;
-    assert(instance.sort_status() >= 1);
+    Output output(instance);
+    AlgorithmFormatter algorithm_formatter(parameters, output);
+    algorithm_formatter.start("Dantzig upper bound");
 
-    ItemPos b = instance.break_item();
-    Weight r = instance.break_capacity();
-    Profit p = instance.break_solution()->profit();
-    if (b <= instance.last_item() && r > 0)
-        p += (instance.item(b).p * r) / instance.item(b).w;
+    // Check trivial cases.
+    if (instance.total_item_weight() <= instance.capacity()) {
+        // Update bound.
+        algorithm_formatter.update_bound(
+                instance.total_item_profit(),
+                std::stringstream("all items fit"));
 
-    return algorithm_end(p, info);
+        algorithm_formatter.end();
+        return output;
+    }
+
+    Profit upper_bound_curr = -1;
+    if (parameters.full_sort != nullptr) {
+        upper_bound_curr = upper_bound(
+                instance,
+                parameters.full_sort->break_solution().profit(),
+                parameters.full_sort->break_solution().weight(),
+                parameters.full_sort->break_item_id());
+    } else if (parameters.partial_sort != nullptr) {
+        upper_bound_curr = upper_bound(
+                instance,
+                parameters.partial_sort->break_solution().profit(),
+                parameters.partial_sort->break_solution().weight(),
+                parameters.partial_sort->break_item_id());
+    } else {
+        PartialSort partial_sort(instance);
+        upper_bound_curr = upper_bound(
+                instance,
+                partial_sort.break_solution().profit(),
+                partial_sort.break_solution().weight(),
+                partial_sort.break_item_id());
+    }
+
+    // Update bound.
+    algorithm_formatter.update_bound(
+            upper_bound_curr,
+            std::stringstream("algorithm end (bound)"));
+
+    algorithm_formatter.end();
+    return output;
 }
-

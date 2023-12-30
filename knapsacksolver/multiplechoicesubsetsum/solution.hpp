@@ -2,6 +2,10 @@
 
 #include "knapsacksolver/multiplechoicesubsetsum/instance.hpp"
 
+#include "optimizationtools/utils/utils.hpp"
+
+#include <iomanip>
+
 namespace knapsacksolver
 {
 namespace multiplechoicesubsetsum
@@ -50,23 +54,23 @@ public:
     /** Return 'true' iff the solution is feasible. */
     bool feasible() const { return weight_ <= instance().capacity(); }
 
-    /**
-     * Return 'true' iff the solution is strictly better than the given lower
-     * bound.
-     */
-    bool better(Weight lower_bound) const { return feasible() && weight() > lower_bound; };
+    /** Get the total cost of the solution. */
+    inline Weight objective_value() const { return weight(); }
 
     /*
      * Export
      */
 
-    /** Print the instance. */
-    std::ostream& print(
-            std::ostream& os,
-            int verbose = 1) const;
-
     /** Write the solution to a file. */
-    void write(std::string filepath);
+    void write(std::string filepath) const;
+
+    /** Export solution characteristics to a JSON structure. */
+    nlohmann::json to_json() const;
+
+    /** Write a formatted output of the instance to a stream. */
+    void format(
+            std::ostream& os,
+            int verbosity_level = 1) const;
 
 private:
 
@@ -97,63 +101,120 @@ std::ostream& operator<<(std::ostream& os, const Solution& solution);
 //////////////////////////////////// Output ////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+inline optimizationtools::ObjectiveDirection objective_direction()
+{
+    return optimizationtools::ObjectiveDirection::Maximize;
+}
+
 /**
- * Output structure for a multiple-choice subset sum problem.
+ * Output structure for a set covering problem.
  */
-struct Output
+struct Output: optimizationtools::Output
 {
     /** Constructor. */
-    Output(
-            const Instance& instance,
-            optimizationtools::Info& info);
+    Output(const Instance& instance):
+        solution(instance),
+        bound(instance.capacity())
+    { }
+
 
     /** Solution. */
     Solution solution;
 
-    /** Lower bound. */
-    Weight lower_bound = 0;
+    /** Value. */
+    Weight value = 0;
 
-    /** Upper bound. */
-    Weight upper_bound = -1;
+    /** Bound. */
+    Weight bound = -1;
 
     /** Elapsed time. */
-    double time = -1;
+    double time = 0.0;
 
-    /** Return 'true' iff the solution is optimal. */
-    bool optimal() const;
 
-    /** Print current state. */
-    void print(
-            optimizationtools::Info& info,
-            const std::stringstream& s) const;
+    std::string solution_value() const
+    {
+        return optimizationtools::solution_value(
+            objective_direction(),
+            solution.feasible(),
+            value);
+    }
 
-    /** Update the solution. */
-    void update_solution(
-            const Solution& solution_new,
-            const std::stringstream& s,
-            optimizationtools::Info& info);
+    double absolute_optimality_gap() const
+    {
+        return optimizationtools::absolute_optimality_gap(
+                objective_direction(),
+                solution.feasible(),
+                value,
+                bound);
+    }
 
-    /** Update the lower bound. */
-    void update_lower_bound(
-            Weight lower_bound_new,
-            const std::stringstream& s,
-            optimizationtools::Info& info);
+    double relative_optimality_gap() const
+    {
+       return optimizationtools::relative_optimality_gap(
+            objective_direction(),
+            solution.feasible(),
+            value,
+            bound);
+    }
 
-    /** Update the upper bound. */
-    void update_upper_bound(
-            Weight upper_bound_new,
-            const std::stringstream& s,
-            optimizationtools::Info& info);
+    bool has_solution() const { return solution.feasible() && solution.objective_value() == value; }
 
-    /** Print the algorithm statistics. */
-    virtual void print_statistics(
-            optimizationtools::Info& info) const { (void)info; }
+    virtual nlohmann::json to_json() const
+    {
+        return nlohmann::json {
+            {"Solution", solution.to_json()},
+            {"HasSolution", has_solution()},
+            {"Value", value},
+            {"Bound", bound},
+            {"AbsoluteOptimalityGap", absolute_optimality_gap()},
+            {"RelativeOptimalityGap", relative_optimality_gap()},
+            {"Time", time}
+        };
+    }
 
-    /** Method to call at the end of the algorithm. */
-    Output& algorithm_end(
-            optimizationtools::Info& info);
+    virtual int format_width() const { return 30; }
+
+    virtual void format(std::ostream& os) const
+    {
+        int width = format_width();
+        os
+            << std::setw(width) << std::left << "Value: " << value << std::endl
+            << std::setw(width) << std::left << "Has solution: " << has_solution() << std::endl
+            << std::setw(width) << std::left << "Bound: " << bound << std::endl
+            << std::setw(width) << std::left << "Absolute optimality gap: " << absolute_optimality_gap() << std::endl
+            << std::setw(width) << std::left << "Relative optimality gap (%): " << relative_optimality_gap() * 100 << std::endl
+            << std::setw(width) << std::left << "Time (s): " << time << std::endl
+            ;
+    }
+};
+
+using NewSolutionCallback = std::function<void(const Output&)>;
+
+struct Parameters: optimizationtools::Parameters
+{
+    /** Callback function called when a new best solution is found. */
+    NewSolutionCallback new_solution_callback = [](const Output&) { };
+
+
+    virtual nlohmann::json to_json() const override
+    {
+        nlohmann::json json = optimizationtools::Parameters::to_json();
+        json.merge_patch(
+            {});
+        return json;
+    }
+
+    virtual int format_width() const override { return 23; }
+
+    virtual void format(std::ostream& os) const override
+    {
+        optimizationtools::Parameters::format(os);
+        //int width = format_width();
+        //os
+        //    << std::setw(width) << std::left << "    Enable: " << reduction_parameters.reduce << std::endl
+        //    ;
+    }
 };
 
 }
 }
-

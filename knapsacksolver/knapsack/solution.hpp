@@ -2,13 +2,17 @@
 
 #include "knapsacksolver/knapsack/instance.hpp"
 
+#include "optimizationtools/utils/utils.hpp"
+
+#include <iomanip>
+
 namespace knapsacksolver
 {
 namespace knapsack
 {
 
 /**
- * Solution class for a Knapsack Problem.
+ * Solution class for a subset sum problem.
  */
 class Solution
 {
@@ -16,81 +20,66 @@ class Solution
 public:
 
     /*
-     * Constructors and destructor.
+     * Constructors and destructor
      */
 
     /** Create an empty solution. */
     Solution(const Instance& instance);
 
-    /** Create a solution from a certificate file. */
-    Solution(const Instance& instance, std::string certificate_path);
+    /** Create a solution from a file. */
+    Solution(
+            const Instance& instance,
+            std::string certificate_path,
+            std::string certificate_format = "standard");
 
-    void update(const Solution& solution);
+    /** Add an item to the solution. */
+    void add(ItemId item_id);
+
+    /** Remove an item to the solution. */
+    void remove(ItemId item_id);
+
+    /** Add all items to the solution. */
+    void fill();
 
     /*
-     * Getters.
+     * Getters
      */
 
-    /** Get the instance of the solution. */
+    /** Get the instance. */
     inline const Instance& instance() const { return *instance_; }
 
-    /** Get the weight of the solution. */
+    /** Get the number of items in the solution. */
+    inline ItemPos number_of_items() const { return number_of_items_; }
+
+    /** Get the total weight of the solution. */
     inline Weight weight() const { return weight_; }
 
-    /** Get the remaining capacity of the solution. */
-    inline Weight remaining_capacity() const { return instance().capacity() - weight(); }
-
-    /** Get the profit of the solution. */
+    /** Get the total profit of the solution. */
     inline Profit profit() const { return profit_; }
 
-    /** Get the number of items in the solution. */
-    inline ItemIdx number_of_items() const { return number_of_items_; }
-
-    /**
-     * Get the solution vector 'x'.
-     *
-     * 'x[j] == true' iff item 'j' is in the solution.
-     */
-    const std::vector<int>& data() const { return x_; }
+    /** Return 'true' iff the solution contains item 'j'. */
+    int8_t contains(ItemId item_id) const { return contains_[item_id]; }
 
     /** Return 'true' iff the solution is feasible. */
-    inline bool feasible() const { return weight_ <= instance().capacity(); }
+    bool feasible() const { return weight_ <= instance().capacity(); }
 
-    /**
-     * Add/remove an item to/from the solution.
-     *
-     * If the item is/isn't already in the solution, nothing happens.
-     * Weight, Profit and Item number of the solution are updated.
-     *
-     * WARNING: the input correspond to the position of the item in the
-     * instance, not its ID!
+    /** Get the total cost of the solution. */
+    inline Profit objective_value() const { return profit(); }
+
+    /*
+     * Export
      */
-    void set(ItemPos j, int b);
 
-    /** Return 'true' iff the solution contains the item at position 'j'. */
-    int contains(ItemPos j) const;
+    /** Write the solution to a file. */
+    void write(std::string filepath) const;
 
-    /** Return 'true' iff the solution contains item 'j'. */
-    int contains_idx(ItemIdx j) const;
+    /** Export solution characteristics to a JSON structure. */
+    nlohmann::json to_json() const;
 
-    /** Clear the solution. */
-    void clear();
-
-    void update_from_partsol(const PartSolFactory1& psolf, PartSol1 psol);
-
-    void update_from_partsol(const PartSolFactory2& psolf, PartSol2 psol);
-
-    /**
-     * Write the solution in the input file.
-     * One item per line. 1 if in, 0 if out.
-     */
-    void write(std::string certificate_path);
-
-    std::string to_string_binary() const;
-
-    std::string to_string_binary_ordered() const;
-
-    std::string to_string_items() const;
+    /** Write a formatted output of the instance to a stream. */
+    void format(
+            std::ostream& os,
+            int verbosity_level = 1) const;
 
 private:
 
@@ -98,58 +87,140 @@ private:
     const Instance* instance_;
 
     /** Number of items in the solution. */
-    ItemIdx number_of_items_ = 0;
-
-    /** Profit of the solution. */
-    Profit profit_ = 0;
+    ItemPos number_of_items_ = 0;
 
     /** Weight of the solution. */
     Weight weight_ = 0;
 
-    /**
-     * Vector of the solution.
-     *
-     * 'x_[j] == true' iff the solution contains item 'j'.
-     */
-    std::vector<int> x_;
+    /** Profit of the solution. */
+    Profit profit_ = 0;
+
+    /** 'contains_[j] == true' iff the solution contains item 'j'. */
+    std::vector<int8_t> contains_;
 
 };
 
-std::ostream& operator<<(std::ostream &os, const Solution& solution);
+/** Stream insertion operator. */
+std::ostream& operator<<(std::ostream& os, const Solution& solution);
 
 ////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////// Output ////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-struct Output
+inline optimizationtools::ObjectiveDirection objective_direction()
 {
-    Output(const Instance& instance, Info& info);
+    return optimizationtools::ObjectiveDirection::Maximize;
+}
+
+/**
+ * Output structure for a set covering problem.
+ */
+struct Output: optimizationtools::Output
+{
+    /** Constructor. */
+    Output(const Instance& instance):
+        solution(instance),
+        bound(instance.total_item_profit())
+    { }
+
+
+    /** Solution. */
     Solution solution;
-    Profit lower_bound = 0;
-    Profit upper_bound = -1;
 
-    void print(Info& info, const std::stringstream& s) const;
+    /** Value. */
+    Profit value = 0;
 
-    void update_lower_bound(
-            Profit lower_bound_new,
-            const std::stringstream& s,
-            Info& info);
+    /** Bound. */
+    Weight bound = -1;
 
-    void update_solution(
-            const Solution& solution_new,
-            const std::stringstream& s,
-            Info& info);
+    /** Elapsed time. */
+    double time = 0.0;
 
-    void update_upper_bound(
-            Profit upper_bound_new,
-            const std::stringstream& s,
-            Info& info);
 
-    Output& algorithm_end(Info& info);
+    std::string solution_value() const
+    {
+        return optimizationtools::solution_value(
+            objective_direction(),
+            solution.feasible(),
+            value);
+    }
+
+    double absolute_optimality_gap() const
+    {
+        return optimizationtools::absolute_optimality_gap(
+                objective_direction(),
+                solution.feasible(),
+                value,
+                bound);
+    }
+
+    double relative_optimality_gap() const
+    {
+       return optimizationtools::relative_optimality_gap(
+            objective_direction(),
+            solution.feasible(),
+            value,
+            bound);
+    }
+
+    bool has_solution() const { return solution.feasible() && solution.objective_value() == value; }
+
+    virtual nlohmann::json to_json() const
+    {
+        return nlohmann::json {
+            {"Solution", solution.to_json()},
+            {"HasSolution", has_solution()},
+            {"Value", value},
+            {"Bound", bound},
+            {"AbsoluteOptimalityGap", absolute_optimality_gap()},
+            {"RelativeOptimalityGap", relative_optimality_gap()},
+            {"Time", time}
+        };
+    }
+
+    virtual int format_width() const { return 30; }
+
+    virtual void format(std::ostream& os) const
+    {
+        int width = format_width();
+        os
+            << std::setw(width) << std::left << "Value: " << value << std::endl
+            << std::setw(width) << std::left << "Has solution: " << has_solution() << std::endl
+            << std::setw(width) << std::left << "Bound: " << bound << std::endl
+            << std::setw(width) << std::left << "Absolute optimality gap: " << absolute_optimality_gap() << std::endl
+            << std::setw(width) << std::left << "Relative optimality gap (%): " << relative_optimality_gap() * 100 << std::endl
+            << std::setw(width) << std::left << "Time (s): " << time << std::endl
+            ;
+    }
 };
 
-Profit algorithm_end(Profit upper_bound, Info& info);
+using NewSolutionCallback = std::function<void(const Output&)>;
+
+struct Parameters: optimizationtools::Parameters
+{
+    /** Callback function called when a new best solution is found. */
+    NewSolutionCallback new_solution_callback = [](const Output&) { };
+
+
+    virtual nlohmann::json to_json() const override
+    {
+        nlohmann::json json = optimizationtools::Parameters::to_json();
+        json.merge_patch(
+            {});
+        return json;
+    }
+
+    virtual int format_width() const override { return 23; }
+
+    virtual void format(std::ostream& os) const override
+    {
+        optimizationtools::Parameters::format(os);
+        //int width = format_width();
+        //os
+        //    << std::setw(width) << std::left << "    Enable: " << reduction_parameters.reduce << std::endl
+        //    ;
+    }
+};
 
 }
 }
-

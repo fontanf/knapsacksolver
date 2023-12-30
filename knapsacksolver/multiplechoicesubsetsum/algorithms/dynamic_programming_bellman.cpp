@@ -1,5 +1,7 @@
 #include "knapsacksolver/multiplechoicesubsetsum/algorithms/dynamic_programming_bellman.hpp"
 
+#include "knapsacksolver/multiplechoicesubsetsum/algorithm_formatter.hpp"
+
 #include <bitset>
 
 using namespace knapsacksolver::multiplechoicesubsetsum;
@@ -8,30 +10,25 @@ using namespace knapsacksolver::multiplechoicesubsetsum;
 ////////////////////// dynamic_programming_bellman_array ///////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-Output knapsacksolver::multiplechoicesubsetsum::dynamic_programming_bellman_array(
+const Output knapsacksolver::multiplechoicesubsetsum::dynamic_programming_bellman_array(
         const Instance& instance,
-        optimizationtools::Info info)
+        const Parameters& parameters)
 {
-    init_display(instance, info);
-    info.os()
-            << "Algorithm" << std::endl
-            << "---------" << std::endl
-            << "Dynamic programming - Bellman" << std::endl
-            << std::endl
-            << "Parameters" << std::endl
-            << "----------" << std::endl
-            << "Implementation:                  Array" << std::endl
-            << std::endl;
+    Output output(instance);
+    AlgorithmFormatter algorithm_formatter(parameters, output);
+    algorithm_formatter.start("Dynamic programming - Bellman - array");
+    algorithm_formatter.print_header();
 
-    Output output(instance, info);
     std::vector<ItemId> values_prev(instance.capacity() + 1, -1);
     std::vector<ItemId> values_next(instance.capacity() + 1, -1);
     values_next[0] = -2;
     Weight weight_sum = 0;
     for (GroupId group_id = 0; group_id < instance.number_of_groups(); ++group_id) {
         // Check time
-        if (info.needs_to_end())
-            return output.algorithm_end(info);
+        if (parameters.timer.needs_to_end()) {
+            algorithm_formatter.end();
+            return output;
+        }
 
         // Update DP table
         values_prev = values_next;
@@ -83,54 +80,32 @@ Output knapsacksolver::multiplechoicesubsetsum::dynamic_programming_bellman_arra
         //    << " w " << instance.item(j).weight
         //    << std::endl;
     }
-    // Update lower bound
-    output.update_solution(
-            solution,
-            std::stringstream("tree search completed"),
-            info);
-    // Update upper bound
-    output.update_upper_bound(
-            solution.weight(),
-            std::stringstream("tree search completed"),
-            info);
 
-    return output.algorithm_end(info);
+    // Update solution.
+    algorithm_formatter.update_solution(
+            solution,
+            std::stringstream("algorithm end (solution)"));
+    // Update bound.
+    algorithm_formatter.update_bound(
+            solution.weight(),
+            std::stringstream("algorithm end (bound)"));
+
+    algorithm_formatter.end();
+    return output;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///////////////////// dynamic_programming_bellman_word_ram /////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace
-{
-
-std::string int2bits(int64_t value)
-{
-    std::string s;
-    for (int i = 0; i < 64; ++i)
-        s += std::to_string((value >> i) & 1);
-    return s;
-}
-
-}
-
-Output knapsacksolver::multiplechoicesubsetsum::dynamic_programming_bellman_word_ram(
+const Output knapsacksolver::multiplechoicesubsetsum::dynamic_programming_bellman_word_ram(
         const Instance& instance,
-        optimizationtools::Info info)
+        const Parameters& parameters)
 {
-    init_display(instance, info);
-    info.os()
-            << "Algorithm" << std::endl
-            << "---------" << std::endl
-            << "Dynamic programming - Bellman" << std::endl
-            << std::endl
-            << "Parameters" << std::endl
-            << "----------" << std::endl
-            << "Implementation:                  Word RAM" << std::endl
-            << "Method for retrieving solution:  No solution" << std::endl
-            << std::endl;
-
-    Output output(instance, info);
+    Output output(instance);
+    AlgorithmFormatter algorithm_formatter(parameters, output);
+    algorithm_formatter.start("Dynamic programming - Bellman - word RAM");
+    algorithm_formatter.print_header();
 
     Weight capacity_number_of_words = (instance.capacity() >> 6);
     Weight capacity_number_of_bits_to_shift = instance.capacity() - (capacity_number_of_words << 6);
@@ -145,8 +120,10 @@ Output knapsacksolver::multiplechoicesubsetsum::dynamic_programming_bellman_word
     std::vector<Weight> word_write;
     for (GroupId group_id = 0; group_id < instance.number_of_groups(); ++group_id) {
         // Check time
-        if (info.needs_to_end())
-            return output.algorithm_end(info);
+        if (parameters.timer.needs_to_end()) {
+            algorithm_formatter.end();
+            return output;
+        }
 
         Weight weight_max = 0;
         for (ItemId item_id: instance.group(group_id).item_ids)
@@ -206,18 +183,18 @@ Output knapsacksolver::multiplechoicesubsetsum::dynamic_programming_bellman_word
             }
         }
     }
-    // Update lower bound.
-    output.update_lower_bound(
-            opt,
-            std::stringstream("tree search completed"),
-            info);
-    // Update upper bound.
-    output.update_upper_bound(
-            opt,
-            std::stringstream("tree search completed"),
-            info);
 
-    return output.algorithm_end(info);
+    // Update value.
+    algorithm_formatter.update_value(
+            opt,
+            std::stringstream("algorithm end (value)"));
+    // Update bound.
+    algorithm_formatter.update_bound(
+            opt,
+            std::stringstream("algorithm end (bound)"));
+
+    algorithm_formatter.end();
+    return output;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -229,7 +206,7 @@ std::vector<uint64_t> dynamic_programming_bellman_word_ram_rec_opts(
         GroupId group_id_1,
         GroupId group_id_2,
         Weight capacity,
-        optimizationtools::Info& info)
+        const Parameters& parameters)
 {
     Weight capacity_number_of_words = (capacity >> 6);
     Weight capacity_number_of_bits_to_shift = capacity - (capacity_number_of_words << 6);
@@ -245,7 +222,7 @@ std::vector<uint64_t> dynamic_programming_bellman_word_ram_rec_opts(
         ItemPos group_size = instance.number_of_items(group_id);
 
         // Check time
-        if (info.needs_to_end())
+        if (parameters.timer.needs_to_end())
             return {};
 
         Weight weight_max = 0;
@@ -303,17 +280,25 @@ void dynamic_programming_bellman_word_ram_rec_rec(
         GroupId group_id_2,
         Weight capacity,
         Solution& solution,
-        optimizationtools::Info& info)
+        const Parameters& parameters)
 {
     ItemPos k = (group_id_1 + group_id_2 - 1) / 2 + 1;
 
     auto values_1 = dynamic_programming_bellman_word_ram_rec_opts(
-            instance, group_id_1, k, capacity, info);
-    if (info.needs_to_end())
+            instance,
+            group_id_1,
+            k,
+            capacity,
+            parameters);
+    if (parameters.timer.needs_to_end())
         return;
     auto values_2 = dynamic_programming_bellman_word_ram_rec_opts(
-            instance, k, group_id_2, capacity, info);
-    if (info.needs_to_end())
+            instance,
+            k,
+            group_id_2,
+            capacity,
+            parameters);
+    if (parameters.timer.needs_to_end())
         return;
 
     Weight capacity_1_best = 0;
@@ -378,31 +363,32 @@ void dynamic_programming_bellman_word_ram_rec_rec(
 
     if (group_id_1 != k - 1) {
         dynamic_programming_bellman_word_ram_rec_rec(
-                instance, group_id_1, k, capacity_1_best, solution, info);
+                instance,
+                group_id_1,
+                k,
+                capacity_1_best,
+                solution,
+                parameters);
     }
     if (k != group_id_2 - 1) {
         dynamic_programming_bellman_word_ram_rec_rec(
-                instance, k, group_id_2, capacity_2_best, solution, info);
+                instance,
+                k,
+                group_id_2,
+                capacity_2_best,
+                solution,
+                parameters);
     }
 }
 
-Output knapsacksolver::multiplechoicesubsetsum::dynamic_programming_bellman_word_ram_rec(
+const Output knapsacksolver::multiplechoicesubsetsum::dynamic_programming_bellman_word_ram_rec(
         const Instance& instance,
-        optimizationtools::Info info)
+        const Parameters& parameters)
 {
-    init_display(instance, info);
-    info.os()
-            << "Algorithm" << std::endl
-            << "---------" << std::endl
-            << "Dynamic programming - Bellman" << std::endl
-            << std::endl
-            << "Parameters" << std::endl
-            << "----------" << std::endl
-            << "Implementation:                  Word RAM" << std::endl
-            << "Method for retrieving solution:  Recursive scheme" << std::endl
-            << std::endl;
-
-    Output output(instance, info);
+    Output output(instance);
+    AlgorithmFormatter algorithm_formatter(parameters, output);
+    algorithm_formatter.start("Dynamic programming - Bellman - word RAM - recursve scheme");
+    algorithm_formatter.print_header();
 
     Solution solution(instance);
     dynamic_programming_bellman_word_ram_rec_rec(
@@ -411,17 +397,21 @@ Output knapsacksolver::multiplechoicesubsetsum::dynamic_programming_bellman_word
         instance.number_of_groups(),
         instance.capacity(),
         solution,
-        info);
-    if (info.needs_to_end())
+        parameters);
+    if (parameters.timer.needs_to_end()) {
+        algorithm_formatter.end();
         return output;
+    }
 
-    output.update_solution(
+    // Update solution.
+    algorithm_formatter.update_solution(
             solution,
-            std::stringstream("tree search completed"),
-            info);
-    output.update_upper_bound(
+            std::stringstream("algorithm end (solution)"));
+    // Update bound.
+    algorithm_formatter.update_bound(
             solution.weight(),
-            std::stringstream("tree search completed"),
-            info);
-    return output.algorithm_end(info);
+            std::stringstream("algorithm end (bound)"));
+
+    algorithm_formatter.end();
+    return output;
 }

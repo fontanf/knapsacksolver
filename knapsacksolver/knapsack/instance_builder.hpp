@@ -1,0 +1,83 @@
+#pragma once
+
+#include "knapsacksolver/knapsack/instance.hpp"
+
+namespace knapsacksolver
+{
+namespace knapsack
+{
+
+class InstanceBuilder
+{
+
+public:
+
+    /** Constructor. */
+    InstanceBuilder() { }
+
+    /** Add an item to the knapsack. */
+    void add_item(
+            Profit profit,
+            Weight weight);
+
+    /** Set the capacity of the knapsack. */
+    void set_capacity(Weight capacity) { instance_.capacity_ = capacity; }
+
+    /** Read an instance from a file. */
+    void read(
+            const std::string& instance_path,
+            const std::string& format = "standard");
+
+    /*
+     * Build
+     */
+
+    /** Build. */
+    Instance build();
+
+private:
+
+    /*
+     * Private methods
+     */
+
+    /*
+     * Read input file
+     */
+
+    /** Read an instance file in 'standard' format. */
+    void read_standard(std::ifstream& file);
+
+    /** Read an instance file in 'pisinger' format. */
+    void read_pisinger(std::ifstream& file);
+
+    /** Read an instance file in 'jooken' format. */
+    void read_jooken(std::ifstream& file);
+
+    /** Read an subsetsum instance file in 'standard' format. */
+    void read_subsetsum_standard(std::ifstream& file);
+
+    /*
+     * Private attributes
+     */
+
+    /** Instance. */
+    Instance instance_;
+
+};
+
+/**
+ * Convert profits from floats to integers.
+ *
+ * This function is useful for the applications that requires solving a
+ * knapsack problem with float profits.
+ *
+ * This function finds a relevant way to scale the profits.
+ */
+std::vector<Profit> convert(
+        const std::vector<double>& profits_double,
+        const std::vector<Weight>& weight,
+        Weight capacity);
+
+}
+}

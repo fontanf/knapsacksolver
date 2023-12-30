@@ -1,6 +1,6 @@
 #pragma once
 
-#include "optimizationtools/utils/info.hpp"
+#include "optimizationtools/utils/output.hpp"
 
 namespace knapsacksolver
 {
@@ -13,6 +13,7 @@ using ItemPos = int64_t;
 using GroupId = int64_t;
 using StateId = int64_t;
 using Counter = int64_t;
+using Seed = int64_t;
 
 /**
  * Structure for a group of items.
@@ -44,26 +45,6 @@ class Instance
 public:
 
     /*
-     * Constructors and destructor
-     */
-
-    /** Create instance from file. */
-    Instance(
-            std::string instance_path,
-            std::string format);
-
-    /** Manual constructor. */
-    Instance() { }
-
-    /** Add an item to the knapsack. */
-    void add_item(
-            GroupId group_id,
-            Weight weight);
-
-    /** Set the capacity of the knapsack. */
-    void set_capacity(Weight capacity) { capacity_ = capacity; }
-
-    /*
      * Getters
      */
 
@@ -90,9 +71,9 @@ public:
      */
 
     /** Print the instance into a stream. */
-    std::ostream& print(
+    void format(
             std::ostream& os,
-            int verbose = 1) const;
+            int verbosity_level = 1) const;
 
     /** Write the instance to a file. */
     void write(std::string instance_path) const;
@@ -103,7 +84,8 @@ private:
      * Private methods.
      */
 
-    void read_standard(std::ifstream& file);
+    /** Manual constructor. */
+    Instance() { }
 
     /*
      * Private attributes
@@ -118,12 +100,9 @@ private:
     /** Capacity of the knapsack. */
     Weight capacity_;
 
+    friend class InstanceBuilder;
+
 };
 
-void init_display(
-        const Instance& instance,
-        optimizationtools::Info& info);
-
 }
 }
-

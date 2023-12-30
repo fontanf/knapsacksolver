@@ -1,66 +1,67 @@
 #include "knapsacksolver/knapsack/algorithms/dynamic_programming_bellman.hpp"
 
-#include "knapsacksolver/knapsack/part_solution_1.hpp"
-#include "knapsacksolver/knapsack/algorithms/upper_bound_dembo.hpp"
+#include "knapsacksolver/knapsack/algorithm_formatter.hpp"
+#include "knapsacksolver/knapsack/sort.hpp"
+#include "knapsacksolver/knapsack/upper_bound.hpp"
 #include "knapsacksolver/knapsack/algorithms/upper_bound_dantzig.hpp"
-#include "knapsacksolver/knapsack/algorithms/greedy_nlogn.hpp"
+#include "knapsacksolver/knapsack/algorithms/greedy.hpp"
+
+#include "optimizationtools/containers/partial_set.hpp"
 
 #include <thread>
 
 using namespace knapsacksolver::knapsack;
 
-#define INDEX(i,w) (i+1)*(c+1) + (w)
-
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////// dynamic_programming_bellman_array ///////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-Output knapsacksolver::knapsack::dynamic_programming_bellman_array(
+const Output knapsacksolver::knapsack::dynamic_programming_bellman_array(
         const Instance& instance,
-        Info info)
+        const Parameters& parameters)
 {
-    init_display(instance, info);
-    info.os()
-            << "Algorithm" << std::endl
-            << "---------" << std::endl
-            << "Dynamic programming - Bellman" << std::endl
-            << std::endl
-            << "Parameters" << std::endl
-            << "----------" << std::endl
-            << "Implementation:                  Array" << std::endl
-            << "Method for retrieving solution:  No solution" << std::endl
-            << std::endl;
+    Output output(instance);
+    AlgorithmFormatter algorithm_formatter(parameters, output);
+    algorithm_formatter.start("Dynamic programming - Bellman - array - no solution");
+    algorithm_formatter.print_header();
 
-    Output output(instance, info);
-    Weight c = instance.capacity();
-    std::vector<Profit> values(c + 1, 0);
-    for (ItemPos j = 0; j < instance.number_of_items(); ++j) {
+    std::vector<Profit> values(instance.capacity() + 1, 0);
+    for (ItemId item_id = 0;
+            item_id < instance.number_of_items();
+            ++item_id) {
+        const Item& item = instance.item(item_id);
+
         // Check time
-        if (!info.check_time())
-            return output.algorithm_end(info);
+        if (parameters.timer.needs_to_end()) {
+            algorithm_formatter.end();
+            return output;
+        }
 
         // Update DP table
-        Weight wj = instance.item(j).w;
-        Profit pj = instance.item(j).p;
-        for (Weight w = c; w >= wj; w--)
-            if (values[w] < values[w - wj] + pj)
-                values[w] = values[w - wj] + pj;
+        for (Weight weight = instance.capacity();
+                weight >= item.weight;
+                --weight) {
+            if (values[weight] < values[weight - item.weight] + item.profit)
+                values[weight] = values[weight - item.weight] + item.profit;
+        }
 
-        // Update lower bound
-        if (output.lower_bound < values[c]) {
+        // Update value.
+        if (output.value < values[instance.capacity()]) {
             std::stringstream ss;
-            ss << "it " << j;
-            output.update_lower_bound(values[c], ss, info);
+            ss << "it " << item_id;
+            algorithm_formatter.update_value(
+                    values[instance.capacity()],
+                    ss);
         }
     }
 
-    // Update upper bound
-    output.update_upper_bound(
-            values[c],
-            std::stringstream("tree search completed"),
-            info);
+    // Update bound.
+    algorithm_formatter.update_bound(
+            output.value,
+            std::stringstream("algorithm end"));
 
-    return output.algorithm_end(info);
+    algorithm_formatter.end();
+    return output;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -69,366 +70,405 @@ Output knapsacksolver::knapsack::dynamic_programming_bellman_array(
 
 void dynamic_programming_bellman_array_parallel_worker(
         const Instance& instance,
-        ItemPos n1,
-        ItemPos n2,
+        ItemPos item_id_start,
+        ItemPos item_id_end,
         std::vector<Profit>::iterator values,
-        Info info)
+        const Parameters& parameters)
 {
-    for (ItemPos j = n1; j < n2; ++j) {
-        if (!info.check_time())
+    for (ItemId item_id = item_id_start;
+            item_id < item_id_end;
+            ++item_id) {
+        const Item& item = instance.item(item_id);
+
+        // Check end.
+        if (parameters.timer.needs_to_end())
             return;
-        Weight wj = instance.item(j).w;
-        Profit pj = instance.item(j).p;
-        for (Weight w = instance.capacity(); w >= wj; w--)
-            if (*(values + w) < *(values + w - wj) + pj)
-                *(values + w) = *(values + w - wj) + pj;
+
+        for (Weight weight = instance.capacity();
+                weight >= item.weight;
+                --weight) {
+            if (*(values + weight) < *(values + weight - item.weight) + item.profit)
+                *(values + weight) = *(values + weight - item.weight) + item.profit;
+        }
     }
 }
 
-Output knapsacksolver::knapsack::dynamic_programming_bellman_array_parallel(
+const Output knapsacksolver::knapsack::dynamic_programming_bellman_array_parallel(
         const Instance& instance,
-        Info info)
+        const Parameters& parameters)
 {
-    init_display(instance, info);
-    info.os()
-            << "Algorithm" << std::endl
-            << "---------" << std::endl
-            << "Dynamic programming - Parallel Bellman" << std::endl
-            << std::endl
-            << "Parameters" << std::endl
-            << "----------" << std::endl
-            << "Implementation:                  Array" << std::endl
-            << "Method for retrieving solution:  No solution" << std::endl
-            << std::endl;
+    Output output(instance);
+    AlgorithmFormatter algorithm_formatter(parameters, output);
+    algorithm_formatter.start("Dynamic programming - Bellman parallel - array - only value");
+    algorithm_formatter.print_header();
 
-    Output output(instance, info);
-    ItemIdx n = instance.number_of_items();
+    // Check trivial cases.
+    if (instance.total_item_weight() <= instance.capacity()) {
+        Solution solution(instance);
+        solution.fill();
 
-    // Trivial cases
-    if (n == 0) {
-        output.update_upper_bound(0, std::stringstream("no item"), info);
-        return output.algorithm_end(info);
-    } else if (n == 1) {
-        output.update_lower_bound(
-                instance.item(0).p,
-                std::stringstream("one item"),
-                info);
-        output.update_upper_bound(
-                instance.item(0).p,
-                std::stringstream(""),
-                info);
-        return output.algorithm_end(info);
+        // Update solution.
+        algorithm_formatter.update_solution(
+                solution,
+                std::stringstream("all items fit (solution)"));
+        // Update bound.
+        algorithm_formatter.update_bound(
+                output.value,
+                std::stringstream("all items fit (bound)"));
+
+        algorithm_formatter.end();
+        return output;
     }
 
     // Partition items and solve both knapsacks
-    Weight c = instance.capacity();
-    ItemIdx k = (n - 1) / 2 + 1;
-    std::vector<Profit> values1(c + 1, 0);
+    ItemId item_id_middle = (instance.number_of_items() - 1) / 2 + 1;
+    std::vector<Profit> values1(instance.capacity() + 1, 0);
     std::thread thread(
             dynamic_programming_bellman_array_parallel_worker,
             std::ref(instance),
             0,
-            k,
+            item_id_middle,
             values1.begin(),
-            info);
-    std::vector<Profit> values2(c + 1, 0);
+            parameters);
+    std::vector<Profit> values2(instance.capacity() + 1, 0);
     dynamic_programming_bellman_array_parallel_worker(
             std::ref(instance),
-            k,
-            n,
+            item_id_middle,
+            instance.number_of_items(),
             values2.begin(),
-            info);
+            parameters);
     thread.join();
-    if (!info.check_time())
-        return output.algorithm_end(info);
-
-    // Compute optimum
-    Profit opt = -1;
-    for (Weight c1 = 0; c1 <= c; ++c1) {
-        Profit z = values1[c1] + values2[c - c1];
-        if (opt < z)
-            opt = z;
+    if (parameters.timer.needs_to_end()) {
+        algorithm_formatter.end();
+        return output;
     }
 
-    output.update_lower_bound(
-            opt,
-            std::stringstream("tree search completed (lb)"),
-            info);
-    output.update_upper_bound(
-            opt,
-            std::stringstream("tree search completed (ub)"),
-            info);
-    return output.algorithm_end(info);
+    // Compute optimal value.
+    Profit optimal_value = -1;
+    for (Weight capacity = 0; capacity <= instance.capacity(); ++capacity) {
+        Profit value = values1[capacity] + values2[instance.capacity() - capacity];
+        if (optimal_value < value)
+            optimal_value = value;
+    }
+
+    // Update value.
+    algorithm_formatter.update_value(
+            optimal_value,
+            std::stringstream("algorithm end (value)"));
+    // Update bound.
+    algorithm_formatter.update_bound(
+            output.value,
+            std::stringstream("algorithm end (bound)"));
+
+    algorithm_formatter.end();
+    return output;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /////////////////////// dynamic_programming_bellman_rec ////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+namespace
+{
+
+inline StateId compute_state_id(
+        const Instance& instance,
+        ItemId item_id,
+        Weight weight)
+{
+    return (item_id + 1) * (instance.capacity() + 1) + weight;
+}
+
+}
+
 Profit dynamic_programming_bellman_rec_rec(
         const Instance& instance,
         std::vector<Profit>& values,
-        ItemIdx j,
-        Weight w,
-        Info& info)
+        ItemId item_id,
+        Weight weight,
+        const Parameters& parameters)
 {
-    if (!info.check_time())
+    if (parameters.timer.needs_to_end())
         return -1;
-    Weight c = instance.capacity();
-    if (values[INDEX(j, w)] == -1) {
-        if (j == -1) {
-            values[INDEX(j, w)] = 0;
-        } else if (instance.item(j).w > w) {
+    StateId state_id = compute_state_id(instance, item_id, weight);
+    if (values[state_id] == -1) {
+        if (item_id == -1) {
+            values[state_id] = 0;
+        } else if (instance.item(item_id).weight > weight) {
             Profit p1 = dynamic_programming_bellman_rec_rec(
-                    instance, values, j - 1, w, info);
-            values[INDEX(j, w)] = p1;
+                    instance,
+                    values,
+                    item_id - 1,
+                    weight,
+                    parameters);
+            values[state_id] = p1;
         } else {
-            Profit p1 = dynamic_programming_bellman_rec_rec(
-                    instance, values, j - 1, w, info);
-            Profit p2 = instance.item(j).p
+            Profit profit_1 = dynamic_programming_bellman_rec_rec(
+                    instance,
+                    values,
+                    item_id - 1,
+                    weight,
+                    parameters);
+            Profit profit_2 = instance.item(item_id).profit
                 + dynamic_programming_bellman_rec_rec(
-                    instance, values, j - 1, w - instance.item(j).w, info);
-            values[INDEX(j, w)] = std::max(p1, p2);
+                    instance,
+                    values,
+                    item_id - 1,
+                    weight - instance.item(item_id).weight,
+                    parameters);
+            values[state_id] = std::max(profit_1, profit_2);
         }
     }
-    return values[INDEX(j, w)];
+    return values[state_id];
 }
 
-Output knapsacksolver::knapsack::dynamic_programming_bellman_rec(
+const Output knapsacksolver::knapsack::dynamic_programming_bellman_rec(
         const Instance& instance,
-        Info info)
+        const Parameters& parameters)
 {
-    init_display(instance, info);
-    info.os()
-            << "Algorithm" << std::endl
-            << "---------" << std::endl
-            << "Dynamic programming - Bellman" << std::endl
-            << std::endl
-            << "Parameters" << std::endl
-            << "----------" << std::endl
-            << "Implementation:                  Recursive" << std::endl
-            << "Method for retrieving solution:  No solution" << std::endl
-            << std::endl;
-
-    Output output(instance, info);
+    Output output(instance);
+    AlgorithmFormatter algorithm_formatter(parameters, output);
+    algorithm_formatter.start("Dynamic programming - Bellman - recursive - only value");
+    algorithm_formatter.print_header();
 
     // Initialize memory table
-    ItemPos n = instance.number_of_items();
-    Weight  c = instance.capacity();
-    StateIdx values_size = (n + 1) * (c + 1);
+    StateId values_size = (instance.number_of_items() + 1) * (instance.capacity() + 1);
     std::vector<Profit> values(values_size, -1);
 
     // Compute recursively
-    Profit opt = dynamic_programming_bellman_rec_rec(
-            instance, values, n - 1, c, info);
-    if (!info.check_time())
-        return output.algorithm_end(info);
-    output.update_lower_bound(
-            opt,
-            std::stringstream("tree search completed (lb)"),
-            info);
-    output.update_upper_bound(
-            opt,
-            std::stringstream("tree search completed (ub)"),
-            info);
+    Profit optimal_value = dynamic_programming_bellman_rec_rec(
+            instance,
+            values,
+            instance.number_of_items() - 1,
+            instance.capacity(),
+            parameters);
+    if (parameters.timer.needs_to_end()) {
+        algorithm_formatter.end();
+        return output;
+    }
 
-    // Retrieve optimal solution
-    Weight w = c;
-    Solution sol(instance);
-    for (ItemPos j = n - 1; j >= 0; --j) {
-        if (values[INDEX(j, w)] != values[INDEX(j - 1, w)]) {
-            w -= instance.item(j).w;
-            sol.set(j, true);
+    // Update value.
+    algorithm_formatter.update_value(
+            optimal_value,
+            std::stringstream("algorithm end (value)"));
+    // Update bound.
+    algorithm_formatter.update_bound(
+            output.value,
+            std::stringstream("algorithm end (bound)"));
+
+    // Retrieve optimal solution.
+    Weight weight = instance.capacity();
+    Solution solution(instance);
+    for (ItemId item_id = instance.number_of_items() - 1;
+            item_id >= 0;
+            --item_id) {
+        StateId state_id = compute_state_id(instance, item_id, weight);
+        StateId state_id_prev = compute_state_id(instance, item_id - 1, weight);
+        if (values[state_id] != values[state_id_prev]) {
+            weight -= instance.item(item_id).weight;
+            solution.add(item_id);
         }
     }
-    output.update_solution(sol, std::stringstream(), info);
+    algorithm_formatter.update_solution(
+            solution,
+            std::stringstream("algorithm end (solution)"));
 
-    return output.algorithm_end(info);
+    algorithm_formatter.end();
+    return output;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 //////////////////// dynamic_programming_bellman_array_all /////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-Output knapsacksolver::knapsack::dynamic_programming_bellman_array_all(
+const Output knapsacksolver::knapsack::dynamic_programming_bellman_array_all(
         const Instance& instance,
-        Info info)
+        const Parameters& parameters)
 {
-    init_display(instance, info);
-    info.os()
-            << "Algorithm" << std::endl
-            << "---------" << std::endl
-            << "Dynamic programming - Bellman" << std::endl
-            << std::endl
-            << "Parameters" << std::endl
-            << "----------" << std::endl
-            << "Implementation:                  Array" << std::endl
-            << "Method for retrieving solution:  Store all states" << std::endl
-            << std::endl;
-
-    Output output(instance, info);
+    Output output(instance);
+    AlgorithmFormatter algorithm_formatter(parameters, output);
+    algorithm_formatter.start("Dynamic programming - Bellman - array - store all states");
+    algorithm_formatter.print_header();
 
     // Initialize memory table
-    ItemPos n = instance.number_of_items();
-    Weight  c = instance.capacity();
-    StateIdx values_size = (n + 1) * (c + 1);
+    StateId values_size = (instance.number_of_items() + 1) * (instance.capacity() + 1);
     std::vector<Profit> values(values_size);
 
     // Compute optimal value
-    std::fill(values.begin(), values.begin() + c + 1, 0);
-    for (ItemPos j = 0; j < instance.number_of_items(); ++j) {
+    std::fill(values.begin(), values.begin() + instance.capacity() + 1, 0);
+    for (ItemId item_id = 0;
+            item_id < instance.number_of_items();
+            ++item_id) {
+        const Item& item = instance.item(item_id);
+
         // Check time
-        if (!info.check_time())
-            return output.algorithm_end(info);
+        if (parameters.timer.needs_to_end()) {
+            algorithm_formatter.end();
+            return output;
+        }
 
         // Fill DP table
-        Weight wj = instance.item(j).w;
-        for (Weight w = 0; w < wj; ++w)
-            values[INDEX(j, w)] = values[INDEX(j-1, w)];
-        Profit pj = instance.item(j).p;
-        for (Weight w = wj; w <= c; ++w) {
-            Profit v0 = values[INDEX(j - 1 ,w)];
-            Profit v1 = values[INDEX(j - 1, w - wj)] + pj;
-            values[INDEX(j, w)] = std::max(v1, v0);
+        for (Weight weight = 0; weight < item.weight; ++weight) {
+            values[compute_state_id(instance, item_id, weight)]
+                = values[compute_state_id(instance, item_id - 1, weight)];
+        }
+        for (Weight weight = item.weight;
+                weight <= instance.capacity();
+                ++weight) {
+            Profit profit_0 = values[compute_state_id(instance, item_id - 1, weight)];
+            Profit profit_1 = values[compute_state_id(instance, item_id - 1, weight - item.weight)] + item.profit;
+            values[compute_state_id(instance, item_id, weight)] = std::max(profit_0, profit_1);
         }
 
         // Update lower bound
-        if (output.lower_bound < values[INDEX(j, c)]) {
+        if (output.value < values[compute_state_id(instance, item_id, instance.capacity())]) {
             std::stringstream ss;
-            ss << "it " << j;
-            output.update_lower_bound(values[INDEX(j, c)], ss, info);
+            ss << "it " << item_id;
+            algorithm_formatter.update_value(
+                    values[compute_state_id(instance, item_id, instance.capacity())],
+                    ss);
         }
     }
 
     // Update upper bound
-    output.update_upper_bound(
-            output.lower_bound,
-            std::stringstream("tree search completed"),
-            info);
+    algorithm_formatter.update_bound(
+            output.value,
+            std::stringstream("algorithm end (bound)"));
 
-    // Retrieve optimal solution
-    Weight w = c;
-    Solution sol(instance);
-    for (ItemPos j = n - 1; j >= 0; --j) {
-        if (values[INDEX(j, w)] != values[INDEX(j - 1, w)]) {
-            w -= instance.item(j).w;
-            sol.set(j, true);
+    // Retrieve optimal solution.
+    Weight weight = instance.capacity();
+    Solution solution(instance);
+    for (ItemId item_id = instance.number_of_items() - 1;
+            item_id >= 0;
+            --item_id) {
+        StateId state_id = compute_state_id(instance, item_id, weight);
+        StateId state_id_prev = compute_state_id(instance, item_id - 1, weight);
+        if (values[state_id] != values[state_id_prev]) {
+            weight -= instance.item(item_id).weight;
+            solution.add(item_id);
         }
     }
-    output.update_solution(sol, std::stringstream(), info);
+    algorithm_formatter.update_solution(
+            solution,
+            std::stringstream("algorithm end (solution)"));
 
-    return output.algorithm_end(info);
+    algorithm_formatter.end();
+    return output;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 //////////////////// dynamic_programming_bellman_array_one /////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-Output knapsacksolver::knapsack::dynamic_programming_bellman_array_one(
+const DynamicProgrammingBellmanArrayOneOutput knapsacksolver::knapsack::dynamic_programming_bellman_array_one(
         const Instance& instance,
-        Info info)
+        const Parameters& parameters)
 {
-    init_display(instance, info);
-    info.os()
-            << "Algorithm" << std::endl
-            << "---------" << std::endl
-            << "Dynamic programming - Bellman" << std::endl
-            << std::endl
-            << "Parameters" << std::endl
-            << "----------" << std::endl
-            << "Implementation:                  Array" << std::endl
-            << "Method for retrieving solution:  Single line" << std::endl
-            << std::endl;
+    DynamicProgrammingBellmanArrayOneOutput output(instance);
+    AlgorithmFormatter algorithm_formatter(parameters, output);
+    algorithm_formatter.start("Dynamic programming - Bellman - array - single line");
+    algorithm_formatter.print_header();
 
-    Output output(instance, info);
+    // Check trivial cases.
+    if (instance.total_item_weight() <= instance.capacity()) {
+        Solution solution(instance);
+        solution.fill();
 
-    ItemPos n = instance.number_of_items();
-    Weight  c = instance.capacity();
+        // Update solution.
+        algorithm_formatter.update_solution(
+                solution,
+                std::stringstream("all items fit (solution)"));
+        // Update bound.
+        algorithm_formatter.update_bound(
+                output.value,
+                std::stringstream("all items fit (bound)"));
 
-    if (n == 0) {
-        output.update_upper_bound(0, std::stringstream("no item"), info);
-        return output.algorithm_end(info);
+        algorithm_formatter.end();
+        return output;
     }
 
-    std::vector<Profit> values(c+1); // Initialize memory table
-    ItemPos it = 0;
-    Profit opt = -1;
-    Profit opt_local = -1;
-    Solution sol(instance);
-    while (sol.profit() != opt) {
-        it++;
-        FFOT_LOG(info, "it " << it << " n " << n << " opt_local " << opt_local << std::endl);
+    // Initialize memory table.
+    std::vector<Profit> values(instance.capacity() + 1);
 
-        ItemPos last_item = -1;
+    Profit optimal_value = -1;
+    Profit optimal_value_local = -1;
+    Solution solution(instance);
+    ItemId last_item_id = instance.number_of_items() - 1;
+    Weight remaining_capacity = instance.capacity();
+    while (solution.profit() != optimal_value) {
+        output.number_of_iterations++;
 
         // Initialization
         std::fill(values.begin(), values.end(), 0);
+        ItemId new_last_item_id = -1;
 
         // Recursion
-        for (ItemPos j = 0; j < n; ++j) {
+        for (ItemId item_id = 0;
+                item_id <= last_item_id;
+                ++item_id) {
+            const Item& item = instance.item(item_id);
+
+            if (item.weight > remaining_capacity)
+                continue;
+
             // Check time
-            if (!info.check_time())
-                return output.algorithm_end(info);
+            if (parameters.timer.needs_to_end()) {
+                algorithm_formatter.end();
+                return output;
+            }
 
-            Weight wj = instance.item(j).w;
-            Profit pj = instance.item(j).p;
-
-            // For w == c
-            if (c >= wj && values[c - wj] + pj > values[c]) {
-                values[c] = values[c - wj] + pj;
-                last_item = j;
-                if (values[c] == opt_local) {
-                    FFOT_LOG(info, "Optimal value reached (j " << j << ")");
+            if (values[remaining_capacity - item.weight] + item.profit > values[remaining_capacity]) {
+                values[remaining_capacity] = values[remaining_capacity - item.weight] + item.profit;
+                new_last_item_id = item_id;
+                if (values[remaining_capacity] == optimal_value_local) {
                     goto end;
                 }
             }
 
             // For other values of w
-            for (Weight w = c - 1; w >= wj; w--) {
-                if (values[w - wj] + pj > values[w]) {
-                    values[w] = values[w - wj] + pj;
-                    if (values[w] == opt_local) {
-                        FFOT_LOG(info, "Optimal value reached (j " << j << ")");
-                        last_item = j;
-                        goto end;
-                    }
-                }
+            for (Weight weight = remaining_capacity;
+                    weight >= item.weight;
+                    --weight) {
+                if (values[weight - item.weight] + item.profit > values[weight])
+                    values[weight] = values[weight - item.weight] + item.profit;
             }
 
-            // Update lower bound
-            if (output.lower_bound < values[c]) {
+            // Update value.
+            if (output.value < values[remaining_capacity]) {
                 std::stringstream ss;
-                ss << "it " << j;
-                output.update_lower_bound(values[c], ss, info);
+                ss << "it " << item_id;
+                algorithm_formatter.update_value(values[remaining_capacity], ss);
             }
         }
 end:
 
         // If first iteration, memorize optimal value
-        if (n == instance.number_of_items()) {
-            // Update upper bound
-            output.update_upper_bound(
-                    values[c],
-                    std::stringstream("tree search completed"),
-                    info);
-            opt = values[c];
-            opt_local = opt;
-            FFOT_LOG(info, "opt " << opt);
+        if (output.number_of_iterations == 1) {
+            optimal_value = values[instance.capacity()];
+
+            // Update value.
+            algorithm_formatter.update_value(
+                    optimal_value,
+                    std::stringstream("algorithm end (value)"));
+            // Update bound.
+            algorithm_formatter.update_bound(
+                    output.value,
+                    std::stringstream("algorithm end (bound)"));
         }
 
-        // Update solution and instancetance
-        FFOT_LOG(info, " add " << last_item);
-        sol.set(last_item, true);
-        c -= instance.item(last_item).w;
-        opt_local -= instance.item(last_item).p;
-        n = last_item;
-        FFOT_LOG(info, " p(S) " << sol.profit() << std::endl);
+        // Update recursion parameters.
+        solution.add(new_last_item_id);
+        remaining_capacity -= instance.item(new_last_item_id).weight;
+        optimal_value_local -= instance.item(new_last_item_id).profit;
+        last_item_id = new_last_item_id - 1;
     }
-    output.update_solution(sol, std::stringstream(), info);
 
-    info.add_to_json("Algorithm", "Iterations", it);
-    output.algorithm_end(info);
-    info.os() << "Iterations: " << it << std::endl;
+    // Update solution.
+    algorithm_formatter.update_solution(
+            solution,
+            std::stringstream("algorithm end (solution)"));
+
+    algorithm_formatter.end();
     return output;
 }
 
@@ -436,107 +476,144 @@ end:
 /////////////////// dynamic_programming_bellman_array_part /////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-Output knapsacksolver::knapsack::dynamic_programming_bellman_array_part(
+const DynamicProgrammingBellmanArrayPartOutput knapsacksolver::knapsack::dynamic_programming_bellman_array_part(
         const Instance& instance,
-        ItemPos k,
-        Info info)
+        const DynamicProgrammingBellmanArrayPartParameters& parameters)
 {
-    init_display(instance, info);
-    info.os()
-            << "Algorithm" << std::endl
-            << "---------" << std::endl
-            << "Dynamic programming - Bellman" << std::endl
-            << std::endl
-            << "Parameters" << std::endl
-            << "----------" << std::endl
-            << "Implementation:                  Array" << std::endl
-            << "Method for retrieving solution:  Partial solution in states" << std::endl
-            << std::endl;
+    DynamicProgrammingBellmanArrayPartOutput output(instance);
+    AlgorithmFormatter algorithm_formatter(parameters, output);
+    algorithm_formatter.start("Dynamic programming - Bellman - array - partial");
+    algorithm_formatter.print_header();
 
-    Output output(instance, info);
+    // Check trivial cases.
+    if (instance.total_item_weight() <= instance.capacity()) {
+        Solution solution(instance);
+        solution.fill();
 
-    assert(0 <= k && k <= 64);
-    ItemPos n = instance.number_of_items();
-    Weight  c = instance.capacity();
-    Solution sol(instance);
+        // Update solution.
+        algorithm_formatter.update_solution(
+                solution,
+                std::stringstream("all items fit (solution)"));
+        // Update bound.
+        algorithm_formatter.update_bound(
+                output.value,
+                std::stringstream("all items fit (bound)"));
 
-    if (n == 0) {
-        output.update_upper_bound(0, std::stringstream("no item"), info);
-        return output.algorithm_end(info);
+        algorithm_formatter.end();
+        return output;
     }
 
-    std::vector<Profit> values(c + 1); // Initialize memory table
-    std::vector<PartSol1> bisols(c + 1);
-    ItemPos it = 0;
-    Profit opt = -1;
-    Profit opt_local = -1;
-    while (sol.profit() != opt) {
-        it++;
-        FFOT_LOG(info, "it " << it << " n " << n << " opt_local " << opt_local << std::endl);
+    // Initialize memory table
+    std::vector<Profit> values(instance.capacity() + 1);
+    std::vector<optimizationtools::PartialSet> partial_solutions(instance.capacity() + 1);
 
-        PartSolFactory1 psolf(instance, k, n - 1, 0, n - 1);
-        Weight w_opt = c;
+    Profit optimal_value = -1;
+    Profit optimal_value_local = -1;
+    Weight remaining_capacity = instance.capacity();
+    Solution solution(instance);
+    ItemId first_item_id = 0;
+    ItemId last_item_id = instance.number_of_items() - 1;
+    while (solution.profit() != optimal_value) {
+        output.number_of_iterations++;
+
+        optimizationtools::PartialSetFactory partial_set_factory(
+                instance.number_of_items(),
+                parameters.partial_solution_size);
+        for (ItemId item_id = first_item_id;
+                item_id <= last_item_id;
+                ++item_id) {
+            partial_set_factory.add_element_to_factory(item_id);
+        }
+
+        Weight optimal_weight = remaining_capacity;
 
         // Initialization
         std::fill(values.begin(), values.end(), 0);
-        std::fill(bisols.begin(), bisols.end(), 0);
+        std::fill(partial_solutions.begin(), partial_solutions.end(), 0);
+        ItemId new_last_item_id = last_item_id;
 
         // Recursion
-        for (ItemPos j = 0; j < n; ++j) {
-            if (!info.check_time())
-                return output.algorithm_end(info);
+        for (ItemId item_id = first_item_id;
+                item_id <= last_item_id;
+                ++item_id) {
+            const Item& item = instance.item(item_id);
 
-            Weight wj = instance.item(j).w;
-            Profit pj = instance.item(j).p;
+            // Check end.
+            if (parameters.timer.needs_to_end()) {
+                algorithm_formatter.end();
+                return output;
+            }
 
             // For other values of w
-            for (Weight w = c; w >= wj; w--) {
-                if (values[w - wj] + pj > values[w]) {
-                    values[w] = values[w - wj] + pj;
-                    bisols[w] = psolf.add(bisols[w - wj], j);
-                    if (values[w] == opt_local) {
-                        FFOT_LOG(info, "Optimal value reached (j " << j << ")");
-                        w_opt = w;
+            for (Weight weight = remaining_capacity;
+                    weight >= item.weight;
+                    --weight) {
+                if (values[weight - item.weight] + item.profit > values[weight]) {
+                    values[weight] = values[weight - item.weight] + item.profit;
+                    partial_solutions[weight] = partial_set_factory.add(
+                            partial_solutions[weight - item.weight],
+                            item_id);
+                    if (values[weight] == optimal_value_local) {
+                        optimal_weight = weight;
+                        new_last_item_id = item_id;
                         goto end;
                     }
                 }
             }
 
             // Update lower bound
-            if (output.lower_bound < values[c]) {
+            if (output.value < values[remaining_capacity]) {
                 std::stringstream ss;
-                ss << "it " << j;
-                output.update_lower_bound(values[c], ss, info);
+                ss << "it " << item_id;
+                algorithm_formatter.update_value(
+                        values[remaining_capacity],
+                        ss);
             }
         }
 end:
 
         // If first iteration, memorize optimal value
-        if (n == instance.number_of_items()) {
-            // Update upper bound
-            output.update_upper_bound(
-                    values[c],
-                    std::stringstream("tree search completed"),
-                    info);
-            opt = values[w_opt];
-            opt_local = opt;
-            FFOT_LOG(info, "opt " << opt);
+        if (first_item_id == 0) {
+            optimal_value = values[optimal_weight];
+
+            // Update value.
+            algorithm_formatter.update_value(
+                    optimal_value,
+                    std::stringstream("algorithm end (value)"));
+            // Update bound.
+            algorithm_formatter.update_bound(
+                    output.value,
+                    std::stringstream("algorithm end (bound)"));
         }
 
-        FFOT_LOG(info, " partsol " << psolf.print(bisols[w_opt]));
+        // Update recursion parameters.
+        for (ItemId item_id = 0;
+                item_id < instance.number_of_items();
+                ++item_id) {
+            if (partial_set_factory.contains(
+                        partial_solutions[optimal_weight],
+                        item_id)) {
+                solution.add(item_id);
+            }
+        }
+        if (!solution.feasible()) {
+            throw std::runtime_error("!solution.feasible()");
+        }
+        if (solution.profit() == output.bound)
+            break;
 
-        // Update solution and instancetance
-        psolf.update_solution(bisols[w_opt], sol);
-        n -= psolf.size();
-        c = instance.capacity() - sol.weight();
-        opt_local = opt - sol.profit();
-        FFOT_LOG(info, " p(S) " << sol.profit() << std::endl);
+        first_item_id += parameters.partial_solution_size;
+        last_item_id = new_last_item_id;
+        remaining_capacity = instance.capacity() - solution.weight();
+        optimal_value_local = optimal_value - solution.profit();
     }
-    output.update_solution(sol, std::stringstream(), info);
 
-    info.add_to_json("Algorithm", "Iterations", it);
-    output.algorithm_end(info);
-    info.os() << "Iterations: " << it << std::endl;
+    // Update solution.
+    algorithm_formatter.update_solution(
+            solution,
+            std::stringstream("algorithm end (solution)"));
+
+    algorithm_formatter.end();
     return output;
 }
 
@@ -546,144 +623,171 @@ end:
 
 struct RecData
 {
+    /** Instance. */
     const Instance& instance;
-    ItemPos n1;
-    ItemPos n2;
-    Weight  c;
-    Solution& sol;
+
+    /** Parameters. */
+    const Parameters& parameters;
+
+    /** Optimal solution, filled during the algorithm. */
+    Solution& solution;
+
+    /** First item. */
+    ItemPos item_id_1;
+
+    /** Last item. */
+    ItemPos item_id_2;
+
+    /** Current capacity. */
+    Weight capacity;
+
+    /** Temporary structure to store values. */
     std::vector<Profit>::iterator values;
-    Info& info;
 };
 
 void opts_dynamic_programming_bellman_array(
         const Instance& instance,
-        ItemPos n1,
-        ItemPos n2,
-        Weight c,
-        std::vector<Profit>::iterator values,
-        Info& info)
+        const Parameters& parameters,
+        ItemPos item_id_1,
+        ItemPos item_id_2,
+        Weight capacity,
+        std::vector<Profit>::iterator values)
 {
-    std::fill(values, values + c + 1, 0);
-    for (ItemPos j = n1; j < n2; ++j) {
-        if (!info.check_time())
+    std::fill(values, values + capacity + 1, 0);
+    for (ItemId item_id = item_id_1; item_id < item_id_2; ++item_id) {
+        if (parameters.timer.needs_to_end())
             break;
-        Weight wj = instance.item(j).w;
-        Profit pj = instance.item(j).p;
-        for (Weight w = c; w >= wj; w--)
-            if (*(values + w) < *(values + w - wj) + pj)
-                *(values + w) = *(values + w - wj) + pj;
+        const Item& item = instance.item(item_id);
+        for (Weight weight = capacity; weight >= item.weight; weight--)
+            if (*(values + weight) < *(values + weight - item.weight) + item.profit)
+                *(values + weight) = *(values + weight - item.weight) + item.profit;
     }
 }
 
-void dynamic_programming_bellman_array_rec_rec(RecData d)
+void dynamic_programming_bellman_array_rec_rec(
+        const Instance& instance,
+        const Parameters& parameters,
+        Solution& solution,
+        ItemPos item_id_1,
+        ItemPos item_id_2,
+        Weight capacity,
+        std::vector<Profit>::iterator values)
 {
-    ItemPos k = (d.n1 + d.n2 - 1) / 2 + 1;
-    std::vector<Profit>::iterator values_2 = d.values + d.c + 1;
-    FFOT_LOG(d.info, "n1 " << d.n1 << " k " << k << " n2 " << d.n2 << " c " << d.c << std::endl);
+    ItemPos item_id_middle = (item_id_1 + item_id_2 - 1) / 2 + 1;
+    std::vector<Profit>::iterator values_2 = values + capacity + 1;
 
-    opts_dynamic_programming_bellman_array(d.instance, d.n1, k, d.c, d.values, d.info);
-    opts_dynamic_programming_bellman_array(d.instance, k, d.n2, d.c, values_2, d.info);
+    opts_dynamic_programming_bellman_array(
+            instance,
+            parameters,
+            item_id_1,
+            item_id_middle,
+            capacity,
+            values);
+    opts_dynamic_programming_bellman_array(
+            instance,
+            parameters,
+            item_id_middle,
+            item_id_2,
+            capacity,
+            values_2);
 
-    Profit z_max  = -1;
-    Weight c1_opt = 0;
-    Weight c2_opt = 0;
-    for (Weight c1 = 0; c1 <= d.c; ++c1) {
-        Weight c2 = d.c - c1;
-        Profit z = *(d.values + c1) + *(values_2 + c2);
-        if (z > z_max) {
-            z_max = z;
-            c1_opt = c1;
-            c2_opt = c2;
+    Profit value_max  = -1;
+    Weight optimal_capacity_1 = 0;
+    Weight optimal_capacity_2 = 0;
+    for (Weight capacity_1 = 0; capacity_1 <= capacity; ++capacity_1) {
+        Weight capacity_2 = capacity - capacity_1;
+        Profit value = *(values + capacity_1) + *(values_2 + capacity_2);
+        if (value > value_max) {
+            value_max = value;
+            optimal_capacity_1 = capacity_1;
+            optimal_capacity_2 = capacity_2;
         }
     }
-    assert(z_max != -1);
-    FFOT_LOG(d.info, "z_max " << z_max << " c1_opt " << c1_opt << " c2_opt " << c2_opt << std::endl);
 
-    if (d.n1 == k - 1)
-        if (*(d.values + c1_opt) == d.instance.item(d.n1).p)
-            d.sol.set(d.n1, true);
-    if (k == d.n2 - 1)
-        if (*(values_2 + c2_opt) == d.instance.item(k).p)
-            d.sol.set(k, true);
+    if (item_id_1 == item_id_middle - 1)
+        if (*(values + optimal_capacity_1) == instance.item(item_id_1).profit)
+            solution.add(item_id_1);
+    if (item_id_middle == item_id_2 - 1)
+        if (*(values_2 + optimal_capacity_2) == instance.item(item_id_middle).profit)
+            solution.add(item_id_middle);
 
-    if (d.n1 != k - 1)
-        dynamic_programming_bellman_array_rec_rec({
-                .instance = d.instance,
-                .n1 = d.n1,
-                .n2 = k,
-                .c = c1_opt,
-                .sol = d.sol,
-                .values = d.values,
-                .info = d.info});
-    if (k != d.n2 - 1)
-        dynamic_programming_bellman_array_rec_rec({
-                .instance = d.instance,
-                .n1 = k,
-                .n2 = d.n2,
-                .c = c2_opt,
-                .sol = d.sol,
-                .values = d.values + 2 * c1_opt + k - d.n1,
-                .info = d.info});
+    if (item_id_1 != item_id_middle - 1) {
+        dynamic_programming_bellman_array_rec_rec(
+                instance,
+                parameters,
+                solution,
+                item_id_1,
+                item_id_middle,
+                optimal_capacity_1,
+                values);
+    }
+    if (item_id_middle != item_id_2 - 1) {
+        dynamic_programming_bellman_array_rec_rec(
+                instance,
+                parameters,
+                solution,
+                item_id_middle,
+                item_id_2,
+                optimal_capacity_2,
+                values + 2 * optimal_capacity_1 + item_id_middle - item_id_1);
+    }
 }
 
-Output knapsacksolver::knapsack::dynamic_programming_bellman_array_rec(
+const Output knapsacksolver::knapsack::dynamic_programming_bellman_array_rec(
         const Instance& instance,
-        Info info)
+        const Parameters& parameters)
 {
-    init_display(instance, info);
-    info.os()
-            << "Algorithm" << std::endl
-            << "---------" << std::endl
-            << "Dynamic programming - Bellman" << std::endl
-            << std::endl
-            << "Parameters" << std::endl
-            << "----------" << std::endl
-            << "Implementation:                  Array" << std::endl
-            << "Method for retrieving solution:  Recursive scheme" << std::endl
-            << std::endl;
+    Output output(instance);
+    AlgorithmFormatter algorithm_formatter(parameters, output);
+    algorithm_formatter.start("Dynamic programming - Bellman - array - recursive scheme");
+    algorithm_formatter.print_header();
+    FFOT_DBG(std::shared_ptr<optimizationtools::Logger> logger = parameters.get_logger();)
 
-    Output output(instance, info);
+    // Check trivial cases.
+    if (instance.total_item_weight() <= instance.capacity()) {
+        Solution solution(instance);
+        solution.fill();
 
-    if (instance.number_of_items() == 0) {
-        output.update_upper_bound(0, std::stringstream("no item"), info);
-        return output.algorithm_end(info);
-    } else if (instance.number_of_items() == 1) {
-        Solution sol(instance);
-        sol.set(0, true);
-        output.update_solution(
-                sol,
-                std::stringstream("one item (lb)"),
-                info);
-        output.update_upper_bound(
-                sol.profit(),
-                std::stringstream("one item (ub)"),
-                info);
-        return output.algorithm_end(info);
+        // Update solution.
+        algorithm_formatter.update_solution(
+                solution,
+                std::stringstream("all items fit (solution)"));
+        // Update bound.
+        algorithm_formatter.update_bound(
+                output.value,
+                std::stringstream("all items fit (bound)"));
+
+        algorithm_formatter.end();
+        return output;
     }
 
+    // Start recursion.
     std::vector<Profit> values(2 * instance.capacity() + instance.number_of_items());
-    Solution sol(instance);
-    dynamic_programming_bellman_array_rec_rec({
-        .instance = instance,
-        .n1 = 0,
-        .n2 = instance.number_of_items(),
-        .c = instance.capacity(),
-        .sol = sol,
-        .values = values.begin(),
-        .info = info
-    });
-    if (!info.check_time())
-        return output.algorithm_end(info);
+    Solution solution(instance);
+    dynamic_programming_bellman_array_rec_rec(
+            instance,
+            parameters,
+            solution,
+            0,
+            instance.number_of_items(),
+            instance.capacity(),
+            values.begin());
+    if (parameters.timer.needs_to_end()) {
+        algorithm_formatter.end();
+        return output;
+    }
 
-    output.update_solution(
-            sol,
-            std::stringstream("tree search completed (lb)"),
-            info);
-    output.update_upper_bound(
-            sol.profit(),
-            std::stringstream("tree search completed (ub)"),
-            info);
-    return output.algorithm_end(info);
+    // Update solution.
+    algorithm_formatter.update_solution(
+            solution,
+            std::stringstream("algorithm end (solution)"));
+    // Update bound.
+    algorithm_formatter.update_bound(
+            output.value,
+            std::stringstream("algorithm end (bound)"));
+
+    algorithm_formatter.end();
+    return output;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -692,13 +796,13 @@ Output knapsacksolver::knapsack::dynamic_programming_bellman_array_rec(
 
 struct BellmanState
 {
-    Weight w;
-    Profit p;
+    Weight weight;
+    Profit profit;
 };
 
 std::ostream& operator<<(std::ostream& os, const BellmanState& s)
 {
-    os << "(" << s.w <<  "," << s.p << ")";
+    os << "(" << s.weight <<  "," << s.profit << ")";
     return os;
 }
 
@@ -708,141 +812,132 @@ std::ostream& operator<<(std::ostream& os, const std::vector<BellmanState>& l)
     return os;
 }
 
-Output knapsacksolver::knapsack::dynamic_programming_bellman_list(
-        Instance& instance,
-        bool sort,
-        Info info)
+const Output knapsacksolver::knapsack::dynamic_programming_bellman_list(
+        const Instance& instance,
+        const DynamicProgrammingBellmanListParameters& parameters)
 {
-    init_display(instance, info);
-    info.os()
-            << "Algorithm" << std::endl
-            << "---------" << std::endl
-            << "Dynamic programming - Bellman" << std::endl
-            << std::endl
-            << "Parameters" << std::endl
-            << "----------" << std::endl
-            << "Implementation:                  States" << std::endl
-            << "Method for retrieving solution:  No solution" << std::endl
-            << "Sort:                            " << sort << std::endl
-            << std::endl;
+    Output output(instance);
+    AlgorithmFormatter algorithm_formatter(parameters, output);
+    algorithm_formatter.start("Dynamic programming - Bellman - states - only value");
+    algorithm_formatter.print_header();
+    FFOT_DBG(std::shared_ptr<optimizationtools::Logger> logger = parameters.get_logger();)
 
-    FFOT_LOG_FOLD_START(info, "bellman sort " << sort << std::endl);
-    Output output(instance, info);
+    // Check trivial cases.
+    if (instance.total_item_weight() <= instance.capacity()) {
+        Solution solution(instance);
+        solution.fill();
 
-    Weight  c = instance.capacity();
-    ItemPos n = instance.number_of_items();
-    ItemPos j_max = instance.max_efficiency_item(FFOT_DBG(info));
+        // Update solution.
+        algorithm_formatter.update_solution(
+                solution,
+                std::stringstream("all items fit (solution)"));
+        // Update bound.
+        algorithm_formatter.update_bound(
+                output.value,
+                std::stringstream("all items fit (bound)"));
 
-    if (n == 0 || c == 0) {
-        output.update_upper_bound(
-                0,
-                std::stringstream("no item or null capacity"),
-                info);
-        FFOT_LOG_FOLD_END(info, "no item or null capacity");
-        return output.algorithm_end(info);
+        algorithm_formatter.end();
+        return output;
     }
 
-    if (!sort && INT_FAST64_MAX / instance.item(j_max).p < instance.capacity()) {
-        FFOT_LOG_FOLD_END(info, "");
-        return output.algorithm_end(info);
+    // Find break item.
+    std::unique_ptr<PartialSort> partial_sort;
+    std::unique_ptr<FullSort> full_sort;
+    if (parameters.sort) {
+        full_sort = std::unique_ptr<FullSort>(new FullSort(instance));
+    } else {
+        partial_sort = std::unique_ptr<PartialSort>(new PartialSort(instance));
     }
 
-    if (sort) {
-        instance.sort(FFOT_DBG(info));
-        if (instance.break_item() == instance.last_item() + 1) {
-            output.update_lower_bound(
-                    instance.break_solution()->profit(),
-                    std::stringstream("all items fit in the knapsack (lb)"),
-                    info);
-            output.update_upper_bound(
-                    output.lower_bound,
-                    std::stringstream("all item fit in the knapsack (ub)"),
-                    info);
-            FFOT_LOG_FOLD_END(info, "all items fit in the knapsack");
-            return output.algorithm_end(info);
-        }
-        auto g_output = greedy_nlogn(instance);
-        output.update_solution(
-                g_output.solution,
-                std::stringstream("greedy_nlogn"),
-                info);
-
-        instance.reduce2(output.lower_bound, info);
-        if (instance.reduced_capacity() < 0) {
-            output.update_upper_bound(
-                    output.lower_bound,
-                    std::stringstream("negative capacity after reduction"),
-                    info);
-            FFOT_LOG_FOLD_END(info, "c < 0");
-            return output.algorithm_end(info);
-        } else if (n == 0 || instance.reduced_capacity() == 0) {
-            output.update_solution(
-                    *instance.reduced_solution(),
-                    std::stringstream("no item or null capacity after reduction (lb)"),
-                    info);
-            output.update_upper_bound(
-                    output.lower_bound,
-                    std::stringstream("no item or null capacity after reduction (ub)"),
-                    info);
-            FFOT_LOG_FOLD_END(info, "no item or null capacity after reduction");
-            return output.algorithm_end(info);
-        } else if (instance.break_item() == instance.last_item() + 1) {
-            output.update_solution(
-                    *instance.break_solution(),
-                    std::stringstream("all items fit in the knapsack after reduction (lb)"),
-                    info);
-            output.update_upper_bound(
-                    output.lower_bound,
-                    std::stringstream("all items fit in the knapsack after reduction (ub)"),
-                    info);
-            FFOT_LOG_FOLD_END(info, "all items fit in the knapsack after reduction");
-            return output.algorithm_end(info);
-        }
+    // Get the greedy solution.
+    GreedyParameters greedy_parameters;
+    greedy_parameters.timer = parameters.timer;
+    greedy_parameters.verbosity_level = 0;
+    if (parameters.sort) {
+        greedy_parameters.full_sort = full_sort.get();
+    } else {
+        greedy_parameters.partial_sort = partial_sort.get();
     }
+    auto greedy_output = greedy(instance, greedy_parameters);
 
-    Profit ub = (!sort)? upper_bound_0(instance, 0, 0, instance.capacity(), j_max):
-        std::max(upper_bound_dantzig(instance), output.lower_bound);
-    output.update_upper_bound(
-            ub,
-            std::stringstream("initial upper bound"),
-            info);
-    std::vector<BellmanState> l0{{
-        .w = (instance.reduced_solution() == NULL)? 0: instance.reduced_solution()->weight(),
-        .p = (instance.reduced_solution() == NULL)? 0: instance.reduced_solution()->profit()}};
-    for (ItemPos j = instance.first_item(); j <= instance.last_item() && !l0.empty(); ++j) {
-        // Check time
-        if (!info.check_time()) {
-            FFOT_LOG_FOLD_END(info, "no time left");
-            return output.algorithm_end(info);
+    // Update solution.
+    algorithm_formatter.update_solution(
+            greedy_output.solution,
+            std::stringstream("greedy"));
+
+    // Compute an initial bound.
+    UpperBoundDantzigParameters upper_bound_dantzig_parameters;
+    upper_bound_dantzig_parameters.timer = parameters.timer;
+    upper_bound_dantzig_parameters.verbosity_level = 0;
+    if (parameters.sort) {
+        upper_bound_dantzig_parameters.full_sort = full_sort.get();
+    } else {
+        upper_bound_dantzig_parameters.partial_sort = partial_sort.get();
+    }
+    auto upper_bound_output = upper_bound_dantzig(
+            instance,
+            upper_bound_dantzig_parameters);
+
+    // Update bound.
+    algorithm_formatter.update_bound(
+            upper_bound_output.bound,
+            std::stringstream("dantzig upper bound"));
+
+    // Main recursion.
+    std::vector<BellmanState> l0{{0, 0}};
+    for (ItemPos item_id = 0;
+            item_id < instance.number_of_items() && !l0.empty();
+            ++item_id) {
+        const Item& item = (!parameters.sort)?
+            instance.item(item_id):
+            instance.item(full_sort->item_id(item_id));
+        ItemId bound_item_id = (item_id == instance.number_of_items() - 1)?
+            -1:
+            (!parameters.sort)?
+            instance.highest_efficiency_item_id():
+            full_sort->item_id(item_id + 1);
+
+        // Check end.
+        if (parameters.timer.needs_to_end()) {
+            algorithm_formatter.end();
+            return output;
         }
 
-        Profit ub_max = -1;
-        Weight wj = instance.item(j).w;
-        Profit pj = instance.item(j).p;
+        Profit upper_bound_it = -1;
         std::vector<BellmanState> l;
-        std::vector<BellmanState>::iterator it  = l0.begin();
+        std::vector<BellmanState>::iterator it = l0.begin();
         std::vector<BellmanState>::iterator it1 = l0.begin();
         while (it != l0.end() || it1 != l0.end()) {
-            if (it1 != l0.end() && (it == l0.end() || it->w > it1->w + wj)) {
-                BellmanState s1{it1->w + wj, it1->p + pj};
-                if (s1.w > c)
+            if (it1 != l0.end()
+                    && (it == l0.end() || it->weight > it1->weight + item.weight)) {
+
+                BellmanState s1{it1->weight + item.weight, it1->profit + item.profit};
+
+                // Check capacity.
+                if (s1.weight > instance.capacity())
                     break;
 
-                Profit ub_curr = (!sort)?
-                    upper_bound_0(instance, j+1, s1.p, c - s1.w, j_max):
-                    upper_bound_dembo(instance, j+1, s1.p, c - s1.w);
+                Profit upper_bound_curr = upper_bound(
+                        instance,
+                        s1.profit,
+                        s1.weight,
+                        bound_item_id);
 
-                if (ub_curr > output.lower_bound && (l.empty() || s1.p > l.back().p)) {
-                    // Update lower bound
-                    if (output.lower_bound < s1.p) {
+                if (upper_bound_curr > output.value
+                        && (l.empty() || s1.profit > l.back().profit)) {
+
+                    // Update value.
+                    if (output.value < s1.profit) {
                         std::stringstream ss;
-                        ss << "it " << j - instance.first_item();
-                        output.update_lower_bound(s1.p, ss, info);
+                        ss << "it " << item_id;
+                        algorithm_formatter.update_value(s1.profit, ss);
                     }
 
-                    if (ub_max < ub_curr)
-                        ub_max = ub_curr;
-                    if (!l.empty() && s1.w == l.back().w) {
+                    // Update current bound.
+                    if (upper_bound_it < upper_bound_curr)
+                        upper_bound_it = upper_bound_curr;
+
+                    if (!l.empty() && s1.weight == l.back().weight) {
                         l.back() = s1;
                     } else {
                         l.push_back(s1);
@@ -852,14 +947,20 @@ Output knapsacksolver::knapsack::dynamic_programming_bellman_list(
             } else {
                 assert(it != l0.end());
 
-                Profit ub_curr = (!sort)?
-                    upper_bound_0(instance, j+1, it->p, c - it->w, j_max):
-                    upper_bound_dembo(instance, j+1, it->p, c - it->w);
+                Profit upper_bound_curr = upper_bound(
+                        instance,
+                        it->profit,
+                        it->weight,
+                        bound_item_id);
 
-                if (ub_curr > output.lower_bound && (l.empty() || it->p > l.back().p)) {
-                    if (ub_max < ub_curr)
-                        ub_max = ub_curr;
-                    if (!l.empty() && it->w == l.back().w) {
+                if (upper_bound_curr > output.value
+                        && (l.empty() || it->profit > l.back().profit)) {
+
+                    // Update current bound.
+                    if (upper_bound_it < upper_bound_curr)
+                        upper_bound_it = upper_bound_curr;
+
+                    if (!l.empty() && it->weight == l.back().weight) {
                         l.back() = *it;
                     } else {
                         l.push_back(*it);
@@ -870,252 +971,19 @@ Output knapsacksolver::knapsack::dynamic_programming_bellman_list(
         }
         l0 = std::move(l);
 
-        // Update upper bound
-        if (ub_max != -1 && output.upper_bound > ub_max) {
+        // Update bound.
+        upper_bound_it = std::max(upper_bound_it, output.value);
+        if (output.bound > upper_bound_it) {
             std::stringstream ss;
-            ss << "it " << j - instance.first_item();
-            output.update_upper_bound(ub_max, ss, info);
+            ss << "it " << item_id;
+            algorithm_formatter.update_bound(upper_bound_it, ss);
         }
     }
-    output.update_upper_bound(
-            output.lower_bound,
-            std::stringstream("tree search completed"),
-            info);
+    // Update bound.
+    algorithm_formatter.update_bound(
+            output.value,
+            std::stringstream("algorithm end (bound)"));
 
-    FFOT_LOG_FOLD_END(info, "");
-    return output.algorithm_end(info);
+    algorithm_formatter.end();
+    return output;
 }
-
-////////////////////////////////////////////////////////////////////////////////
-//////////////////// dynamic_programming_bellman_list_rec //////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-struct BellmanListRecData
-{
-    const Instance& instance;
-    ItemPos n1;
-    ItemPos n2;
-    Weight c;
-    Solution& sol;
-    ItemPos j_max;
-    Info& info;
-};
-
-std::vector<BellmanState> opts_dynamic_programming_bellman_list(
-        const Instance& instance,
-        ItemPos n1,
-        ItemPos n2,
-        Weight c,
-        ItemPos j_max,
-        Info& info)
-{
-    FFOT_LOG_FOLD_START(info, "solve n1 " << n1 << " n2 " << n2 << " c " << c << std::endl);
-    if (c == 0) {
-        FFOT_LOG_FOLD_END(info, "c == 0");
-        return {{0, 0}};
-    }
-
-    Profit lb = 0;
-    std::vector<BellmanState> l0{{0, 0}};
-    for (ItemPos j = n1; j < n2; ++j) {
-        if (!info.check_time())
-            break;
-        Weight wj = instance.item(j).w;
-        Profit pj = instance.item(j).p;
-        FFOT_LOG(info, "j " << j << " wj " << wj << " pj " << pj << std::endl);
-        std::vector<BellmanState> l;
-        std::vector<BellmanState>::iterator it = l0.begin();
-        std::vector<BellmanState>::iterator it1 = l0.begin();
-        while (it != l0.end() || it1 != l0.end()) {
-            if (it1 != l0.end() && (it == l0.end() || it->w > it1->w + wj)) {
-                BellmanState s1{it1->w+wj, it1->p+pj};
-                FFOT_LOG(info, "s1 " << s1);
-                if (s1.w > c) {
-                    FFOT_LOG(info, " too large" << std::endl);
-                    break;
-                }
-                if (s1.p > l.back().p) {
-                    if (s1.p > lb) // Update lower bound
-                        lb = s1.p;
-                    if (s1.w == l.back().w) {
-                        FFOT_LOG(info, " replace" << std::endl);
-                        l.back() = s1;
-                    } else {
-                        Profit ub = upper_bound_0(instance, j, s1.p, c - s1.w, j_max);
-                        FFOT_LOG(info, " ub " << ub << " lb " << lb);
-                        if (ub >= lb) {
-                            l.push_back(s1);
-                            FFOT_LOG(info, " added" << std::endl);
-                        } else {
-                            FFOT_LOG(info, " ×" << std::endl);
-                        }
-                    }
-                } else {
-                    FFOT_LOG(info, " ×" << std::endl);
-                }
-                it1++;
-            } else {
-                FFOT_LOG(info, "s0 " << *it);
-                if (l.empty()) {
-                    FFOT_LOG(info, " added" << std::endl);
-                    l.push_back(*it);
-                } else {
-                    if (it->p > l.back().p) {
-                        if (it->w == l.back().w) {
-                            FFOT_LOG(info, " replace" << std::endl);
-                            l.back() = *it;
-                        } else {
-                            FFOT_LOG(info, " added" << std::endl);
-                            l.push_back(*it);
-                        }
-                    } else {
-                        FFOT_LOG(info, " ×" << std::endl);
-                    }
-                }
-                ++it;
-            }
-        }
-        l0 = std::move(l);
-    }
-    FFOT_LOG_FOLD_END(info, "");
-    return l0;
-}
-
-void dynamic_programming_bellman_list_rec_rec(BellmanListRecData d)
-{
-    ItemPos k = (d.n1 + d.n2 - 1) / 2 + 1;
-    FFOT_LOG_FOLD_START(d.info, "rec n1 " << d.n1 << " n2 " << d.n2 << " k " << k << " c " << d.c << std::endl);
-
-    std::vector<BellmanState> l1 = opts_dynamic_programming_bellman_list(
-            d.instance, d.n1, k, d.c, d.j_max, d.info);
-    std::vector<BellmanState> l2 = opts_dynamic_programming_bellman_list(
-            d.instance, k, d.n2, d.c, d.j_max, d.info);
-    FFOT_LOG(d.info, "l1.size() " << l1.size() << " l2.size() " << l2.size() << std::endl);
-
-    Profit z_max  = -1;
-    Weight i1_opt = 0;
-    Weight i2_opt = 0;
-    StateIdx i2 = l2.size() - 1;
-    for (StateIdx i1 = 0; i1 < (StateIdx)l1.size(); ++i1) {
-        while (l1[i1].w + l2[i2].w > d.c)
-            i2--;
-        FFOT_LOG(d.info, "i1 " << i1 << " l1[i1].w " << l1[i1].w << " i2 " << i2 << " l2[i2].w " << l2[i2].w << std::endl);
-        assert(i2 >= 0);
-        Profit z = l1[i1].p + l2[i2].p;
-        if (z_max < z) {
-            z_max = z;
-            i1_opt = i1;
-            i2_opt = i2;
-        }
-    }
-    StateIdx i1 = l1.size() - 1;
-    for (StateIdx i2 = 0; i2 < (StateIdx)l2.size(); ++i2) {
-        while (l2[i2].w + l1[i1].w > d.c)
-            i1--;
-        Profit z = l1[i1].p + l2[i2].p;
-        if (z_max < z) {
-            z_max = z;
-            i1_opt = i1;
-            i2_opt = i2;
-        }
-    }
-    FFOT_LOG(d.info, "z_max " << z_max << std::endl );
-
-    if (d.n1 == k - 1)
-        if (l1[i1_opt].p == d.instance.item(d.n1).p)
-            d.sol.set(d.n1, true);
-    if (k == d.n2 - 1)
-        if (l2[i2_opt].p == d.instance.item(k).p)
-            d.sol.set(k, true);
-
-    if (d.n1 != k - 1)
-        dynamic_programming_bellman_list_rec_rec({
-                .instance = d.instance,
-                .n1 = d.n1,
-                .n2 = k,
-                .c = l1[i1_opt].w,
-                .sol = d.sol,
-                .j_max = d.j_max,
-                .info = d.info});
-    if (k != d.n2 - 1)
-        dynamic_programming_bellman_list_rec_rec({
-                .instance = d.instance,
-                .n1 = k,
-                .n2 = d.n2,
-                .c = l2[i2_opt].w,
-                .sol = d.sol,
-                .j_max = d.j_max,
-                .info = d.info});
-
-    FFOT_LOG_FOLD_END(d.info, "");
-}
-
-Output knapsacksolver::knapsack::dynamic_programming_bellman_list_rec(
-        const Instance& instance,
-        Info info)
-{
-    info.os()
-            << "Algorithm" << std::endl
-            << "---------" << std::endl
-            << "Dynamic programming - Bellman" << std::endl
-            << std::endl
-            << "Parameters" << std::endl
-            << "----------" << std::endl
-            << "Implementation:                  States" << std::endl
-            << "Method for retrieving solution:  Recursive scheme" << std::endl
-            << std::endl;
-
-    FFOT_LOG_FOLD_START(info, "*** bellman (list, rec) ***" << std::endl);
-    Output output(instance, info);
-    ItemPos n = instance.number_of_items();
-
-    if (n == 0) {
-        output.update_upper_bound(0, std::stringstream("no item (ub)"), info);
-        return output.algorithm_end(info);
-    } else if (n == 1) {
-        Solution sol(instance);
-        sol.set(0, true);
-        output.update_solution(
-                sol,
-                std::stringstream("one item (lb)"),
-                info);
-        output.update_upper_bound(
-                sol.profit(),
-                std::stringstream("one item (ub)"),
-                info);
-        FFOT_LOG_FOLD_END(info, "");
-        return output.algorithm_end(info);
-    }
-
-    ItemPos j_max = instance.max_efficiency_item(FFOT_DBG(info));
-    if (INT_FAST64_MAX / instance.item(j_max).p < instance.capacity()) {
-        FFOT_LOG_FOLD_END(info, "");
-        return output.algorithm_end(info);
-    }
-
-    Solution sol(instance);
-    dynamic_programming_bellman_list_rec_rec({
-        .instance = instance,
-        .n1 = 0,
-        .n2 = instance.number_of_items(),
-        .c = instance.capacity(),
-        .sol = sol,
-        .j_max = j_max,
-        .info = info});
-    if (!info.check_time()) {
-        FFOT_LOG_FOLD_END(info, "");
-        return output.algorithm_end(info);
-    }
-
-    output.update_solution(
-            sol,
-            std::stringstream("tree search completed (lb)"),
-            info);
-    output.update_upper_bound(
-            sol.profit(),
-            std::stringstream("tree search completed (ub)"),
-            info);
-    FFOT_LOG_FOLD_END(info, "");
-    return output.algorithm_end(info);
-}
-

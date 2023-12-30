@@ -4,34 +4,37 @@ cc_library(
         name = "knapsacksolver",
         hdrs = [
                 "instance.hpp",
+                "instance_builder.hpp",
                 "solution.hpp",
-                "part_solution_1.hpp",
-                "part_solution_2.hpp",
+                "algorithm_formatter.hpp",
+                "sort.hpp",
+                "upper_bound.hpp",
         ],
         srcs = [
                 "instance.cpp",
-                "solution.cpp"
+                "instance_builder.cpp",
+                "solution.cpp",
+                "algorithm_formatter.cpp",
+                "sort.cpp",
+                "upper_bound.cpp",
         ],
         deps = [
-                "//knapsacksolver/knapsack/algorithms:upper_bound_dembo",
-                "@optimizationtools//optimizationtools/utils:info",
+                "@optimizationtools//optimizationtools/utils:utils",
+                "@optimizationtools//optimizationtools/containers:containers",
         ],
-        linkopts = select({
-                "@bazel_tools//src/conditions:windows": [],
-                "//conditions:default":                 ["-lpthread"],
-        }),
         copts = STDCPP,
         visibility = ["//visibility:public"],
 )
 
-cc_library(
-        name = "knapsacksolver_hpp",
-        hdrs = [
-                "instance.hpp",
-                "solution.hpp"
+cc_binary(
+        name = "main",
+        srcs = ["main.cpp"],
+        deps = [
+                "//knapsacksolver/knapsack/algorithms:dynamic_programming_bellman",
+                "//knapsacksolver/knapsack/algorithms:dynamic_programming_primal_dual",
+                "@boost//:program_options",
         ],
-        deps = ["@optimizationtools//optimizationtools/utils:info",],
-        visibility = ["//visibility:public"],
+        copts = STDCPP,
 )
 
 cc_library(
@@ -40,80 +43,19 @@ cc_library(
         srcs = ["generator.cpp"],
         deps = [
                 ":knapsacksolver",
-                "//knapsacksolver/knapsack/algorithms:dynamic_programming_primal_dual"
         ],
+        copts = STDCPP,
         visibility = ["//visibility:public"],
-)
-
-cc_binary(
-        name = "generator_main",
-        srcs = ["generator_main.cpp"],
-        deps = [
-                "@boost//:program_options",
-                ":generator",
-        ],
 )
 
 cc_library(
-        name = "tester",
-        hdrs = ["tester.hpp"],
-        srcs = ["tester.cpp"],
+        name = "tests",
+        hdrs = ["tests.hpp"],
+        srcs = ["tests.cpp"],
         deps = [
                 ":knapsacksolver",
-                ":generator",
                 "@googletest//:gtest_main",
         ],
+        copts = STDCPP,
         visibility = ["//visibility:public"],
 )
-
-cc_test(
-        name = "test",
-        srcs = ["test.cpp"],
-        deps = [
-                ":knapsacksolver",
-                "//knapsacksolver/knapsack/algorithms:greedy",
-                "@googletest//:gtest_main",
-        ],
-        copts = STDCPP,
-        timeout = "long",
-)
-
-cc_binary(
-        name = "sort_bench",
-        srcs = ["sort_bench.cpp"],
-        deps = [":knapsacksolver"],
-)
-
-cc_binary(
-        name = "main",
-        srcs = ["main.cpp"],
-        deps = [
-                "@boost//:program_options",
-                "//knapsacksolver/knapsack/algorithms:algorithms",
-        ],
-        copts = STDCPP,
-)
-
-cc_binary(
-        name = "bench",
-        srcs = ["bench.cpp"],
-        deps = [
-                "@boost//:program_options",
-                "//knapsacksolver/knapsack/algorithms:algorithms",
-                ":generator",
-        ],
-        copts = STDCPP,
-        data = ["//data:data"],
-)
-
-cc_binary(
-        name = "test_main",
-        srcs = ["test_main.cpp"],
-        deps = [
-                "//knapsacksolver/knapsack/algorithms:algorithms",
-                ":generator",
-                ":tester",
-        ],
-        copts = STDCPP,
-)
-

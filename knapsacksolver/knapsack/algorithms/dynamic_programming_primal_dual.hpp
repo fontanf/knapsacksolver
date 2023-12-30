@@ -9,70 +9,70 @@ namespace knapsacksolver
 namespace knapsack
 {
 
-struct DynamicProgrammingPrimalDualOptionalParameters
+struct DynamicProgrammingPrimalDualParameters: Parameters
 {
-    Info info = Info();
-
     bool greedy = true;
-    StateIdx pairing = -1;
-    StateIdx surrogate_relaxation = -1;
-    bool combo_core = false;
-    ItemIdx partial_solution_size = 64;
 
-    // If "stop_if_end" == true, the algorithm will stop when *end"" becomes
-    // equal to "true".
-    // If end == NULL, then a new pointer will be allocated and deallocated.
-    // If set_end == true, then "*end" will be set to "true" at the end of the
-    // algorithm.
-    // This is used for parallelization.
-    // Normal users should not need to change "end" and "set_end" default values.
-    bool* end = NULL;
-    bool stop_if_end = false;
-    bool set_end = true;
+    bool pairing = false;
 
-    DynamicProgrammingPrimalDualOptionalParameters& set_pure()
+    ItemId partial_solution_size = 64;
+
+
+    virtual int format_width() const override { return 37; }
+
+    virtual void format(std::ostream& os) const override
     {
-        greedy = false;
-        pairing = -1;
-        surrogate_relaxation = -1;
-        combo_core = false;
-        partial_solution_size = 64;
-        return *this;
+        Parameters::format(os);
+        int width = format_width();
+        os
+            << std::setw(width) << std::left << "Greedy: " << greedy << std::endl
+            << std::setw(width) << std::left << "Pairing: " << pairing << std::endl
+            << std::setw(width) << std::left << "Partial solution size: " << partial_solution_size << std::endl
+            ;
     }
 
-    DynamicProgrammingPrimalDualOptionalParameters& set_combo()
+    virtual nlohmann::json to_json() const override
     {
-        greedy = true;
-        pairing = 10000;
-        surrogate_relaxation = 2000;
-        combo_core = true;
-        partial_solution_size = 64;
-        return *this;
+        nlohmann::json json = Parameters::to_json();
+        json.merge_patch({
+                {"Greedy", greedy},
+                {"Pairing", pairing},
+                {"PartialSolutionSize", partial_solution_size}});
+        return json;
     }
 };
 
 struct DynamicProgrammingPrimalDualOutput: Output
 {
     DynamicProgrammingPrimalDualOutput(
-            const Instance& instance,
-            Info& info):
-        Output(instance, info) { }
+            const Instance& instance):
+        Output(instance) { }
+
 
     Counter number_of_recursive_calls = 0;
 
-    DynamicProgrammingPrimalDualOutput& algorithm_end(Info& info)
+
+    virtual void format(std::ostream& os) const override
     {
-        info.add_to_json("Algorithm", "NumberOfRecursiveCalls", number_of_recursive_calls);
-        Output::algorithm_end(info);
-        info.os() << "Number of recursive calls:  " << number_of_recursive_calls << std::endl;
-        return *this;
+        Output::format(os);
+        int width = format_width();
+        os
+            << std::setw(width) << std::left << "Number of recursive calls: " << number_of_recursive_calls << std::endl
+            ;
+    }
+
+    virtual nlohmann::json to_json() const override
+    {
+        nlohmann::json json = Output::to_json();
+        json.merge_patch({
+                {"NumberOfRecursiveCalls", number_of_recursive_calls}});
+        return json;
     }
 };
 
-DynamicProgrammingPrimalDualOutput dynamic_programming_primal_dual(
-        Instance& instance,
-        DynamicProgrammingPrimalDualOptionalParameters parameters = {});
+const DynamicProgrammingPrimalDualOutput dynamic_programming_primal_dual(
+        const Instance& instance,
+        const DynamicProgrammingPrimalDualParameters& parameters = {});
 
 }
 }
-

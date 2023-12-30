@@ -1,39 +1,35 @@
 #include "knapsacksolver/subsetsum/algorithms/dynamic_programming_balancing.hpp"
 
+#include "knapsacksolver/subsetsum/algorithm_formatter.hpp"
+
 using namespace knapsacksolver::subsetsum;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///////////////////// dynamic_programming_balancing_array //////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-Output knapsacksolver::subsetsum::dynamic_programming_balancing_array(
+const Output knapsacksolver::subsetsum::dynamic_programming_balancing_array(
         const Instance& instance,
-        optimizationtools::Info info)
+        const Parameters& parameters)
 {
-    init_display(instance, info);
-    info.os()
-            << "Algorithm" << std::endl
-            << "---------" << std::endl
-            << "Dynamic programming - Balancing" << std::endl
-            << std::endl
-            << "Parameters" << std::endl
-            << "----------" << std::endl
-            << "Implementation:                  Array" << std::endl
-            << "Method for retrieving solution:  No solution" << std::endl
-            << std::endl;
+    Output output(instance);
+    AlgorithmFormatter algorithm_formatter(parameters, output);
+    algorithm_formatter.start("Dynamic programming - balancing - array");
+    algorithm_formatter.print_header();
 
-    Output output(instance, info);
     Weight c = instance.capacity();
     Weight w_max = 0;
-    for (ItemId j = 0; j < instance.number_of_items(); ++j)
-        w_max = std::max(w_max, instance.weight(j));
+    for (ItemId item_id = 0; item_id < instance.number_of_items(); ++item_id)
+        w_max = std::max(w_max, instance.weight(item_id));
     // Compute the break item and the weight of the break solution.
     Weight w_break = 0;
-    ItemId j_break = 0;
-    for (ItemId j = 0; j < instance.number_of_items(); ++j) {
-        Weight wj = instance.weight(j);
+    ItemId break_item_id = 0;
+    for (ItemId item_id = 0;
+            item_id < instance.number_of_items();
+            ++item_id) {
+        Weight wj = instance.weight(item_id);
         if (w_break + wj > c) {
-            j_break = j;
+            break_item_id = item_id;
             break;
         }
         w_break += wj;
@@ -46,22 +42,29 @@ Output knapsacksolver::subsetsum::dynamic_programming_balancing_array(
         values_pred[w] = 0;
     for (Weight w = c + 1 - offset; w <= c + w_max - offset; ++w)
         values_pred[w] = 1;
-    values_pred[w_break - offset] = j_break;
+    values_pred[w_break - offset] = break_item_id;
 
-    for (ItemId j = j_break; j < instance.number_of_items(); ++j) {
+    for (ItemId item_id = break_item_id;
+            item_id < instance.number_of_items();
+            ++item_id) {
+
         // Check time
-        if (info.needs_to_end())
-            return output.algorithm_end(info);
+        if (parameters.timer.needs_to_end()) {
+            algorithm_formatter.end();
+            return output;
+        }
 
-        Weight wj = instance.weight(j);
+        Weight wj = instance.weight(item_id);
         for (Weight w = c - w_max + 1 - offset; w <= c + w_max - offset; ++w)
             values_next[w] = values_pred[w];
         for (Weight w = c - w_max + 1 - offset; w <= c - offset; ++w)
             values_next[w + wj] = std::max(values_next[w + wj], values_pred[w]);
         for (Weight w = c + wj - offset; w >= c + 1 - offset; --w) {
-            for (ItemId j0 = values_pred[w]; j0 < values_next[w]; ++j0) {
-                Weight wj0 = instance.weight(j0);
-                values_next[w - wj0] = std::max(values_next[w - wj0], j);
+            for (ItemId item_id_0 = values_pred[w];
+                    item_id_0 < values_next[w];
+                    ++item_id_0) {
+                Weight wj0 = instance.weight(item_id_0);
+                values_next[w - wj0] = std::max(values_next[w - wj0], item_id);
             }
         }
 
@@ -73,23 +76,24 @@ Output knapsacksolver::subsetsum::dynamic_programming_balancing_array(
     }
 
     // Retrieve optimal value.
-    Weight opt = 0;
-    for (Weight w = c - offset; w >= c - w_max + 1 - offset; --w) {
-        if (values_pred[w] != 0) {
-            opt = w + offset;
+    Weight optimal_value = 0;
+    for (Weight weight = c - offset;
+            weight >= c - w_max + 1 - offset;
+            --weight) {
+        if (values_pred[weight] != 0) {
+            optimal_value = weight + offset;
             break;
         }
     }
     // Update lower bound.
-    output.update_lower_bound(
-            opt,
-            std::stringstream("tree search completed"),
-            info);
+    algorithm_formatter.update_value(
+            optimal_value,
+            std::stringstream("algorithm end (value)"));
     // Update upper bound.
-    output.update_upper_bound(
-            opt,
-            std::stringstream("tree search completed"),
-            info);
+    algorithm_formatter.update_bound(
+            optimal_value,
+            std::stringstream("algorithm end (bound)"));
 
-    return output.algorithm_end(info);
+    algorithm_formatter.end();
+    return output;
 }

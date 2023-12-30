@@ -1,70 +1,106 @@
 #include "knapsacksolver/knapsack/algorithms/greedy.hpp"
 
+#include "knapsacksolver/knapsack/algorithm_formatter.hpp"
+#include "knapsacksolver/knapsack/sort.hpp"
+
 using namespace knapsacksolver::knapsack;
 
-Output knapsacksolver::knapsack::greedy(
+const Output knapsacksolver::knapsack::greedy(
         const Instance& instance,
-        Info info)
+        const GreedyParameters& parameters)
 {
-    FFOT_LOG_FOLD_START(info, "greedy" << std::endl);
-    info.os() << "*** greedy ***" << std::endl;
-    Output output(instance, info);
+    Output output(instance);
+    AlgorithmFormatter algorithm_formatter(parameters, output);
+    algorithm_formatter.start("Greedy");
 
-    assert(instance.break_item() != -1);
+    // Check trivial cases.
+    if (instance.total_item_weight() <= instance.capacity()) {
+        Solution solution(instance);
+        solution.fill();
 
-    output.update_solution(
-            *instance.break_solution(),
-            std::stringstream("break"),
-            info);
-    std::string best_algo = "break";
-    FFOT_LOG(info, "break " << output.solution.profit() << std::endl);
-    ItemPos b = instance.break_item();
+        // Update solution.
+        algorithm_formatter.update_solution(
+                solution,
+                std::stringstream("all items fit"));
+        // Update bound.
+        algorithm_formatter.update_bound(
+                solution.profit(),
+                std::stringstream("all items fit"));
 
-    if (b < instance.last_item()) {
-        Profit  p = 0;
-        ItemPos j = -1;
-
-        // Backward greedy
-        Weight rb = output.solution.remaining_capacity() - instance.item(b).w;
-        for (ItemPos k=instance.first_item(); k<=b; ++k) {
-            if (rb + instance.item(k).w >= 0 && instance.item(b).p - instance.item(k).p > p) {
-                p = instance.item(b).p - instance.item(k).p;
-                j = k;
-            }
-        }
-
-        // Forward greedy
-        Weight rf = output.solution.remaining_capacity();
-        for (ItemPos k=b+1; k<=instance.last_item(); ++k) {
-            if (instance.item(k).w <= rf && instance.item(k).p > p) {
-                p = instance.item(k).p;
-                j = k;
-            }
-        }
-
-        if (j == -1) {
-        } else if (j <= b) {
-            best_algo = "backward";
-            Solution sol = output.solution;
-            sol.set(b, true);
-            sol.set(j, false);
-            output.update_solution(
-                    sol,
-                    std::stringstream("backward"),
-                    info);
-        } else {
-            best_algo = "forward";
-            Solution sol = output.solution;
-            sol.set(j, true);
-            output.update_solution(
-                    sol,
-                    std::stringstream("forward"),
-                    info);
-        }
+        algorithm_formatter.end();
+        return output;
     }
 
-    FFOT_LOG_FOLD_END(info, "greedy " << output.solution.profit());
-    info.add_to_json("Algorithm", "Best", best_algo);
-    return output.algorithm_end(info);
-}
+    Solution solution_forward(instance);
+    Solution solution_backward(instance);
 
+    if (parameters.full_sort != nullptr) {
+        solution_forward = parameters.full_sort->break_solution();
+        solution_backward = parameters.full_sort->break_solution();
+        solution_backward.add(parameters.full_sort->break_item_id());
+    } else if (parameters.partial_sort != nullptr) {
+        solution_forward = parameters.partial_sort->break_solution();
+        solution_backward = parameters.partial_sort->break_solution();
+        solution_backward.add(parameters.partial_sort->break_item_id());
+    } else {
+        PartialSort partial_sort(instance);
+        solution_forward = partial_sort.break_solution();
+        solution_backward = partial_sort.break_solution();
+        solution_backward.add( partial_sort.break_item_id());
+    }
+
+    if (solution_forward.weight() > instance.capacity()) {
+        throw std::logic_error("forward");
+    }
+
+    if (solution_backward.weight() < instance.capacity()) {
+        throw std::logic_error("backward");
+    }
+
+    // Find the best item to add to the forward solution and the best item to
+    // remove from the backward solution.
+    ItemId item_id_best_forward = -1;
+    ItemId item_id_best_backward = -1;
+    for (ItemId item_id = 0;
+            item_id < instance.number_of_items();
+            ++item_id) {
+        const Item& item = instance.item(item_id);
+        // Forward.
+        if (!solution_forward.contains(item_id)) {
+            if (solution_forward.weight() + item.weight
+                    <= instance.capacity()) {
+                if (item_id_best_forward == -1
+                        || instance.item(item_id_best_forward).profit
+                        < item.profit) {
+                    item_id_best_forward = item_id;
+                }
+            }
+        }
+        // Backward.
+        if (solution_backward.contains(item_id)) {
+            if (solution_forward.weight() - item.weight
+                    <= instance.capacity()) {
+                if (item_id_best_backward == -1
+                        || instance.item(item_id_best_backward).profit
+                        > item.profit) {
+                    item_id_best_backward = item_id;
+                }
+            }
+        }
+    }
+    if (item_id_best_forward != -1)
+        solution_forward.add(item_id_best_forward);
+    algorithm_formatter.update_solution(
+            solution_forward,
+            std::stringstream("forward"));
+
+    if (item_id_best_backward != -1) {
+        solution_backward.remove(item_id_best_backward);
+        algorithm_formatter.update_solution(
+                solution_backward,
+                std::stringstream("backward"));
+    }
+
+    algorithm_formatter.end();
+    return output;
+}

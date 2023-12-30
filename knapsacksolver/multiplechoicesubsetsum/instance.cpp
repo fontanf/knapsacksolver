@@ -1,65 +1,14 @@
 #include "knapsacksolver/multiplechoicesubsetsum/instance.hpp"
 
+#include <iomanip>
+
 using namespace knapsacksolver::multiplechoicesubsetsum;
 
-Instance::Instance(
-        std::string instance_path,
-        std::string format)
-{
-    std::ifstream file(instance_path);
-    if (!file.good()) {
-        throw std::runtime_error(
-                "Unable to open file \"" + instance_path + "\".");
-    }
-
-    if (format == "standard" || format == "") {
-        read_standard(file);
-    } else {
-        throw std::invalid_argument(
-                "Unknown instance format \"" + format + "\".");
-    }
-
-    file.close();
-}
-
-void Instance::read_standard(std::ifstream& file)
-{
-    GroupId number_of_groups;
-    Weight weight;
-    ItemPos group_number_of_items;
-
-    file >> number_of_groups >> weight;
-    set_capacity(weight);
-    for (GroupId group_id = 0; group_id < number_of_groups; ++group_id) {
-        file >> group_number_of_items;
-        for (ItemPos item_id = 0;
-                item_id < group_number_of_items;
-                ++item_id) {
-            file >> weight;
-            add_item(group_id, weight);
-        }
-    }
-}
-
-void Instance::add_item(
-        GroupId group_id,
-        Weight weight)
-{
-    ItemId item_id = items_.size();
-    Item item;
-    item.group_id = group_id;
-    item.weight = weight;
-    items_.push_back(item);
-    while ((GroupId)groups_.size() <= group_id)
-        groups_.push_back(Group());
-    groups_[group_id].item_ids.push_back(item_id);
-}
-
-std::ostream& Instance::print(
+void Instance::format(
         std::ostream& os,
-        int verbose) const
+        int verbosity_level) const
 {
-    if (verbose >= 1) {
+    if (verbosity_level >= 1) {
         os
             << "Number of groups:  " << number_of_groups() << std::endl
             << "Number of items:   " << number_of_items() << std::endl
@@ -67,7 +16,7 @@ std::ostream& Instance::print(
             ;
     }
 
-    if (verbose >= 2) {
+    if (verbosity_level >= 2) {
         os
             << std::endl
             << std::setw(12) << "Group"
@@ -102,8 +51,6 @@ std::ostream& Instance::print(
                 << std::endl;
         }
     }
-
-    return os;
 }
 
 void Instance::write(
@@ -124,23 +71,4 @@ void Instance::write(
             file << " " << item(item_id).weight;
         file << std::endl;
     }
-}
-
-void knapsacksolver::multiplechoicesubsetsum::init_display(
-        const Instance& instance,
-        optimizationtools::Info& info)
-{
-    info.os()
-            << "====================================" << std::endl
-            << "           KnapsackSolver           " << std::endl
-            << "====================================" << std::endl
-            << std::endl
-            << "Problem" << std::endl
-            << "--------" << std::endl
-            << "Multiple-choice subset sum problem" << std::endl
-            << std::endl
-            << "Instance" << std::endl
-            << "--------" << std::endl;
-    instance.print(info.os(), info.verbosity_level());
-    info.os() << std::endl;
 }

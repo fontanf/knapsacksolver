@@ -8,15 +8,3 @@ cc_library(
         copts = STDCPP,
         visibility = ["//visibility:public"],
 )
-
-cc_library(
-        name = "algorithms",
-        hdrs = ["algorithms.hpp"],
-        srcs = ["algorithms.cpp"],
-        deps = [
-                ":dynamic_programming_bellman",
-                "@boost//:program_options",
-        ],
-        copts = STDCPP,
-        visibility = ["//visibility:public"],
-)
