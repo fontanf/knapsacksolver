@@ -45,16 +45,16 @@ void AlgorithmFormatter::print_header()
         << std::endl
         << std::setw(12) << "Time (s)"
         << std::setw(6) << "Sol."
-        << std::setw(16) << "Value"
-        << std::setw(16) << "Bound"
+        << std::setw(24) << "Value"
+        << std::setw(24) << "Bound"
         << std::setw(16) << "Gap"
         << std::setw(8) << "Gap (%)"
         << std::setw(32) << "Comment"
         << std::endl
         << std::setw(12) << "--------"
         << std::setw(6) << "----"
-        << std::setw(16) << "-----"
-        << std::setw(16) << "-----"
+        << std::setw(24) << "-----"
+        << std::setw(24) << "-----"
         << std::setw(16) << "---"
         << std::setw(8) << "-------"
         << std::setw(32) << "-------"
@@ -71,8 +71,8 @@ void AlgorithmFormatter::print(
     *os_
         << std::setw(12) << std::fixed << std::setprecision(3) << output_.time << std::defaultfloat << std::setprecision(precision)
         << std::setw(6) << output_.has_solution()
-        << std::setw(16) << output_.value
-        << std::setw(16) << output_.bound
+        << std::setw(24) << output_.value
+        << std::setw(24) << output_.bound
         << std::setw(16) << output_.absolute_optimality_gap()
         << std::setw(8) << std::fixed << std::setprecision(2) << output_.relative_optimality_gap() * 100 << std::defaultfloat << std::setprecision(precision)
         << std::setw(32) << s.str() << std::endl;

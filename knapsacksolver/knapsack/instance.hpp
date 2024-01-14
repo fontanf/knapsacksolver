@@ -1,6 +1,8 @@
 #pragma once
 
-#include "optimizationtools/utils/output.hpp"
+#include <cstdint>
+#include <vector>
+#include <iostream>
 
 namespace knapsacksolver
 {

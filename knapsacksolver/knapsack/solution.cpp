@@ -1,7 +1,5 @@
 #include "knapsacksolver/knapsack/solution.hpp"
 
-#include "optimizationtools/utils/utils.hpp"
-
 using namespace knapsacksolver::knapsack;
 
 Solution::Solution(const Instance& instance):

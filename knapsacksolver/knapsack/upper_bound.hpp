@@ -1,7 +1,6 @@
 #pragma once
 
-#include "knapsacksolver/knapsack/solution.hpp"
-#include "knapsacksolver/knapsack/sort.hpp"
+#include "knapsacksolver/knapsack/instance.hpp"
 
 namespace knapsacksolver
 {
@@ -23,7 +22,15 @@ inline Profit upper_bound(
     if (item_id == -1)
         return current_profit;
     const Item& item = instance.item(item_id);
-    return current_profit + ((instance.capacity() - current_weight) * item.profit) / item.weight;
+    Profit bound = current_profit + ((instance.capacity() - current_weight) * item.profit) / item.weight;
+    if (bound < 0) {
+        throw std::runtime_error(
+                "current_profit: " + std::to_string(current_profit)
+                + "; item_id: " + std::to_string(item_id)
+                + "; efficiency: " + std::to_string(item.efficiency)
+                + ".");
+    }
+    return bound;
 }
 
 /**
@@ -41,7 +48,10 @@ inline Profit upper_bound_reverse(
     if (item_id == -1)
         return -1;
     const Item& item = instance.item(item_id);
-    return current_profit + ((instance.capacity() - current_weight) * item.profit + 1) / item.weight - 1;
+    Profit bound = current_profit + ((instance.capacity() - current_weight) * item.profit + 1) / item.weight - 1;
+    if (bound < 0)
+        throw std::runtime_error("");
+    return bound;
 }
 
 }

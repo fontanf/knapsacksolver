@@ -1,5 +1,6 @@
 #include "knapsacksolver/knapsack/instance.hpp"
 
+#include <fstream>
 #include <iomanip>
 
 using namespace knapsacksolver::knapsack;
@@ -25,21 +26,21 @@ void Instance::format(
             << std::endl
             << std::setw(12) << "Item"
             << std::setw(12) << "Weight"
-            << std::setw(12) << "Profit"
-            << std::setw(12) << "Eff."
+            << std::setw(24) << "Profit"
+            << std::setw(16) << "Eff."
             << std::endl
             << std::setw(12) << "----"
             << std::setw(12) << "------"
-            << std::setw(12) << "------"
-            << std::setw(12) << "----"
+            << std::setw(24) << "------"
+            << std::setw(16) << "----"
             << std::endl;
         for (ItemId item_id = 0; item_id < number_of_items(); ++item_id) {
             const Item& item = this->item(item_id);
             os
                 << std::setw(12) << item_id
                 << std::setw(12) << item.weight
-                << std::setw(12) << item.profit
-                << std::setw(12) << item.efficiency
+                << std::setw(24) << item.profit
+                << std::setw(16) << item.efficiency
                 << std::endl;
         }
     }

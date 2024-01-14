@@ -2,7 +2,7 @@
 
 #include "optimizationtools/utils/utils.hpp"
 
-#include <iomanip>
+#include <fstream>
 
 using namespace knapsacksolver::knapsack;
 
@@ -191,22 +191,19 @@ std::vector<Profit> knapsacksolver::knapsack::convert(
             highest_possible_item_profit / highest_item_profit);
 
     // Check no overflow because of the bounds.
-    //     bound = profit / weight * capacity
     // We want to ensure that:
-    //     bound < INT_MAX
-    // That is
-    //     profit < INT_MAX / capacity * weight
+    //     profit * capacity < INT_MAX
     // Since
     //     profit = profit_double * multiplier
-    // We want:
-    //     multiplier < INT_MAX / capacity * weight / profit_double
+    // That is:
+    //     multiplier < INT_MAX / capacity / profit_double
     for (ItemId item_id = 0;
             item_id < number_of_items;
             ++item_id) {
         highest_possible_multiplier = std::min(
                 highest_possible_multiplier,
-                (double)(std::numeric_limits<Profit>::max()
-                    / capacity * weights[item_id])
+                (double)(std::numeric_limits<Profit>::max())
+                / capacity
                 / profits_double[item_id]);
     }
 

@@ -3,6 +3,7 @@
 #include "knapsacksolver/knapsack/instance.hpp"
 
 #include "optimizationtools/utils/utils.hpp"
+#include "optimizationtools/utils/output.hpp"
 
 #include <iomanip>
 
