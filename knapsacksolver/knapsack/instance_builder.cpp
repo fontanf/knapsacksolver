@@ -170,6 +170,9 @@ std::vector<Profit> knapsacksolver::knapsack::convert(
 {
     ItemId number_of_items = weights.size();
 
+    if (number_of_items == 0)
+        return {};
+
     // Check overflow because of total profit.
     //     multiplier * total_profit_double < INT_MAX
     //     multiplier < INT_MAX / total_profit_double
