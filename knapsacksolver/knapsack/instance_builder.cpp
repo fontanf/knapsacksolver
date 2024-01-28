@@ -163,31 +163,41 @@ Instance InstanceBuilder::build()
     return std::move(instance_);
 }
 
-std::vector<Profit> knapsacksolver::knapsack::convert(
-        const std::vector<double>& profits_double,
-        const std::vector<Weight>& weights,
-        Weight capacity)
+void InstanceFromFloatProfitsBuilder::add_item(
+        double profit,
+        Weight weight)
 {
-    ItemId number_of_items = weights.size();
+    profits_double_.push_back(profit);
+    Item item;
+    item.profit = -1;
+    item.weight = weight;
+    instance_.items_.push_back(item);
+};
 
-    if (number_of_items == 0)
+Instance InstanceFromFloatProfitsBuilder::build()
+{
+    if (instance_.number_of_items() == 0)
         return {};
 
     // Check overflow because of total profit.
     //     multiplier * total_profit_double < INT_MAX
     //     multiplier < INT_MAX / total_profit_double
     double total_item_profit = 0;
-    for (double profit: profits_double)
+    for (double profit: profits_double_)
         total_item_profit += profit;
     double highest_possible_multiplier = (double)std::numeric_limits<Profit>::max() / total_item_profit;
 
     // Check highest possible profit to avoid overflows when sorting.
     double highest_item_profit = 0;
-    for (double profit: profits_double)
+    for (double profit: profits_double_)
         highest_item_profit = std::max(highest_item_profit, profit);
     Weight highest_item_weight = 0;
-    for (Weight weight: weights)
-        highest_item_weight = std::max(highest_item_weight, weight);
+    for (ItemId item_id = 0;
+            item_id < instance_.number_of_items();
+            ++item_id) {
+        const Item& item = instance_.item(item_id);
+        highest_item_weight = std::max(highest_item_weight, item.weight);
+    }
     Profit highest_possible_item_profit = std::numeric_limits<Profit>::max() / highest_item_weight;
     highest_possible_multiplier = std::min(
             highest_possible_multiplier,
@@ -201,25 +211,81 @@ std::vector<Profit> knapsacksolver::knapsack::convert(
     // That is:
     //     multiplier < INT_MAX / capacity / profit_double
     for (ItemId item_id = 0;
-            item_id < number_of_items;
+            item_id < instance_.number_of_items();
             ++item_id) {
         highest_possible_multiplier = std::min(
                 highest_possible_multiplier,
                 (double)(std::numeric_limits<Profit>::max())
-                / capacity
-                / profits_double[item_id]);
+                / instance_.capacity_
+                / profits_double_[item_id]);
     }
 
     // Compute multiplier.
-    int64_t multiplier = 1;
+    double multiplier = 1;
     while (2 * multiplier < highest_possible_multiplier)
         multiplier *= 2;
     while (multiplier > highest_possible_multiplier)
         multiplier /= 2;
 
     // Compute integer profits.
-    std::vector<Profit> profits;
-    for (double profit: profits_double)
-        profits.push_back(std::round(profit * multiplier));
-    return profits;
+    for (ItemId item_id = 0;
+            item_id < instance_.number_of_items();
+            ++item_id) {
+        Profit profit = std::round(profits_double_[item_id] * multiplier);
+        instance_.items_[item_id].profit = profit;
+    }
+
+    // Check that profit are positive and weights are positive and smaller than
+    // the capacity.
+    for (ItemId item_id = 0;
+            item_id < instance_.number_of_items();
+            ++item_id) {
+        const Item& item = instance_.items_[item_id];
+        if (item.profit <= 0) {
+            throw std::invalid_argument(
+                    "Items must have strictly positive profits.");
+        }
+        if (item.weight <= 0) {
+            throw std::invalid_argument(
+                    "Items must have strictly positive weights.");
+        }
+        if (item.weight > instance_.capacity()) {
+            throw std::invalid_argument(
+                    "The weight of an item must be smaller than the knapsack capacity..");
+        }
+    }
+
+    // Compute total item profit and weight.
+    for (ItemId item_id = 0;
+            item_id < instance_.number_of_items();
+            ++item_id) {
+        const Item& item = instance_.items_[item_id];
+        instance_.highest_item_profit_ = std::max(instance_.highest_item_profit_, item.profit);
+        instance_.highest_item_weight_ = std::max(instance_.highest_item_weight_, item.weight);
+        instance_.total_item_profit_ += item.profit;
+        instance_.total_item_weight_ += item.weight;
+    }
+
+    // Compute item efficiencies.
+    for (ItemId item_id = 0;
+            item_id < instance_.number_of_items();
+            ++item_id) {
+        Item& item = instance_.items_[item_id];
+        item.efficiency = (double)item.profit / item.weight;
+    }
+
+    // Compute highest efficiency item.
+    instance_.highest_efficiency_item_id_ = -1;
+    for (ItemId item_id = 0;
+            item_id < instance_.number_of_items();
+            ++item_id) {
+        const Item& item = instance_.item(item_id);
+        if (instance_.highest_efficiency_item_id_ == -1
+                || item.efficiency
+                > instance_.item(instance_.highest_efficiency_item_id_).efficiency) {
+            instance_.highest_efficiency_item_id_ = item_id;
+        }
+    }
+
+    return std::move(instance_);
 }

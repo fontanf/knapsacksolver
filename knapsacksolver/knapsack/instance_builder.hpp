@@ -66,18 +66,45 @@ private:
 
 };
 
-/**
- * Convert profits from floats to integers.
- *
- * This function is useful for the applications that requires solving a
- * knapsack problem with float profits.
- *
- * This function finds a relevant way to scale the profits.
- */
-std::vector<Profit> convert(
-        const std::vector<double>& profits_double,
-        const std::vector<Weight>& weight,
-        Weight capacity);
+class InstanceFromFloatProfitsBuilder
+{
+
+public:
+
+    /** Constructor. */
+    InstanceFromFloatProfitsBuilder() { }
+
+    /** Add an item to the knapsack. */
+    void add_item(
+            double profit,
+            Weight weight);
+
+    /** Set the capacity of the knapsack. */
+    void set_capacity(Weight capacity) { instance_.capacity_ = capacity; }
+
+    /*
+     * Build
+     */
+
+    /** Build. */
+    Instance build();
+
+private:
+
+    /*
+     * Private methods
+     */
+
+    /*
+     * Private attributes
+     */
+
+    /** Instance. */
+    Instance instance_;
+
+    std::vector<double> profits_double_;
+
+};
 
 }
 }

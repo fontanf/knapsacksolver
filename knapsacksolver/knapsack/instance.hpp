@@ -126,6 +126,7 @@ private:
     ItemId highest_efficiency_item_id_;
 
     friend class InstanceBuilder;
+    friend class InstanceFromFloatProfitsBuilder;
 
 };
 
