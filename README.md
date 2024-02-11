@@ -18,6 +18,12 @@ And therefore, having efficient algorithms with reliable implementations to solv
 
 The goal of this repository is to provide such efficient and reliable implementations.
 
+Here are some usage examples of this library:
+* [Lifting the length of a bin in a 3D packing problem](https://github.com/fontanf/packingsolver/blob/dev_2/packingsolver/boxstacks/branching_scheme.cpp#L67)
+* [Solving a 0-1 knapsack subproblem inside an algorithm for a geometrical variable-sized bin packing problem](https://github.com/fontanf/packingsolver/blob/dev_2/packingsolver/algorithms/dichotomic_search.hpp#L135)
+* Solving the pricing problem inside a column generation algorithm for the [cutting stock problem](https://github.com/fontanf/columngenerationsolver/blob/main/examples/multipleknapsack.hpp#L157), the [multiple knapsack problem](https://github.com/fontanf/columngenerationsolver/blob/main/examples/cuttingstock.hpp#L123), or the [genralized assignment problem](https://github.com/fontanf/generalizedassignmentsolver/blob/master/generalizedassignmentsolver/algorithms/column_generation.cpp#L181)
+* [Solving a 0-1 knapsack subproblem inside an algorithm for the packing while travelling problem](https://github.com/fontanf/travellingthiefsolver/blob/master/travellingthiefsolver/packingwhiletravelling/algorithms/sequential_value_correction.cpp#L19)
+
 ## Implemented algorithms
 
 ### Knapsack
@@ -256,8 +262,6 @@ Run tests:
 ```
 bazel test -- //...
 ```
-
-### C++ library
 
 ### Python interface
 
