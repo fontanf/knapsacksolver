@@ -57,9 +57,6 @@ void Instance::write(
 
     file << number_of_items() << " " << capacity() << std::endl;
     for (ItemId item_id = 0; item_id < number_of_items(); ++item_id) {
-        file
-            << item(item_id).weight
-            << item(item_id).profit
-            << std::endl;
+        file << item(item_id).profit << " " << item(item_id).weight << std::endl;
     }
 }
