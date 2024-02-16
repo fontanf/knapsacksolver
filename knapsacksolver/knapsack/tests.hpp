@@ -45,6 +45,8 @@ inline std::vector<TestInstancePath> get_test_instance_paths()
             "data/knapsack/tests/instance_7_items.sol.txt", "standard"},
         {"data/knapsack/tests/instance_9_items.txt", "standard",
             "data/knapsack/tests/instance_9_items.sol.txt", "standard"},
+        {"data/knapsack/tests/instance_debug.txt", "standard",
+            "data/knapsack/tests/instance_debug.sol.txt", "standard"},
     };
 }
 
