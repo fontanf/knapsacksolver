@@ -232,6 +232,8 @@ Instance InstanceFromFloatProfitsBuilder::build()
             item_id < instance_.number_of_items();
             ++item_id) {
         Profit profit = std::round(profits_double_[item_id] * multiplier);
+        if (profit == 0)
+            profit = 1;
         instance_.items_[item_id].profit = profit;
     }
 
