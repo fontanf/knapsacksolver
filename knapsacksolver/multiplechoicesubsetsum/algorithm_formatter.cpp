@@ -59,11 +59,11 @@ void AlgorithmFormatter::print_header()
         << std::setw(12) << "-------"
         << std::setw(32) << "-------"
         << std::endl;
-    print(std::stringstream(""));
+    print("");
 }
 
 void AlgorithmFormatter::print(
-        const std::stringstream& s)
+        const std::string& s)
 {
     if (parameters_.verbosity_level == 0)
         return;
@@ -75,12 +75,12 @@ void AlgorithmFormatter::print(
         << std::setw(12) << output_.bound
         << std::setw(12) << output_.absolute_optimality_gap()
         << std::setw(12) << std::fixed << std::setprecision(2) << output_.relative_optimality_gap() * 100 << std::defaultfloat << std::setprecision(precision)
-        << std::setw(32) << s.str() << std::endl;
+        << std::setw(32) << s << std::endl;
 }
 
 void AlgorithmFormatter::update_solution(
         const Solution& solution_new,
-        const std::stringstream& s)
+        const std::string& s)
 {
     if ((output_.has_solution() && optimizationtools::is_solution_strictly_better(
                 objective_direction(),
@@ -103,7 +103,7 @@ void AlgorithmFormatter::update_solution(
 
 void AlgorithmFormatter::update_value(
         Weight value_new,
-        const std::stringstream& s)
+        const std::string& s)
 {
     if (optimizationtools::is_value_strictly_better(
                 objective_direction(),
@@ -119,7 +119,7 @@ void AlgorithmFormatter::update_value(
 
 void AlgorithmFormatter::update_bound(
         Weight bound_new,
-        const std::stringstream& s)
+        const std::string& s)
 {
     if (optimizationtools::is_bound_strictly_better(
             objective_direction(),

@@ -19,13 +19,9 @@ const Output knapsacksolver::knapsack::greedy(
         solution.fill();
 
         // Update solution.
-        algorithm_formatter.update_solution(
-                solution,
-                std::stringstream("all items fit"));
+        algorithm_formatter.update_solution(solution, "all items fit");
         // Update bound.
-        algorithm_formatter.update_bound(
-                solution.profit(),
-                std::stringstream("all items fit"));
+        algorithm_formatter.update_bound(solution.profit(), "all items fit");
 
         algorithm_formatter.end();
         return output;
@@ -90,15 +86,11 @@ const Output knapsacksolver::knapsack::greedy(
     }
     if (item_id_best_forward != -1)
         solution_forward.add(item_id_best_forward);
-    algorithm_formatter.update_solution(
-            solution_forward,
-            std::stringstream("forward"));
+    algorithm_formatter.update_solution(solution_forward, "forward");
 
     if (item_id_best_backward != -1) {
         solution_backward.remove(item_id_best_backward);
-        algorithm_formatter.update_solution(
-                solution_backward,
-                std::stringstream("backward"));
+        algorithm_formatter.update_solution(solution_backward, "backward");
     }
 
     algorithm_formatter.end();

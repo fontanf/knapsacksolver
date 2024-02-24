@@ -51,14 +51,14 @@ const Output knapsacksolver::knapsack::dynamic_programming_bellman_array(
             ss << "it " << item_id;
             algorithm_formatter.update_value(
                     values[instance.capacity()],
-                    ss);
+                    ss.str());
         }
     }
 
     // Update bound.
     algorithm_formatter.update_bound(
             output.value,
-            std::stringstream("algorithm end"));
+            "algorithm end");
 
     algorithm_formatter.end();
     return output;
@@ -110,11 +110,11 @@ const Output knapsacksolver::knapsack::dynamic_programming_bellman_array_paralle
         // Update solution.
         algorithm_formatter.update_solution(
                 solution,
-                std::stringstream("all items fit (solution)"));
+                "all items fit (solution)");
         // Update bound.
         algorithm_formatter.update_bound(
                 output.value,
-                std::stringstream("all items fit (bound)"));
+                "all items fit (bound)");
 
         algorithm_formatter.end();
         return output;
@@ -154,11 +154,11 @@ const Output knapsacksolver::knapsack::dynamic_programming_bellman_array_paralle
     // Update value.
     algorithm_formatter.update_value(
             optimal_value,
-            std::stringstream("algorithm end (value)"));
+            "algorithm end (value)");
     // Update bound.
     algorithm_formatter.update_bound(
             output.value,
-            std::stringstream("algorithm end (bound)"));
+            "algorithm end (bound)");
 
     algorithm_formatter.end();
     return output;
@@ -250,11 +250,11 @@ const Output knapsacksolver::knapsack::dynamic_programming_bellman_rec(
     // Update value.
     algorithm_formatter.update_value(
             optimal_value,
-            std::stringstream("algorithm end (value)"));
+            "algorithm end (value)");
     // Update bound.
     algorithm_formatter.update_bound(
             output.value,
-            std::stringstream("algorithm end (bound)"));
+            "algorithm end (bound)");
 
     // Retrieve optimal solution.
     Weight weight = instance.capacity();
@@ -271,7 +271,7 @@ const Output knapsacksolver::knapsack::dynamic_programming_bellman_rec(
     }
     algorithm_formatter.update_solution(
             solution,
-            std::stringstream("algorithm end (solution)"));
+            "algorithm end (solution)");
 
     algorithm_formatter.end();
     return output;
@@ -326,14 +326,14 @@ const Output knapsacksolver::knapsack::dynamic_programming_bellman_array_all(
             ss << "it " << item_id;
             algorithm_formatter.update_value(
                     values[compute_state_id(instance, item_id, instance.capacity())],
-                    ss);
+                    ss.str());
         }
     }
 
     // Update upper bound
     algorithm_formatter.update_bound(
             output.value,
-            std::stringstream("algorithm end (bound)"));
+            "algorithm end (bound)");
 
     // Retrieve optimal solution.
     Weight weight = instance.capacity();
@@ -350,7 +350,7 @@ const Output knapsacksolver::knapsack::dynamic_programming_bellman_array_all(
     }
     algorithm_formatter.update_solution(
             solution,
-            std::stringstream("algorithm end (solution)"));
+            "algorithm end (solution)");
 
     algorithm_formatter.end();
     return output;
@@ -377,11 +377,11 @@ const DynamicProgrammingBellmanArrayOneOutput knapsacksolver::knapsack::dynamic_
         // Update solution.
         algorithm_formatter.update_solution(
                 solution,
-                std::stringstream("all items fit (solution)"));
+                "all items fit (solution)");
         // Update bound.
         algorithm_formatter.update_bound(
                 output.value,
-                std::stringstream("all items fit (bound)"));
+                "all items fit (bound)");
 
         algorithm_formatter.end();
         return output;
@@ -437,7 +437,7 @@ const DynamicProgrammingBellmanArrayOneOutput knapsacksolver::knapsack::dynamic_
             if (output.value < values[remaining_capacity]) {
                 std::stringstream ss;
                 ss << "it " << item_id;
-                algorithm_formatter.update_value(values[remaining_capacity], ss);
+                algorithm_formatter.update_value(values[remaining_capacity], ss.str());
             }
         }
 end:
@@ -449,11 +449,11 @@ end:
             // Update value.
             algorithm_formatter.update_value(
                     optimal_value,
-                    std::stringstream("algorithm end (value)"));
+                    "algorithm end (value)");
             // Update bound.
             algorithm_formatter.update_bound(
                     output.value,
-                    std::stringstream("algorithm end (bound)"));
+                    "algorithm end (bound)");
         }
 
         // Update recursion parameters.
@@ -466,7 +466,7 @@ end:
     // Update solution.
     algorithm_formatter.update_solution(
             solution,
-            std::stringstream("algorithm end (solution)"));
+            "algorithm end (solution)");
 
     algorithm_formatter.end();
     return output;
@@ -493,11 +493,11 @@ const DynamicProgrammingBellmanArrayPartOutput knapsacksolver::knapsack::dynamic
         // Update solution.
         algorithm_formatter.update_solution(
                 solution,
-                std::stringstream("all items fit (solution)"));
+                "all items fit (solution)");
         // Update bound.
         algorithm_formatter.update_bound(
                 output.value,
-                std::stringstream("all items fit (bound)"));
+                "all items fit (bound)");
 
         algorithm_formatter.end();
         return output;
@@ -567,7 +567,7 @@ const DynamicProgrammingBellmanArrayPartOutput knapsacksolver::knapsack::dynamic
                 ss << "it " << item_id;
                 algorithm_formatter.update_value(
                         values[remaining_capacity],
-                        ss);
+                        ss.str());
             }
         }
 end:
@@ -579,11 +579,11 @@ end:
             // Update value.
             algorithm_formatter.update_value(
                     optimal_value,
-                    std::stringstream("algorithm end (value)"));
+                    "algorithm end (value)");
             // Update bound.
             algorithm_formatter.update_bound(
                     output.value,
-                    std::stringstream("algorithm end (bound)"));
+                    "algorithm end (bound)");
         }
 
         // Update recursion parameters.
@@ -611,7 +611,7 @@ end:
     // Update solution.
     algorithm_formatter.update_solution(
             solution,
-            std::stringstream("algorithm end (solution)"));
+            "algorithm end (solution)");
 
     algorithm_formatter.end();
     return output;
@@ -751,11 +751,11 @@ const Output knapsacksolver::knapsack::dynamic_programming_bellman_array_rec(
         // Update solution.
         algorithm_formatter.update_solution(
                 solution,
-                std::stringstream("all items fit (solution)"));
+                "all items fit (solution)");
         // Update bound.
         algorithm_formatter.update_bound(
                 output.value,
-                std::stringstream("all items fit (bound)"));
+                "all items fit (bound)");
 
         algorithm_formatter.end();
         return output;
@@ -780,11 +780,11 @@ const Output knapsacksolver::knapsack::dynamic_programming_bellman_array_rec(
     // Update solution.
     algorithm_formatter.update_solution(
             solution,
-            std::stringstream("algorithm end (solution)"));
+            "algorithm end (solution)");
     // Update bound.
     algorithm_formatter.update_bound(
             output.value,
-            std::stringstream("algorithm end (bound)"));
+            "algorithm end (bound)");
 
     algorithm_formatter.end();
     return output;
@@ -830,11 +830,11 @@ const Output knapsacksolver::knapsack::dynamic_programming_bellman_list(
         // Update solution.
         algorithm_formatter.update_solution(
                 solution,
-                std::stringstream("all items fit (solution)"));
+                "all items fit (solution)");
         // Update bound.
         algorithm_formatter.update_bound(
                 output.value,
-                std::stringstream("all items fit (bound)"));
+                "all items fit (bound)");
 
         algorithm_formatter.end();
         return output;
@@ -863,7 +863,7 @@ const Output knapsacksolver::knapsack::dynamic_programming_bellman_list(
     // Update solution.
     algorithm_formatter.update_solution(
             greedy_output.solution,
-            std::stringstream("greedy"));
+            "greedy");
 
     // Compute an initial bound.
     UpperBoundDantzigParameters upper_bound_dantzig_parameters;
@@ -881,7 +881,7 @@ const Output knapsacksolver::knapsack::dynamic_programming_bellman_list(
     // Update bound.
     algorithm_formatter.update_bound(
             upper_bound_output.bound,
-            std::stringstream("dantzig upper bound"));
+            "dantzig upper bound");
 
     // Main recursion.
     std::vector<BellmanState> l0{{0, 0}};
@@ -930,7 +930,7 @@ const Output knapsacksolver::knapsack::dynamic_programming_bellman_list(
                     if (output.value < s1.profit) {
                         std::stringstream ss;
                         ss << "it " << item_id;
-                        algorithm_formatter.update_value(s1.profit, ss);
+                        algorithm_formatter.update_value(s1.profit, ss.str());
                     }
 
                     // Update current bound.
@@ -976,13 +976,13 @@ const Output knapsacksolver::knapsack::dynamic_programming_bellman_list(
         if (output.bound > upper_bound_it) {
             std::stringstream ss;
             ss << "it " << item_id;
-            algorithm_formatter.update_bound(upper_bound_it, ss);
+            algorithm_formatter.update_bound(upper_bound_it, ss.str());
         }
     }
     // Update bound.
     algorithm_formatter.update_bound(
             output.value,
-            std::stringstream("algorithm end (bound)"));
+            "algorithm end (bound)");
 
     algorithm_formatter.end();
     return output;

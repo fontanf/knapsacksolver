@@ -18,7 +18,7 @@ const Output knapsacksolver::knapsack::upper_bound_dantzig(
         // Update bound.
         algorithm_formatter.update_bound(
                 instance.total_item_profit(),
-                std::stringstream("all items fit"));
+                "all items fit");
 
         algorithm_formatter.end();
         return output;
@@ -49,7 +49,7 @@ const Output knapsacksolver::knapsack::upper_bound_dantzig(
     // Update bound.
     algorithm_formatter.update_bound(
             upper_bound_curr,
-            std::stringstream("algorithm end (bound)"));
+            "algorithm end (bound)");
 
     algorithm_formatter.end();
     return output;

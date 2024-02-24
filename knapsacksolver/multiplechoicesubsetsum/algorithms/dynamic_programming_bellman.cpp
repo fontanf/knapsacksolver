@@ -84,11 +84,11 @@ const Output knapsacksolver::multiplechoicesubsetsum::dynamic_programming_bellma
     // Update solution.
     algorithm_formatter.update_solution(
             solution,
-            std::stringstream("algorithm end (solution)"));
+            "algorithm end (solution)");
     // Update bound.
     algorithm_formatter.update_bound(
             solution.weight(),
-            std::stringstream("algorithm end (bound)"));
+            "algorithm end (bound)");
 
     algorithm_formatter.end();
     return output;
@@ -185,13 +185,9 @@ const Output knapsacksolver::multiplechoicesubsetsum::dynamic_programming_bellma
     }
 
     // Update value.
-    algorithm_formatter.update_value(
-            opt,
-            std::stringstream("algorithm end (value)"));
+    algorithm_formatter.update_value(opt, "algorithm end (value)");
     // Update bound.
-    algorithm_formatter.update_bound(
-            opt,
-            std::stringstream("algorithm end (bound)"));
+    algorithm_formatter.update_bound(opt, "algorithm end (bound)");
 
     algorithm_formatter.end();
     return output;
@@ -404,13 +400,9 @@ const Output knapsacksolver::multiplechoicesubsetsum::dynamic_programming_bellma
     }
 
     // Update solution.
-    algorithm_formatter.update_solution(
-            solution,
-            std::stringstream("algorithm end (solution)"));
+    algorithm_formatter.update_solution(solution, "algorithm end (solution)");
     // Update bound.
-    algorithm_formatter.update_bound(
-            solution.weight(),
-            std::stringstream("algorithm end (bound)"));
+    algorithm_formatter.update_bound(solution.weight(), "algorithm end (bound)");
 
     algorithm_formatter.end();
     return output;

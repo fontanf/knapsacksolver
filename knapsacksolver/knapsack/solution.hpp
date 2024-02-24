@@ -202,6 +202,9 @@ struct Parameters: optimizationtools::Parameters
     /** Callback function called when a new best solution is found. */
     NewSolutionCallback new_solution_callback = [](const Output&) { };
 
+    /** Enable json output. */
+    bool json_output = false;
+
 
     virtual nlohmann::json to_json() const override
     {

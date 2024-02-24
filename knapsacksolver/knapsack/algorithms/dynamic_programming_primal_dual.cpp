@@ -146,7 +146,7 @@ void add_item(DynamicProgrammingPrimalDualInternalData& data)
                     && state.profit > data.output.value) {
                 std::stringstream ss;
                 ss << "it " << data.t - data.s << " (value)";
-                data.algorithm_formatter.update_value(state.profit, ss);
+                data.algorithm_formatter.update_value(state.profit, ss.str());
                 data.best_state = state;
             }
 
@@ -194,7 +194,7 @@ void add_item(DynamicProgrammingPrimalDualInternalData& data)
     if (data.output.bound > upper_bound_it) {
         std::stringstream ss;
         ss << "it " << data.t - data.s << " (bound)";
-        data.algorithm_formatter.update_bound(upper_bound_it, ss);
+        data.algorithm_formatter.update_bound(upper_bound_it, ss.str());
     }
 
     data.l0.swap(data.l);
@@ -294,7 +294,7 @@ void remove_item(DynamicProgrammingPrimalDualInternalData& data)
                 if (data.output.number_of_recursive_calls == 1) {
                     std::stringstream ss;
                     ss << "it " << data.t - data.s << " (value)";
-                    data.algorithm_formatter.update_value(state.profit, ss);
+                    data.algorithm_formatter.update_value(state.profit, ss.str());
                 }
                 data.best_state = state;
             }
@@ -312,7 +312,7 @@ void remove_item(DynamicProgrammingPrimalDualInternalData& data)
     if (data.output.bound > upper_bound_it) {
         std::stringstream ss;
         ss << "it " << data.t - data.s << " (bound)";
-        data.algorithm_formatter.update_bound(upper_bound_it, ss);
+        data.algorithm_formatter.update_bound(upper_bound_it, ss.str());
     }
 
     data.l0.swap(data.l);
@@ -404,11 +404,11 @@ const DynamicProgrammingPrimalDualOutput knapsacksolver::knapsack::dynamic_progr
         // Update solution.
         algorithm_formatter.update_solution(
                 solution,
-                std::stringstream("all items fit (solution)"));
+                "all items fit (solution)");
         // Update bound.
         algorithm_formatter.update_bound(
                 output.value,
-                std::stringstream("all items fit (bound)"));
+                "all items fit (bound)");
 
         algorithm_formatter.end();
         return output;
@@ -426,7 +426,7 @@ const DynamicProgrammingPrimalDualOutput knapsacksolver::knapsack::dynamic_progr
     // Update solution.
     algorithm_formatter.update_solution(
             greedy_output.solution,
-            std::stringstream("greedy"));
+            "greedy");
 
     // Compute an initial bound.
     UpperBoundDantzigParameters upper_bound_dantzig_parameters;
@@ -440,7 +440,7 @@ const DynamicProgrammingPrimalDualOutput knapsacksolver::knapsack::dynamic_progr
     // Update bound.
     algorithm_formatter.update_bound(
             upper_bound_output.bound,
-            std::stringstream("dantzig upper bound"));
+            "dantzig upper bound");
 
     // Recursion.
     Weight w_bar = data.partial_sort.break_solution().weight();
@@ -545,7 +545,7 @@ const DynamicProgrammingPrimalDualOutput knapsacksolver::knapsack::dynamic_progr
     // Update bound.
     algorithm_formatter.update_bound(
             output.value,
-            std::stringstream("algorithm end (bound)"));
+            "algorithm end (bound)");
 
     if (output.solution.profit() == output.bound) {
         algorithm_formatter.end();
@@ -585,7 +585,7 @@ const DynamicProgrammingPrimalDualOutput knapsacksolver::knapsack::dynamic_progr
         // Update solution.
         algorithm_formatter.update_solution(
                 solution,
-                std::stringstream("algorithm end (solution)"));
+                "algorithm end (solution)");
 
         algorithm_formatter.end();
         return output;
@@ -643,7 +643,7 @@ const DynamicProgrammingPrimalDualOutput knapsacksolver::knapsack::dynamic_progr
     // Update solution.
     algorithm_formatter.update_solution(
             solution,
-            std::stringstream("algorithm end (solution)"));
+            "algorithm end (solution)");
 
     algorithm_formatter.end();
     return output;

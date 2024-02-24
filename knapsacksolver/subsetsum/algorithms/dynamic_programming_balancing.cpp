@@ -88,11 +88,11 @@ const Output knapsacksolver::subsetsum::dynamic_programming_balancing_array(
     // Update lower bound.
     algorithm_formatter.update_value(
             optimal_value,
-            std::stringstream("algorithm end (value)"));
+            "algorithm end (value)");
     // Update upper bound.
     algorithm_formatter.update_bound(
             optimal_value,
-            std::stringstream("algorithm end (bound)"));
+            "algorithm end (bound)");
 
     algorithm_formatter.end();
     return output;

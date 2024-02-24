@@ -64,11 +64,11 @@ const Output knapsacksolver::subsetsum::dynamic_programming_bellman_array(
     // Update value.
     algorithm_formatter.update_solution(
             solution,
-            std::stringstream("algorithm end (solution)"));
+            "algorithm end (solution)");
     // Update bound.
     algorithm_formatter.update_bound(
             solution.weight(),
-            std::stringstream("algorithm end (bound)"));
+            "algorithm end (bound)");
 
     algorithm_formatter.end();
     return output;
@@ -120,7 +120,7 @@ const Output knapsacksolver::subsetsum::dynamic_programming_bellman_list(
         if (output.value < l0.back()) {
             std::stringstream ss;
             ss << "iteration " << item_id;
-            algorithm_formatter.update_value(l0.back(), ss);
+            algorithm_formatter.update_value(l0.back(), ss.str());
         }
 
         if (output.value == output.bound)
@@ -130,7 +130,7 @@ const Output knapsacksolver::subsetsum::dynamic_programming_bellman_list(
     // Update bound.
     algorithm_formatter.update_bound(
             l0.back(),
-            std::stringstream("algorithm end (bound)"));
+            "algorithm end (bound)");
 
     algorithm_formatter.end();
     return output;
@@ -212,11 +212,11 @@ const Output knapsacksolver::subsetsum::dynamic_programming_bellman_word_ram(
     // Update bound.
     algorithm_formatter.update_value(
             optimal_value,
-            std::stringstream("algorithm end (value)"));
+            "algorithm end (value)");
     // Update bound.
     algorithm_formatter.update_bound(
             optimal_value,
-            std::stringstream("algorithm end (bound)"));
+            "algorithm end (bound)");
 
     algorithm_formatter.end();
     return output;
@@ -406,11 +406,11 @@ const Output knapsacksolver::subsetsum::dynamic_programming_bellman_word_ram_rec
     // Update value.
     algorithm_formatter.update_solution(
             solution,
-            std::stringstream("algorithm end (solution)"));
+            "algorithm end (solution)");
     // Update bound.
     algorithm_formatter.update_bound(
             solution.weight(),
-            std::stringstream("algorithm end (bound)"));
+            "algorithm end (bound)");
 
     algorithm_formatter.end();
     return output;

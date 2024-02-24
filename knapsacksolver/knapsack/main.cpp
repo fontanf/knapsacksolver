@@ -25,6 +25,7 @@ void read_args(
     if (vm.count("log"))
         parameters.log_path = vm["log"].as<std::string>();
     parameters.log_to_stderr = vm.count("log-to-stderr");
+    parameters.json_output = (vm.count("output"));
     bool only_write_at_the_end = vm.count("only-write-at-the-end");
     if (!only_write_at_the_end) {
         std::string certificate_path = vm["certificate"].as<std::string>();

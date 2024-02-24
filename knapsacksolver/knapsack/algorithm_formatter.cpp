@@ -9,7 +9,8 @@ using namespace knapsacksolver::knapsack;
 void AlgorithmFormatter::start(
         const std::string& algorithm_name)
 {
-    output_.json["Parameters"] = parameters_.to_json();
+    if (parameters_.json_output)
+        output_.json["Parameters"] = parameters_.to_json();
 
     if (parameters_.verbosity_level == 0)
         return;
@@ -59,11 +60,11 @@ void AlgorithmFormatter::print_header()
         << std::setw(8) << "-------"
         << std::setw(32) << "-------"
         << std::endl;
-    print(std::stringstream(""));
+    print("");
 }
 
 void AlgorithmFormatter::print(
-        const std::stringstream& s)
+        const std::string& s)
 {
     if (parameters_.verbosity_level == 0)
         return;
@@ -75,12 +76,12 @@ void AlgorithmFormatter::print(
         << std::setw(24) << output_.bound
         << std::setw(16) << output_.absolute_optimality_gap()
         << std::setw(8) << std::fixed << std::setprecision(2) << output_.relative_optimality_gap() * 100 << std::defaultfloat << std::setprecision(precision)
-        << std::setw(32) << s.str() << std::endl;
+        << std::setw(32) << s << std::endl;
 }
 
 void AlgorithmFormatter::update_solution(
         const Solution& solution_new,
-        const std::stringstream& s)
+        const std::string& s)
 {
     if ((output_.has_solution() && optimizationtools::is_solution_strictly_better(
                 objective_direction(),
@@ -96,14 +97,15 @@ void AlgorithmFormatter::update_solution(
         output_.solution = solution_new;
         output_.value = output_.solution.objective_value();
         print(s);
-        output_.json["IntermediaryOutputs"].push_back(output_.to_json());
+        if (parameters_.json_output)
+            output_.json["IntermediaryOutputs"].push_back(output_.to_json());
         parameters_.new_solution_callback(output_);
     }
 }
 
 void AlgorithmFormatter::update_value(
         Weight value_new,
-        const std::stringstream& s)
+        const std::string& s)
 {
     if (optimizationtools::is_value_strictly_better(
                 objective_direction(),
@@ -112,14 +114,15 @@ void AlgorithmFormatter::update_value(
         output_.time = parameters_.timer.elapsed_time();
         output_.value = value_new;
         print(s);
-        output_.json["IntermediaryOutputs"].push_back(output_.to_json());
+        if (parameters_.json_output)
+            output_.json["IntermediaryOutputs"].push_back(output_.to_json());
         parameters_.new_solution_callback(output_);
     }
 }
 
 void AlgorithmFormatter::update_bound(
         Weight bound_new,
-        const std::stringstream& s)
+        const std::string& s)
 {
     if (optimizationtools::is_bound_strictly_better(
             objective_direction(),
@@ -128,7 +131,8 @@ void AlgorithmFormatter::update_bound(
         output_.time = parameters_.timer.elapsed_time();
         output_.bound = bound_new;
         print(s);
-        output_.json["IntermediaryOutputs"].push_back(output_.to_json());
+        if (parameters_.json_output)
+            output_.json["IntermediaryOutputs"].push_back(output_.to_json());
         parameters_.new_solution_callback(output_);
     }
 }
@@ -136,7 +140,8 @@ void AlgorithmFormatter::update_bound(
 void AlgorithmFormatter::end()
 {
     output_.time = parameters_.timer.elapsed_time();
-    output_.json["Output"] = output_.to_json();
+    if (parameters_.json_output)
+        output_.json["Output"] = output_.to_json();
 
     if (parameters_.verbosity_level == 0)
         return;

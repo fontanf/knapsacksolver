@@ -29,22 +29,22 @@ public:
 
     /** Print current state. */
     void print(
-            const std::stringstream& s);
+            const std::string& s);
 
     /** Update the solution. */
     void update_solution(
             const Solution& solution_new,
-            const std::stringstream& s);
+            const std::string& s);
 
     /** Update the solution value. */
     void update_value(
             Weight value,
-            const std::stringstream& s);
+            const std::string& s);
 
     /** Update the bound. */
     void update_bound(
             Weight bound_new,
-            const std::stringstream& s);
+            const std::string& s);
 
     /** Method to call at the end of the algorithm. */
     void end();
