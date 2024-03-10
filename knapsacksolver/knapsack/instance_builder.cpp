@@ -167,6 +167,11 @@ void InstanceFromFloatProfitsBuilder::add_item(
         double profit,
         Weight weight)
 {
+    if (profit != profit) {
+        throw std::invalid_argument(
+                "Item profits must not be NaN.");
+    }
+
     profits_double_.push_back(profit);
     Item item;
     item.profit = -1;
