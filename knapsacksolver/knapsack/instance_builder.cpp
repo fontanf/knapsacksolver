@@ -108,6 +108,12 @@ void InstanceBuilder::read_subsetsum_standard(std::ifstream& file)
 
 Instance InstanceBuilder::build()
 {
+    // Check knapsack capacity.
+    if (instance_.capacity() < 0) {
+        throw std::invalid_argument(
+                "The knapsack capacity must be positive.");
+    }
+
     // Check that profit are positive and weights are positive and smaller than
     // the capacity.
     for (ItemId item_id = 0;
@@ -240,6 +246,12 @@ Instance InstanceFromFloatProfitsBuilder::build()
         if (profit == 0)
             profit = 1;
         instance_.items_[item_id].profit = profit;
+    }
+
+    // Check knapsack capacity.
+    if (instance_.capacity() < 0) {
+        throw std::invalid_argument(
+                "The knapsack capacity must be positive.");
     }
 
     // Check that profit are positive and weights are positive and smaller than
