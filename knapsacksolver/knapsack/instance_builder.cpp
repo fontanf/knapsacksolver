@@ -32,8 +32,8 @@ void InstanceBuilder::read(
         read_pisinger(file);
     } else if (format == "jooken") {
         read_jooken(file);
-    } else if (format == "subsetsum_standard") {
-        read_subsetsum_standard(file);
+    } else if (format == "subset_sum_standard") {
+        read_subset_sum_standard(file);
     } else {
         throw std::invalid_argument(
                 "Unknown instance format \"" + format + "\".");
@@ -91,7 +91,7 @@ void InstanceBuilder::read_jooken(std::ifstream& file)
     set_capacity(capacity);
 }
 
-void InstanceBuilder::read_subsetsum_standard(std::ifstream& file)
+void InstanceBuilder::read_subset_sum_standard(std::ifstream& file)
 {
     ItemId number_of_items;
     Weight capacity;

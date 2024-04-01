@@ -204,7 +204,7 @@ Feasible:         1
 ```
 
 ```shell
-./bazel-bin/knapsacksolver/subsetsum/main -v 1 -i data/subsetsum/pthree/pthree_1000_1 -a dynamic-programming-bellman-word-ram-rec
+./bazel-bin/knapsacksolver/subset_sum/main -v 1 -i data/subset_sum/pthree/pthree_1000_1 -a dynamic-programming-bellman-word-ram-rec
 ```
 ```
 ====================================

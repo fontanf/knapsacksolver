@@ -54,8 +54,8 @@ private:
     /** Read an instance file in 'jooken' format. */
     void read_jooken(std::ifstream& file);
 
-    /** Read an subsetsum instance file in 'standard' format. */
-    void read_subsetsum_standard(std::ifstream& file);
+    /** Read an subset_sum instance file in 'standard' format. */
+    void read_subset_sum_standard(std::ifstream& file);
 
     /*
      * Private attributes
