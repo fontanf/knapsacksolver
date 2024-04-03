@@ -188,7 +188,7 @@ void InstanceFromFloatProfitsBuilder::add_item(
 Instance InstanceFromFloatProfitsBuilder::build()
 {
     if (instance_.number_of_items() == 0)
-        return {};
+        return std::move(instance_);
 
     // Check overflow because of total profit.
     //     multiplier * total_profit_double < INT_MAX
