@@ -2,6 +2,8 @@
 
 #include "knapsacksolver/knapsack/instance.hpp"
 
+#include <string>
+
 namespace knapsacksolver
 {
 namespace knapsack
