@@ -77,8 +77,10 @@ Compile:
 bazel build -- //...
 ```
 
-Download and uncompress the instances in the `data/` folder:
-https://drive.google.com/file/d/1k2Mp3Z5sb5tVJO8I5-WiAglqawk-l1k3/view?usp=sharing
+Download data:
+```shell
+python3 scripts/download_data.py
+```
 
 Solve:
 
