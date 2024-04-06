@@ -458,7 +458,7 @@ const DynamicProgrammingPrimalDualOutput knapsacksolver::knapsack::dynamic_progr
                 || !data.partial_sort.is_intervals_right_empty()
                 || data.t <= data.partial_sort.last_sorted_item_pos())) {
 
-        // Check endata.
+        // Check end.
         if (parameters.timer.needs_to_end()) {
             algorithm_formatter.end();
             return output;
@@ -479,7 +479,7 @@ const DynamicProgrammingPrimalDualOutput knapsacksolver::knapsack::dynamic_progr
                     add_item(data);
                     ++data.t;
 
-                    // Check endata.
+                    // Check end.
                     if (parameters.timer.needs_to_end()) {
                         algorithm_formatter.end();
                         return output;
@@ -499,7 +499,7 @@ const DynamicProgrammingPrimalDualOutput knapsacksolver::knapsack::dynamic_progr
                     remove_item(data);
                     --data.s;
 
-                    // Check endata.
+                    // Check end.
                     if (parameters.timer.needs_to_end()) {
                         algorithm_formatter.end();
                         return output;
@@ -516,7 +516,7 @@ const DynamicProgrammingPrimalDualOutput knapsacksolver::knapsack::dynamic_progr
             add_item(data);
             data.t++;
 
-            // Check endata.
+            // Check end.
             if (parameters.timer.needs_to_end()) {
                 algorithm_formatter.end();
                 return output;
@@ -531,7 +531,7 @@ const DynamicProgrammingPrimalDualOutput knapsacksolver::knapsack::dynamic_progr
             remove_item(data);
             data.s--;
 
-            // Check endata.
+            // Check end.
             if (parameters.timer.needs_to_end()) {
                 algorithm_formatter.end();
                 return output;
@@ -620,6 +620,11 @@ const DynamicProgrammingPrimalDualOutput knapsacksolver::knapsack::dynamic_progr
     sub_parameters.timer = parameters.timer;
     sub_parameters.verbosity_level = 0;
     auto sub_output = dynamic_programming_primal_dual(sub_instance, sub_parameters);
+    // Check end.
+    if (parameters.timer.needs_to_end()) {
+        algorithm_formatter.end();
+        return output;
+    }
 
     output.number_of_recursive_calls += sub_output.number_of_recursive_calls;
 
