@@ -14,6 +14,11 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ["3.8"]
 
+    env:
+      KNAPSACK_DATA: ${{ github.workspace }}/data/knapsack
+      SUBSET_SUM_DATA: ${{ github.workspace }}/data/subset_sum
+      MULITPLE_CHOICE_SUBSET_SUM_DATA: ${{ github.workspace }}/data/multiple_choice_subset_sum
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -31,14 +36,7 @@ jobs:
         cmake --build build --parallel
     - name: Run unit tests
       working-directory: build/test
-      run: |
-        echo "KNAPSACK_DATA: ${KNAPSACK_DATA}"
-        ls "${KNAPSACK_DATA}"
-        ctest --parallel
-      env:
-        KNAPSACK_DATA: ${{ github.workspace }}/data/knapsack
-        SUBSET_SUM_DATA: ${{ github.workspace }}/data/subset_sum
-        MULITPLE_CHOICE_SUBSET_SUM_DATA: ${{ github.workspace }}/data/multiple_choice_subset_sum
+      run: ctest --parallel
     - name: Run tests
       run: python3 -u scripts/run_tests.py test_results
     - name: Checkout main branch
