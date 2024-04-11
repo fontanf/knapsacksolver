@@ -1,0 +1,3 @@
+add_subdirectory(knapsack)
+add_subdirectory(subset_sum)
+add_subdirectory(multiple_choice_subset_sum)

@@ -70,11 +70,10 @@ Here are some usage examples of this library:
 
 ### Command line
 
-This project uses Bazel https://bazel.build/
-
 Compile:
 ```shell
-bazel build -- //...
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --parallel
 ```
 
 Download data:
@@ -85,7 +84,7 @@ python3 scripts/download_data.py
 Solve:
 
 ```shell
-./bazel-bin/knapsacksolver/knapsack/main --verbosity-level 1 --algorithm dynamic-programming-primal-dual --input data/knapsack/largecoeff/knapPI_2_10000_10000000/knapPI_2_10000_10000000_50.csv --format pisinger
+./build/src/knapsack/KnapsackSolver_knapsack_main --verbosity-level 1 --algorithm dynamic-programming-primal-dual --input data/knapsack/largecoeff/knapPI_2_10000_10000000/knapPI_2_10000_10000000_50.csv --format pisinger
 ```
 ```
 ====================================
@@ -206,7 +205,7 @@ Feasible:         1
 ```
 
 ```shell
-./bazel-bin/knapsacksolver/subset_sum/main -v 1 -i data/subset_sum/pthree/pthree_1000_1 -a dynamic-programming-bellman-word-ram-rec
+./build/src/subset_sum/KnapsackSolver_subset_sum_main  --verbosity-level 1  --input data/subset_sum/pthree/pthree_1000_1  --algorithm dynamic-programming-bellman-word-ram-rec
 ```
 ```
 ====================================
@@ -262,37 +261,7 @@ Feasible:         1
 
 Run tests:
 ```
-bazel test -- //...
-```
-
-### Python interface
-
-The Python library is generated at `bazel-bin/python/knapsacksolver.so` by the following command:
-```shell
-bazel build -- //python:knapsacksolver.so
-```
-
-Usage:
-```python
-import random
-import knapsacksolver
-
-# Create instance
-instance_builder = knapsacksolver.InstanceBuilder()
-number_of_items = 100
-total_weight = 0
-for item_id in range(number_of_items):
-    weight = random.randint(1, 1000000)
-    total_weight += weight
-    profit = weight + 10
-    instance_builder.add_item(profit, weight)
-
-instance_builder.set_capacity(total_weight // 2)
-instance = instance_builder.build()
-
-# Solve
-solution = knapsacksolver.solve(instance)
-solution.number_of_items()
-solution.profit()
-solution.contains(0)
+export KNAPSACK_DATA=$(pwd)/data/knapsack
+cd build/test
+ctest --parallel
 ```
