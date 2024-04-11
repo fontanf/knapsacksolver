@@ -36,9 +36,9 @@ jobs:
         ls "${KNAPSACK_DATA}"
         ctest --parallel
       env:
-        KNAPSACK_DATA: ${GITHUB_WORKSPACE}/data/knapsack
-        SUBSET_SUM_DATA: ${GITHUB_WORKSPACE}/data/subset_sum
-        MULITPLE_CHOICE_SUBSET_SUM_DATA: ${GITHUB_WORKSPACE}/data/multiple_choice_subset_sum
+        KNAPSACK_DATA: ${{ github.workspace }}/data/knapsack
+        SUBSET_SUM_DATA: ${{ github.workspace }}/data/subset_sum
+        MULITPLE_CHOICE_SUBSET_SUM_DATA: ${{ github.workspace }}/data/multiple_choice_subset_sum
     - name: Run tests
       run: python3 -u scripts/run_tests.py test_results
     - name: Checkout main branch
