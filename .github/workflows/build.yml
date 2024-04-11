@@ -51,4 +51,4 @@ jobs:
     - name: Run tests
       run: python3 -u scripts/run_tests.py test_results_ref
     - name: Process tests
-      run: python3 -u ./bazel-packingsolver/external/optimizationtools/scripts/process_tests.py --ref test_results_ref --new test_results
+      run: python3 -u ./build/_deps/optimizationtools-src/scripts/process_tests.py --ref test_results_ref --new test_results
