@@ -31,7 +31,10 @@ jobs:
         cmake --build build --parallel
     - name: Run unit tests
       working-directory: build/test
-      run: ctest --parallel
+      run: |
+        echo "KNAPSACK_DATA: ${KNAPSACK_DATA}"
+        ls "${KNAPSACK_DATA}"
+        ctest --parallel
       env:
         KNAPSACK_DATA: ${GITHUB_WORKSPACE}/data/knapsack
         SUBSET_SUM_DATA: ${GITHUB_WORKSPACE}/data/subset_sum
