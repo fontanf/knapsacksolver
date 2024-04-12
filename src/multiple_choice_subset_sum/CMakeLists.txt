@@ -18,3 +18,5 @@ target_sources(KnapsackSolver_multiple_choice_subset_sum_main PRIVATE
 target_link_libraries(KnapsackSolver_multiple_choice_subset_sum_main PUBLIC
     KnapsackSolver_multiple_choice_subset_sum_dynamic_programming_bellman
     Boost::program_options)
+set_target_properties(KnapsackSolver_multiple_choice_subset_sum_main PROPERTIES OUTPUT_NAME "KnapsackSolver_multiple_choice_subset_sum" ) 
+install(TARGETS KnapsackSolver_multiple_choice_subset_sum_main DESTINATION bin)

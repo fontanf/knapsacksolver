@@ -84,7 +84,7 @@ python3 scripts/download_data.py
 Solve:
 
 ```shell
-./build/src/knapsack/KnapsackSolver_knapsack_main --verbosity-level 1 --algorithm dynamic-programming-primal-dual --input data/knapsack/largecoeff/knapPI_2_10000_10000000/knapPI_2_10000_10000000_50.csv --format pisinger
+./build/src/knapsack/KnapsackSolver_knapsack --verbosity-level 1 --algorithm dynamic-programming-primal-dual --input data/knapsack/largecoeff/knapPI_2_10000_10000000/knapPI_2_10000_10000000_50.csv --format pisinger
 ```
 ```
 ====================================
@@ -205,7 +205,7 @@ Feasible:         1
 ```
 
 ```shell
-./build/src/subset_sum/KnapsackSolver_subset_sum_main  --verbosity-level 1  --input data/subset_sum/pthree/pthree_1000_1  --algorithm dynamic-programming-bellman-word-ram-rec
+./build/src/subset_sum/KnapsackSolver_subset_sum  --verbosity-level 1  --input data/subset_sum/pthree/pthree_1000_1  --algorithm dynamic-programming-bellman-word-ram-rec
 ```
 ```
 ====================================

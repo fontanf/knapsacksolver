@@ -34,6 +34,7 @@ jobs:
       run: |
         cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
         cmake --build build --parallel
+        cmake --install build --prefix install
     - name: Run unit tests
       working-directory: build/test
       run: ctest --parallel
@@ -48,6 +49,7 @@ jobs:
       run: |
         cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
         cmake --build build --parallel
+        cmake --install build --prefix install
     - name: Run tests
       run: python3 -u scripts/run_tests.py test_results_ref
     - name: Process tests

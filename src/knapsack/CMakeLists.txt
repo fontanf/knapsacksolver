@@ -23,6 +23,8 @@ target_link_libraries(KnapsackSolver_knapsack_main PUBLIC
     KnapsackSolver_knapsack_dynamic_programming_bellman
     KnapsackSolver_knapsack_dynamic_programming_primal_dual
     Boost::program_options)
+set_target_properties(KnapsackSolver_knapsack_main PROPERTIES OUTPUT_NAME "KnapsackSolver_knapsack" ) 
+install(TARGETS KnapsackSolver_knapsack_main DESTINATION bin)
 
 add_library(KnapsackSolver_knapsack_generator)
 target_sources(KnapsackSolver_knapsack_generator PRIVATE
