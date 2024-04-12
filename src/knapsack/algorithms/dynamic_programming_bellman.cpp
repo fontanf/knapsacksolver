@@ -645,23 +645,23 @@ struct RecData
     std::vector<Profit>::iterator values;
 };
 
-void opts_dynamic_programming_bellman_array(
+std::vector<Profit> opts_dynamic_programming_bellman_array(
         const Instance& instance,
         const Parameters& parameters,
         ItemPos item_id_1,
         ItemPos item_id_2,
-        Weight capacity,
-        std::vector<Profit>::iterator values)
+        Weight capacity)
 {
-    std::fill(values, values + capacity + 1, 0);
+    std::vector<Profit> values(capacity + 1, 0);
     for (ItemId item_id = item_id_1; item_id < item_id_2; ++item_id) {
         if (parameters.timer.needs_to_end())
             break;
         const Item& item = instance.item(item_id);
         for (Weight weight = capacity; weight >= item.weight; weight--)
-            if (*(values + weight) < *(values + weight - item.weight) + item.profit)
-                *(values + weight) = *(values + weight - item.weight) + item.profit;
+            if (values[weight] < values[weight - item.weight] + item.profit)
+                values[weight] = values[weight - item.weight] + item.profit;
     }
+    return values;
 }
 
 void dynamic_programming_bellman_array_rec_rec(
@@ -670,33 +670,29 @@ void dynamic_programming_bellman_array_rec_rec(
         Solution& solution,
         ItemPos item_id_1,
         ItemPos item_id_2,
-        Weight capacity,
-        std::vector<Profit>::iterator values)
+        Weight capacity)
 {
     ItemPos item_id_middle = (item_id_1 + item_id_2 - 1) / 2 + 1;
-    std::vector<Profit>::iterator values_2 = values + capacity + 1;
 
-    opts_dynamic_programming_bellman_array(
+    auto values_1 = opts_dynamic_programming_bellman_array(
             instance,
             parameters,
             item_id_1,
             item_id_middle,
-            capacity,
-            values);
-    opts_dynamic_programming_bellman_array(
+            capacity);
+    auto values_2 = opts_dynamic_programming_bellman_array(
             instance,
             parameters,
             item_id_middle,
             item_id_2,
-            capacity,
-            values_2);
+            capacity);
 
     Profit value_max  = -1;
     Weight optimal_capacity_1 = 0;
     Weight optimal_capacity_2 = 0;
     for (Weight capacity_1 = 0; capacity_1 <= capacity; ++capacity_1) {
         Weight capacity_2 = capacity - capacity_1;
-        Profit value = *(values + capacity_1) + *(values_2 + capacity_2);
+        Profit value = values_1[capacity_1] + values_2[capacity_2];
         if (value > value_max) {
             value_max = value;
             optimal_capacity_1 = capacity_1;
@@ -705,10 +701,10 @@ void dynamic_programming_bellman_array_rec_rec(
     }
 
     if (item_id_1 == item_id_middle - 1)
-        if (*(values + optimal_capacity_1) == instance.item(item_id_1).profit)
+        if (values_1[optimal_capacity_1] == instance.item(item_id_1).profit)
             solution.add(item_id_1);
     if (item_id_middle == item_id_2 - 1)
-        if (*(values_2 + optimal_capacity_2) == instance.item(item_id_middle).profit)
+        if (values_2[optimal_capacity_2] == instance.item(item_id_middle).profit)
             solution.add(item_id_middle);
 
     if (item_id_1 != item_id_middle - 1) {
@@ -718,8 +714,7 @@ void dynamic_programming_bellman_array_rec_rec(
                 solution,
                 item_id_1,
                 item_id_middle,
-                optimal_capacity_1,
-                values);
+                optimal_capacity_1);
     }
     if (item_id_middle != item_id_2 - 1) {
         dynamic_programming_bellman_array_rec_rec(
@@ -728,8 +723,7 @@ void dynamic_programming_bellman_array_rec_rec(
                 solution,
                 item_id_middle,
                 item_id_2,
-                optimal_capacity_2,
-                values + 2 * optimal_capacity_1 + item_id_middle - item_id_1);
+                optimal_capacity_2);
     }
 }
 
@@ -762,7 +756,6 @@ const Output knapsacksolver::knapsack::dynamic_programming_bellman_array_rec(
     }
 
     // Start recursion.
-    std::vector<Profit> values(2 * instance.capacity() + instance.number_of_items());
     Solution solution(instance);
     dynamic_programming_bellman_array_rec_rec(
             instance,
@@ -770,8 +763,7 @@ const Output knapsacksolver::knapsack::dynamic_programming_bellman_array_rec(
             solution,
             0,
             instance.number_of_items(),
-            instance.capacity(),
-            values.begin());
+            instance.capacity());
     if (parameters.timer.needs_to_end()) {
         algorithm_formatter.end();
         return output;
