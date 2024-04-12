@@ -20,6 +20,7 @@ target_link_libraries(KnapsackSolver_subset_sum_main PUBLIC
     KnapsackSolver_subset_sum_dynamic_programming_balancing
     KnapsackSolver_subset_sum_dynamic_programming_primal_dual
     Boost::program_options)
+set_target_properties(KnapsackSolver_subset_sum_main PROPERTIES OUTPUT_NAME "knapsacksolver_subset_sum" ) 
 install(TARGETS KnapsackSolver_subset_sum_main DESTINATION bin)
 
 add_library(KnapsackSolver_subset_sum_generator)

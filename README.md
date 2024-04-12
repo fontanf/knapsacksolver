@@ -73,7 +73,8 @@ Here are some usage examples of this library:
 Compile:
 ```shell
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build --parallel
+cmake --build build --config Release --parallel
+cmake --install build --config Release --prefix install
 ```
 
 Download data:
@@ -84,7 +85,7 @@ python3 scripts/download_data.py
 Solve:
 
 ```shell
-./build/src/knapsack/KnapsackSolver_knapsack --verbosity-level 1 --algorithm dynamic-programming-primal-dual --input data/knapsack/largecoeff/knapPI_2_10000_10000000/knapPI_2_10000_10000000_50.csv --format pisinger
+./install/bin/knapsacksolver_knapsack --verbosity-level 1 --algorithm dynamic-programming-primal-dual --input data/knapsack/largecoeff/knapPI_2_10000_10000000/knapPI_2_10000_10000000_50.csv --format pisinger
 ```
 ```
 ====================================
@@ -205,7 +206,7 @@ Feasible:         1
 ```
 
 ```shell
-./build/src/subset_sum/KnapsackSolver_subset_sum  --verbosity-level 1  --input data/subset_sum/pthree/pthree_1000_1  --algorithm dynamic-programming-bellman-word-ram-rec
+./install/bin/knapsacksolver_subset_sum  --verbosity-level 1  --input data/subset_sum/pthree/pthree_1000_1  --algorithm dynamic-programming-bellman-word-ram-rec
 ```
 ```
 ====================================
