@@ -16,7 +16,7 @@ args = parser.parse_args()
 knapsack_main = os.path.join(
         "install",
         "bin",
-        "KnapsackSolver_knapsack")
+        "KnapsackSolver_knapsack_main")
 knapsack_data = os.environ['KNAPSACK_DATA']
 
 
@@ -54,7 +54,7 @@ if args.tests is None or "knapsack-dynamic-programming-primal-dual" in args.test
 subset_sum_main = os.path.join(
         "install",
         "bin",
-        "KnapsackSolver_subset_sum")
+        "KnapsackSolver_subset_sum_main")
 subset_sum_data = os.environ['SUBSET_SUM_DATA']
 
 
