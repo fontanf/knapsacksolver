@@ -17,6 +17,6 @@ FetchContent_MakeAvailable(Boost)
 FetchContent_Declare(
     optimizationtools
     GIT_REPOSITORY https://github.com/fontanf/optimizationtools.git
-    GIT_TAG bf8539009c46afd2117e8ffdd7a2b40d3ced7394)
+    GIT_TAG 95bd5064ef65ea964fe00a1547c2a556cd98d588)
     #SOURCE_DIR "${PROJECT_SOURCE_DIR}/../optimizationtools/")
 FetchContent_MakeAvailable(optimizationtools)
