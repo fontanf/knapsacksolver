@@ -8,7 +8,7 @@ target_include_directories(KnapsackSolver_multiple_choice_subset_sum PUBLIC
     ${PROJECT_SOURCE_DIR}/include)
 target_link_libraries(KnapsackSolver_multiple_choice_subset_sum PUBLIC
     OptimizationTools::utils)
-add_library(KnapsackSolver::knapsack ALIAS KnapsackSolver_multiple_choice_subset_sum)
+add_library(KnapsackSolver::multiple_choice_subset_sum ALIAS KnapsackSolver_multiple_choice_subset_sum)
 
 add_subdirectory(algorithms)
 
@@ -18,5 +18,5 @@ target_sources(KnapsackSolver_multiple_choice_subset_sum_main PRIVATE
 target_link_libraries(KnapsackSolver_multiple_choice_subset_sum_main PUBLIC
     KnapsackSolver_multiple_choice_subset_sum_dynamic_programming_bellman
     Boost::program_options)
-set_target_properties(KnapsackSolver_multiple_choice_subset_sum_main PROPERTIES OUTPUT_NAME "knapsacksolver_multiple_choice_subset_sum" ) 
-install(TARGETS KnapsackSolver_multiple_choice_subset_sum_main DESTINATION bin)
+set_target_properties(KnapsackSolver_multiple_choice_subset_sum_main PROPERTIES OUTPUT_NAME "knapsacksolver_multiple_choice_subset_sum")
+install(TARGETS KnapsackSolver_multiple_choice_subset_sum_main)

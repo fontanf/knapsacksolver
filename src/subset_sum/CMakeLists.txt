@@ -20,12 +20,12 @@ target_link_libraries(KnapsackSolver_subset_sum_main PUBLIC
     KnapsackSolver_subset_sum_dynamic_programming_balancing
     KnapsackSolver_subset_sum_dynamic_programming_primal_dual
     Boost::program_options)
-set_target_properties(KnapsackSolver_subset_sum_main PROPERTIES OUTPUT_NAME "knapsacksolver_subset_sum" ) 
-install(TARGETS KnapsackSolver_subset_sum_main DESTINATION bin)
+set_target_properties(KnapsackSolver_subset_sum_main PROPERTIES OUTPUT_NAME "knapsacksolver_subset_sum")
+install(TARGETS KnapsackSolver_subset_sum_main)
 
 add_library(KnapsackSolver_subset_sum_generator)
 target_sources(KnapsackSolver_subset_sum_generator PRIVATE
     generator.cpp)
 target_link_libraries(KnapsackSolver_subset_sum_generator PUBLIC
     KnapsackSolver_subset_sum)
-add_library(KnapsackSolver::knapsack::generator ALIAS KnapsackSolver_subset_sum_generator)
+add_library(KnapsackSolver::subset_sum::generator ALIAS KnapsackSolver_subset_sum_generator)

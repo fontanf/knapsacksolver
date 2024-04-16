@@ -5,7 +5,7 @@ target_include_directories(KnapsackSolver_subset_sum_dynamic_programming_bellman
     ${PROJECT_SOURCE_DIR}/include)
 target_link_libraries(KnapsackSolver_subset_sum_dynamic_programming_bellman PUBLIC
     KnapsackSolver_subset_sum)
-add_library(KnapsackSolver::knapsack::dynamic_programming_bellman ALIAS KnapsackSolver_subset_sum_dynamic_programming_bellman)
+add_library(KnapsackSolver::subset_sum::dynamic_programming_bellman ALIAS KnapsackSolver_subset_sum_dynamic_programming_bellman)
 
 add_library(KnapsackSolver_subset_sum_dynamic_programming_balancing)
 target_sources(KnapsackSolver_subset_sum_dynamic_programming_balancing PRIVATE
@@ -14,7 +14,7 @@ target_include_directories(KnapsackSolver_subset_sum_dynamic_programming_balanci
     ${PROJECT_SOURCE_DIR}/include)
 target_link_libraries(KnapsackSolver_subset_sum_dynamic_programming_balancing PUBLIC
     KnapsackSolver_subset_sum)
-add_library(KnapsackSolver::knapsack::dynamic_programming_balancing ALIAS KnapsackSolver_subset_sum_dynamic_programming_balancing)
+add_library(KnapsackSolver::subset_sum::dynamic_programming_balancing ALIAS KnapsackSolver_subset_sum_dynamic_programming_balancing)
 
 add_library(KnapsackSolver_subset_sum_dynamic_programming_primal_dual)
 target_sources(KnapsackSolver_subset_sum_dynamic_programming_primal_dual PRIVATE
@@ -23,4 +23,4 @@ target_include_directories(KnapsackSolver_subset_sum_dynamic_programming_primal_
     ${PROJECT_SOURCE_DIR}/include)
 target_link_libraries(KnapsackSolver_subset_sum_dynamic_programming_primal_dual PUBLIC
     KnapsackSolver_subset_sum)
-add_library(KnapsackSolver::knapsack::dynamic_programming_primal_dual ALIAS KnapsackSolver_subset_sum_dynamic_programming_primal_dual)
+add_library(KnapsackSolver::subset_sum::dynamic_programming_primal_dual ALIAS KnapsackSolver_subset_sum_dynamic_programming_primal_dual)
