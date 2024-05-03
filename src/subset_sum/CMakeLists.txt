@@ -29,3 +29,12 @@ target_sources(KnapsackSolver_subset_sum_generator PRIVATE
 target_link_libraries(KnapsackSolver_subset_sum_generator PUBLIC
     KnapsackSolver_subset_sum)
 add_library(KnapsackSolver::subset_sum::generator ALIAS KnapsackSolver_subset_sum_generator)
+
+add_library(KnapsackSolver_subset_sum_tests)
+target_sources(KnapsackSolver_subset_sum_tests PRIVATE
+    tests.cpp)
+target_link_libraries(KnapsackSolver_subset_sum_tests PUBLIC
+    KnapsackSolver_subset_sum
+    Boost::filesystem
+    GTest::gtest_main)
+add_library(KnapsackSolver::subset_sum::tests ALIAS KnapsackSolver_subset_sum_tests)

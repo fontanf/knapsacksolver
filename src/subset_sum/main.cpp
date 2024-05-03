@@ -24,15 +24,24 @@ void read_args(
     parameters.log_to_stderr = vm.count("log-to-stderr");
     bool only_write_at_the_end = vm.count("only-write-at-the-end");
     if (!only_write_at_the_end) {
-        std::string certificate_path = vm["certificate"].as<std::string>();
-        std::string json_output_path = vm["output"].as<std::string>();
+
+        std::string certificate_path;
+        if (vm.count("certificate"))
+            certificate_path = vm["certificate"].as<std::string>();
+
+        std::string json_output_path;
+        if (vm.count("output"))
+            json_output_path = vm["output"].as<std::string>();
+
         parameters.new_solution_callback = [
             json_output_path,
             certificate_path](
                     const Output& output)
         {
-            output.write_json_output(json_output_path);
-            output.solution.write(certificate_path);
+            if (!json_output_path.empty())
+                output.write_json_output(json_output_path);
+            if (!certificate_path.empty())
+                output.solution.write(certificate_path);
         };
     }
 }
@@ -85,8 +94,8 @@ int main(int argc, char *argv[])
         ("algorithm,a", po::value<std::string>(), "set algorithm")
         ("input,i", po::value<std::string>()->required(), "set input file (required)")
         ("format,f", po::value<std::string>()->default_value(""), "set input file format (default: standard)")
-        ("output,o", po::value<std::string>()->default_value(""), "set JSON output file")
-        ("certificate,c", po::value<std::string>()->default_value(""), "set certificate file")
+        ("output,o", po::value<std::string>(), "set JSON output file")
+        ("certificate,c", po::value<std::string>(), "set certificate file")
         ("seed,s", po::value<Seed>()->default_value(0), "set seed")
         ("time-limit,t", po::value<double>(), "set time limit in seconds")
         ("verbosity-level,v", po::value<int>(), "set verbosity level")
@@ -103,7 +112,7 @@ int main(int argc, char *argv[])
     try {
         po::notify(vm);
     } catch (const po::required_option& e) {
-        std::cout << desc << std::endl;;
+        std::cout << desc << std::endl;
         return 1;
     }
 
@@ -118,10 +127,10 @@ int main(int argc, char *argv[])
     Output output = run(instance, vm);
 
     // Write outputs.
-    std::string certificate_path = vm["certificate"].as<std::string>();
-    std::string json_output_path = vm["output"].as<std::string>();
-    output.write_json_output(json_output_path);
-    output.solution.write(certificate_path);
+    if (vm.count("certificate"))
+        output.solution.write(vm["certificate"].as<std::string>());
+    if (vm.count("output"))
+        output.write_json_output(vm["output"].as<std::string>());
 
     return 0;
 }

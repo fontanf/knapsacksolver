@@ -192,7 +192,7 @@ const Output knapsacksolver::subset_sum::dynamic_programming_bellman_word_ram(
         //        std::cout << ((values[word] >> bit) & 1);
         //std::cout << std::endl;
 
-        if (((values[capacity_number_of_words - 1] >> capacity_number_of_bits_to_shift) & 1) == 1)
+        if (((values[capacity_number_of_words] >> capacity_number_of_bits_to_shift) & 1) == 1)
             break;
     }
 

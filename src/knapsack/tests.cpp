@@ -100,10 +100,12 @@ const Instance knapsacksolver::knapsack::get_instance(
             const TestInstancePath& files)
 {
     InstanceBuilder instance_builder;
-    std::string data_path = std::getenv("KNAPSACK_DATA");
-    data_path += "/";
+    std::string instance_path = get_path({
+            std::getenv("KNAPSACK_DATA"),
+            files.instance_path});
+    std::cout << "Instance path:  " << instance_path << std::endl;
     instance_builder.read(
-            data_path + files.instance_path,
+            instance_path,
             files.instance_format);
     return instance_builder.build();
 }
@@ -112,10 +114,11 @@ const Solution knapsacksolver::knapsack::get_solution(
         const Instance& instance,
         const TestInstancePath& files)
 {
-    std::string data_path = std::getenv("KNAPSACK_DATA");
-    data_path += "/";
+    std::string certificate_path = get_path({
+            std::getenv("KNAPSACK_DATA"),
+            files.certificate_path});
     return Solution(
             instance,
-            data_path + files.certificate_path,
+            certificate_path,
             files.certificate_format);
 }
