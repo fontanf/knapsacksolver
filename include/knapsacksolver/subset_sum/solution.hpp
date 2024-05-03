@@ -29,7 +29,7 @@ public:
     /** Create a solution from a file. */
     Solution(
             const Instance& instance,
-            std::string certificate_path);
+            const std::string& certificate_path);
 
     /** Add an item to the solution. */
     void add(ItemId item_id);
@@ -61,7 +61,7 @@ public:
      */
 
     /** Write the solution to a file. */
-    void write(std::string filepath) const;
+    void write(const std::string& certificate_path) const;
 
     /** Export solution characteristics to a JSON structure. */
     nlohmann::json to_json() const;

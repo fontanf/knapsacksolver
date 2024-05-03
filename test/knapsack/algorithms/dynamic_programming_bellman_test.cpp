@@ -27,7 +27,7 @@ TEST_P(ExactNoSolutionAlgorithmTest, ExactNoSolutionAlgorithm)
 }
 
 INSTANTIATE_TEST_SUITE_P(
-        DynamicProgrammingBellmanArray,
+        KnapsackDynamicProgrammingBellmanArray,
         ExactNoSolutionAlgorithmTest,
         testing::ValuesIn(get_test_params(
                 {
@@ -42,7 +42,7 @@ INSTANTIATE_TEST_SUITE_P(
                 })));
 
 INSTANTIATE_TEST_SUITE_P(
-        DynamicProgrammingBellmanNoSolution,
+        KnapsackDynamicProgrammingBellmanNoSolution,
         ExactNoSolutionAlgorithmTest,
         testing::ValuesIn(get_test_params(
                 {
@@ -74,7 +74,7 @@ INSTANTIATE_TEST_SUITE_P(
                 })));
 
 INSTANTIATE_TEST_SUITE_P(
-        DynamicProgrammingBellman,
+        KnapsackDynamicProgrammingBellman,
         ExactAlgorithmTest,
         testing::ValuesIn(get_test_params(
                 {

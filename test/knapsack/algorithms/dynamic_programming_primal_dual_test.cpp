@@ -17,7 +17,7 @@ TEST_P(ExactAlgorithmTest, ExactAlgorithm)
 }
 
 INSTANTIATE_TEST_SUITE_P(
-        DynamicProgrammingPrimalDualPartialSolutionSize,
+        KnapsackDynamicProgrammingPrimalDualPartialSolutionSize,
         ExactAlgorithmTest,
         testing::ValuesIn(get_test_params(
                 {
@@ -43,7 +43,7 @@ INSTANTIATE_TEST_SUITE_P(
                 {get_test_instance_paths()})));
 
 INSTANTIATE_TEST_SUITE_P(
-        DynamicProgrammingPrimalDual,
+        KnapsackDynamicProgrammingPrimalDual,
         ExactAlgorithmTest,
         testing::ValuesIn(get_test_params(
                 {

@@ -11,7 +11,7 @@ Solution::Solution(const Instance& instance):
 
 Solution::Solution(
         const Instance& instance,
-        std::string certificate_path):
+        const std::string& certificate_path):
     Solution(instance)
 {
     if (certificate_path.empty())
@@ -38,7 +38,8 @@ void Solution::add(ItemId item_id)
     weight_ += instance().weight(item_id);
 }
 
-void Solution::write(std::string certificate_path) const
+void Solution::write(
+        const std::string& certificate_path) const
 {
     if (certificate_path.empty())
         return;
