@@ -594,7 +594,7 @@ const DynamicProgrammingPrimalDualOutput knapsacksolver::knapsack::dynamic_progr
     // Build new instance.
     InstanceBuilder sub_instance_builder;
     std::vector<ItemId> sub2original;
-    Weight sub_capacity = instance.capacity() - solution.weight();
+    Weight sub_capacity = data.best_state.weight - solution.weight();
     sub_instance_builder.set_capacity(sub_capacity);
     for (ItemPos item_pos = data.s + 1;
             item_pos <= data.partial_sort.last_sorted_item_pos();
