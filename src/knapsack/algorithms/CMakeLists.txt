@@ -16,6 +16,7 @@ target_link_libraries(KnapsackSolver_knapsack_greedy PUBLIC
     KnapsackSolver_knapsack)
 add_library(KnapsackSolver::knapsack::greedy ALIAS KnapsackSolver_knapsack_greedy)
 
+find_package(Threads)
 add_library(KnapsackSolver_knapsack_dynamic_programming_bellman)
 target_sources(KnapsackSolver_knapsack_dynamic_programming_bellman PRIVATE
     dynamic_programming_bellman.cpp)
@@ -24,7 +25,8 @@ target_include_directories(KnapsackSolver_knapsack_dynamic_programming_bellman P
 target_link_libraries(KnapsackSolver_knapsack_dynamic_programming_bellman PUBLIC
     KnapsackSolver_knapsack
     KnapsackSolver_knapsack_upper_bound_dantzig
-    KnapsackSolver_knapsack_greedy)
+    KnapsackSolver_knapsack_greedy
+    Threads::Threads)
 add_library(KnapsackSolver::knapsack::dynamic_programming_bellman ALIAS KnapsackSolver_knapsack_dynamic_programming_bellman)
 
 add_library(KnapsackSolver_knapsack_dynamic_programming_primal_dual)
