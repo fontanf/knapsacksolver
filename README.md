@@ -19,10 +19,10 @@ And therefore, having efficient algorithms with reliable implementations to solv
 The goal of this repository is to provide such efficient and reliable implementations.
 
 Here are some usage examples of this library:
-* [Lifting the length of a bin in a 3D packing problem](https://github.com/fontanf/packingsolver/blob/dev_2/packingsolver/boxstacks/branching_scheme.cpp#L67)
-* [Solving a 0-1 knapsack subproblem inside an algorithm for a geometrical variable-sized bin packing problem](https://github.com/fontanf/packingsolver/blob/dev_2/packingsolver/algorithms/dichotomic_search.hpp#L135)
-* Solving the pricing problem inside a column generation algorithm for the [cutting stock problem](https://github.com/fontanf/columngenerationsolver/blob/main/examples/multipleknapsack.hpp#L157), the [multiple knapsack problem](https://github.com/fontanf/columngenerationsolver/blob/main/examples/cuttingstock.hpp#L123), or the [genralized assignment problem](https://github.com/fontanf/generalizedassignmentsolver/blob/master/generalizedassignmentsolver/algorithms/column_generation.cpp#L181)
-* [Solving a 0-1 knapsack subproblem inside an algorithm for the packing while travelling problem](https://github.com/fontanf/travellingthiefsolver/blob/master/travellingthiefsolver/packingwhiletravelling/algorithms/sequential_value_correction.cpp#L19)
+* [Lifting the length of a bin in a 3D packing problem](https://github.com/fontanf/packingsolver/blob/2cddb90686fb4a0e92f4ee1b4335ceaa2048d2f4/src/boxstacks/branching_scheme.cpp#L272)
+* [Solving a 0-1 knapsack subproblem inside an algorithm for a geometrical variable-sized bin packing problem](https://github.com/fontanf/packingsolver/blob/2cddb90686fb4a0e92f4ee1b4335ceaa2048d2f4/src/algorithms/dichotomic_search.hpp#L149)
+* Solving the pricing problem inside a column generation algorithm for the [cutting stock problem](https://github.com/fontanf/columngenerationsolver/blob/096802d9e20d2826aed5b44e3b68ac9df6b20da2/include/columngenerationsolver/examples/cutting_stock.hpp#L123), the [multiple knapsack problem](https://github.com/fontanf/columngenerationsolver/blob/096802d9e20d2826aed5b44e3b68ac9df6b20da2/include/columngenerationsolver/examples/multiple_knapsack.hpp#L154), or the [genralized assignment problem](https://github.com/fontanf/generalizedassignmentsolver/blob/68be0ab77efd897fd583f1031dd6cbc946b33f5a/src/algorithms/column_generation.cpp#L177)
+* [Solving a 0-1 knapsack subproblem inside an algorithm for the packing while travelling problem](https://github.com/fontanf/travellingthiefsolver/blob/ce1b6805e8aee8ee3300fbbc97dbc9153eecff01/src/packing_while_travelling/algorithms/sequential_value_correction.cpp#L19)
 
 ## Implemented algorithms
 
