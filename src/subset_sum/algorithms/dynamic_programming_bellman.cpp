@@ -8,17 +8,17 @@ using namespace knapsacksolver::subset_sum;
 ////////////////////// dynamic_programming_bellman_array ///////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-Output knapsacksolver::subset_sum::dynamic_programming_bellman_array(
+DynamicProgrammingBellmanArrayOutput knapsacksolver::subset_sum::dynamic_programming_bellman_array(
         const Instance& instance,
         const Parameters& parameters)
 {
-    Output output(instance);
+    DynamicProgrammingBellmanArrayOutput output(instance);
     AlgorithmFormatter algorithm_formatter(parameters, output);
     algorithm_formatter.start("Dynamic programming - Bellman - array");
     algorithm_formatter.print_header();
 
-    std::vector<ItemId> values(instance.capacity() + 1, -1);
-    values[0] = -2;
+    output.values = std::vector<ItemId>(instance.capacity() + 1, -1);
+    output.values[0] = -2;
     Weight weight_sum = 0;
     for (ItemPos item_id = 0; item_id < instance.number_of_items(); ++item_id) {
         // Check time
@@ -32,9 +32,9 @@ Output knapsacksolver::subset_sum::dynamic_programming_bellman_array(
         for (Weight weight = std::min(instance.capacity(), weight_sum);
                 weight >= instance.weight(item_id);
                 weight--) {
-            if (values[weight] == -1
-                    && values[weight - instance.weight(item_id)] != -1) {
-                values[weight] = item_id;
+            if (output.values[weight] == -1
+                    && output.values[weight - instance.weight(item_id)] != -1) {
+                output.values[weight] = item_id;
             }
         }
 
@@ -43,20 +43,20 @@ Output knapsacksolver::subset_sum::dynamic_programming_bellman_array(
         //std::cout << std::endl;
 
         // If optimum reached, stop.
-        if (values[instance.capacity()] != -1)
+        if (output.values[instance.capacity()] != -1)
             break;
     }
 
     Solution solution(instance);
     Weight weight_cur = 0;
     for (Weight weight = instance.capacity(); weight >= 0; weight--) {
-        if (values[weight] != -1) {
+        if (output.values[weight] != -1) {
             weight_cur = weight;
             break;
         }
     }
     while (weight_cur > 0) {
-        ItemId item_id = values[weight_cur];
+        ItemId item_id = output.values[weight_cur];
         solution.add(item_id);
         weight_cur -= instance.weight(item_id);
     }
@@ -140,19 +140,19 @@ Output knapsacksolver::subset_sum::dynamic_programming_bellman_list(
 ///////////////////// dynamic_programming_bellman_word_ram /////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-Output knapsacksolver::subset_sum::dynamic_programming_bellman_word_ram(
+DynamicProgrammingBellmanWordRamOutput knapsacksolver::subset_sum::dynamic_programming_bellman_word_ram(
         const Instance& instance,
         const Parameters& parameters)
 {
-    Output output(instance);
+    DynamicProgrammingBellmanWordRamOutput output(instance);
     AlgorithmFormatter algorithm_formatter(parameters, output);
     algorithm_formatter.start("Dynamic programming - Bellman - word RAM");
     algorithm_formatter.print_header();
 
     Weight capacity_number_of_words = (instance.capacity() >> 6);
     Weight capacity_number_of_bits_to_shift = instance.capacity() - (capacity_number_of_words << 6);
-    std::vector<uint64_t> values(capacity_number_of_words + 1, 0);
-    values[0] = 1;
+    output.values = std::vector<uint64_t>(capacity_number_of_words + 1, 0);
+    output.values[0] = 1;
 
     Weight weight_sum = 0;
 
@@ -173,15 +173,15 @@ Output knapsacksolver::subset_sum::dynamic_programming_bellman_word_ram(
         Weight word_write = word_read - number_of_words_to_shift;
         if (number_of_bits_to_shift_left != 0) {
             while (word_write > 0) {
-                values[word_read] |= (values[word_write] << number_of_bits_to_shift_left);
-                values[word_read] |= (values[word_write - 1] >> number_of_bits_to_shift_right);
+                output.values[word_read] |= (output.values[word_write] << number_of_bits_to_shift_left);
+                output.values[word_read] |= (output.values[word_write - 1] >> number_of_bits_to_shift_right);
                 word_read--;
                 word_write--;
             }
-            values[word_read] |= (values[word_write] << number_of_bits_to_shift_left);
+            output.values[word_read] |= (output.values[word_write] << number_of_bits_to_shift_left);
         } else {
             while (word_write >= 0) {
-                values[word_read] |= values[word_write];
+                output.values[word_read] |= output.values[word_write];
                 word_read--;
                 word_write--;
             }
@@ -192,18 +192,18 @@ Output knapsacksolver::subset_sum::dynamic_programming_bellman_word_ram(
         //        std::cout << ((values[word] >> bit) & 1);
         //std::cout << std::endl;
 
-        if (((values[capacity_number_of_words] >> capacity_number_of_bits_to_shift) & 1) == 1)
+        if (((output.values[capacity_number_of_words] >> capacity_number_of_bits_to_shift) & 1) == 1)
             break;
     }
 
     Weight optimal_value = 0;
     for (Weight word = capacity_number_of_words; optimal_value == 0; --word) {
-        if (values[word] == 0)
+        if (output.values[word] == 0)
             continue;
         for (int bit = 63; bit >= 0; --bit) {
             Weight weight = 64 * word + bit;
             if (weight <= instance.capacity()
-                    && ((values[word] >> bit) & 1) == 1) {
+                    && ((output.values[word] >> bit) & 1) == 1) {
                 optimal_value = weight;
                 break;
             }
