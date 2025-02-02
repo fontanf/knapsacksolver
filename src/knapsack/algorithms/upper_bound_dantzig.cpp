@@ -5,7 +5,7 @@
 
 using namespace knapsacksolver::knapsack;
 
-const Output knapsacksolver::knapsack::upper_bound_dantzig(
+Output knapsacksolver::knapsack::upper_bound_dantzig(
         const Instance& instance,
         const UpperBoundDantzigParameters& parameters)
 {

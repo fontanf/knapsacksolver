@@ -14,7 +14,7 @@ struct SurrogateRelaxationParameters: Parameters
     SolveCallback solve_callback = [](const Instance& instance) { return Output(instance); };
 };
 
-const Output surrogate_relaxation(
+Output surrogate_relaxation(
         const Instance& instance,
         const SurrogateRelaxationParameters& parameters = {});
 

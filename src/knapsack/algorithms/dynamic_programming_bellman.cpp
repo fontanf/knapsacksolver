@@ -16,7 +16,7 @@ using namespace knapsacksolver::knapsack;
 ////////////////////// dynamic_programming_bellman_array ///////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-const Output knapsacksolver::knapsack::dynamic_programming_bellman_array(
+Output knapsacksolver::knapsack::dynamic_programming_bellman_array(
         const Instance& instance,
         const Parameters& parameters)
 {
@@ -93,7 +93,7 @@ void dynamic_programming_bellman_array_parallel_worker(
     }
 }
 
-const Output knapsacksolver::knapsack::dynamic_programming_bellman_array_parallel(
+Output knapsacksolver::knapsack::dynamic_programming_bellman_array_parallel(
         const Instance& instance,
         const Parameters& parameters)
 {
@@ -222,7 +222,7 @@ Profit dynamic_programming_bellman_rec_rec(
     return values[state_id];
 }
 
-const Output knapsacksolver::knapsack::dynamic_programming_bellman_rec(
+Output knapsacksolver::knapsack::dynamic_programming_bellman_rec(
         const Instance& instance,
         const Parameters& parameters)
 {
@@ -281,7 +281,7 @@ const Output knapsacksolver::knapsack::dynamic_programming_bellman_rec(
 //////////////////// dynamic_programming_bellman_array_all /////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-const Output knapsacksolver::knapsack::dynamic_programming_bellman_array_all(
+Output knapsacksolver::knapsack::dynamic_programming_bellman_array_all(
         const Instance& instance,
         const Parameters& parameters)
 {
@@ -727,7 +727,7 @@ void dynamic_programming_bellman_array_rec_rec(
     }
 }
 
-const Output knapsacksolver::knapsack::dynamic_programming_bellman_array_rec(
+Output knapsacksolver::knapsack::dynamic_programming_bellman_array_rec(
         const Instance& instance,
         const Parameters& parameters)
 {
@@ -804,7 +804,7 @@ std::ostream& operator<<(std::ostream& os, const std::vector<BellmanState>& l)
     return os;
 }
 
-const Output knapsacksolver::knapsack::dynamic_programming_bellman_list(
+Output knapsacksolver::knapsack::dynamic_programming_bellman_list(
         const Instance& instance,
         const DynamicProgrammingBellmanListParameters& parameters)
 {

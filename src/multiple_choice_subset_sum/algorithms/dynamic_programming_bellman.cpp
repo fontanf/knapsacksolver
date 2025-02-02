@@ -10,7 +10,7 @@ using namespace knapsacksolver::multiple_choice_subset_sum;
 ////////////////////// dynamic_programming_bellman_array ///////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-const Output knapsacksolver::multiple_choice_subset_sum::dynamic_programming_bellman_array(
+Output knapsacksolver::multiple_choice_subset_sum::dynamic_programming_bellman_array(
         const Instance& instance,
         const Parameters& parameters)
 {
@@ -98,7 +98,7 @@ const Output knapsacksolver::multiple_choice_subset_sum::dynamic_programming_bel
 ///////////////////// dynamic_programming_bellman_word_ram /////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-const Output knapsacksolver::multiple_choice_subset_sum::dynamic_programming_bellman_word_ram(
+Output knapsacksolver::multiple_choice_subset_sum::dynamic_programming_bellman_word_ram(
         const Instance& instance,
         const Parameters& parameters)
 {
@@ -377,7 +377,7 @@ void dynamic_programming_bellman_word_ram_rec_rec(
     }
 }
 
-const Output knapsacksolver::multiple_choice_subset_sum::dynamic_programming_bellman_word_ram_rec(
+Output knapsacksolver::multiple_choice_subset_sum::dynamic_programming_bellman_word_ram_rec(
         const Instance& instance,
         const Parameters& parameters)
 {

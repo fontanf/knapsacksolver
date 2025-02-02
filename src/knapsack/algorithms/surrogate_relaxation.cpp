@@ -212,7 +212,7 @@ UBS surrogate_solve(
     return {ub, s_best};
 }
 
-const Output knapsacksolver::knapsack::surrogate_relaxation(
+Output knapsacksolver::knapsack::surrogate_relaxation(
         const Instance& instance,
         const SurrogateRelaxationParameters& parameters)
 {
