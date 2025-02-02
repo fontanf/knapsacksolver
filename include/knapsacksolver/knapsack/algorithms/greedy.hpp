@@ -8,7 +8,7 @@ namespace knapsacksolver
 namespace knapsack
 {
 
-const Output trivial(
+Output trivial(
         const Instance& instance,
         const Parameters& parameters = {});
 
@@ -44,7 +44,7 @@ struct GreedyParameters: Parameters
     }
 };
 
-const Output greedy(
+Output greedy(
         const Instance& instance,
         const GreedyParameters& parameters = {});
 

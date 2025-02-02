@@ -8,7 +8,7 @@ using namespace knapsacksolver::subset_sum;
 ///////////////////// dynamic_programming_balancing_array //////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-const Output knapsacksolver::subset_sum::dynamic_programming_balancing_array(
+Output knapsacksolver::subset_sum::dynamic_programming_balancing_array(
         const Instance& instance,
         const Parameters& parameters)
 {

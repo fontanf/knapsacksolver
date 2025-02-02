@@ -7,22 +7,22 @@ namespace knapsacksolver
 namespace knapsack
 {
 
-const Output dynamic_programming_bellman_rec(
+Output dynamic_programming_bellman_rec(
         const Instance& instance,
         const Parameters& parameters = {});
 
 
-const Output dynamic_programming_bellman_array(
+Output dynamic_programming_bellman_array(
         const Instance& instance,
         const Parameters& parameters = {});
 
 
-const Output dynamic_programming_bellman_array_parallel(
+Output dynamic_programming_bellman_array_parallel(
         const Instance& instance,
         const Parameters& parameters = {});
 
 
-const Output dynamic_programming_bellman_array_all(
+Output dynamic_programming_bellman_array_all(
         const Instance& instance,
         const Parameters& parameters = {});
 
@@ -121,7 +121,7 @@ const DynamicProgrammingBellmanArrayPartOutput dynamic_programming_bellman_array
         const DynamicProgrammingBellmanArrayPartParameters& parameters = {});
 
 
-const Output dynamic_programming_bellman_array_rec(
+Output dynamic_programming_bellman_array_rec(
         const Instance& instance,
         const Parameters& parameters = {});
 
@@ -152,7 +152,7 @@ struct DynamicProgrammingBellmanListParameters: Parameters
     }
 };
 
-const Output dynamic_programming_bellman_list(
+Output dynamic_programming_bellman_list(
         const Instance& instance,
         const DynamicProgrammingBellmanListParameters& parameters = {});
 

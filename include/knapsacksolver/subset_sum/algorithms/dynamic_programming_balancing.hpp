@@ -7,7 +7,7 @@ namespace knapsacksolver
 namespace subset_sum
 {
 
-const Output dynamic_programming_balancing_array(
+Output dynamic_programming_balancing_array(
         const Instance& instance,
         const Parameters& parameters = {});
 

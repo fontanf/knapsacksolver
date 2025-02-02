@@ -5,7 +5,7 @@
 
 using namespace knapsacksolver::knapsack;
 
-const Output knapsacksolver::knapsack::greedy(
+Output knapsacksolver::knapsack::greedy(
         const Instance& instance,
         const GreedyParameters& parameters)
 {

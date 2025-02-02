@@ -39,7 +39,7 @@ struct UpperBoundDantzigParameters: Parameters
     }
 };
 
-const Output upper_bound_dantzig(
+Output upper_bound_dantzig(
         const Instance& instance,
         const UpperBoundDantzigParameters& parameters = {});
 

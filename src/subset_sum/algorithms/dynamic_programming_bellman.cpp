@@ -8,7 +8,7 @@ using namespace knapsacksolver::subset_sum;
 ////////////////////// dynamic_programming_bellman_array ///////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-const Output knapsacksolver::subset_sum::dynamic_programming_bellman_array(
+Output knapsacksolver::subset_sum::dynamic_programming_bellman_array(
         const Instance& instance,
         const Parameters& parameters)
 {
@@ -78,7 +78,7 @@ const Output knapsacksolver::subset_sum::dynamic_programming_bellman_array(
 /////////////////////// dynamic_programming_bellman_list ///////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-const Output knapsacksolver::subset_sum::dynamic_programming_bellman_list(
+Output knapsacksolver::subset_sum::dynamic_programming_bellman_list(
         const Instance& instance,
         const Parameters& parameters)
 {
@@ -140,7 +140,7 @@ const Output knapsacksolver::subset_sum::dynamic_programming_bellman_list(
 ///////////////////// dynamic_programming_bellman_word_ram /////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-const Output knapsacksolver::subset_sum::dynamic_programming_bellman_word_ram(
+Output knapsacksolver::subset_sum::dynamic_programming_bellman_word_ram(
         const Instance& instance,
         const Parameters& parameters)
 {
@@ -381,7 +381,7 @@ void dynamic_programming_bellman_word_ram_rec_rec(
     }
 }
 
-const Output knapsacksolver::subset_sum::dynamic_programming_bellman_word_ram_rec(
+Output knapsacksolver::subset_sum::dynamic_programming_bellman_word_ram_rec(
         const Instance& instance,
         const Parameters& parameters)
 {
