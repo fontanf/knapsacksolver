@@ -1,8 +1,0 @@
-add_executable(KnapsackSolver_subset_sum_dynamic_programming_bellman_test)
-target_sources(KnapsackSolver_subset_sum_dynamic_programming_bellman_test PRIVATE
-    dynamic_programming_bellman_test.cpp)
-target_link_libraries(KnapsackSolver_subset_sum_dynamic_programming_bellman_test
-    KnapsackSolver_subset_sum_dynamic_programming_bellman
-    KnapsackSolver_subset_sum_tests
-    GTest::gtest_main)
-add_test(KnapsackSolver_subset_sum_dynamic_programming_bellman_test KnapsackSolver_subset_sum_dynamic_programming_bellman_test)

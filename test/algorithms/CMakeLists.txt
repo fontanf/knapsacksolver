@@ -1,0 +1,18 @@
+add_executable(KnapsackSolver_dynamic_programming_bellman_test)
+target_sources(KnapsackSolver_dynamic_programming_bellman_test PRIVATE
+    dynamic_programming_bellman_test.cpp)
+target_link_libraries(KnapsackSolver_dynamic_programming_bellman_test
+    KnapsackSolver_dynamic_programming_bellman
+    KnapsackSolver_tests
+    GTest::gtest_main)
+gtest_discover_tests(KnapsackSolver_dynamic_programming_bellman_test)
+
+add_executable(KnapsackSolver_dynamic_programming_primal_dual_test)
+target_sources(KnapsackSolver_dynamic_programming_primal_dual_test PRIVATE
+    dynamic_programming_primal_dual_test.cpp)
+target_link_libraries(KnapsackSolver_dynamic_programming_primal_dual_test
+    KnapsackSolver_dynamic_programming_primal_dual
+    KnapsackSolver_tests
+    GTest::gtest_main)
+add_test(KnapsackSolver_dynamic_programming_primal_dual_test KnapsackSolver_dynamic_programming_primal_dual_test)
+set_tests_properties(KnapsackSolver_dynamic_programming_primal_dual_test PROPERTIES TIMEOUT 10000)

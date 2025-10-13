@@ -15,9 +15,7 @@ jobs:
         python-version: ["3.8"]
 
     env:
-      KNAPSACK_DATA: ${{ github.workspace }}/data/knapsack
-      SUBSET_SUM_DATA: ${{ github.workspace }}/data/subset_sum
-      MULITPLE_CHOICE_SUBSET_SUM_DATA: ${{ github.workspace }}/data/multiple_choice_subset_sum
+      KNAPSACK_DATA: ${{ github.workspace }}/data
 
     steps:
     - name: Checkout code
@@ -28,7 +26,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Download data
       run: |
-        python3 -m pip install gdown
+        python3 -m pip install -r requirements.txt
         python3 -u scripts/download_data.py
     - name: Build
       run: |
@@ -36,8 +34,7 @@ jobs:
         cmake --build build --config Release --parallel
         cmake --install build --config Release --prefix install
     - name: Run unit tests
-      working-directory: build/test
-      run: ctest --parallel
+      run: ctest --test-dir build/test --parallel
     - name: Run tests
       run: python3 -u scripts/run_tests.py test_results
     - name: Checkout main branch

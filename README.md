@@ -1,32 +1,17 @@
 # KnapsackSolver
 
-A solver for some knapsack problems:
-* 0-1 knapsack problem
-* Subset sum problem
-* Multiple-choice subset sum problem
+A solver for the 0-1 knapsack problem
 
 ![knapsack](knapsack.png?raw=true "knapsack")
 
 [image source](https://commons.wikimedia.org/wiki/File:Knapsack.svg)
 
-These problems often appear as subproblems of more complex problems. For example:
-* To generate cuts in branch-and-cut algorithms
-* To solve pricing problems in column generation algorithms
-* To lift bin and item dimensions in packing problems
-
-And therefore, having efficient algorithms with reliable implementations to solve them is very useful.
-
-The goal of this repository is to provide such efficient and reliable implementations.
-
-Here are some usage examples of this library:
-* [Lifting the length of a bin in a 3D packing problem](https://github.com/fontanf/packingsolver/blob/2cddb90686fb4a0e92f4ee1b4335ceaa2048d2f4/src/boxstacks/branching_scheme.cpp#L272)
-* [Solving a 0-1 knapsack subproblem inside an algorithm for a geometrical variable-sized bin packing problem](https://github.com/fontanf/packingsolver/blob/2cddb90686fb4a0e92f4ee1b4335ceaa2048d2f4/src/algorithms/dichotomic_search.hpp#L149)
-* Solving the pricing problem inside a column generation algorithm for the [cutting stock problem](https://github.com/fontanf/columngenerationsolver/blob/096802d9e20d2826aed5b44e3b68ac9df6b20da2/include/columngenerationsolver/examples/cutting_stock.hpp#L123), the [multiple knapsack problem](https://github.com/fontanf/columngenerationsolver/blob/096802d9e20d2826aed5b44e3b68ac9df6b20da2/include/columngenerationsolver/examples/multiple_knapsack.hpp#L154), or the [genralized assignment problem](https://github.com/fontanf/generalizedassignmentsolver/blob/68be0ab77efd897fd583f1031dd6cbc946b33f5a/src/algorithms/column_generation.cpp#L177)
-* [Solving a 0-1 knapsack subproblem inside an algorithm for the packing while travelling problem](https://github.com/fontanf/travellingthiefsolver/blob/ce1b6805e8aee8ee3300fbbc97dbc9153eecff01/src/packing_while_travelling/algorithms/sequential_value_correction.cpp#L19)
+<!--Here are some usage examples of this library:-->
+<!--* [Solving a 0-1 knapsack subproblem inside an algorithm for a geometrical variable-sized bin packing problem](https://github.com/fontanf/packingsolver/blob/2cddb90686fb4a0e92f4ee1b4335ceaa2048d2f4/src/algorithms/dichotomic_search.hpp#L149)-->
+<!--* Solving the pricing problem inside a column generation algorithm for the [cutting stock problem](https://github.com/fontanf/columngenerationsolver/blob/096802d9e20d2826aed5b44e3b68ac9df6b20da2/include/columngenerationsolver/examples/cutting_stock.hpp#L123), the [multiple knapsack problem](https://github.com/fontanf/columngenerationsolver/blob/096802d9e20d2826aed5b44e3b68ac9df6b20da2/include/columngenerationsolver/examples/multiple_knapsack.hpp#L154), or the [genralized assignment problem](https://github.com/fontanf/generalizedassignmentsolver/blob/68be0ab77efd897fd583f1031dd6cbc946b33f5a/src/algorithms/column_generation.cpp#L177)-->
+<!--* [Solving a 0-1 knapsack subproblem inside an algorithm for the packing while travelling problem](https://github.com/fontanf/travellingthiefsolver/blob/ce1b6805e8aee8ee3300fbbc97dbc9153eecff01/src/packing_while_travelling/algorithms/sequential_value_correction.cpp#L19)-->
 
 ## Implemented algorithms
-
-### Knapsack
 
 * Greedy
   * `O(n)` `-a greedy`
@@ -47,25 +32,6 @@ Here are some usage examples of this library:
   * Primal-dual (minknap)
     * List (partial solution) `-a "dynamic-programming-primal-dual --partial-solution-size 64 --pairing 0"`
 
-### Subset sum
-
-* Dynamic programming
-  * Bellman
-    * Array `-a dynamic-programming-bellman-array`
-    * List (only optimal value) `-a dynamic-programming-bellman-list`
-    * Word RAM (only optimal value) `-a dynamic-programming-bellman-word-ram`
-    * Word RAM with recursive scheme `-a dynamic-programming-bellman-word-ram-rec`
-  * Balancing
-    * Array (only optimal value) `-a dynamic-programming-balancing-array`
-
-### Multiple-choice subset sum
-
-* Dynamic programming
-  * Bellman
-    * Array `-a dynamic-programming-bellman-array`
-    * Word RAM (only optimal value) `-a dynamic-programming-bellman-word-ram`
-    * Word RAM with recursive scheme `-a dynamic-programming-bellman-word-ram-rec`
-
 ## Usage
 
 ### Command line
@@ -85,16 +51,12 @@ python3 scripts/download_data.py
 Solve:
 
 ```shell
-./install/bin/knapsacksolver_knapsack --verbosity-level 1 --algorithm dynamic-programming-primal-dual --input data/knapsack/largecoeff/knapPI_2_10000_10000000/knapPI_2_10000_10000000_50.csv --format pisinger
+./install/bin/knapsacksolver --verbosity-level 1 --algorithm dynamic-programming-primal-dual --input data/knapsack/largecoeff/knapPI_2_10000_10000000/knapPI_2_10000_10000000_50.csv --format pisinger
 ```
 ```
 ====================================
            KnapsackSolver           
 ====================================
-
-Problem
--------
-Knapsack problem
 
 Instance
 --------
@@ -202,61 +164,6 @@ Solution
 Number of items:  4959 / 10000 (49.59%)
 Weight:           24537085626 / 24537085856 (100%)
 Profit:           27018122468
-Feasible:         1
-```
-
-```shell
-./install/bin/knapsacksolver_subset_sum  --verbosity-level 1  --input data/subset_sum/pthree/pthree_1000_1  --algorithm dynamic-programming-bellman-word-ram-rec
-```
-```
-====================================
-           KnapsackSolver           
-====================================
-
-Problem
--------
-Subset sum problem
-
-Instance
---------
-Number of items:  1000
-Capacity:         250000
-
-Algorithm
----------
-Dynamic programming - Bellman - word RAM - recursive scheme
-
-Parameters
-----------
-Time limit:            inf
-Messages
-    Verbosity level:   1
-    Standard output:   1
-    File path:         
-    # streams:         0
-Logger
-    Has logger:        0
-    Standard error:    0
-    File path:         
-
-    Time (s)  Sol.       Value       Bound         Gap     Gap (%)                         Comment
-    --------  ----       -----       -----         ---     -------                         -------
-       0.000     1           0      250000      250000      100.00                                
-       0.033     1      250000      250000           0        0.00        algorithm end (solution)
-
-Final statistics
-----------------
-Value:                        250000
-Has solution:                 1
-Bound:                        250000
-Absolute optimality gap:      0
-Relative optimality gap (%):  0
-Time (s):                     0.0330949
-
-Solution
---------
-Number of items:  484 / 1000 (48.4%)
-Weight:           250000 / 250000 (100%)
 Feasible:         1
 ```
 

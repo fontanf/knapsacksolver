@@ -1,12 +1,10 @@
 import gdown
-import os
 import pathlib
+import py7zr
+import shutil
 
-
-def download(id):
-    gdown.download(id=id, output="data.7z")
-    os.system("7z x data.7z -odata")
-    pathlib.Path("data.7z").unlink()
-
-download("1jCf-Ye7pAQLVep6MT1HA_G05gdEgWeKk")
-download("1tNIfm81yBp7DU3qfQVLLnewYwKlyzsrt")
+gdown.download(id="1jCf-Ye7pAQLVep6MT1HA_G05gdEgWeKk", output="data.7z")
+with py7zr.SevenZipFile("data.7z", mode="r") as z:
+    z.extractall()
+shutil.move("knapsack", "data")
+pathlib.Path("data.7z").unlink()
