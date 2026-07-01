@@ -115,7 +115,7 @@ Instance InstanceBuilder::build()
     }
 
     // Check that profit are positive and weights are positive and smaller than
-    // the capacity.
+    // the capacity. Also compute the highest item weight, needed below.
     for (ItemId item_id = 0;
             item_id < instance_.number_of_items();
             ++item_id) {
@@ -132,6 +132,31 @@ Instance InstanceBuilder::build()
             throw std::invalid_argument(
                     "The weight of an item must be smaller than the knapsack capacity..");
         }
+        instance_.highest_item_weight_ = std::max(instance_.highest_item_weight_, item.weight);
+    }
+
+    // Check no overflow because of the bounds computed by 'upper_bound' and
+    // 'upper_bound_reverse', which multiply an item's profit by a weight gap
+    // that can be as large as 'capacity + 2 * highest_item_weight' (the
+    // weight of a state can exceed the capacity by up to two item weights,
+    // see PartialSort::sort_next_right_interval).
+    Weight bound_weight = instance_.capacity();
+    if (instance_.highest_item_weight_
+            > (std::numeric_limits<Weight>::max() - bound_weight) / 2) {
+        throw std::overflow_error(
+                "Overflow while computing the profit/weight bound.");
+    }
+    bound_weight += 2 * instance_.highest_item_weight_;
+    for (ItemId item_id = 0;
+            item_id < instance_.number_of_items();
+            ++item_id) {
+        const Item& item = instance_.items_[item_id];
+        if (bound_weight > 0
+                && item.profit > std::numeric_limits<Profit>::max() / bound_weight) {
+            throw std::overflow_error(
+                    "Overflow: 'item.profit * (capacity + 2 * highest_item_weight)' "
+                    "must not exceed the maximum profit value.");
+        }
     }
 
     // Compute total item profit and weight.
@@ -140,8 +165,15 @@ Instance InstanceBuilder::build()
             ++item_id) {
         const Item& item = instance_.items_[item_id];
         instance_.highest_item_profit_ = std::max(instance_.highest_item_profit_, item.profit);
-        instance_.highest_item_weight_ = std::max(instance_.highest_item_weight_, item.weight);
+        if (item.profit > std::numeric_limits<Profit>::max() - instance_.total_item_profit_) {
+            throw std::overflow_error(
+                    "Overflow while computing the total item profit.");
+        }
         instance_.total_item_profit_ += item.profit;
+        if (item.weight > std::numeric_limits<Weight>::max() - instance_.total_item_weight_) {
+            throw std::overflow_error(
+                    "Overflow while computing the total item weight.");
+        }
         instance_.total_item_weight_ += item.weight;
     }
 
@@ -214,20 +246,31 @@ Instance InstanceFromFloatProfitsBuilder::build()
             highest_possible_multiplier,
             highest_possible_item_profit / highest_item_profit);
 
-    // Check no overflow because of the bounds.
+    // Check no overflow because of the bounds computed by 'upper_bound' and
+    // 'upper_bound_reverse', which multiply an item's profit by a weight gap
+    // that can be as large as 'capacity + 2 * highest_item_weight' (the
+    // weight of a state can exceed the capacity by up to two item weights,
+    // see PartialSort::sort_next_right_interval).
     // We want to ensure that:
-    //     profit * capacity < INT_MAX
+    //     profit * bound_weight < INT_MAX
     // Since
     //     profit = profit_double * multiplier
     // That is:
-    //     multiplier < INT_MAX / capacity / profit_double
+    //     multiplier < INT_MAX / bound_weight / profit_double
+    Weight bound_weight = instance_.capacity_;
+    if (highest_item_weight
+            > (std::numeric_limits<Weight>::max() - bound_weight) / 2) {
+        throw std::overflow_error(
+                "Overflow while computing the profit/weight bound.");
+    }
+    bound_weight += 2 * highest_item_weight;
     for (ItemId item_id = 0;
             item_id < instance_.number_of_items();
             ++item_id) {
         highest_possible_multiplier = std::min(
                 highest_possible_multiplier,
                 (double)(std::numeric_limits<Profit>::max())
-                / instance_.capacity_
+                / bound_weight
                 / profits_double_[item_id]);
     }
 
@@ -237,6 +280,40 @@ Instance InstanceFromFloatProfitsBuilder::build()
         multiplier *= 2;
     while (multiplier > highest_possible_multiplier)
         multiplier /= 2;
+
+    // The bounds on 'multiplier' above are computed in double precision and
+    // don't account for the rounding of individual profits below (nor for
+    // the "round up to 1" rule for tiny profits). At this magnitude, doubles
+    // don't have enough precision to guarantee those bounds hold exactly, so
+    // instead of trusting them, verify the actual rounded integer profits do
+    // not overflow when summed, and that no single profit overflows once
+    // multiplied by the capacity (as required by 'upper_bound'), halving the
+    // multiplier and retrying if either check fails.
+    Profit total_item_profit_int;
+    for (;;) {
+        total_item_profit_int = 0;
+        bool overflow = false;
+        for (ItemId item_id = 0;
+                item_id < instance_.number_of_items();
+                ++item_id) {
+            Profit profit = std::round(profits_double_[item_id] * multiplier);
+            if (profit == 0)
+                profit = 1;
+            if (profit > std::numeric_limits<Profit>::max() - total_item_profit_int) {
+                overflow = true;
+                break;
+            }
+            if (bound_weight > 0
+                    && profit > std::numeric_limits<Profit>::max() / bound_weight) {
+                overflow = true;
+                break;
+            }
+            total_item_profit_int += profit;
+        }
+        if (!overflow)
+            break;
+        multiplier /= 2;
+    }
 
     // Compute integer profits.
     for (ItemId item_id = 0;
@@ -272,6 +349,12 @@ Instance InstanceFromFloatProfitsBuilder::build()
             throw std::invalid_argument(
                     "The weight of an item must be smaller than the knapsack capacity..");
         }
+        if (bound_weight > 0
+                && item.profit > std::numeric_limits<Profit>::max() / bound_weight) {
+            throw std::overflow_error(
+                    "Overflow: 'item.profit * (capacity + 2 * highest_item_weight)' "
+                    "must not exceed the maximum profit value.");
+        }
     }
 
     // Compute total item profit and weight.
@@ -281,7 +364,15 @@ Instance InstanceFromFloatProfitsBuilder::build()
         const Item& item = instance_.items_[item_id];
         instance_.highest_item_profit_ = std::max(instance_.highest_item_profit_, item.profit);
         instance_.highest_item_weight_ = std::max(instance_.highest_item_weight_, item.weight);
+        if (item.profit > std::numeric_limits<Profit>::max() - instance_.total_item_profit_) {
+            throw std::overflow_error(
+                    "Overflow while computing the total item profit.");
+        }
         instance_.total_item_profit_ += item.profit;
+        if (item.weight > std::numeric_limits<Weight>::max() - instance_.total_item_weight_) {
+            throw std::overflow_error(
+                    "Overflow while computing the total item weight.");
+        }
         instance_.total_item_weight_ += item.weight;
     }
 

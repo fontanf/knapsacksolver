@@ -170,6 +170,5 @@ Feasible:         1
 Run tests:
 ```
 export KNAPSACK_DATA=$(pwd)/data/knapsack
-cd build/test
-ctest --parallel
+ctest --parallel --output-on-failure  --test-dir build/test
 ```
