@@ -451,6 +451,19 @@ const DynamicProgrammingPrimalDualOutput knapsacksolver::dynamic_programming_pri
     data.remaining_weight = w_bar;
     data.best_state = data.l0.front();
     StateId next_pairing = 1e4;
+    // Return 'true' iff the time limit or the maximum number of states is
+    // reached.
+    auto needs_to_end = [&parameters, &data, &output]()
+    {
+        if (parameters.timer.needs_to_end())
+            return true;
+        if (parameters.maximum_number_of_states >= 0
+                && (StateId)data.l0.size() > parameters.maximum_number_of_states) {
+            output.maximum_number_of_states_reached = true;
+            return true;
+        }
+        return false;
+    };
     while (!data.l0.empty()
             && (
                 !data.partial_sort.is_intervals_left_empty()
@@ -459,7 +472,7 @@ const DynamicProgrammingPrimalDualOutput knapsacksolver::dynamic_programming_pri
                 || data.t <= data.partial_sort.last_sorted_item_pos())) {
 
         // Check end.
-        if (parameters.timer.needs_to_end()) {
+        if (needs_to_end()) {
             algorithm_formatter.end();
             return output;
         }
@@ -480,7 +493,7 @@ const DynamicProgrammingPrimalDualOutput knapsacksolver::dynamic_programming_pri
                     ++data.t;
 
                     // Check end.
-                    if (parameters.timer.needs_to_end()) {
+                    if (needs_to_end()) {
                         algorithm_formatter.end();
                         return output;
                     }
@@ -500,7 +513,7 @@ const DynamicProgrammingPrimalDualOutput knapsacksolver::dynamic_programming_pri
                     --data.s;
 
                     // Check end.
-                    if (parameters.timer.needs_to_end()) {
+                    if (needs_to_end()) {
                         algorithm_formatter.end();
                         return output;
                     }
@@ -517,7 +530,7 @@ const DynamicProgrammingPrimalDualOutput knapsacksolver::dynamic_programming_pri
             data.t++;
 
             // Check end.
-            if (parameters.timer.needs_to_end()) {
+            if (needs_to_end()) {
                 algorithm_formatter.end();
                 return output;
             }
@@ -532,7 +545,7 @@ const DynamicProgrammingPrimalDualOutput knapsacksolver::dynamic_programming_pri
             data.s--;
 
             // Check end.
-            if (parameters.timer.needs_to_end()) {
+            if (needs_to_end()) {
                 algorithm_formatter.end();
                 return output;
             }
@@ -619,9 +632,13 @@ const DynamicProgrammingPrimalDualOutput knapsacksolver::dynamic_programming_pri
     DynamicProgrammingPrimalDualParameters sub_parameters;
     sub_parameters.timer = parameters.timer;
     sub_parameters.verbosity_level = 0;
+    sub_parameters.maximum_number_of_states = parameters.maximum_number_of_states;
     auto sub_output = dynamic_programming_primal_dual(sub_instance, sub_parameters);
     // Check end.
-    if (parameters.timer.needs_to_end()) {
+    if (sub_output.maximum_number_of_states_reached)
+        output.maximum_number_of_states_reached = true;
+    if (parameters.timer.needs_to_end()
+            || sub_output.maximum_number_of_states_reached) {
         algorithm_formatter.end();
         return output;
     }

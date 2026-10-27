@@ -108,6 +108,8 @@ Output run(
             parameters.partial_solution_size = vm["partial-solution-size"].as<int>();
         if (vm.count("pairing"))
             parameters.pairing = vm["pairing"].as<bool>();
+        if (vm.count("maximum-number-of-states"))
+            parameters.maximum_number_of_states = vm["maximum-number-of-states"].as<StateId>();
         return dynamic_programming_primal_dual(instance, parameters);
 
     } else {
@@ -138,6 +140,7 @@ int main(int argc, char *argv[])
         ("sort,", po::value<bool>(), "set sort")
         ("partial-solution-size,", po::value<int>(), "set partial solution size")
         ("pairing,", po::value<bool>(), "set pairing")
+        ("maximum-number-of-states,", po::value<StateId>(), "set maximum number of states")
         ;
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
