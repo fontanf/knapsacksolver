@@ -110,7 +110,7 @@ Output run(
             parameters.pairing = vm["pairing"].as<bool>();
         if (vm.count("maximum-number-of-states"))
             parameters.maximum_number_of_states = vm["maximum-number-of-states"].as<StateId>();
-        return dynamic_programming_primal_dual(instance, parameters);
+        return dynamic_programming_primal_dual(instance, generator, parameters);
 
     } else {
         throw std::invalid_argument(

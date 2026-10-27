@@ -25,19 +25,22 @@ INSTANTIATE_TEST_SUITE_P(
                     {
                         DynamicProgrammingPrimalDualParameters parameters;
                         parameters.partial_solution_size = 1;
-                        return dynamic_programming_primal_dual(instance, parameters);
+                        std::mt19937_64 generator(0);
+                        return dynamic_programming_primal_dual(instance, generator, parameters);
                     },
                     [](const Instance& instance)
                     {
                         DynamicProgrammingPrimalDualParameters parameters;
                         parameters.partial_solution_size = 2;
-                        return dynamic_programming_primal_dual(instance, parameters);
+                        std::mt19937_64 generator(0);
+                        return dynamic_programming_primal_dual(instance, generator, parameters);
                     },
                     [](const Instance& instance)
                     {
                         DynamicProgrammingPrimalDualParameters parameters;
                         parameters.partial_solution_size = 3;
-                        return dynamic_programming_primal_dual(instance, parameters);
+                        std::mt19937_64 generator(0);
+                        return dynamic_programming_primal_dual(instance, generator, parameters);
                     },
                 },
                 {get_test_instance_paths()})));
@@ -51,7 +54,8 @@ INSTANTIATE_TEST_SUITE_P(
                     {
                         DynamicProgrammingPrimalDualParameters parameters;
                         parameters.verbosity_level = 0;
-                        return dynamic_programming_primal_dual(instance, parameters);
+                        std::mt19937_64 generator(0);
+                        return dynamic_programming_primal_dual(instance, generator, parameters);
                     },
                 },
                 {
@@ -210,7 +214,8 @@ INSTANTIATE_TEST_SUITE_P(
                         DynamicProgrammingPrimalDualParameters parameters;
                         parameters.pairing = true;
                         parameters.verbosity_level = 0;
-                        return dynamic_programming_primal_dual(instance, parameters);
+                        std::mt19937_64 generator(0);
+                        return dynamic_programming_primal_dual(instance, generator, parameters);
                     },
                 },
                 {
@@ -434,14 +439,16 @@ TEST_P(DynamicProgrammingPrimalDualMaximumNumberOfStatesTest, DynamicProgramming
     }
     const Instance instance = instance_builder.build();
 
+    std::mt19937_64 reference_generator(0);
     DynamicProgrammingPrimalDualParameters reference_parameters;
     reference_parameters.verbosity_level = 0;
-    auto reference_output = dynamic_programming_primal_dual(instance, reference_parameters);
+    auto reference_output = dynamic_programming_primal_dual(instance, reference_generator, reference_parameters);
 
+    std::mt19937_64 generator(0);
     DynamicProgrammingPrimalDualParameters parameters;
     parameters.verbosity_level = 0;
     parameters.maximum_number_of_states = test_params.maximum_number_of_states;
-    auto output = dynamic_programming_primal_dual(instance, parameters);
+    auto output = dynamic_programming_primal_dual(instance, generator, parameters);
 
     EXPECT_EQ(
             output.maximum_number_of_states_reached,
@@ -493,3 +500,91 @@ INSTANTIATE_TEST_SUITE_P(
                 1,
                 true,
             }}));
+
+struct DynamicProgrammingPrimalDualRandomTieBreakTestParams
+{
+    /** Name of the test. */
+    std::string name;
+
+    /** Profits of the items. */
+    std::vector<Profit> profits;
+
+    /** Weights of the items. */
+    std::vector<Weight> weights;
+
+    /** Capacity of the knapsack. */
+    Weight capacity;
+
+    /** Seed of the generator. */
+    Seed seed;
+};
+
+inline std::ostream& operator<<(std::ostream& os, const DynamicProgrammingPrimalDualRandomTieBreakTestParams& test_params)
+{
+    os << test_params.name << " " << test_params.seed;
+    return os;
+}
+
+class DynamicProgrammingPrimalDualRandomTieBreakTest: public testing::TestWithParam<DynamicProgrammingPrimalDualRandomTieBreakTestParams> { };
+
+TEST_P(DynamicProgrammingPrimalDualRandomTieBreakTest, DynamicProgrammingPrimalDualRandomTieBreak)
+{
+    DynamicProgrammingPrimalDualRandomTieBreakTestParams test_params = GetParam();
+    InstanceBuilder instance_builder;
+    instance_builder.set_capacity(test_params.capacity);
+    for (ItemId item_id = 0;
+            item_id < (ItemId)test_params.profits.size();
+            ++item_id) {
+        instance_builder.add_item(
+                test_params.profits[item_id],
+                test_params.weights[item_id]);
+    }
+    const Instance instance = instance_builder.build();
+
+    // Reference value, computed with the default seed.
+    std::mt19937_64 reference_generator(0);
+    DynamicProgrammingPrimalDualParameters reference_parameters;
+    reference_parameters.verbosity_level = 0;
+    auto reference_output = dynamic_programming_primal_dual(instance, reference_generator, reference_parameters);
+
+    // Whatever the random order of the items with the same efficiency, the
+    // algorithm is exact.
+    std::mt19937_64 generator(test_params.seed);
+    DynamicProgrammingPrimalDualParameters parameters;
+    parameters.verbosity_level = 0;
+    auto output = dynamic_programming_primal_dual(instance, generator, parameters);
+
+    EXPECT_TRUE(output.solution.feasible());
+    EXPECT_EQ(output.solution.profit(), reference_output.value);
+    EXPECT_EQ(output.value, reference_output.value);
+    EXPECT_EQ(output.bound, reference_output.value);
+}
+
+INSTANTIATE_TEST_SUITE_P(
+        KnapsackDynamicProgrammingPrimalDualRandomTieBreak,
+        DynamicProgrammingPrimalDualRandomTieBreakTest,
+        testing::ValuesIn([]()
+        {
+            // Subset sum instance: all the items have the same efficiency.
+            DynamicProgrammingPrimalDualRandomTieBreakTestParams subset_sum{
+                "subset_sum",
+                {1001, 2003, 4007, 8009, 16001, 32003, 64007, 128021, 256019, 512009},
+                {1001, 2003, 4007, 8009, 16001, 32003, 64007, 128021, 256019, 512009},
+                700001,
+                0};
+            // Knapsack instance with groups of items with the same efficiency.
+            DynamicProgrammingPrimalDualRandomTieBreakTestParams knapsack{
+                "knapsack",
+                {20, 30, 40, 50, 33, 66, 99, 132, 17, 34, 51, 68},
+                {10, 15, 20, 25, 30, 60, 90, 120, 25, 50, 75, 100},
+                250,
+                0};
+            std::vector<DynamicProgrammingPrimalDualRandomTieBreakTestParams> test_params;
+            for (Seed seed = 0; seed < 8; ++seed) {
+                subset_sum.seed = seed;
+                test_params.push_back(subset_sum);
+                knapsack.seed = seed;
+                test_params.push_back(knapsack);
+            }
+            return test_params;
+        }()));
