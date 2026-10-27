@@ -2,6 +2,8 @@
 
 #include "knapsacksolver/solution.hpp"
 
+#include <random>
+
 namespace knapsacksolver
 {
 
@@ -49,8 +51,23 @@ class PartialSort
 
 public:
 
-    /** Constructor. */
-    PartialSort(const Instance& instance);
+    /**
+     * Constructor.
+     *
+     * The order of the items with the same efficiency is unspecified.
+     */
+    PartialSort(const Instance& instance):
+        PartialSort(instance, nullptr) { }
+
+    /**
+     * Constructor.
+     *
+     * The items with the same efficiency are ordered randomly.
+     */
+    PartialSort(
+            const Instance& instance,
+            std::mt19937_64& generator):
+        PartialSort(instance, &generator) { }
 
     /** Get instance. */
     const Instance& instance() const { return *instance_; }
@@ -122,6 +139,26 @@ private:
      * Private methods
      */
 
+    /**
+     * Constructor.
+     *
+     * If 'generator' is not null, the items with the same efficiency are
+     * ordered randomly.
+     */
+    PartialSort(
+            const Instance& instance,
+            std::mt19937_64* generator);
+
+    /**
+     * Compare two items by efficiency, then by their random rank if any.
+     *
+     * Return 1 if the first item is before the second one, -1 if it is after,
+     * and 0 if their order is unspecified.
+     */
+    int compare(
+            ItemId item_id_1,
+            ItemId item_id_2) const;
+
     std::pair<ItemPos, ItemPos> partition(
             ItemPos f,
             ItemPos l);
@@ -159,6 +196,12 @@ private:
 
     /** Position of the break item in the sorted items. */
     ItemPos break_item_pos_ = -1;
+
+    /**
+     * Random rank of each item, used to order the items with the same
+     * efficiency; empty if they are not ordered randomly.
+     */
+    std::vector<ItemPos> tie_ranks_;
 
     /** Sorted items. */
     std::vector<ItemId> sorted_items_;

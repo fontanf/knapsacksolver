@@ -40,7 +40,8 @@ FullSort::FullSort(const Instance& instance):
 }
 
 PartialSort::PartialSort(
-        const Instance& instance):
+        const Instance& instance,
+        std::mt19937_64* generator):
     instance_(&instance),
     break_solution_(instance),
     mandatory_items_(instance),
@@ -57,6 +58,13 @@ PartialSort::PartialSort(
 
     // Initialize sorted_items_.
     std::iota(sorted_items_.begin(), sorted_items_.end(), 0);
+
+    // Random ranks of the items.
+    if (generator != nullptr) {
+        tie_ranks_ = std::vector<ItemPos>(instance.number_of_items());
+        std::iota(tie_ranks_.begin(), tie_ranks_.end(), 0);
+        std::shuffle(tie_ranks_.begin(), tie_ranks_.end(), *generator);
+    }
 
     // Quick sort like algorithm.
     ItemPos f = 0;
@@ -128,6 +136,21 @@ void PartialSort::compute_break_solution()
     }
 }
 
+int PartialSort::compare(
+        ItemId item_id_1,
+        ItemId item_id_2) const
+{
+    const Item& item_1 = instance().item(item_id_1);
+    const Item& item_2 = instance().item(item_id_2);
+    if (item_1.profit * item_2.weight > item_2.profit * item_1.weight)
+        return 1;
+    if (item_1.profit * item_2.weight < item_2.profit * item_1.weight)
+        return -1;
+    if (tie_ranks_.empty() || tie_ranks_[item_id_1] == tie_ranks_[item_id_2])
+        return 0;
+    return (tie_ranks_[item_id_1] < tie_ranks_[item_id_2])? 1: -1;
+}
+
 std::pair<ItemPos, ItemPos> PartialSort::partition(
         ItemPos f,
         ItemPos l)
@@ -135,19 +158,18 @@ std::pair<ItemPos, ItemPos> PartialSort::partition(
     // Select pivot.
     ItemPos pivot_item_pos = f + 1 + (l - f) / 2;
     ItemId pivot_item_id = sorted_items_[pivot_item_pos];
-    const Item& pivot_item = instance().item(pivot_item_id);
 
     // Partition
     std::swap(sorted_items_[pivot_item_pos], sorted_items_[l]);
     ItemPos item_pos = f;
     while (item_pos <= l) {
         ItemId item_id = sorted_items_[item_pos];
-        const Item& item = instance().item(item_id);
-        if (item.profit * pivot_item.weight > pivot_item.profit * item.weight) {
+        int comparison = compare(item_id, pivot_item_id);
+        if (comparison == 1) {
             std::swap(sorted_items_[item_pos], sorted_items_[f]);
             f++;
             item_pos++;
-        } else if (item.profit * pivot_item.weight < pivot_item.profit * item.weight) {
+        } else if (comparison == -1) {
             std::swap(sorted_items_[item_pos], sorted_items_[l]);
             l--;
         } else {
@@ -192,9 +214,7 @@ void PartialSort::sort_next_left_interval(
             sorted_items_.begin() + k,
             sorted_items_.begin() + first_sorted_item_pos_,
             [this](ItemId item_id_1, ItemId item_id_2) {
-                const Item& item_1 = instance().item(item_id_1);
-                const Item& item_2 = instance().item(item_id_2);
-                return item_1.profit * item_2.weight > item_2.profit * item_1.weight;
+                return compare(item_id_1, item_id_2) == 1;
             });
     first_sorted_item_pos_ = k;
 }
@@ -228,9 +248,7 @@ void PartialSort::sort_next_right_interval(
             sorted_items_.begin() + last_sorted_item_pos_ + 1,
             sorted_items_.begin() + k + 1,
             [this](ItemId item_id_1, ItemId item_id_2) {
-                const Item& item_1 = instance().item(item_id_1);
-                const Item& item_2 = instance().item(item_id_2);
-                return item_1.profit * item_2.weight > item_2.profit * item_1.weight;
+                return compare(item_id_1, item_id_2) == 1;
             });
     last_sorted_item_pos_ = k;
 }
