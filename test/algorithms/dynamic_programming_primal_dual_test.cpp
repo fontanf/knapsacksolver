@@ -1,6 +1,7 @@
 #include "knapsacksolver/tests.hpp"
 
 #include "knapsacksolver/algorithms/dynamic_programming_primal_dual.hpp"
+#include "knapsacksolver/instance_builder.hpp"
 
 using namespace knapsacksolver;
 
@@ -389,3 +390,106 @@ INSTANTIATE_TEST_SUITE_P(
                     get_pisinger_instance_paths("hardinstances", "knapPI_16_50_1000"),
                     get_pisinger_instance_paths("hardinstances", "knapPI_16_100_1000"),
                 })));
+
+struct DynamicProgrammingPrimalDualMaximumNumberOfStatesTestParams
+{
+    /** Name of the test. */
+    std::string name;
+
+    /** Profits of the items. */
+    std::vector<Profit> profits;
+
+    /** Weights of the items. */
+    std::vector<Weight> weights;
+
+    /** Capacity of the knapsack. */
+    Weight capacity;
+
+    /** Maximum number of states. */
+    StateId maximum_number_of_states;
+
+    /** True iff the maximum number of states is expected to be reached. */
+    bool expected_maximum_number_of_states_reached;
+};
+
+inline std::ostream& operator<<(std::ostream& os, const DynamicProgrammingPrimalDualMaximumNumberOfStatesTestParams& test_params)
+{
+    os << test_params.name << " " << test_params.maximum_number_of_states;
+    return os;
+}
+
+class DynamicProgrammingPrimalDualMaximumNumberOfStatesTest: public testing::TestWithParam<DynamicProgrammingPrimalDualMaximumNumberOfStatesTestParams> { };
+
+TEST_P(DynamicProgrammingPrimalDualMaximumNumberOfStatesTest, DynamicProgrammingPrimalDualMaximumNumberOfStates)
+{
+    DynamicProgrammingPrimalDualMaximumNumberOfStatesTestParams test_params = GetParam();
+    InstanceBuilder instance_builder;
+    instance_builder.set_capacity(test_params.capacity);
+    for (ItemId item_id = 0;
+            item_id < (ItemId)test_params.profits.size();
+            ++item_id) {
+        instance_builder.add_item(
+                test_params.profits[item_id],
+                test_params.weights[item_id]);
+    }
+    const Instance instance = instance_builder.build();
+
+    DynamicProgrammingPrimalDualParameters reference_parameters;
+    reference_parameters.verbosity_level = 0;
+    auto reference_output = dynamic_programming_primal_dual(instance, reference_parameters);
+
+    DynamicProgrammingPrimalDualParameters parameters;
+    parameters.verbosity_level = 0;
+    parameters.maximum_number_of_states = test_params.maximum_number_of_states;
+    auto output = dynamic_programming_primal_dual(instance, parameters);
+
+    EXPECT_EQ(
+            output.maximum_number_of_states_reached,
+            test_params.expected_maximum_number_of_states_reached);
+    // The solution is feasible and the bound is valid.
+    EXPECT_TRUE(output.solution.feasible());
+    EXPECT_EQ(output.value >= output.solution.profit(), true);
+    EXPECT_EQ(output.value <= reference_output.value, true);
+    EXPECT_EQ(output.bound >= reference_output.value, true);
+    if (!test_params.expected_maximum_number_of_states_reached) {
+        EXPECT_EQ(output.solution.profit(), reference_output.value);
+        EXPECT_EQ(output.bound, reference_output.value);
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(
+        KnapsackDynamicProgrammingPrimalDualMaximumNumberOfStates,
+        DynamicProgrammingPrimalDualMaximumNumberOfStatesTest,
+        testing::ValuesIn(std::vector<DynamicProgrammingPrimalDualMaximumNumberOfStatesTestParams>{
+            {
+                // Subset sum instance (profits equal to weights): the upper
+                // bound of each state is the capacity, so that states are only
+                // pruned once a solution fills the knapsack exactly.
+                "subset_sum",
+                {1001, 2003, 4007, 8009, 16001, 32003, 64007, 128021, 256019, 512009},
+                {1001, 2003, 4007, 8009, 16001, 32003, 64007, 128021, 256019, 512009},
+                700001,
+                -1,
+                false,
+            }, {
+                "subset_sum",
+                {1001, 2003, 4007, 8009, 16001, 32003, 64007, 128021, 256019, 512009},
+                {1001, 2003, 4007, 8009, 16001, 32003, 64007, 128021, 256019, 512009},
+                700001,
+                4,
+                true,
+            }, {
+                "knapsack",
+                {12, 23, 31, 47, 52, 68, 71, 89, 94, 103},
+                {10, 21, 29, 43, 50, 61, 70, 80, 91, 99},
+                250,
+                -1,
+                false,
+            }, {
+                "knapsack",
+                {12, 23, 31, 47, 52, 68, 71, 89, 94, 103},
+                {10, 21, 29, 43, 50, 61, 70, 80, 91, 99},
+                250,
+                1,
+                true,
+            }}));

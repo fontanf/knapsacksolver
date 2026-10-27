@@ -13,6 +13,17 @@ struct DynamicProgrammingPrimalDualParameters: Parameters
 
     ItemId partial_solution_size = 64;
 
+    /**
+     * Maximum number of states.
+     *
+     * It is checked after each item. If it is exceeded, the algorithm stops
+     * as when the time limit is reached: the solution is feasible and the
+     * bound is valid, but they may not be optimal.
+     *
+     * If negative, the number of states is not limited.
+     */
+    StateId maximum_number_of_states = -1;
+
 
     virtual int format_width() const override { return 37; }
 
@@ -24,6 +35,7 @@ struct DynamicProgrammingPrimalDualParameters: Parameters
             << std::setw(width) << std::left << "Greedy: " << greedy << std::endl
             << std::setw(width) << std::left << "Pairing: " << pairing << std::endl
             << std::setw(width) << std::left << "Partial solution size: " << partial_solution_size << std::endl
+            << std::setw(width) << std::left << "Maximum number of states: " << maximum_number_of_states << std::endl
             ;
     }
 
@@ -33,7 +45,8 @@ struct DynamicProgrammingPrimalDualParameters: Parameters
         json.merge_patch({
                 {"Greedy", greedy},
                 {"Pairing", pairing},
-                {"PartialSolutionSize", partial_solution_size}});
+                {"PartialSolutionSize", partial_solution_size},
+                {"MaximumNumberOfStates", maximum_number_of_states}});
         return json;
     }
 };
@@ -47,6 +60,9 @@ struct DynamicProgrammingPrimalDualOutput: Output
 
     Counter number_of_recursive_calls = 0;
 
+    /** True iff the algorithm stopped because of the maximum number of states. */
+    bool maximum_number_of_states_reached = false;
+
 
     virtual void format(std::ostream& os) const override
     {
@@ -54,6 +70,7 @@ struct DynamicProgrammingPrimalDualOutput: Output
         int width = format_width();
         os
             << std::setw(width) << std::left << "Number of recursive calls: " << number_of_recursive_calls << std::endl
+            << std::setw(width) << std::left << "Max. states reached: " << maximum_number_of_states_reached << std::endl
             ;
     }
 
@@ -61,7 +78,8 @@ struct DynamicProgrammingPrimalDualOutput: Output
     {
         nlohmann::json json = Output::to_json();
         json.merge_patch({
-                {"NumberOfRecursiveCalls", number_of_recursive_calls}});
+                {"NumberOfRecursiveCalls", number_of_recursive_calls},
+                {"MaximumNumberOfStatesReached", maximum_number_of_states_reached}});
         return json;
     }
 };
