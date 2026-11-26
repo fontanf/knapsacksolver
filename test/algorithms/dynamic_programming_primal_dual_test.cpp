@@ -25,19 +25,22 @@ INSTANTIATE_TEST_SUITE_P(
                     {
                         DynamicProgrammingPrimalDualParameters parameters;
                         parameters.partial_solution_size = 1;
-                        return dynamic_programming_primal_dual(instance, parameters);
+                        std::mt19937_64 generator(0);
+                        return dynamic_programming_primal_dual(instance, generator, parameters);
                     },
                     [](const Instance& instance)
                     {
                         DynamicProgrammingPrimalDualParameters parameters;
                         parameters.partial_solution_size = 2;
-                        return dynamic_programming_primal_dual(instance, parameters);
+                        std::mt19937_64 generator(0);
+                        return dynamic_programming_primal_dual(instance, generator, parameters);
                     },
                     [](const Instance& instance)
                     {
                         DynamicProgrammingPrimalDualParameters parameters;
                         parameters.partial_solution_size = 3;
-                        return dynamic_programming_primal_dual(instance, parameters);
+                        std::mt19937_64 generator(0);
+                        return dynamic_programming_primal_dual(instance, generator, parameters);
                     },
                 },
                 {get_test_instance_paths()})));
@@ -51,7 +54,8 @@ INSTANTIATE_TEST_SUITE_P(
                     {
                         DynamicProgrammingPrimalDualParameters parameters;
                         parameters.verbosity_level = 0;
-                        return dynamic_programming_primal_dual(instance, parameters);
+                        std::mt19937_64 generator(0);
+                        return dynamic_programming_primal_dual(instance, generator, parameters);
                     },
                 },
                 {
@@ -210,7 +214,8 @@ INSTANTIATE_TEST_SUITE_P(
                         DynamicProgrammingPrimalDualParameters parameters;
                         parameters.pairing = true;
                         parameters.verbosity_level = 0;
-                        return dynamic_programming_primal_dual(instance, parameters);
+                        std::mt19937_64 generator(0);
+                        return dynamic_programming_primal_dual(instance, generator, parameters);
                     },
                 },
                 {
@@ -393,17 +398,11 @@ INSTANTIATE_TEST_SUITE_P(
 
 struct DynamicProgrammingPrimalDualMaximumNumberOfStatesTestParams
 {
-    /** Name of the test. */
-    std::string name;
+    /** Path of the instance, in the 'standard' format. */
+    std::string instance_path;
 
-    /** Profits of the items. */
-    std::vector<Profit> profits;
-
-    /** Weights of the items. */
-    std::vector<Weight> weights;
-
-    /** Capacity of the knapsack. */
-    Weight capacity;
+    /** Path of an optimal solution of the instance. */
+    std::string certificate_path;
 
     /** Maximum number of states. */
     StateId maximum_number_of_states;
@@ -412,10 +411,12 @@ struct DynamicProgrammingPrimalDualMaximumNumberOfStatesTestParams
     bool expected_maximum_number_of_states_reached;
 };
 
-inline std::ostream& operator<<(std::ostream& os, const DynamicProgrammingPrimalDualMaximumNumberOfStatesTestParams& test_params)
+void PrintTo(const DynamicProgrammingPrimalDualMaximumNumberOfStatesTestParams& params, std::ostream* os)
 {
-    os << test_params.name << " " << test_params.maximum_number_of_states;
-    return os;
+    *os << "instance_path " << params.instance_path << "\n";
+    *os << "certificate_path " << params.certificate_path << "\n";
+    *os << "maximum_number_of_states " << params.maximum_number_of_states << "\n";
+    *os << "expected_maximum_number_of_states_reached " << params.expected_maximum_number_of_states_reached << "\n";
 }
 
 class DynamicProgrammingPrimalDualMaximumNumberOfStatesTest: public testing::TestWithParam<DynamicProgrammingPrimalDualMaximumNumberOfStatesTestParams> { };
@@ -423,37 +424,30 @@ class DynamicProgrammingPrimalDualMaximumNumberOfStatesTest: public testing::Tes
 TEST_P(DynamicProgrammingPrimalDualMaximumNumberOfStatesTest, DynamicProgrammingPrimalDualMaximumNumberOfStates)
 {
     DynamicProgrammingPrimalDualMaximumNumberOfStatesTestParams test_params = GetParam();
+    PrintTo(test_params, &std::cout);
     InstanceBuilder instance_builder;
-    instance_builder.set_capacity(test_params.capacity);
-    for (ItemId item_id = 0;
-            item_id < (ItemId)test_params.profits.size();
-            ++item_id) {
-        instance_builder.add_item(
-                test_params.profits[item_id],
-                test_params.weights[item_id]);
-    }
+    instance_builder.read(test_params.instance_path, "standard");
     const Instance instance = instance_builder.build();
+    const Solution solution(instance, test_params.certificate_path, "standard");
 
-    DynamicProgrammingPrimalDualParameters reference_parameters;
-    reference_parameters.verbosity_level = 0;
-    auto reference_output = dynamic_programming_primal_dual(instance, reference_parameters);
-
+    std::mt19937_64 generator(0);
     DynamicProgrammingPrimalDualParameters parameters;
     parameters.verbosity_level = 0;
     parameters.maximum_number_of_states = test_params.maximum_number_of_states;
-    auto output = dynamic_programming_primal_dual(instance, parameters);
+    auto output = dynamic_programming_primal_dual(instance, generator, parameters);
 
+    ASSERT_TRUE(solution.feasible());
     EXPECT_EQ(
             output.maximum_number_of_states_reached,
             test_params.expected_maximum_number_of_states_reached);
     // The solution is feasible and the bound is valid.
     EXPECT_TRUE(output.solution.feasible());
     EXPECT_EQ(output.value >= output.solution.profit(), true);
-    EXPECT_EQ(output.value <= reference_output.value, true);
-    EXPECT_EQ(output.bound >= reference_output.value, true);
+    EXPECT_EQ(output.value <= solution.profit(), true);
+    EXPECT_EQ(output.bound >= solution.profit(), true);
     if (!test_params.expected_maximum_number_of_states_reached) {
-        EXPECT_EQ(output.solution.profit(), reference_output.value);
-        EXPECT_EQ(output.bound, reference_output.value);
+        EXPECT_EQ(output.solution.profit(), solution.profit());
+        EXPECT_EQ(output.bound, solution.profit());
     }
 }
 
@@ -465,31 +459,145 @@ INSTANTIATE_TEST_SUITE_P(
                 // Subset sum instance (profits equal to weights): the upper
                 // bound of each state is the capacity, so that states are only
                 // pruned once a solution fills the knapsack exactly.
-                "subset_sum",
-                {1001, 2003, 4007, 8009, 16001, 32003, 64007, 128021, 256019, 512009},
-                {1001, 2003, 4007, 8009, 16001, 32003, 64007, 128021, 256019, 512009},
-                700001,
+                get_path({"data", "tests", "handmade", "subset_sum_10_items.txt"}),
+                get_path({"data", "tests", "handmade", "subset_sum_10_items.sol.txt"}),
                 -1,
                 false,
             }, {
-                "subset_sum",
-                {1001, 2003, 4007, 8009, 16001, 32003, 64007, 128021, 256019, 512009},
-                {1001, 2003, 4007, 8009, 16001, 32003, 64007, 128021, 256019, 512009},
-                700001,
+                get_path({"data", "tests", "handmade", "subset_sum_10_items.txt"}),
+                get_path({"data", "tests", "handmade", "subset_sum_10_items.sol.txt"}),
                 4,
                 true,
             }, {
-                "knapsack",
-                {12, 23, 31, 47, 52, 68, 71, 89, 94, 103},
-                {10, 21, 29, 43, 50, 61, 70, 80, 91, 99},
-                250,
+                get_path({"data", "tests", "handmade", "knapsack_10_items.txt"}),
+                get_path({"data", "tests", "handmade", "knapsack_10_items.sol.txt"}),
                 -1,
                 false,
             }, {
-                "knapsack",
-                {12, 23, 31, 47, 52, 68, 71, 89, 94, 103},
-                {10, 21, 29, 43, 50, 61, 70, 80, 91, 99},
-                250,
+                get_path({"data", "tests", "handmade", "knapsack_10_items.txt"}),
+                get_path({"data", "tests", "handmade", "knapsack_10_items.sol.txt"}),
                 1,
                 true,
-            }}));
+            }}),
+        [](const testing::TestParamInfo<DynamicProgrammingPrimalDualMaximumNumberOfStatesTest::ParamType>& info) {
+            return std::to_string(info.index);
+        });
+
+struct DynamicProgrammingPrimalDualRandomTieBreakTestParams
+{
+    /** Path of the instance, in the 'standard' format. */
+    std::string instance_path;
+
+    /** Path of an optimal solution of the instance. */
+    std::string certificate_path;
+
+    /** Seed of the generator. */
+    Seed seed;
+};
+
+void PrintTo(const DynamicProgrammingPrimalDualRandomTieBreakTestParams& params, std::ostream* os)
+{
+    *os << "instance_path " << params.instance_path << "\n";
+    *os << "certificate_path " << params.certificate_path << "\n";
+    *os << "seed " << params.seed << "\n";
+}
+
+class DynamicProgrammingPrimalDualRandomTieBreakTest: public testing::TestWithParam<DynamicProgrammingPrimalDualRandomTieBreakTestParams> { };
+
+TEST_P(DynamicProgrammingPrimalDualRandomTieBreakTest, DynamicProgrammingPrimalDualRandomTieBreak)
+{
+    DynamicProgrammingPrimalDualRandomTieBreakTestParams test_params = GetParam();
+    PrintTo(test_params, &std::cout);
+    InstanceBuilder instance_builder;
+    instance_builder.read(test_params.instance_path, "standard");
+    const Instance instance = instance_builder.build();
+    const Solution solution(instance, test_params.certificate_path, "standard");
+
+    // Whatever the random order of the items with the same efficiency, the
+    // algorithm is exact.
+    std::mt19937_64 generator(test_params.seed);
+    DynamicProgrammingPrimalDualParameters parameters;
+    parameters.verbosity_level = 0;
+    auto output = dynamic_programming_primal_dual(instance, generator, parameters);
+
+    ASSERT_TRUE(solution.feasible());
+    EXPECT_TRUE(output.solution.feasible());
+    EXPECT_EQ(output.solution.profit(), solution.profit());
+    EXPECT_EQ(output.value, solution.profit());
+    EXPECT_EQ(output.bound, solution.profit());
+}
+
+INSTANTIATE_TEST_SUITE_P(
+        KnapsackDynamicProgrammingPrimalDualRandomTieBreak,
+        DynamicProgrammingPrimalDualRandomTieBreakTest,
+        testing::ValuesIn(std::vector<DynamicProgrammingPrimalDualRandomTieBreakTestParams>{
+            {
+                // Subset sum instance: all the items have the same efficiency.
+                get_path({"data", "tests", "handmade", "subset_sum_10_items.txt"}),
+                get_path({"data", "tests", "handmade", "subset_sum_10_items.sol.txt"}),
+                0,
+            }, {
+                get_path({"data", "tests", "handmade", "subset_sum_10_items.txt"}),
+                get_path({"data", "tests", "handmade", "subset_sum_10_items.sol.txt"}),
+                1,
+            }, {
+                get_path({"data", "tests", "handmade", "subset_sum_10_items.txt"}),
+                get_path({"data", "tests", "handmade", "subset_sum_10_items.sol.txt"}),
+                2,
+            }, {
+                get_path({"data", "tests", "handmade", "subset_sum_10_items.txt"}),
+                get_path({"data", "tests", "handmade", "subset_sum_10_items.sol.txt"}),
+                3,
+            }, {
+                get_path({"data", "tests", "handmade", "subset_sum_10_items.txt"}),
+                get_path({"data", "tests", "handmade", "subset_sum_10_items.sol.txt"}),
+                4,
+            }, {
+                get_path({"data", "tests", "handmade", "subset_sum_10_items.txt"}),
+                get_path({"data", "tests", "handmade", "subset_sum_10_items.sol.txt"}),
+                5,
+            }, {
+                get_path({"data", "tests", "handmade", "subset_sum_10_items.txt"}),
+                get_path({"data", "tests", "handmade", "subset_sum_10_items.sol.txt"}),
+                6,
+            }, {
+                get_path({"data", "tests", "handmade", "subset_sum_10_items.txt"}),
+                get_path({"data", "tests", "handmade", "subset_sum_10_items.sol.txt"}),
+                7,
+            }, {
+                // Knapsack instance with groups of items with the same efficiency.
+                get_path({"data", "tests", "handmade", "knapsack_12_items_same_efficiency.txt"}),
+                get_path({"data", "tests", "handmade", "knapsack_12_items_same_efficiency.sol.txt"}),
+                0,
+            }, {
+                get_path({"data", "tests", "handmade", "knapsack_12_items_same_efficiency.txt"}),
+                get_path({"data", "tests", "handmade", "knapsack_12_items_same_efficiency.sol.txt"}),
+                1,
+            }, {
+                get_path({"data", "tests", "handmade", "knapsack_12_items_same_efficiency.txt"}),
+                get_path({"data", "tests", "handmade", "knapsack_12_items_same_efficiency.sol.txt"}),
+                2,
+            }, {
+                get_path({"data", "tests", "handmade", "knapsack_12_items_same_efficiency.txt"}),
+                get_path({"data", "tests", "handmade", "knapsack_12_items_same_efficiency.sol.txt"}),
+                3,
+            }, {
+                get_path({"data", "tests", "handmade", "knapsack_12_items_same_efficiency.txt"}),
+                get_path({"data", "tests", "handmade", "knapsack_12_items_same_efficiency.sol.txt"}),
+                4,
+            }, {
+                get_path({"data", "tests", "handmade", "knapsack_12_items_same_efficiency.txt"}),
+                get_path({"data", "tests", "handmade", "knapsack_12_items_same_efficiency.sol.txt"}),
+                5,
+            }, {
+                get_path({"data", "tests", "handmade", "knapsack_12_items_same_efficiency.txt"}),
+                get_path({"data", "tests", "handmade", "knapsack_12_items_same_efficiency.sol.txt"}),
+                6,
+            }, {
+                get_path({"data", "tests", "handmade", "knapsack_12_items_same_efficiency.txt"}),
+                get_path({"data", "tests", "handmade", "knapsack_12_items_same_efficiency.sol.txt"}),
+                7,
+            }}),
+        [](const testing::TestParamInfo<DynamicProgrammingPrimalDualRandomTieBreakTest::ParamType>& info) {
+            return std::to_string(info.index);
+        });

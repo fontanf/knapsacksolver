@@ -14,5 +14,8 @@ target_link_libraries(KnapsackSolver_dynamic_programming_primal_dual_test
     KnapsackSolver_dynamic_programming_primal_dual
     KnapsackSolver_tests
     GTest::gtest_main)
-add_test(KnapsackSolver_dynamic_programming_primal_dual_test KnapsackSolver_dynamic_programming_primal_dual_test)
+add_test(
+    NAME KnapsackSolver_dynamic_programming_primal_dual_test
+    COMMAND KnapsackSolver_dynamic_programming_primal_dual_test
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 set_tests_properties(KnapsackSolver_dynamic_programming_primal_dual_test PROPERTIES TIMEOUT 10000)

@@ -40,7 +40,8 @@ jobs:
         cmake --build build --config Release --parallel
         cmake --install build --config Release --prefix install
     - name: Run unit tests
-      run: ctest --test-dir build/test --parallel
+      # ctest finds no test without the configuration.
+      run: ctest --test-dir build/test -C Release --output-on-failure --parallel
     - name: Run tests
       run: python3 -u scripts/run_tests.py test_results
     - name: Checkout main branch

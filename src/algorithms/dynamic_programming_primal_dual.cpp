@@ -32,12 +32,13 @@ struct DynamicProgrammingPrimalDualInternalData
             const Instance& instance,
             const DynamicProgrammingPrimalDualParameters& parameters,
             AlgorithmFormatter& algorithm_formatter,
-            DynamicProgrammingPrimalDualOutput& output):
+            DynamicProgrammingPrimalDualOutput& output,
+            std::mt19937_64& generator):
         instance(instance),
         parameters(parameters),
         algorithm_formatter(algorithm_formatter),
         output(output),
-        partial_sort(instance),
+        partial_sort(instance, generator),
         partial_solution_factory(
                 instance.number_of_items(),
                 parameters.partial_solution_size) { }
@@ -371,6 +372,7 @@ ItemPos dynamic_programming_primal_dual_find_state(
 
 const DynamicProgrammingPrimalDualOutput knapsacksolver::dynamic_programming_primal_dual(
         const Instance& instance,
+        std::mt19937_64& generator,
         const DynamicProgrammingPrimalDualParameters& parameters)
 {
     DynamicProgrammingPrimalDualOutput output(instance);
@@ -414,7 +416,7 @@ const DynamicProgrammingPrimalDualOutput knapsacksolver::dynamic_programming_pri
         return output;
     }
 
-    DynamicProgrammingPrimalDualInternalData data(instance, parameters, algorithm_formatter, output);
+    DynamicProgrammingPrimalDualInternalData data(instance, parameters, algorithm_formatter, output, generator);
 
     // Get the greedy solution.
     GreedyParameters greedy_parameters;
@@ -633,7 +635,7 @@ const DynamicProgrammingPrimalDualOutput knapsacksolver::dynamic_programming_pri
     sub_parameters.timer = parameters.timer;
     sub_parameters.verbosity_level = 0;
     sub_parameters.maximum_number_of_states = parameters.maximum_number_of_states;
-    auto sub_output = dynamic_programming_primal_dual(sub_instance, sub_parameters);
+    auto sub_output = dynamic_programming_primal_dual(sub_instance, generator, sub_parameters);
     // Check end.
     if (sub_output.maximum_number_of_states_reached)
         output.maximum_number_of_states_reached = true;
@@ -670,3 +672,4 @@ const DynamicProgrammingPrimalDualOutput knapsacksolver::dynamic_programming_pri
     algorithm_formatter.end();
     return output;
 }
+
