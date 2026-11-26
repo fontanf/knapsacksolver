@@ -7,12 +7,15 @@ namespace py = pybind11;
 
 knapsacksolver::Solution solve(
         knapsacksolver::Instance& instance,
-        bool verbosity_level)
+        bool verbosity_level,
+        knapsacksolver::Seed seed)
 {
+    std::mt19937_64 generator(seed);
     knapsacksolver::DynamicProgrammingPrimalDualParameters parameters;
     parameters.verbosity_level = verbosity_level;
     auto output = knapsacksolver::dynamic_programming_primal_dual(
             instance,
+            generator,
             parameters);
     return output.solution;
 }
@@ -32,5 +35,6 @@ PYBIND11_MODULE(knapsacksolver, m)
         .def("weight", &knapsacksolver::Solution::weight);
     m.def("solve", &solve,
             py::arg("instance"),
-            py::arg("verbosity_level") = 1);
+            py::arg("verbosity_level") = 1,
+            py::arg("seed") = 0);
 }

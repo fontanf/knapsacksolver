@@ -2,6 +2,8 @@
 
 #include "knapsacksolver/solution.hpp"
 
+#include <random>
+
 namespace knapsacksolver
 {
 
@@ -84,8 +86,17 @@ struct DynamicProgrammingPrimalDualOutput: Output
     }
 };
 
+/**
+ * Primal-dual dynamic programming ("minknap").
+ *
+ * The items with the same efficiency are ordered randomly with 'generator'.
+ * On instances where many items have the same efficiency, such as subset sum
+ * instances, their order determines the states explored before the maximum
+ * number of states is reached.
+ */
 const DynamicProgrammingPrimalDualOutput dynamic_programming_primal_dual(
         const Instance& instance,
+        std::mt19937_64& generator,
         const DynamicProgrammingPrimalDualParameters& parameters = {});
 
 }
